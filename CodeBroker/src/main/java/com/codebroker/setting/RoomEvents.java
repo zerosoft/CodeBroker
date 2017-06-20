@@ -1,0 +1,5 @@
+package com.codebroker.setting;
+
+public enum RoomEvents {
+	ROOM_NAME_CHANGE, ROOM_CAPACITY_CHANGE, PASSWORD_STATE_CHANGE, USER_COUNT_CHANGE, ROOM_VARIABLES_UPDATE;
+}
