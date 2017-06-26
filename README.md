@@ -11,3 +11,6 @@ Java Akka scala game server
 单个JVM拥有独立的World
 
 每个AREA之间的数据可以相互通信
+
+Protobuf-ED
+PB协议编程工程
