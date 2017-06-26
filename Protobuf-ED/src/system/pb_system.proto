@@ -1,0 +1,40 @@
+syntax = "proto2";
+package Protocol;
+option java_package = "com.message.protocol";
+option java_outer_classname = "PBSystem";
+
+message CS_USER_CONNECT_TO_SERVER{
+  required string name = 1;
+  required string params = 2;
+}
+
+message SC_USER_RECONNECTION_SUCCESS{
+
+}
+
+message SC_USER_CONNECT_TO_SERVER_FAIL{
+
+}
+
+message CS_USER_DISCONNECT{
+  required string stat = 1;
+}
+
+message CS_USER_RECONNECTION_TRY{
+	required string key = 1;
+}
+
+
+message SC_USER_RECONNECTION_FAIL{
+	required string key = 1;
+}
+
+
+message CS_USER_ENTER_WORLD{
+  required string stat = 1;
+}
+
+message SC_USER_ENTER_WORLD{
+
+}
+

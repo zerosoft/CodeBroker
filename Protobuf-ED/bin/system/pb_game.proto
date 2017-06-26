@@ -1,0 +1,77 @@
+syntax = "proto2";
+package Protocol;
+option java_package = "com.message.protocol";
+option java_outer_classname = "PBGame";
+
+message CS_REGISTER{
+  required string name = 1;
+  required string password = 2;
+}
+
+message SC_REGISTER{
+  required int32 result =1;
+  optional string name = 2;
+  optional string password = 3;
+
+}
+
+message CS_LOGIN{
+  required string name = 1;
+  required string password = 2;
+}
+
+message SC_LOGIN{
+  required int32 result =1;
+}
+
+message CS_CHAT{
+  required string message = 1;
+}
+
+message SC_CHAT{
+  required string message = 1;
+}
+
+message CS_CHAT_PRV{
+  required string name = 1;
+  required string message = 2;
+}
+
+message SC_CHAT_PRV{
+  required string name = 1;
+  required string message = 2;
+}
+
+
+message CS_GET_AREA_LIST{
+	required string worldId = 1;
+}
+
+message SC_GET_AREA_LIST{
+  repeated string areaId = 1;
+}
+
+message CS_ENTER_AREA{
+  required string message = 1;
+}
+
+message SC_ENTER_AREA{
+  required string message = 1;
+}
+
+message CS_GET_GRID_LIST{
+	 required string areaId = 1;
+}
+
+message SC_GET_GRID_LIST{
+  repeated string areaId = 1;
+}
+
+
+message CS_ENTER_GRID{
+  required string message = 1;
+}
+
+message SC_ENTER_GRID{
+  required string message = 1;
+}

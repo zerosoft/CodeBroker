@@ -1,0 +1,10 @@
+compiler.compileProtoFiles=true
+compiler.enableProjectSettings=true
+compiler.javaCodeGenerationEnabled=true
+compiler.protocFilePath=D\:\\Users\\xl\\workspace\\Protobuf-ED\\protoc.exe
+compiler.refreshOutputDirectory=true
+compiler.refreshProject=false
+compiler.useProtocInCustomPath=true
+compiler.useProtocInSystemPath=false
+eclipse.preferences.version=1
+general.enableProjectSettings=true
