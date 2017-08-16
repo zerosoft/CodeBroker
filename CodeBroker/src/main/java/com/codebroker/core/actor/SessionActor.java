@@ -344,7 +344,6 @@ package com.codebroker.core.actor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.avalon.protocol.AvalonWorld.CS_USER_LOGIN;
 import com.codebroker.api.IUser;
 import com.codebroker.api.IoSession;
 import com.codebroker.api.internal.IoMessagePackage;
@@ -354,7 +353,10 @@ import com.codebroker.core.actor.WorldActor.UserReconnectionTry;
 import com.codebroker.net.MessagePackImpl;
 import com.codebroker.setting.SystemMessageType;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.message.protocol.PBSystem.SC_USER_LOGIN;
+import com.message.protocol.Message;
+import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER;
+import com.message.protocol.PBSystem.SC_USER_RECONNECTION_FAIL;
+import com.message.protocol.PBSystem.SC_USER_RECONNECTION_SUCCESS;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -416,7 +418,7 @@ public class SessionActor extends AbstractActor {
 			ActorSelection actorSelection = getContext().actorSelection("/user/" + WorldActor.IDENTIFY);
 			if (message.getOpCode() == SystemMessageType.USER_LOGIN.id) {
 				try {
-					CS_USER_LOGIN login = CS_USER_LOGIN.parseFrom(message.getRawData());
+					CS_USER_CONNECT_TO_SERVER login = CS_USER_CONNECT_TO_SERVER.parseFrom(message.getRawData());
 					WorldActor.UserConnect2Server connect2Server = new WorldActor.UserConnect2Server(login.getName(),
 							login.getParams());
 					actorSelection.tell(connect2Server, getSelf());
@@ -446,14 +448,17 @@ public class SessionActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(UserLoginFail.class, msg -> {
-			ioSession.close(true);
-		}).match(UserConnect2Server.class, msg -> {
-
-			SC_USER_LOGIN login = SC_USER_LOGIN.newBuilder().setStat("1").build();
-			sessionSendMessage(2, login.toByteArray());
-			processConnectionSessionsBinding();
-
+		return ReceiveBuilder.create()
+		 .match(UserConnect2Server.class, msg -> {
+			if (msg.success) {
+				SC_USER_RECONNECTION_SUCCESS success=SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
+				sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());
+				processConnectionSessionsBinding();
+			}else{
+				SC_USER_RECONNECTION_FAIL fail=SC_USER_RECONNECTION_FAIL.newBuilder().build();
+				sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
+				ioSession.close(true);
+			}
 		}).match(UserSendMessage2Net.class, msg -> {
 			sessionSendMessage(msg.requestId, msg.value);
 		}).match(IosessionReciveMessage.class, msg -> {
@@ -472,8 +477,6 @@ public class SessionActor extends AbstractActor {
 	public static class UserLogout {
 	}
 
-	public static class UserLoginFail {
-	}
 
 	public static class UserConnect2Server {
 		public final boolean success;

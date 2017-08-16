@@ -12,9 +12,11 @@ import com.codebroker.api.IArea;
  */
 public interface IAreaManager {
 
-	public IArea createGrid(int loaclGridId) throws Exception;
+	public IArea createArea(int loaclAreaId) throws Exception;
 
-	public Collection<IArea> getAllGrid() throws Exception;
+	public IArea getAreaById(String areaId) throws Exception;
+	
+	public Collection<IArea> getAllArea() throws Exception;
 
-	public void removeGrid(int loaclGridId);
+	public void removeArea(int loaclAreaId);
 }

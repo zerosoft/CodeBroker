@@ -5,8 +5,9 @@ import java.io.InputStreamReader;
 
 import com.codebroker.net.MessagePackImpl;
 import com.codebroker.util.MessageHead;
+import com.message.protocol.Message;
+import com.message.protocol.PBGame.CS_REGISTER;
 import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER;
-import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER.Builder;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -40,19 +41,14 @@ public class ClientMain {
 	                }
 	                MessageHead head=null;
 	                if (line.startsWith("1")) {
-						String[] split = line.split(" ");
-						Builder newBuilder = CS_USER_CONNECT_TO_SERVER.newBuilder();
-						newBuilder.setName(split[1]);
-						newBuilder.setParams(split[2]);
-						CS_USER_CONNECT_TO_SERVER build = newBuilder.build();
-						head=new MessageHead(new MessagePackImpl(105,build.toByteArray()));
+	                	CS_USER_CONNECT_TO_SERVER.Builder builder=CS_USER_CONNECT_TO_SERVER.newBuilder();
+	                	builder.setName("Test");
+	                	builder.setParams("Param");
+	                	CS_USER_CONNECT_TO_SERVER build = builder.build();
+	                	head=new MessageHead(new MessagePackImpl(Message.PB.SystemKey.CS_USER_CONNECT_TO_SERVER_VALUE,build.toByteArray()));	
 					}else if (line.startsWith("2")) {
-//						String[] split = line.split(" ");
-//						com.avalon.protocol.Chat.CS_CHAT_MESSAGE.Builder newBuilder = CS_CHAT_MESSAGE.newBuilder();
-//						newBuilder.setName(split[1]);
-//						newBuilder.setMessage(split[2]);
-//						CS_CHAT_MESSAGE build = newBuilder.build();
-//						head=new MessageHead(new MessagePackImpl(2,build.toByteArray()));	
+						CS_REGISTER register=CS_REGISTER.newBuilder().setName("1").setPassword("1").build();
+						head=new MessageHead(new MessagePackImpl(Message.PB.MessageKey.CS_REGISTER_VALUE,register.toByteArray()));
 					}
 	                // Sends the received line to the server.
 	                lastWriteFuture = ch.writeAndFlush(head);

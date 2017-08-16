@@ -46,6 +46,9 @@ public class UserManagerActor extends AbstractActor {
 			rebindKeyUserMap.put(msg.reBindKey, msg.userId);
 		}).match(FindUserByRebindKey.class, msg -> {
 			processReBind(msg);
+		}).match(GetPlayerUser.class, msg->{
+			User user = userMap.get(msg.userId);
+			getSender().tell(user, getSelf());
 		}).build();
 	}
 
@@ -60,7 +63,7 @@ public class UserManagerActor extends AbstractActor {
 			if (userMap.containsKey(key)) {
 				User user = userMap.get(key);
 				user.rebindIoSession(getSender());
-				getSender().tell(new SessionActor.ReBindUser(true), user.getUserRef());
+				getSender().tell(new SessionActor.ReBindUser(true), user.getActorRef());
 			} else {
 				getSender().tell(new SessionActor.ReBindUser(false), ActorRef.noSender());
 			}
@@ -101,7 +104,7 @@ public class UserManagerActor extends AbstractActor {
 		user.setNpc(npc);
 
 		actorOf = context.actorOf(Props.create(UserActor.class, user, npc, ioSession), userid);
-		user.setUserRef(actorOf);
+		user.setActorRef(actorOf);
 
 		userMap.put(userid, user);
 
@@ -182,4 +185,15 @@ public class UserManagerActor extends AbstractActor {
 		}
 
 	}
+	
+	public static class GetPlayerUser{
+
+		public final String userId;
+
+		public GetPlayerUser(String userId) {
+			super();
+			this.userId = userId;
+		}
+		
+		}
 }

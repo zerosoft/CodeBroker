@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.codebroker.api.event.IEventDispatcher;
 
@@ -65,6 +66,8 @@ public interface IArea  extends IEventDispatcher{
 	 * @throws Exception
 	 */
 	public Collection<IGrid> getAllGrid() throws Exception;
+	
+	public List<IUser> getPlayers() throws Exception;
 	/**
 	 * 销毁区域
 	 */

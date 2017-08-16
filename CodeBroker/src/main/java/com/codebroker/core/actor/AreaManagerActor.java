@@ -41,6 +41,8 @@ public class AreaManagerActor extends AbstractActor {
 			createGrid(msg.loaclGridId);
 		}).match(RemoveArea.class, msg -> {
 			removeGridById(msg.loaclGridId);
+		}).match(GetGridById.class, msg->{
+			getSender().tell(gridMap.get(msg.gridId), getSelf());
 		}).match(GetAllArea.class, msg -> {
 			getAllArea();
 		}).match(NewServerComeIn.class, msg -> {
@@ -80,7 +82,7 @@ public class AreaManagerActor extends AbstractActor {
 			Area gridProxy = new Area();
 			ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, gridProxy), key);
 
-			gridProxy.setAreaRef(actorOf);
+			gridProxy.setActorRef(actorOf);
 
 			getContext().watch(actorOf);
 			getSender().tell(gridProxy, getSelf());
@@ -95,7 +97,7 @@ public class AreaManagerActor extends AbstractActor {
 	private void removeGridById(int loaclGridId) {
 		String key = ServerEngine.serverId + "_" + loaclGridId;
 		Area gridProxy = gridMap.get(key);
-		getContext().stop(gridProxy.getAreaRef());
+		getContext().stop(gridProxy.getActorRef());
 		gridMap.remove(key);
 		// 发送到通道
 		mediator.tell(new DistributedPubSubMediator.Publish(IDENTIFY,
@@ -213,5 +215,20 @@ public class AreaManagerActor extends AbstractActor {
 			this.fixSupervisorPath = fixSupervisorPath;
 		}
 
+	}
+	
+	public static class GetGridById implements Serializable{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3623698442502947872L;
+		public final String gridId;
+		
+		public GetGridById(String gridId) {
+			super();
+			this.gridId=gridId;
+		}
+		
 	}
 }

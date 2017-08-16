@@ -349,6 +349,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
 import com.codebroker.core.actor.CodeBrokerSystem;
 import com.codebroker.core.service.BaseCoreService;
 import com.codebroker.jmx.ManagementService;
@@ -393,6 +395,10 @@ public class AkkaBootService extends BaseCoreService {
 
 	private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
 
+	public  IAreaManager gridLeader;
+
+	public  IUserManager userManager;
+	
 	@Override
 	public void init(Object obj) {
 		logger.debug("Code Broker Mediator init");
@@ -490,6 +496,22 @@ public class AkkaBootService extends BaseCoreService {
 
 	public AbstractActor getTmpActor(String key) {
 		return tmpActor.get(key);
+	}
+
+	public IAreaManager getGridLeader() {
+		return gridLeader;
+	}
+
+	public void setGridLeader(IAreaManager gridLeader) {
+		this.gridLeader = gridLeader;
+	}
+
+	public IUserManager getUserManager() {
+		return userManager;
+	}
+
+	public void setUserManager(IUserManager userManager) {
+		this.userManager = userManager;
 	}
 
 }

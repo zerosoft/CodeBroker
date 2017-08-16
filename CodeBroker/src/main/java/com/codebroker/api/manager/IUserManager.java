@@ -15,6 +15,8 @@ public interface IUserManager {
 
 	public void removeUser(String userId);
 
+	public IUser getPlayerUser(String userId) throws Exception;
+	
 	public List<IUser> getPlayerUser() throws Exception;
 
 	public List<IUser> getNPCUser() throws Exception;

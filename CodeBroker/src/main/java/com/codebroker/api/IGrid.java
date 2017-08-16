@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.codebroker.api.event.IEventDispatcher;
 
@@ -29,6 +30,8 @@ public interface IGrid  extends IEventDispatcher{
 	 * @param userID
 	 */
 	public void leaveGrid(String userID);
+	
+	public List<IUser> getPlayers() throws Exception;
 	/**
 	 * 对指定组的用户进行广播
 	 * @param jsonString

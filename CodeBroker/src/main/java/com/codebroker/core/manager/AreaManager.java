@@ -5,13 +5,9 @@ import java.util.Collection;
 import com.codebroker.api.IArea;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.core.actor.AreaManagerActor;
+import com.codebroker.util.AkkaMediator;
 
 import akka.actor.ActorRef;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 /**
  * 区域管理器
@@ -28,25 +24,27 @@ public class AreaManager implements IAreaManager {
 	}
 
 	@Override
-	public IArea createGrid(int loaclGridId) throws Exception {
-		Timeout timeout = new Timeout(Duration.create(5, "seconds"));
-		Future<Object> future = Patterns.ask(gridLeaderRef, new AreaManagerActor.CreateArea(loaclGridId), timeout);
-		IArea result = (IArea) Await.result(future, timeout.duration());
-		return result;
+	public IArea createArea(int loaclGridId) throws Exception {
+		IArea callBak = (IArea)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.CreateArea(loaclGridId));
+		return callBak;
 	}
 
 	@Override
-	public void removeGrid(int loaclGridId) {
+	public void removeArea(int loaclGridId) {
 		gridLeaderRef.tell(new AreaManagerActor.RemoveArea(loaclGridId), ActorRef.noSender());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<IArea> getAllGrid() throws Exception {
-		Timeout timeout = new Timeout(Duration.create(5, "seconds"));
-		Future<Object> future = Patterns.ask(gridLeaderRef, new AreaManagerActor.GetAllArea(), timeout);
-		Collection<IArea> result = (Collection<IArea>) Await.result(future, timeout.duration());
-		return result;
+	public Collection<IArea> getAllArea() throws Exception {
+		Collection<IArea> callBak = (Collection<IArea>)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetAllArea());
+		return callBak;
+	}
+
+	@Override
+	public IArea getAreaById(String gridId) throws Exception {
+		IArea callBak = (IArea)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetGridById(gridId));
+		return callBak;
 	}
 
 }

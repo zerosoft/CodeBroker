@@ -366,8 +366,8 @@ public final class FileUtil {
 	 */
 	public static List<File> scanPath(String searchPath, boolean IncludeDirs) {
 		List<File> result = Lists.newArrayList();
-		@SuppressWarnings("rawtypes")
-		FindFile<?> ff = new FindFile().setRecursive(true).setIncludeDirs(IncludeDirs).searchPath(searchPath);
+		FindFile findFile = new FindFile();
+		FindFile ff = findFile.searchPath(searchPath);
 		File f;
 		while ((f = ff.nextFile()) != null) {
 			result.add(f);

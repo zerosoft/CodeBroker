@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.CodeBrokerAppListener;
-import com.codebroker.api.ControlCenter;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.cluster.ClusterDistributedPub;
@@ -73,7 +72,6 @@ public class WorldActor extends AbstractActor {
 			} else {
 				handleLogin = "Test1234";
 			}
-
 			User user = null;
 			try {
 				user = AkkaMediator.getCallBak(userManagerRef,
@@ -82,7 +80,7 @@ public class WorldActor extends AbstractActor {
 				getSender().tell(new SessionActor.UserConnect2Server(false), getSelf());
 				e.printStackTrace();
 			}
-			getSender().tell(new SessionActor.UserConnect2Server(true), user.getUserRef());
+			getSender().tell(new SessionActor.UserConnect2Server(true), user.getActorRef());
 		} catch (NoAuthException e1) {
 			getSender().tell(new SessionActor.UserConnect2Server(false), getSelf());
 		}
@@ -161,7 +159,8 @@ public class WorldActor extends AbstractActor {
 		 */
 		areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class), AreaManagerActor.IDENTIFY);
 		AreaManager gridLeaderProxy = new AreaManager(areaManagerRef);
-		ControlCenter.gridLeader = gridLeaderProxy;
+		AkkaBootService component = ContextResolver.getComponent(AkkaBootService.class);
+		component.setGridLeader(gridLeaderProxy);
 		getContext().watch(areaManagerRef);
 		logger.info("AreaManager Path= {}", areaManagerRef.path().toString());
 		/**
@@ -171,7 +170,7 @@ public class WorldActor extends AbstractActor {
 		userManagerRef = getContext().actorOf(Props.create(UserManagerActor.class, manager), UserManagerActor.IDENTIFY);
 		manager.setManagerRef(userManagerRef);
 		getContext().watch(userManagerRef);
-		ControlCenter.userManager = manager;
+		component.setUserManager(manager);
 		logger.info("UserManager Path= {}", userManagerRef.path().toString());
 	}
 

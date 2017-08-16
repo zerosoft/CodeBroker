@@ -343,6 +343,8 @@ package com.codebroker.core;
 
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.ManagerLocator;
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
 
 import akka.actor.ActorSystem;
 
@@ -367,6 +369,16 @@ class ManagerLocatorImpl implements ManagerLocator {
 	@Override
 	public ActorSystem getActorSystem() {
 		return ContextResolver.getActorSystem();
+	}
+
+	@Override
+	public IAreaManager getAreaManager() {
+		return ContextResolver.getAreaManager();
+	}
+
+	@Override
+	public IUserManager getUserManager() {
+		return ContextResolver.getUserManager();
 	}
 
 }

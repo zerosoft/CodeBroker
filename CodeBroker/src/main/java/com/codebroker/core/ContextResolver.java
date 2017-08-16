@@ -343,6 +343,8 @@ package com.codebroker.core;
 
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.internal.IService;
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
 import com.codebroker.util.PropertiesWrapper;
 
 import akka.actor.ActorSystem;
@@ -441,6 +443,14 @@ public final class ContextResolver {
 	 */
 	public static ActorSystem getActorSystem() {
 		return context.getActorSystem();
+	}
+
+	public static IAreaManager getAreaManager() {
+		return context.getAreaManager();
+	}
+
+	public static IUserManager getUserManager() {
+		return context.getUserManager();
 	}
 
 }

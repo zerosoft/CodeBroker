@@ -12,15 +12,14 @@ import java.util.UUID;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.core.actor.UserActor.AddEventListener;
-import com.codebroker.core.actor.UserActor.DispatchEvent;
-import com.codebroker.core.actor.UserActor.HasEventListener;
-import com.codebroker.core.actor.UserActor.RemoveEventListener;
 import com.codebroker.core.entities.Area;
 import com.codebroker.core.entities.CodeBrokerEvent;
 import com.codebroker.core.entities.CodeEvent;
 import com.codebroker.core.entities.Grid;
 import com.codebroker.core.entities.User;
+import com.codebroker.core.eventbus.CodebrokerEnvelope;
+import com.codebroker.exception.NoActorRefException;
+import com.message.thrift.actor.ActorMessage;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -34,43 +33,68 @@ import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-
+/**
+ * 区域
+ * 管理区域中的格子
+ * @author zero
+ *
+ */
 public class AreaActor extends AbstractActor {
 
 	private final Area grid;
+	//**事件总线
+	private CodebrokerEnvelope envelope=new CodebrokerEnvelope();
+	
 	
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-
+	//用户
 	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
+	//创建NPC
 	private Map<String, User> npcMap = new TreeMap<String, User>();
+	//格子
 	private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
 
 	public AreaActor(Area grid) {
 		super();
 		this.grid = grid;
+		
 	}
 
 	@Override
 	public void postStop() throws Exception {
 		super.postStop();
 		Iterable<ActorRef> children = getContext().getChildren();
-		for (ActorRef actorRef : children) {
-			actorRef.tell(PoisonPill.getInstance(), getSelf());
+		for (ActorRef childRef : children) {
+			childRef.tell(PoisonPill.getInstance(), getSelf());
 		}
-		for (IUser actorRef : userMap.values()) {
-			actorRef.dispatchEvent(new CodeEvent());
+		
+		for (IUser iUser : userMap.values()) {
+			iUser.dispatchEvent(new CodeEvent());
 		}
-		for (User actorRef : npcMap.values()) {
-			actorRef.getUserRef().tell(PoisonPill.getInstance(), getSelf());
+		
+		for (User user : npcMap.values()) {
+			try {
+				user.getActorRef().tell(PoisonPill.getInstance(), getSelf());
+			} catch (NoActorRefException e) {
+
+			}
 		}
 	}
 
 	@Override
 	public Receive createReceive() {
 		return ReceiveBuilder.create()
-		  .match(CreateNPC.class, msg -> {
-			createNPC();
-		}).match(EnterArea.class, msg -> {
+		.match(ActorMessage.class, msg->{
+			switch (msg.op) {
+			case AREA_CREATE_NPC:
+				createNPC();
+				break;
+
+			default:
+				break;
+			}
+		})
+		.match(EnterArea.class, msg -> {
 			enterArea(msg);
 		}).match(LeaveArea.class, msg -> {
 			leaveArea(msg);
@@ -82,10 +106,17 @@ public class AreaActor extends AbstractActor {
 			getGridById(msg);
 		}).match(GetAllGrids.class, msg -> {
 			getAllGrid();
-		}).match(Terminated.class, msg->{
+		}).match(GetPlayers.class, msg->{
+			Collection<IUser> values = userMap.values();
+			List<IUser> list = new ArrayList<IUser>();
+			list.addAll(values);
+			getSender().tell(list, getSelf());
+		})
+		  .match(Terminated.class, msg->{
 			String name = msg.actor().path().name();
-			
-		}).match(BroadCastAllUser.class, msg -> {
+		})
+		 //广播信息
+		  .match(BroadCastAllUser.class, msg -> {
 			broadCastAllUser(msg.jsonString);
 		}).match(AddEventListener.class, msg -> {
 			eventListener.put(msg.topic, msg.paramIEventListener);
@@ -127,18 +158,21 @@ public class AreaActor extends AbstractActor {
 
 			Grid gridProxy = new Grid();
 			ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, gridProxy), msg.gridId);
-			gridProxy.setGridRef(actorOf);
+			gridProxy.setActorRef(actorOf);
 
 			getContext().watch(actorOf);
 			getSender().tell(gridProxy, getSelf());
 
 			gridMap.put(msg.gridId, gridProxy);
+			
+			envelope.subscribe(actorOf,getSelf().path().name());
 		}
 	}
 
 	private void removeGrid(RemoveGrid msg) {
 		Grid grid2 = gridMap.get(msg.gridId);
 		if (grid2 != null) {
+			envelope.unsubscribe(grid2.getActorRef());
 			grid2.destory();
 		}
 	}
@@ -161,6 +195,7 @@ public class AreaActor extends AbstractActor {
 		if (userMap.containsKey(msg.userId)) {
 			userMap.remove(msg.userId);
 			
+			//广播玩家离开
 			broadCastAllUser("JSON　SOMEONE LEAVE");
 		}
 	}
@@ -171,6 +206,8 @@ public class AreaActor extends AbstractActor {
 		} else {
 			userMap.put(msg.user.getUserId(), msg.user);
 			getSender().tell(true, getSelf());
+			//通知user进入所在actor
+			((User)msg.user).getActorRef().tell(new UserActor.EnterArea(), getSelf());
 			
 			broadCastAllUser("JSON　SOMEONE ENTER");
 		}
@@ -193,10 +230,6 @@ public class AreaActor extends AbstractActor {
 		private static final long serialVersionUID = 3065865091907475834L;
 	}
 
-	public static class CreateNPC implements Serializable {
-
-		private static final long serialVersionUID = -4577708795739514242L;
-	}
 
 	public static class EnterArea implements Serializable {
 
@@ -316,6 +349,12 @@ public class AreaActor extends AbstractActor {
 			super();
 			this.topic = topic;
 		}
+		
+	}
+	
+	public static class GetPlayers implements Serializable{
+
+		private static final long serialVersionUID = -1823532488763688181L;
 		
 	}
 }

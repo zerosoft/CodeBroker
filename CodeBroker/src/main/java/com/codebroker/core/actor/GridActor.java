@@ -1,17 +1,16 @@
 package com.codebroker.core.actor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.core.actor.UserActor.AddEventListener;
-import com.codebroker.core.actor.UserActor.DispatchEvent;
-import com.codebroker.core.actor.UserActor.HasEventListener;
-import com.codebroker.core.actor.UserActor.RemoveEventListener;
 import com.codebroker.core.entities.Grid;
 
 import akka.actor.AbstractActor;
@@ -44,7 +43,14 @@ public class GridActor extends AbstractActor {
 				userMap.remove(msg.userId);
 			}
 
-		}).match(AddEventListener.class, msg -> {
+		}).match(GetPlayers.class, msg->{
+			Collection<IUser> values = userMap.values();
+			List<IUser> list = new ArrayList<IUser>();
+			list.addAll(values);
+			getSender().tell(list, getSelf());
+		})
+		  //广播相关
+		  .match(AddEventListener.class, msg -> {
 			eventListener.put(msg.topic, msg.paramIEventListener);
 		}).match(RemoveEventListener.class, msg->{
 			eventListener.remove(msg.topic);
@@ -145,6 +151,12 @@ public class GridActor extends AbstractActor {
 			super();
 			this.topic = topic;
 		}
+		
+	}
+	
+	public static class GetPlayers implements Serializable{
+
+		private static final long serialVersionUID = -6878647894314032793L;
 		
 	}
 }

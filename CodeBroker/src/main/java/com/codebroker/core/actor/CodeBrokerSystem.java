@@ -348,6 +348,7 @@ import com.codebroker.core.cluster.ClusterDistributedPub;
 import com.codebroker.core.cluster.ClusterDistributedSub;
 import com.codebroker.core.cluster.ClusterListener;
 import com.codebroker.core.model.CodeDeadLetter;
+import com.codebroker.util.LogUtil;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -425,6 +426,7 @@ public class CodeBrokerSystem extends AbstractActor {
 		 */
 		ActorRef elkLogger = actorSystem.actorOf(Props.create(ELKLogActor.class), ELKLogActor.IDENTIFY);
 		this.getContext().watch(elkLogger);
+		LogUtil.elkLog=elkLogger;
 		logger.info("ELKActor Path=" + elkLogger.path().toString());
 		/**
 		 * 订阅Actor

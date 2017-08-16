@@ -341,6 +341,9 @@ Public License instead of this License.
  */
 package com.codebroker.api.internal;
 
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
+
 import akka.actor.ActorSystem;
 
 /**
@@ -366,4 +369,8 @@ public interface ManagerLocator {
 	 * @return the actor system
 	 */
 	ActorSystem getActorSystem();
+
+	IAreaManager getAreaManager();
+
+	IUserManager getUserManager();
 }

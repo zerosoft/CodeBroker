@@ -20,7 +20,7 @@ public class TestRedis {
 	public static void main(String[] args) {
 		Props properties = new Props();
 		properties.setValue("redis.isPool", "true");
-		properties.setValue("redis.url", "127.0.0.1");
+		properties.setValue("redis.url", "192.168.0.199");
 		properties.setValue("redis.port", "32768");
 		properties.setValue("redis.password", "");
 		PropertiesWrapper propertiesWrapper = new PropertiesWrapper(properties);

@@ -341,14 +341,12 @@ Public License instead of this License.
  */
 package com.codebroker.api;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
 import com.codebroker.exception.ManagerNotFoundException;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 
@@ -366,8 +364,22 @@ public final class AppContext {
 	private AppContext() {
 	}
 
-	public static Map<String, ActorPath> pathCache = new TreeMap<String, ActorPath>();
 
+	public static IAreaManager getAreaManager(){
+		try {
+			return InternalContext.getManagerLocator().getAreaManager();
+		} catch (IllegalStateException ise) {
+			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+		}
+	}
+	
+	public static IUserManager getUserManager(){
+		try {
+			return InternalContext.getManagerLocator().getUserManager();
+		} catch (IllegalStateException ise) {
+			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+		}
+	}
 	/**
 	 * Gets the manager.
 	 *

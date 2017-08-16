@@ -14,12 +14,14 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * 网络和Actor的关联
- * 
+ * 负责TCP的手法消息
  * @author server
  *
  */
 public class NettyIoSession implements IoSession {
 
+	public static final String NAME="NettyIoSession";
+	
 	final ChannelHandlerContext ctx;
 
 	final long sessionId;
@@ -31,8 +33,7 @@ public class NettyIoSession implements IoSession {
 		this.ctx = ctx;
 		ActorSystem actorSystem = AkkaMediator.getActorSystem();
 		this.sessionId = NettyServerMonitor.sessionIds.getAndIncrement();
-		actorRef = actorSystem.actorOf(Props.create(SessionActor.class, this),
-				(NettyIoSession.class.getSimpleName() + "_" + sessionId));
+		actorRef = actorSystem.actorOf(Props.create(SessionActor.class, this),(NAME + "_" + sessionId));
 	}
 
 	public long getSessionId() {
@@ -70,8 +71,8 @@ public class NettyIoSession implements IoSession {
 	 */
 	private void sendMessageToTransport(Object msg) {
 		if (msg instanceof IoMessagePackage) {
-			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage(
-					(IoMessagePackage) msg);
+			SessionActor.IosessionReciveMessage message = 
+			new SessionActor.IosessionReciveMessage((IoMessagePackage) msg);
 			actorRef.tell(message, ActorRef.noSender());
 		}
 	}

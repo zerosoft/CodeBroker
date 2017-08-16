@@ -2,15 +2,17 @@ package com.codebroker.core.entities;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import com.codebroker.api.IArea;
 import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
-import com.codebroker.api.event.IEvent;
-import com.codebroker.api.event.IEventListener;
+import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.AreaActor;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.util.AkkaMediator;
+import com.message.thrift.actor.ActorMessage;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -21,71 +23,63 @@ import akka.actor.PoisonPill;
  * @author xl
  *
  */
-public class Area implements IArea, Serializable {
+public class Area extends EventDispatcher implements IArea, Serializable {
 
 	private static final long serialVersionUID = -1706402463773889231L;
 
-	private ActorRef areaRef;
-
-	public void setAreaRef(ActorRef gridRef) {
-		this.areaRef = gridRef;
-	}
-
-	public ActorRef getAreaRef() {
-		return areaRef;
-	}
-
 	@Override
 	public boolean enterArea(IUser user) throws Exception {
-		return (boolean) AkkaMediator.getCallBak(areaRef, new AreaActor.EnterArea(user));
+		return (boolean) AkkaMediator.getCallBak(getActorRef(), new AreaActor.EnterArea(user));
 	}
 
 	@Override
 	public String getId() throws Exception {
-		if (areaRef != null) {
-			return areaRef.path().name();
+		if (getActorRef() != null) {
+			return getActorRef().path().name();
 		}
 		throw new CodeBrokerException("NO");
 	}
 
 	@Override
 	public IUser createNPC() throws Exception {
-		return (IUser) AkkaMediator.getCallBak(areaRef, new AreaActor.CreateNPC());
+		ActorMessage message=new ActorMessage(Operation.AREA_CREATE_NPC);
+		return (IUser) AkkaMediator.getCallBak(getActorRef(), message);
 	}
 
 	@Override
 	public void leaveArea(String userID) {
-		areaRef.tell(new AreaActor.LeaveArea(userID), ActorRef.noSender());
+		getActorRef().tell(new AreaActor.LeaveArea(userID), ActorRef.noSender());
 	}
 
 	@Override
 	public void removeNPC(String npcId) {
-		areaRef.tell(new AreaActor.LeaveArea(npcId), ActorRef.noSender());
+		getActorRef().tell(new AreaActor.LeaveArea(npcId), ActorRef.noSender());
 	}
 
 	@Override
 	public IGrid createGrid(String gridId) throws Exception {
-		return (IGrid) AkkaMediator.getCallBak(areaRef, new AreaActor.CreateGrid(gridId));
+		return (IGrid) AkkaMediator.getCallBak(getActorRef(), new AreaActor.CreateGrid(gridId));
 	}
 
 	@Override
 	public void removeGridById(String gridId) {
-		areaRef.tell(new AreaActor.RemoveGrid(gridId), ActorRef.noSender());
+		getActorRef().tell(new AreaActor.RemoveGrid(gridId), ActorRef.noSender());
 	}
 
 	@Override
 	public IGrid getGridById(String gridId) throws Exception {
-		return (IGrid) AkkaMediator.getCallBak(areaRef, new AreaActor.GetGridById(gridId));
+		return (IGrid) AkkaMediator.getCallBak(getActorRef(), new AreaActor.GetGridById(gridId));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<IGrid> getAllGrid() throws Exception {
-		return (Collection<IGrid>) AkkaMediator.getCallBak(areaRef, new AreaActor.GetAllGrids());
+		return (Collection<IGrid>) AkkaMediator.getCallBak(getActorRef(), new AreaActor.GetAllGrids());
 	}
 
 	@Override
 	public void broadCastAllUser(String jsonString) {
-		areaRef.tell(new AreaActor.BroadCastAllUser(jsonString), ActorRef.noSender());
+		getActorRef().tell(new AreaActor.BroadCastAllUser(jsonString), ActorRef.noSender());
 	}
 
 	@Override
@@ -100,31 +94,12 @@ public class Area implements IArea, Serializable {
 
 	@Override
 	public void destroy() {
-		areaRef.tell(PoisonPill.getInstance(), ActorRef.noSender());
+		getActorRef().tell(PoisonPill.getInstance(), ActorRef.noSender());
 	}
 
 	@Override
-	public void addEventListener(String topic, IEventListener eventListener) {
-		areaRef.tell(new AreaActor.AddEventListener(topic, eventListener), ActorRef.noSender());
-	}
-
-	@Override
-	public boolean hasEventListener(String paramString) {
-		try {
-			return AkkaMediator.getCallBak(areaRef, new AreaActor.HasEventListener(paramString));
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	@Override
-	public void removeEventListener(String paramString) {
-		areaRef.tell(new AreaActor.RemoveEventListener(paramString), ActorRef.noSender());
-	}
-
-	@Override
-	public void dispatchEvent(IEvent paramIEvent) {
-		areaRef.tell(new AreaActor.DispatchEvent(paramIEvent), ActorRef.noSender());
+	public List<IUser> getPlayers() throws Exception {
+		return (List<IUser>) AkkaMediator.getCallBak(getActorRef(), new AreaActor.GetPlayers());
 	}
 
 }
