@@ -364,22 +364,32 @@ public final class AppContext {
 	private AppContext() {
 	}
 
-
-	public static IAreaManager getAreaManager(){
+	/**
+	 * 获得区域管理器
+	 * 
+	 * @return
+	 */
+	public static IAreaManager getAreaManager() {
 		try {
 			return InternalContext.getManagerLocator().getAreaManager();
 		} catch (IllegalStateException ise) {
 			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
 		}
 	}
-	
-	public static IUserManager getUserManager(){
+
+	/**
+	 * 获得用户管理器
+	 * 
+	 * @return
+	 */
+	public static IUserManager getUserManager() {
 		try {
 			return InternalContext.getManagerLocator().getUserManager();
 		} catch (IllegalStateException ise) {
 			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
 		}
 	}
+
 	/**
 	 * Gets the manager.
 	 *

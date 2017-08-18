@@ -6,56 +6,131 @@
  */
 package com.message.thrift.actor;
 
+import java.util.Map;
+import java.util.HashMap;
+import org.apache.thrift.TEnum;
+
 /**
  * 操作命令
  */
 public enum Operation implements org.apache.thrift.TEnum {
-  /**
-   * 创建NPC
-   */
-  AREA_CREATE_NPC(0),
-  /**
-   * 获取空间ID
-   */
-  AREA_GET_ID(1),
-  /**
-   * 用户进入空间
-   */
-  AREA_USER_ENTER_AREA(2),
-  /**
-   * 用户离开空间
-   */
-  AREA_USER_LEAVE_AREA(3);
+	/**
+	 * 创建NPC
+	 */
+	AREA_CREATE_NPC(0),
+	/**
+	 * 获取空间ID
+	 */
+	AREA_GET_ID(1),
+	/**
+	 * 用户进入空间
+	 */
+	AREA_USER_ENTER_AREA(2),
+	/**
+	 * 用户离开空间
+	 */
+	AREA_USER_LEAVE_AREA(3),
+	/**
+	 * 创建格子
+	 */
+	AREA_CREATE_GRID(4),
+	/**
+	 * 删除格子
+	 */
+	AREA_REMOVE_GRID(5),
+	/**
+	 * 根据格子ID获取格子
+	 */
+	AREA_GET_GRID_BY_ID(6),
+	/**
+	 * 获取全部格子
+	 */
+	AREA_GET_ALL_GRID(7),
+	/**
+	 * 区域广播给所有用户信息
+	 */
+	AREA_BROADCAST_ALL_USER(8), USER_IS_CONNECTED(9), USER_DISCONNECT(10), USER_RECIVE_IOSESSION_MESSAGE(11), USER_REUSER_BINDUSER_IOSESSION_ACTOR(12), USER_GET_IUSER(13), USER_SENDMESSAGE_TO_IOSESSION(14),
+	/**
+	 * 用户进入空间
+	 */
+	USER_ENTER_AREA(15),
+	/**
+	 * 用户离开空间
+	 */
+	USER_LEAVE_AREA(16), USER_ENTER_GRID(17), USER_LEAVE_GRID(18), SESSION_USER_LOGOUT(19), SESSION_USER_CONNECT_TO_SERVER(20), SESSION_ENTER_WORLD(21), SESSION_USERSEND_MESSAGE(22), SESSION_RECIVE_IOMESSAGE(23), SESSION_REBIND_USER(24);
 
-  private final int value;
+	private final int value;
 
-  private Operation(int value) {
-    this.value = value;
-  }
+	private Operation(int value) {
+		this.value = value;
+	}
 
-  /**
-   * Get the integer value of this enum value, as defined in the Thrift IDL.
-   */
-  public int getValue() {
-    return value;
-  }
+	/**
+	 * Get the integer value of this enum value, as defined in the Thrift IDL.
+	 */
+	public int getValue() {
+		return value;
+	}
 
-  /**
-   * Find a the enum type by its integer value, as defined in the Thrift IDL.
-   * @return null if the value is not found.
-   */
-  public static Operation findByValue(int value) { 
-    switch (value) {
-      case 0:
-        return AREA_CREATE_NPC;
-      case 1:
-        return AREA_GET_ID;
-      case 2:
-        return AREA_USER_ENTER_AREA;
-      case 3:
-        return AREA_USER_LEAVE_AREA;
-      default:
-        return null;
-    }
-  }
+	/**
+	 * Find a the enum type by its integer value, as defined in the Thrift IDL.
+	 * 
+	 * @return null if the value is not found.
+	 */
+	public static Operation findByValue(int value) {
+		switch (value) {
+		case 0:
+			return AREA_CREATE_NPC;
+		case 1:
+			return AREA_GET_ID;
+		case 2:
+			return AREA_USER_ENTER_AREA;
+		case 3:
+			return AREA_USER_LEAVE_AREA;
+		case 4:
+			return AREA_CREATE_GRID;
+		case 5:
+			return AREA_REMOVE_GRID;
+		case 6:
+			return AREA_GET_GRID_BY_ID;
+		case 7:
+			return AREA_GET_ALL_GRID;
+		case 8:
+			return AREA_BROADCAST_ALL_USER;
+		case 9:
+			return USER_IS_CONNECTED;
+		case 10:
+			return USER_DISCONNECT;
+		case 11:
+			return USER_RECIVE_IOSESSION_MESSAGE;
+		case 12:
+			return USER_REUSER_BINDUSER_IOSESSION_ACTOR;
+		case 13:
+			return USER_GET_IUSER;
+		case 14:
+			return USER_SENDMESSAGE_TO_IOSESSION;
+		case 15:
+			return USER_ENTER_AREA;
+		case 16:
+			return USER_LEAVE_AREA;
+		case 17:
+			return USER_ENTER_GRID;
+		case 18:
+			return USER_LEAVE_GRID;
+		case 19:
+			return SESSION_USER_LOGOUT;
+		case 20:
+			return SESSION_USER_CONNECT_TO_SERVER;
+		case 21:
+			return SESSION_ENTER_WORLD;
+		case 22:
+			return SESSION_USERSEND_MESSAGE;
+		case 23:
+			return SESSION_RECIVE_IOMESSAGE;
+		case 24:
+			return SESSION_REBIND_USER;
+		default:
+			return null;
+		}
+	}
 }

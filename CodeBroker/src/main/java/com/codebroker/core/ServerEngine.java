@@ -352,6 +352,7 @@ import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
 import com.codebroker.component.ComponentRegistryImpl;
+import com.codebroker.core.eventbus.CodebrokerEnvelope;
 import com.codebroker.core.manager.AkkaBootService;
 import com.codebroker.jmx.InstanceMXBean;
 import com.codebroker.jmx.ManagementService;
@@ -383,6 +384,8 @@ public class ServerEngine implements InstanceMXBean {
 	/** 应用上下文. */
 	private KernelContext application;
 
+	// **事件总线
+	public static CodebrokerEnvelope envelope = new CodebrokerEnvelope();
 	/** 系统服务器组件(集合). */
 	private final ComponentRegistryImpl systemRegistry;
 
@@ -526,11 +529,11 @@ public class ServerEngine implements InstanceMXBean {
 	 *            the app name
 	 */
 	private void startApplication(String appName) {
-			// 启动上层逻辑应用
-			listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER,
-					CodeBrokerAppListener.class, new Class[] {});
-			listener.init(propertiesWrapper);
-			application.setAppListener(listener);
+		// 启动上层逻辑应用
+		listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER,
+				CodeBrokerAppListener.class, new Class[] {});
+		listener.init(propertiesWrapper);
+		application.setAppListener(listener);
 	}
 
 	/**

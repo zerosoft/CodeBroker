@@ -26,8 +26,7 @@ public class Supervisor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-				.match(Props.class, props -> {
+		return receiveBuilder().match(Props.class, props -> {
 			getSender().tell(getContext().actorOf(props), getSelf());
 		}).build();
 	}

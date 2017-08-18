@@ -349,9 +349,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 public class NettyHandler extends ChannelInboundHandlerAdapter {
-	
-	public static final String NAME="NettyHandler";
-	public static AtomicInteger sessionNum=new AtomicInteger(1);
+
+	public static final String NAME = "NettyHandler";
+	public static AtomicInteger sessionNum = new AtomicInteger(1);
 
 	private NettyIoSession nettyIoSession;
 
@@ -359,7 +359,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		super.channelRegistered(ctx);
 		this.nettyIoSession = new NettyIoSession(ctx);
-		LogUtil.snedELKLogMessage(NAME, "SESSION NUM "+sessionNum.getAndIncrement());
+		LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndIncrement());
 	}
 
 	@Override
@@ -377,7 +377,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
 		super.handlerRemoved(ctx);
 		nettyIoSession.close(false);
-		LogUtil.snedELKLogMessage(NAME, "SESSION NUM "+sessionNum.getAndDecrement());
+		LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndDecrement());
 	}
 
 	@Override

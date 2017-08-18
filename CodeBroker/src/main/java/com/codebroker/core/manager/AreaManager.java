@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 
 /**
  * 区域管理器
+ * 
  * @author ZERO
  *
  */
@@ -25,7 +26,7 @@ public class AreaManager implements IAreaManager {
 
 	@Override
 	public IArea createArea(int loaclGridId) throws Exception {
-		IArea callBak = (IArea)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.CreateArea(loaclGridId));
+		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.CreateArea(loaclGridId));
 		return callBak;
 	}
 
@@ -37,13 +38,14 @@ public class AreaManager implements IAreaManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<IArea> getAllArea() throws Exception {
-		Collection<IArea> callBak = (Collection<IArea>)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetAllArea());
+		Collection<IArea> callBak = (Collection<IArea>) AkkaMediator.getCallBak(gridLeaderRef,
+				new AreaManagerActor.GetAllArea());
 		return callBak;
 	}
 
 	@Override
 	public IArea getAreaById(String gridId) throws Exception {
-		IArea callBak = (IArea)  AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetGridById(gridId));
+		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetGridById(gridId));
 		return callBak;
 	}
 

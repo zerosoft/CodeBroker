@@ -115,8 +115,7 @@ public class ReplicatedCache extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-				.match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
+		return receiveBuilder().match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
 				.match(Evict.class, cmd -> receiveEvict(cmd.key))
 				.match(GetFromCache.class, cmd -> receiveGetFromCache(cmd.key))
 				.match(GetSuccess.class, g -> receiveGetSuccess((GetSuccess<LWWMap<String, Object>>) g))

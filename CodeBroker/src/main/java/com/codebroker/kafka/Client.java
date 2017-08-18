@@ -32,21 +32,16 @@ public class Client {
 				.withBootstrapServers("192.168.0.242:9092");
 		final Materializer materializer = ActorMaterializer.create(system);
 
-		CompletionStage<Done> done =
-				  Source.range(300, 500)
-				    .map(n -> {
-				      //int partition = Math.abs(n) % 2;
-				      int partition = 0;
-				      String elem = String.valueOf(n);
-				      return new ProducerMessage.Message<String, String, Integer>(
-				        new ProducerRecord<>("topic1", partition, null, elem), n);
-				    })
-				    .via(Producer.flow(producerSettings))
-				    .map(result -> {
-				      ProducerRecord<String, String> record = result.message().record();
-				      System.out.println(record);
-				      return result;
-				    })
-				    .runWith(Sink.ignore(), materializer);
+		CompletionStage<Done> done = Source.range(300, 500).map(n -> {
+			// int partition = Math.abs(n) % 2;
+			int partition = 0;
+			String elem = String.valueOf(n);
+			return new ProducerMessage.Message<String, String, Integer>(
+					new ProducerRecord<>("topic1", partition, null, elem), n);
+		}).via(Producer.flow(producerSettings)).map(result -> {
+			ProducerRecord<String, String> record = result.message().record();
+			System.out.println(record);
+			return result;
+		}).runWith(Sink.ignore(), materializer);
 	}
 }

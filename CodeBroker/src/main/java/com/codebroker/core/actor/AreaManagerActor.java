@@ -36,17 +36,16 @@ public class AreaManagerActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-		 .match(CreateArea.class, msg -> {
+		return receiveBuilder().match(CreateArea.class, msg -> {
 			createGrid(msg.loaclGridId);
 		}).match(RemoveArea.class, msg -> {
 			removeGridById(msg.loaclGridId);
-		}).match(GetGridById.class, msg->{
+		}).match(GetGridById.class, msg -> {
 			getSender().tell(gridMap.get(msg.gridId), getSelf());
 		}).match(GetAllArea.class, msg -> {
 			getAllArea();
 		}).match(NewServerComeIn.class, msg -> {
-			newServerComeIn(msg.serverId,msg.fixSupervisorPath);
+			newServerComeIn(msg.serverId, msg.fixSupervisorPath);
 		}).match(GiveMeYourArea.class, msg -> {
 			giveMeYourArea();
 		}).match(GiveYourMyAreas.class, msg -> {
@@ -54,9 +53,9 @@ public class AreaManagerActor extends AbstractActor {
 		}).match(Subscribe.class, msg -> {
 			mediator.tell(new DistributedPubSubMediator.Subscribe(IDENTIFY, getSelf()), getSelf());
 		}).match(AddArea.class, msg -> {
-			addArea(msg.serverId,msg.area);
+			addArea(msg.serverId, msg.area);
 		}).match(DelArea.class, msg -> {
-			delArea(msg.serverId,msg.areaId);
+			delArea(msg.serverId, msg.areaId);
 		}).matchAny(msg -> {
 			System.out.println(msg);
 		}).build();
@@ -216,19 +215,19 @@ public class AreaManagerActor extends AbstractActor {
 		}
 
 	}
-	
-	public static class GetGridById implements Serializable{
+
+	public static class GetGridById implements Serializable {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -3623698442502947872L;
 		public final String gridId;
-		
+
 		public GetGridById(String gridId) {
 			super();
-			this.gridId=gridId;
+			this.gridId = gridId;
 		}
-		
+
 	}
 }

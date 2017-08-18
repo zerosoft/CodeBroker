@@ -42,7 +42,7 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 
 	@Override
 	public IUser createNPC() throws Exception {
-		ActorMessage message=new ActorMessage(Operation.AREA_CREATE_NPC);
+		ActorMessage message = new ActorMessage(Operation.AREA_CREATE_NPC);
 		return (IUser) AkkaMediator.getCallBak(getActorRef(), message);
 	}
 

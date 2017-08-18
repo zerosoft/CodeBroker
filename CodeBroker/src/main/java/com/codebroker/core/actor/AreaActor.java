@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
+import com.codebroker.core.ServerEngine;
 import com.codebroker.core.entities.Area;
 import com.codebroker.core.entities.CodeBrokerEvent;
 import com.codebroker.core.entities.CodeEvent;
@@ -33,31 +34,29 @@ import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+
 /**
- * 区域
- * 管理区域中的格子
+ * 区域 管理区域中的格子
+ * 
  * @author zero
  *
  */
 public class AreaActor extends AbstractActor {
 
 	private final Area grid;
-	//**事件总线
-	private CodebrokerEnvelope envelope=new CodebrokerEnvelope();
-	
-	
+
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-	//用户
+	// 用户
 	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
-	//创建NPC
+	// 创建NPC
 	private Map<String, User> npcMap = new TreeMap<String, User>();
-	//格子
+	// 格子
 	private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
 
 	public AreaActor(Area grid) {
 		super();
 		this.grid = grid;
-		
+
 	}
 
 	@Override
@@ -67,11 +66,11 @@ public class AreaActor extends AbstractActor {
 		for (ActorRef childRef : children) {
 			childRef.tell(PoisonPill.getInstance(), getSelf());
 		}
-		
+
 		for (IUser iUser : userMap.values()) {
 			iUser.dispatchEvent(new CodeEvent());
 		}
-		
+
 		for (User user : npcMap.values()) {
 			try {
 				user.getActorRef().tell(PoisonPill.getInstance(), getSelf());
@@ -83,8 +82,7 @@ public class AreaActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create()
-		.match(ActorMessage.class, msg->{
+		return ReceiveBuilder.create().match(ActorMessage.class, msg -> {
 			switch (msg.op) {
 			case AREA_CREATE_NPC:
 				createNPC();
@@ -93,8 +91,7 @@ public class AreaActor extends AbstractActor {
 			default:
 				break;
 			}
-		})
-		.match(EnterArea.class, msg -> {
+		}).match(EnterArea.class, msg -> {
 			enterArea(msg);
 		}).match(LeaveArea.class, msg -> {
 			leaveArea(msg);
@@ -106,37 +103,36 @@ public class AreaActor extends AbstractActor {
 			getGridById(msg);
 		}).match(GetAllGrids.class, msg -> {
 			getAllGrid();
-		}).match(GetPlayers.class, msg->{
+		}).match(GetPlayers.class, msg -> {
 			Collection<IUser> values = userMap.values();
 			List<IUser> list = new ArrayList<IUser>();
 			list.addAll(values);
 			getSender().tell(list, getSelf());
-		})
-		  .match(Terminated.class, msg->{
+		}).match(Terminated.class, msg -> {
 			String name = msg.actor().path().name();
 		})
-		 //广播信息
-		  .match(BroadCastAllUser.class, msg -> {
-			broadCastAllUser(msg.jsonString);
-		}).match(AddEventListener.class, msg -> {
-			eventListener.put(msg.topic, msg.paramIEventListener);
-		}).match(RemoveEventListener.class, msg->{
-			eventListener.remove(msg.topic);
-		}).match(HasEventListener.class, msg->{
-			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-		}).match(DispatchEvent.class, msg->{
-			dispatchEvent(msg);
-		}).build();
+				// 广播信息
+				.match(BroadCastAllUser.class, msg -> {
+					broadCastAllUser(msg.jsonString);
+				}).match(AddEventListener.class, msg -> {
+					eventListener.put(msg.topic, msg.paramIEventListener);
+				}).match(RemoveEventListener.class, msg -> {
+					eventListener.remove(msg.topic);
+				}).match(HasEventListener.class, msg -> {
+					getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+				}).match(DispatchEvent.class, msg -> {
+					dispatchEvent(msg);
+				}).build();
 	}
 
 	private void dispatchEvent(DispatchEvent msg) {
 		IEvent paramIEvent = msg.paramIEvent;
-		try{
+		try {
 			IEventListener iEventListener = eventListener.get(paramIEvent.getTopic());
-			if(iEventListener!=null){
+			if (iEventListener != null) {
 				iEventListener.handleEvent(paramIEvent);
-			}		
-		}catch (Exception e) {
+			}
+		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
@@ -164,15 +160,15 @@ public class AreaActor extends AbstractActor {
 			getSender().tell(gridProxy, getSelf());
 
 			gridMap.put(msg.gridId, gridProxy);
-			
-			envelope.subscribe(actorOf,getSelf().path().name());
+
+			ServerEngine.envelope.subscribe(actorOf, getSelf().path().name());
 		}
 	}
 
 	private void removeGrid(RemoveGrid msg) {
 		Grid grid2 = gridMap.get(msg.gridId);
 		if (grid2 != null) {
-			envelope.unsubscribe(grid2.getActorRef());
+			ServerEngine.envelope.unsubscribe(grid2.getActorRef());
 			grid2.destory();
 		}
 	}
@@ -194,8 +190,8 @@ public class AreaActor extends AbstractActor {
 	private void leaveArea(LeaveArea msg) {
 		if (userMap.containsKey(msg.userId)) {
 			userMap.remove(msg.userId);
-			
-			//广播玩家离开
+
+			// 广播玩家离开
 			broadCastAllUser("JSON　SOMEONE LEAVE");
 		}
 	}
@@ -206,9 +202,9 @@ public class AreaActor extends AbstractActor {
 		} else {
 			userMap.put(msg.user.getUserId(), msg.user);
 			getSender().tell(true, getSelf());
-			//通知user进入所在actor
-			((User)msg.user).getActorRef().tell(new UserActor.EnterArea(), getSelf());
-			
+			// 通知user进入所在actor
+			((User) msg.user).getActorRef().tell(new UserActor.EnterArea(), getSelf());
+
 			broadCastAllUser("JSON　SOMEONE ENTER");
 		}
 	}
@@ -229,7 +225,6 @@ public class AreaActor extends AbstractActor {
 
 		private static final long serialVersionUID = 3065865091907475834L;
 	}
-
 
 	public static class EnterArea implements Serializable {
 
@@ -304,20 +299,20 @@ public class AreaActor extends AbstractActor {
 			this.jsonString = jsonString;
 		}
 	}
-	
-	public static class AddEventListener{
+
+	public static class AddEventListener {
 		public final String topic;
 		public final IEventListener paramIEventListener;
-		
+
 		public AddEventListener(String topic, IEventListener paramIEventListener) {
 			super();
 			this.topic = topic;
 			this.paramIEventListener = paramIEventListener;
 		}
-		
+
 	}
-	
-	public static class RemoveEventListener{
+
+	public static class RemoveEventListener {
 		public final String topic;
 
 		public RemoveEventListener(String topic) {
@@ -325,36 +320,36 @@ public class AreaActor extends AbstractActor {
 			this.topic = topic;
 		}
 	}
-	
-	public static class DispatchEvent implements Serializable{
-		
+
+	public static class DispatchEvent implements Serializable {
+
 		private static final long serialVersionUID = -382183759904733665L;
-		
+
 		public final IEvent paramIEvent;
 
 		public DispatchEvent(IEvent paramIEvent) {
 			super();
 			this.paramIEvent = paramIEvent;
 		}
-		
+
 	}
-	
-	public static class HasEventListener implements Serializable{
+
+	public static class HasEventListener implements Serializable {
 
 		private static final long serialVersionUID = 6661678840156738466L;
-		
+
 		public final String topic;
 
 		public HasEventListener(String topic) {
 			super();
 			this.topic = topic;
 		}
-		
+
 	}
-	
-	public static class GetPlayers implements Serializable{
+
+	public static class GetPlayers implements Serializable {
 
 		private static final long serialVersionUID = -1823532488763688181L;
-		
+
 	}
 }

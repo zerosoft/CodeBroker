@@ -22,7 +22,7 @@ public class GridActor extends AbstractActor {
 	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-	
+
 	public GridActor(Grid grid) {
 		super();
 		this.grid = grid;
@@ -30,8 +30,7 @@ public class GridActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-		  .match(EnterGrid.class, msg -> {
+		return receiveBuilder().match(EnterGrid.class, msg -> {
 			if (userMap.containsKey(msg.user.getUserId())) {
 				getSender().tell(false, getSelf());
 			} else {
@@ -43,32 +42,32 @@ public class GridActor extends AbstractActor {
 				userMap.remove(msg.userId);
 			}
 
-		}).match(GetPlayers.class, msg->{
+		}).match(GetPlayers.class, msg -> {
 			Collection<IUser> values = userMap.values();
 			List<IUser> list = new ArrayList<IUser>();
 			list.addAll(values);
 			getSender().tell(list, getSelf());
 		})
-		  //广播相关
-		  .match(AddEventListener.class, msg -> {
-			eventListener.put(msg.topic, msg.paramIEventListener);
-		}).match(RemoveEventListener.class, msg->{
-			eventListener.remove(msg.topic);
-		}).match(HasEventListener.class, msg->{
-			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-		}).match(DispatchEvent.class, msg->{
-			dispatchEvent(msg);
-		}).build();
+				// 广播相关
+				.match(AddEventListener.class, msg -> {
+					eventListener.put(msg.topic, msg.paramIEventListener);
+				}).match(RemoveEventListener.class, msg -> {
+					eventListener.remove(msg.topic);
+				}).match(HasEventListener.class, msg -> {
+					getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+				}).match(DispatchEvent.class, msg -> {
+					dispatchEvent(msg);
+				}).build();
 	}
 
 	private void dispatchEvent(DispatchEvent msg) {
 		IEvent paramIEvent = msg.paramIEvent;
-		try{
+		try {
 			IEventListener iEventListener = eventListener.get(paramIEvent.getTopic());
-			if(iEventListener!=null){
+			if (iEventListener != null) {
 				iEventListener.handleEvent(paramIEvent);
-			}		
-		}catch (Exception e) {
+			}
+		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
@@ -106,20 +105,20 @@ public class GridActor extends AbstractActor {
 		}
 
 	}
-	
-	public static class AddEventListener{
+
+	public static class AddEventListener {
 		public final String topic;
 		public final IEventListener paramIEventListener;
-		
+
 		public AddEventListener(String topic, IEventListener paramIEventListener) {
 			super();
 			this.topic = topic;
 			this.paramIEventListener = paramIEventListener;
 		}
-		
+
 	}
-	
-	public static class RemoveEventListener{
+
+	public static class RemoveEventListener {
 		public final String topic;
 
 		public RemoveEventListener(String topic) {
@@ -127,36 +126,36 @@ public class GridActor extends AbstractActor {
 			this.topic = topic;
 		}
 	}
-	
-	public static class DispatchEvent implements Serializable{
-		
+
+	public static class DispatchEvent implements Serializable {
+
 		private static final long serialVersionUID = -382183759904733665L;
-		
+
 		public final IEvent paramIEvent;
 
 		public DispatchEvent(IEvent paramIEvent) {
 			super();
 			this.paramIEvent = paramIEvent;
 		}
-		
+
 	}
-	
-	public static class HasEventListener implements Serializable{
+
+	public static class HasEventListener implements Serializable {
 
 		private static final long serialVersionUID = 6661678840156738466L;
-		
+
 		public final String topic;
 
 		public HasEventListener(String topic) {
 			super();
 			this.topic = topic;
 		}
-		
+
 	}
-	
-	public static class GetPlayers implements Serializable{
+
+	public static class GetPlayers implements Serializable {
 
 		private static final long serialVersionUID = -6878647894314032793L;
-		
+
 	}
 }

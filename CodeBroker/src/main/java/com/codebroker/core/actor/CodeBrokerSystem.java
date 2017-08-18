@@ -426,7 +426,7 @@ public class CodeBrokerSystem extends AbstractActor {
 		 */
 		ActorRef elkLogger = actorSystem.actorOf(Props.create(ELKLogActor.class), ELKLogActor.IDENTIFY);
 		this.getContext().watch(elkLogger);
-		LogUtil.elkLog=elkLogger;
+		LogUtil.elkLog = elkLogger;
 		logger.info("ELKActor Path=" + elkLogger.path().toString());
 		/**
 		 * 订阅Actor

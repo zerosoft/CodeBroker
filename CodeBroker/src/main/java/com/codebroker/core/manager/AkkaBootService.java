@@ -395,10 +395,10 @@ public class AkkaBootService extends BaseCoreService {
 
 	private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
 
-	public  IAreaManager gridLeader;
+	public IAreaManager gridLeader;
 
-	public  IUserManager userManager;
-	
+	public IUserManager userManager;
+
 	@Override
 	public void init(Object obj) {
 		logger.debug("Code Broker Mediator init");

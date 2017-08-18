@@ -46,7 +46,7 @@ public class UserManagerActor extends AbstractActor {
 			rebindKeyUserMap.put(msg.reBindKey, msg.userId);
 		}).match(FindUserByRebindKey.class, msg -> {
 			processReBind(msg);
-		}).match(GetPlayerUser.class, msg->{
+		}).match(GetPlayerUser.class, msg -> {
 			User user = userMap.get(msg.userId);
 			getSender().tell(user, getSelf());
 		}).build();
@@ -185,8 +185,8 @@ public class UserManagerActor extends AbstractActor {
 		}
 
 	}
-	
-	public static class GetPlayerUser{
+
+	public static class GetPlayerUser {
 
 		public final String userId;
 
@@ -194,6 +194,6 @@ public class UserManagerActor extends AbstractActor {
 			super();
 			this.userId = userId;
 		}
-		
-		}
+
+	}
 }

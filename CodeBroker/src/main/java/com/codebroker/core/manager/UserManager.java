@@ -62,8 +62,7 @@ public class UserManager implements IUserManager {
 
 	@Override
 	public IUser getPlayerUser(String userId) throws Exception {
-		return (IUser) AkkaMediator.getCallBak(managerRef,
-				new UserManagerActor.GetPlayerUser(userId));
+		return (IUser) AkkaMediator.getCallBak(managerRef, new UserManagerActor.GetPlayerUser(userId));
 	}
 
 }

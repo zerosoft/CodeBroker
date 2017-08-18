@@ -7,16 +7,28 @@ import com.codebroker.core.eventbus.CodebrokerEnvelope.MsgEnvelope;
 import akka.actor.ActorRef;
 import akka.event.japi.LookupEventBus;
 
-public class CodebrokerEnvelope extends LookupEventBus<MsgEnvelope, ActorRef, String> {
+/**
+ * 集群订阅事件
+ * 
+ * @author zero
+ *
+ */
+public class CluserEnvelope extends LookupEventBus<MsgEnvelope, ActorRef, String> {
 
-	public static class MsgEnvelope {
+	public static class CluserMsgEnvelope {
 		public final String topic;// 主题
-		public final Object payload;// 内容
+		public final int cmd;// 命令
+		public final ByteBuffer raw;// 元数据
+		public final ActorRef sender;// 发送者
 
-		public MsgEnvelope(String topic, Object payload, ByteBuffer messageRaw) {
+		public CluserMsgEnvelope(String topic, int cmd, ByteBuffer raw, ActorRef sender) {
+			super();
 			this.topic = topic;
-			this.payload = payload;
+			this.cmd = cmd;
+			this.raw = raw;
+			this.sender = sender;
 		}
+
 	}
 
 	@Override
@@ -37,6 +49,5 @@ public class CodebrokerEnvelope extends LookupEventBus<MsgEnvelope, ActorRef, St
 	@Override
 	public void publish(MsgEnvelope event, ActorRef subscriber) {
 		subscriber.tell(event.payload, ActorRef.noSender());
-
 	}
 }

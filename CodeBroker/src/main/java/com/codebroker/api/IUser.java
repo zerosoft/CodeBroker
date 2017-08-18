@@ -8,7 +8,7 @@ import com.codebroker.api.event.IEventDispatcher;
  * @author xl
  *
  */
-public interface IUser extends IEventDispatcher{
+public interface IUser extends IEventDispatcher {
 
 	public String getName() throws Exception;
 
@@ -21,5 +21,13 @@ public interface IUser extends IEventDispatcher{
 	public void disconnect();
 
 	public boolean isConnected();
+
+	public Object getProperty(Object key);
+
+	public void setProperty(Object key, Object value);
+
+	public boolean containsProperty(Object key);
+
+	public void removeProperty(Object key);
 
 }

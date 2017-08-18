@@ -3,10 +3,9 @@ package com.codebroker.core.entities;
 import com.codebroker.api.event.IEvent;
 
 public class CodeEvent implements IEvent {
-	
+
 	private String topic;
 	private String jsonString;
-	
 
 	@Override
 	public String getParameter() {
@@ -15,7 +14,7 @@ public class CodeEvent implements IEvent {
 
 	@Override
 	public void setParameter(String jsonString) {
-	this.jsonString=jsonString;
+		this.jsonString = jsonString;
 	}
 
 	@Override
@@ -25,7 +24,7 @@ public class CodeEvent implements IEvent {
 
 	@Override
 	public void setTopic(String topic) {
-		this.topic=topic;
+		this.topic = topic;
 	}
 
 }

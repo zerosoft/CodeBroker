@@ -341,12 +341,17 @@ Public License instead of this License.
  */
 package com.codebroker.core.cluster;
 
+import com.codebroker.core.actor.CluserActor;
 import com.codebroker.core.actor.WorldActor;
+import com.codebroker.core.eventbus.CluserEnvelope;
 import com.codebroker.util.AkkaMediator;
+import com.message.thrift.actor.CluserInitMessage;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Address;
+import akka.actor.Props;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberEvent;
@@ -354,8 +359,10 @@ import akka.cluster.ClusterEvent.MemberRemoved;
 import akka.cluster.ClusterEvent.MemberUp;
 import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.cluster.Member;
+import akka.cluster.UniqueAddress;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import redis.clients.jedis.params.sortedset.ZAddParams;
 
 /**
  * 集群事件
@@ -365,14 +372,16 @@ import akka.event.LoggingAdapter;
 public class ClusterListener extends AbstractActor {
 
 	public static final String IDENTIFY = ClusterListener.class.getSimpleName();
-
+	public static CluserEnvelope cluserEnvelope = new CluserEnvelope();
 	LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 	Cluster cluster = Cluster.get(getContext().getSystem());
+	ActorRef cluserActor;
 
 	// subscribe to cluster changes
 	@Override
 	public void preStart() {
 		cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(), MemberEvent.class, UnreachableMember.class);
+		cluserActor = getContext().actorOf(Props.create(CluserActor.class), "CluserActor");
 	}
 
 	// re-subscribe when restart
@@ -387,12 +396,24 @@ public class ClusterListener extends AbstractActor {
 			// akka.tcp://CodeBroker@192.168.0.127:2551
 			Member member = mUp.member();
 			Address address = member.address();
-			log.info("Member is Up: {} address {} longId {}", member, address.toString(),
-					member.uniqueAddress().longUid());
+			String host = address.host().get();// 192.168.0.127
+			String hostPort = address.hostPort();// CodeBroker@192.168.0.127:2551
+			Integer port = (Integer) address.port().get();
+			String system = address.system();// CodeBroker
+			String protocol = address.protocol();// akka.tcp
+			UniqueAddress uniqueAddress = member.uniqueAddress();
+			long longUid = uniqueAddress.longUid();// 1560657262
+
+			log.info("Member is Up: {} address {} longId {}", member, address.toString(), longUid);
 			ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
-			systemActorSelection.tell(
-					new WorldActor.NewServerComeIn(member.uniqueAddress().longUid(), member.address().toString()),
+			systemActorSelection.tell(new WorldActor.NewServerComeIn(longUid, member.address().toString()),
 					getSender());
+
+			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,
+					longUid);
+			getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor").tell(cluserInitMessage,
+					cluserActor);
+
 		}).match(UnreachableMember.class, mUnreachable -> {
 			log.info("Member detected as unreachable: {}", mUnreachable.member());
 		}).match(MemberRemoved.class, mRemoved -> {

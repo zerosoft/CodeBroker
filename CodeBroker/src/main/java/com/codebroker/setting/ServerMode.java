@@ -361,7 +361,6 @@ public enum ServerMode {
 	/** 逻辑服务器模式. */
 	SERVER_TYPE_SHARE("GAME", 2, true);
 
-
 	/** The enums. */
 	public static EnumSet<ServerMode> enums = EnumSet.allOf(ServerMode.class);
 

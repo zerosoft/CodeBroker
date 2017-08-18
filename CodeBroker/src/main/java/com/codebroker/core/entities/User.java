@@ -1,6 +1,8 @@
 package com.codebroker.core.entities;
 
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.codebroker.api.IUser;
 import com.codebroker.core.EventDispatcher;
@@ -22,6 +24,8 @@ public class User extends EventDispatcher implements IUser, Serializable {
 	private String userId;
 
 	private boolean npc;
+
+	private final ConcurrentMap<Object, Object> properties = new ConcurrentHashMap<Object, Object>();
 
 	public String getUserId() {
 		return userId;
@@ -65,6 +69,26 @@ public class User extends EventDispatcher implements IUser, Serializable {
 
 	public void rebindIoSession(ActorRef actorRef) {
 		getActorRef().tell(new UserActor.ReBindIoSession(actorRef), ActorRef.noSender());
+	}
+
+	@Override
+	public Object getProperty(Object key) {
+		return properties.get(key);
+	}
+
+	@Override
+	public void setProperty(Object key, Object value) {
+		properties.put(key, value);
+	}
+
+	@Override
+	public boolean containsProperty(Object key) {
+		return properties.containsKey(key);
+	}
+
+	@Override
+	public void removeProperty(Object key) {
+		properties.remove(key);
 	}
 
 }

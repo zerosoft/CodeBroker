@@ -385,7 +385,7 @@ public abstract class AppListenerExtension implements CodeBrokerAppListener {
 			// does not implement IClientRequestHandler: %s, Cmd: %s",
 			// new Object[] {theClass, requestId }));
 		} else {
-			logger.info("add handler id {} class {}",requestId,theClass);
+			logger.info("add handler id {} class {}", requestId, theClass);
 			handlerFactory.addHandler(requestId, theClass);
 		}
 	}

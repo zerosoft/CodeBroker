@@ -44,8 +44,7 @@ public class UserActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-		  .match(Disconnect.class, msg -> {
+		return receiveBuilder().match(Disconnect.class, msg -> {
 
 		}).match(SendMessage.class, msg -> {
 			sendMessage(msg);
@@ -58,44 +57,44 @@ public class UserActor extends AbstractActor {
 		}).match(GetIUser.class, msg -> {
 			getSender().tell(user, getSelf());
 		})
-		/* 进出区域和格子 */
-		.match(EnterArea.class, msg -> {
-			if (inArea != null) {
-				inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
-			}
-			inArea = getSender();
-			if (inGrid != null) {
-				inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-			}
-			inGrid=null;
-		}).match(LeaveArea.class, msg -> {
-			if (inArea != null) {
-				inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
-			}
-			if (inGrid != null) {
-				inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-			}
-			inGrid=null;
-		}).match(EnterGrid.class, msg -> {
-			if (inGrid != null) {
-				inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-			}
-			inGrid = getSender();
-		}).match(LeaveGrid.class, msg -> {
-			if (inGrid != null) {
-				inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-			}
-		})
-		// 事件分发
-		.match(AddEventListener.class, msg -> {
-			eventListener.put(msg.topic, msg.paramIEventListener);
-		}).match(RemoveEventListener.class, msg -> {
-			eventListener.remove(msg.topic);
-		}).match(HasEventListener.class, msg -> {
-			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-		}).match(DispatchEvent.class, msg -> {
-			dispatchEvent(msg);
-		}).build();
+				/* 进出区域和格子 */
+				.match(EnterArea.class, msg -> {
+					if (inArea != null) {
+						inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
+					}
+					inArea = getSender();
+					if (inGrid != null) {
+						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+					}
+					inGrid = null;
+				}).match(LeaveArea.class, msg -> {
+					if (inArea != null) {
+						inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
+					}
+					if (inGrid != null) {
+						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+					}
+					inGrid = null;
+				}).match(EnterGrid.class, msg -> {
+					if (inGrid != null) {
+						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+					}
+					inGrid = getSender();
+				}).match(LeaveGrid.class, msg -> {
+					if (inGrid != null) {
+						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+					}
+				})
+				// 事件分发
+				.match(AddEventListener.class, msg -> {
+					eventListener.put(msg.topic, msg.paramIEventListener);
+				}).match(RemoveEventListener.class, msg -> {
+					eventListener.remove(msg.topic);
+				}).match(HasEventListener.class, msg -> {
+					getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+				}).match(DispatchEvent.class, msg -> {
+					dispatchEvent(msg);
+				}).build();
 	}
 
 	private void handleClientRequest(ReciveIosessionMessage msg) {

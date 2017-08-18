@@ -2,12 +2,12 @@ package com.codebroker.core.manager;
 
 import com.codebroker.api.IReplicatedCache;
 
-public class ReplicatedCacheService implements IReplicatedCache{
+public class ReplicatedCacheService implements IReplicatedCache {
 
 	@Override
 	public void PutInCache(String key, Object value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -19,7 +19,7 @@ public class ReplicatedCacheService implements IReplicatedCache{
 	@Override
 	public void Remove(String key) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

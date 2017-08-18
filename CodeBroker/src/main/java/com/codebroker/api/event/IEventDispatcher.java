@@ -7,7 +7,7 @@ package com.codebroker.api.event;
  *
  */
 public interface IEventDispatcher {
-	
+
 	public void addEventListener(String topic, IEventListener eventListener);
 
 	public boolean hasEventListener(String topic);

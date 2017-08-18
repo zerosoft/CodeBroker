@@ -448,14 +448,13 @@ public class SessionActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create()
-		 .match(UserConnect2Server.class, msg -> {
+		return ReceiveBuilder.create().match(UserConnect2Server.class, msg -> {
 			if (msg.success) {
-				SC_USER_RECONNECTION_SUCCESS success=SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
+				SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
 				sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());
 				processConnectionSessionsBinding();
-			}else{
-				SC_USER_RECONNECTION_FAIL fail=SC_USER_RECONNECTION_FAIL.newBuilder().build();
+			} else {
+				SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
 				sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
 				ioSession.close(true);
 			}
@@ -476,7 +475,6 @@ public class SessionActor extends AbstractActor {
 
 	public static class UserLogout {
 	}
-
 
 	public static class UserConnect2Server {
 		public final boolean success;
