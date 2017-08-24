@@ -1,10 +1,9 @@
 package com.codebroker.net.netty;
 
 import com.codebroker.api.IoSession;
-import com.codebroker.api.internal.IoMessagePackage;
 import com.codebroker.core.actor.SessionActor;
+import com.codebroker.net.BaseByteArrayPacket;
 import com.codebroker.util.AkkaMediator;
-import com.codebroker.util.MessageHead;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -42,9 +41,8 @@ public class NettyIoSession implements IoSession {
 
 	@Override
 	public void write(Object msg) {
-		if (msg instanceof IoMessagePackage) {
-			MessageHead head = new MessageHead((IoMessagePackage) msg);
-			ctx.writeAndFlush(head);
+		if (msg instanceof BaseByteArrayPacket) {
+			ctx.writeAndFlush(msg);
 		}
 	}
 
@@ -70,9 +68,8 @@ public class NettyIoSession implements IoSession {
 	 * @param msg
 	 */
 	private void sendMessageToTransport(Object msg) {
-		if (msg instanceof IoMessagePackage) {
-			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage(
-					(IoMessagePackage) msg);
+		if (msg instanceof BaseByteArrayPacket) {
+			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage((BaseByteArrayPacket) msg);
 			actorRef.tell(message, ActorRef.noSender());
 		}
 	}

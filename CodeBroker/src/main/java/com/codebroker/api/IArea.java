@@ -83,7 +83,11 @@ public interface IArea extends IEventDispatcher {
 	 * @throws Exception
 	 */
 	public Collection<IGrid> getAllGrid() throws Exception;
-
+	/**
+	 * 获得当前区域里的所有玩家
+	 * @return
+	 * @throws Exception
+	 */
 	public List<IUser> getPlayers() throws Exception;
 
 	/**

@@ -43,7 +43,7 @@ public class ELKLogActor extends AbstractActor {
 			RedisService component = ContextResolver.getComponent(RedisService.class);
 			if (component != null) {
 				Jedis jedis = component.getJedis();
-				jedis.lpush(LOG_KEY, JSONUtil.objectToFastJSON(msg));
+//				jedis.lpush(LOG_KEY, JSONUtil.objectToFastJSON(msg));
 			}
 		}).build();
 	}

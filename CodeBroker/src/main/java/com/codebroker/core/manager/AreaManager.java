@@ -25,8 +25,8 @@ public class AreaManager implements IAreaManager {
 	}
 
 	@Override
-	public IArea createArea(int loaclGridId) throws Exception {
-		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.CreateArea(loaclGridId));
+	public IArea createArea(int loaclAreaId) throws Exception {
+		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.CreateArea(loaclAreaId));
 		return callBak;
 	}
 
@@ -45,7 +45,7 @@ public class AreaManager implements IAreaManager {
 
 	@Override
 	public IArea getAreaById(String gridId) throws Exception {
-		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetGridById(gridId));
+		IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, new AreaManagerActor.GetAreaById(gridId));
 		return callBak;
 	}
 

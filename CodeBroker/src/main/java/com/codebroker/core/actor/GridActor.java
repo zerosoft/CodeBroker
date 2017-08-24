@@ -11,26 +11,31 @@ import java.util.TreeMap;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.core.entities.Grid;
-
 import akka.actor.AbstractActor;
-
+import akka.actor.ActorRef;
+/**
+ * 格子Actor对象
+ * @author zero
+ *
+ */
 public class GridActor extends AbstractActor {
-
-	private final Grid grid;
+	/**
+	 * 父类Actor
+	 */
+	private final ActorRef parentAreaRef;
+	
+	public GridActor(ActorRef parentAreaRef) {
+		super();
+		this.parentAreaRef = parentAreaRef;
+	}
 
 	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-
-	public GridActor(Grid grid) {
-		super();
-		this.grid = grid;
-	}
-
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder().match(EnterGrid.class, msg -> {
+		return receiveBuilder()
+		  .match(EnterGrid.class, msg -> {
 			if (userMap.containsKey(msg.user.getUserId())) {
 				getSender().tell(false, getSelf());
 			} else {
@@ -41,7 +46,6 @@ public class GridActor extends AbstractActor {
 			if (userMap.containsKey(msg.userId)) {
 				userMap.remove(msg.userId);
 			}
-
 		}).match(GetPlayers.class, msg -> {
 			Collection<IUser> values = userMap.values();
 			List<IUser> list = new ArrayList<IUser>();

@@ -35,7 +35,11 @@ public interface IGrid extends IEventDispatcher {
 	 * @param userID
 	 */
 	public void leaveGrid(String userID);
-
+	/**
+	 * 获得当前格子里的所有玩家
+	 * @return
+	 * @throws Exception
+	 */
 	public List<IUser> getPlayers() throws Exception;
 
 	/**

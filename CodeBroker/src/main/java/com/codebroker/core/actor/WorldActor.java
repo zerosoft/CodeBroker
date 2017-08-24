@@ -2,6 +2,7 @@ package com.codebroker.core.actor;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +21,7 @@ import com.codebroker.core.manager.AreaManager;
 import com.codebroker.core.manager.UserManager;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.util.AkkaMediator;
+import com.google.common.collect.Lists;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -45,6 +47,10 @@ public class WorldActor extends AbstractActor {
 
 	private ActorRef areaManagerRef;
 	private ActorRef userManagerRef;
+	
+	private List<ActorRef> areaList=Lists.newArrayList();
+	
+	private List<ActorRef> gridList=Lists.newArrayList();
 
 	private static Logger logger = LoggerFactory.getLogger("WorldActor");
 
@@ -88,7 +94,8 @@ public class WorldActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(UserConnect2Server.class, msg -> {
+		return ReceiveBuilder.create()
+		  .match(UserConnect2Server.class, msg -> {
 			userConnect2Server(msg.name, msg.params, getSender());
 		}).match(UserReconnectionTry.class, msg -> {
 			processReconnection(msg.reBindKey, getSender());
@@ -157,7 +164,7 @@ public class WorldActor extends AbstractActor {
 		/**
 		 * 初始化空间管理器 akka://CodeBroker/user/WorldActor/AreaManagerActor
 		 */
-		areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class), AreaManagerActor.IDENTIFY);
+		areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class,getSelf()), AreaManagerActor.IDENTIFY);
 		AreaManager gridLeaderProxy = new AreaManager(areaManagerRef);
 		AkkaBootService component = ContextResolver.getComponent(AkkaBootService.class);
 		component.setGridLeader(gridLeaderProxy);

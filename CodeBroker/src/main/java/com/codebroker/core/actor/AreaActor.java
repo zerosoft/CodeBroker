@@ -43,7 +43,7 @@ import scala.concurrent.duration.Duration;
  */
 public class AreaActor extends AbstractActor {
 
-	private final Area grid;
+	private final ActorRef world;
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
 	// 用户
@@ -53,9 +53,9 @@ public class AreaActor extends AbstractActor {
 	// 格子
 	private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
 
-	public AreaActor(Area grid) {
+	public AreaActor(ActorRef world) {
 		super();
-		this.grid = grid;
+		this.world = world;
 
 	}
 
@@ -82,7 +82,8 @@ public class AreaActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(ActorMessage.class, msg -> {
+		return ReceiveBuilder.create()
+		.match(ActorMessage.class, msg -> {
 			switch (msg.op) {
 			case AREA_CREATE_NPC:
 				createNPC();
@@ -153,7 +154,7 @@ public class AreaActor extends AbstractActor {
 		} else {
 
 			Grid gridProxy = new Grid();
-			ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, gridProxy), msg.gridId);
+			ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, getSelf()), msg.gridId);
 			gridProxy.setActorRef(actorOf);
 
 			getContext().watch(actorOf);

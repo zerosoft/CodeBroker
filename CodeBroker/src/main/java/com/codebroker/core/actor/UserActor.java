@@ -6,9 +6,9 @@ import java.util.Map;
 
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.internal.IoMessagePackage;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.entities.User;
+import com.codebroker.net.BaseByteArrayPacket;
 
 import akka.actor.AbstractActor;
 /**
@@ -137,9 +137,9 @@ public class UserActor extends AbstractActor {
 	public static class ReciveIosessionMessage implements Serializable {
 
 		private static final long serialVersionUID = 3590058049590298359L;
-		public final IoMessagePackage message;
+		public final BaseByteArrayPacket message;
 
-		public ReciveIosessionMessage(IoMessagePackage message) {
+		public ReciveIosessionMessage(BaseByteArrayPacket message) {
 			super();
 			this.message = message;
 		}

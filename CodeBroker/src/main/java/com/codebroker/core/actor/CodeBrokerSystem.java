@@ -405,7 +405,8 @@ public class CodeBrokerSystem extends AbstractActor {
 		/**
 		 * 集群监听
 		 */
-		ActorRef clusterListener = actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
+		ActorRef clusterListener = 
+		actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
 		this.getContext().watch(clusterListener);
 
 		/**
@@ -429,22 +430,23 @@ public class CodeBrokerSystem extends AbstractActor {
 		LogUtil.elkLog = elkLogger;
 		logger.info("ELKActor Path=" + elkLogger.path().toString());
 		/**
-		 * 订阅Actor
+		 * 分布式发布Actor
 		 */
-		ActorRef clusterDistributedPub = actorSystem.actorOf(Props.create(ClusterDistributedPub.class),
-				ClusterDistributedPub.IDENTIFY);
+		ActorRef clusterDistributedPub = 
+				actorSystem.actorOf(Props.create(ClusterDistributedPub.class),ClusterDistributedPub.IDENTIFY);
 		this.getContext().watch(clusterDistributedPub);
 		/**
-		 * 订阅 Actor
+		 * 分布式订阅 Actor
 		 */
-		ActorRef clusterDistributedSub = actorSystem.actorOf(
-				Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC"), ClusterDistributedSub.IDENTIFY);
+		ActorRef clusterDistributedSub = 
+				actorSystem.actorOf(Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC"), ClusterDistributedSub.IDENTIFY);
 		this.getContext().watch(clusterDistributedSub);
 	}
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(InitAkkaSystem.class, msg -> {
+		return ReceiveBuilder.create()
+		.match(InitAkkaSystem.class, msg -> {
 			processInitAvalon();
 		}).build();
 	}

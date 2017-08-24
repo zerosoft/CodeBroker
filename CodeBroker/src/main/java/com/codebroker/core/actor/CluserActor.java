@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actor.ServerCluserActorProxy.State;
@@ -32,6 +35,7 @@ import akka.japi.pf.ReceiveBuilder;
  */
 public class CluserActor extends AbstractActor {
 
+	private Logger logger=LoggerFactory.getLogger(getClass());
 	/** 1560657262 */
 	public long uid;
 	/** 192.168.0.127 */
@@ -50,7 +54,8 @@ public class CluserActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(CluserInitMessage.class, msg -> {
+		return ReceiveBuilder.create()
+		  .match(CluserInitMessage.class, msg -> {
 			cluserRegedit(msg);
 		}).match(CluserHelloMessage.class, msg -> {
 			handshake(msg);
@@ -58,6 +63,8 @@ public class CluserActor extends AbstractActor {
 			sendMessage(msg);
 		}).match(CluserReciveMessage.class, msg -> {
 			reciveCluserMessage(msg);
+		}).matchAny(msg->{
+			logger.info("unknow message "+msg);
 		}).build();
 	}
 
@@ -123,6 +130,7 @@ public class CluserActor extends AbstractActor {
 	private void cluserRegedit(CluserInitMessage msg) {
 		// 如果是本机的话
 		if (getSender().equals(getSelf())) {
+			logger.info("Get self Node uid="+uid);
 			this.uid = msg.longUid;
 			this.host = msg.host;
 			this.hostPort = msg.hostPort;
@@ -134,6 +142,7 @@ public class CluserActor extends AbstractActor {
 			boolean has = false;
 			for (ServerCluserActorProxy serverCluserActorProxy : list) {
 				if (serverCluserActorProxy.uid == msg.longUid) {
+					logger.info("Get allready Node uid="+uid);
 					cluserActorProxy = serverCluserActorProxy;
 					cluserActorProxy.host = msg.host;
 					cluserActorProxy.hostPort = msg.hostPort;
@@ -144,6 +153,7 @@ public class CluserActor extends AbstractActor {
 				}
 			}
 			if (!has) {
+				logger.info("Get not ready Node uid="+uid);
 				cluserActorProxy = new ServerCluserActorProxy(msg.longUid, msg.host, msg.hostPort, msg.port, msg.system,
 						msg.protocol);
 				list.add(cluserActorProxy);

@@ -9,6 +9,7 @@ public class ByteUtils {
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	private static final char DOT = 46;
 
+
 	public static byte[] resizeByteArray(byte source[], int pos, int size) {
 		byte tmpArray[] = new byte[size];
 		System.arraycopy(source, pos, tmpArray, 0, size);

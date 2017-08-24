@@ -23,9 +23,16 @@ public class AreaManagerActor extends AbstractActor {
 
 	public static final String IDENTIFY = AreaManagerActor.class.getSimpleName();
 
-	private Map<String, Area> gridMap = new TreeMap<String, Area>();
+	private Map<String, Area> areaMap = new TreeMap<String, Area>();
 
+	private final ActorRef world;
+	
 	ActorRef mediator;
+	
+	public AreaManagerActor(ActorRef world) {
+		super();
+		this.world = world;
+	}
 
 	@Override
 	public void preStart() throws Exception {
@@ -36,12 +43,13 @@ public class AreaManagerActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder().match(CreateArea.class, msg -> {
-			createGrid(msg.loaclGridId);
+		return receiveBuilder()
+		  .match(CreateArea.class, msg -> {
+			createArea(msg.loaclAreaId);
 		}).match(RemoveArea.class, msg -> {
-			removeGridById(msg.loaclGridId);
-		}).match(GetGridById.class, msg -> {
-			getSender().tell(gridMap.get(msg.gridId), getSelf());
+			removeAreaById(msg.loaclGridId);
+		}).match(GetAreaById.class, msg -> {
+			getSender().tell(areaMap.get(msg.gridId), getSelf());
 		}).match(GetAllArea.class, msg -> {
 			getAllArea();
 		}).match(NewServerComeIn.class, msg -> {
@@ -63,41 +71,41 @@ public class AreaManagerActor extends AbstractActor {
 
 	private void delArea(int serverId, String areaId) {
 		if (ServerEngine.serverId != serverId) {
-			gridMap.remove(areaId);
+			areaMap.remove(areaId);
 		}
 	}
 
 	private void addArea(int serverId, Area area) throws Exception {
 		if (ServerEngine.serverId != serverId) {
-			gridMap.put(area.getId(), area);
+			areaMap.put(area.getId(), area);
 		}
 	}
 
-	private void createGrid(int loaclGridId) {
+	private void createArea(int loaclGridId) {
 		String key = ServerEngine.serverId + "_" + loaclGridId;
-		if (gridMap.containsKey(key)) {
-			getSender().tell(gridMap.get(loaclGridId), getSelf());
+		if (areaMap.containsKey(key)) {
+			getSender().tell(areaMap.get(loaclGridId), getSelf());
 		} else {
 			Area gridProxy = new Area();
-			ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, gridProxy), key);
+			ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, world), key);
 
 			gridProxy.setActorRef(actorOf);
 
 			getContext().watch(actorOf);
 			getSender().tell(gridProxy, getSelf());
 
-			gridMap.put(key, gridProxy);
+			areaMap.put(key, gridProxy);
 			// 发送到通道
 			mediator.tell(new DistributedPubSubMediator.Publish(IDENTIFY,
 					new AreaManagerActor.AddArea(ServerEngine.serverId, gridProxy)), getSelf());
 		}
 	}
 
-	private void removeGridById(int loaclGridId) {
-		String key = ServerEngine.serverId + "_" + loaclGridId;
-		Area gridProxy = gridMap.get(key);
+	private void removeAreaById(int loaclAreaId) {
+		String key = ServerEngine.serverId + "_" + loaclAreaId;
+		Area gridProxy = areaMap.get(key);
 		getContext().stop(gridProxy.getActorRef());
-		gridMap.remove(key);
+		areaMap.remove(key);
 		// 发送到通道
 		mediator.tell(new DistributedPubSubMediator.Publish(IDENTIFY,
 				new AreaManagerActor.DelArea(ServerEngine.serverId, key)), getSelf());
@@ -105,19 +113,19 @@ public class AreaManagerActor extends AbstractActor {
 
 	private void giveYourMyAreas(Collection<Area> areas) throws Exception {
 		for (Area area : areas) {
-			gridMap.put(area.getId(), area);
+			areaMap.put(area.getId(), area);
 		}
 	}
 
 	private void giveMeYourArea() {
-		Collection<Area> values = gridMap.values();
+		Collection<Area> values = areaMap.values();
 		List<Area> list = new ArrayList<Area>();
 		list.addAll(values);
 		getSender().tell(new GiveYourMyAreas(list), getSelf());
 	}
 
 	private void getAllArea() {
-		Collection<Area> values = gridMap.values();
+		Collection<Area> values = areaMap.values();
 		List<Area> list = new ArrayList<Area>();
 		list.addAll(values);
 		getSender().tell(list, getSelf());
@@ -134,11 +142,11 @@ public class AreaManagerActor extends AbstractActor {
 
 		private static final long serialVersionUID = -1232160366248486176L;
 
-		public final int loaclGridId;
+		public final int loaclAreaId;
 
-		public CreateArea(int loaclGridId) {
+		public CreateArea(int loaclAreaId) {
 			super();
-			this.loaclGridId = loaclGridId;
+			this.loaclAreaId = loaclAreaId;
 		}
 	}
 
@@ -216,7 +224,7 @@ public class AreaManagerActor extends AbstractActor {
 
 	}
 
-	public static class GetGridById implements Serializable {
+	public static class GetAreaById implements Serializable {
 
 		/**
 		 * 
@@ -224,7 +232,7 @@ public class AreaManagerActor extends AbstractActor {
 		private static final long serialVersionUID = -3623698442502947872L;
 		public final String gridId;
 
-		public GetGridById(String gridId) {
+		public GetAreaById(String gridId) {
 			super();
 			this.gridId = gridId;
 		}
