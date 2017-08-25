@@ -344,8 +344,10 @@ package com.codebroker.core.cluster;
 import com.codebroker.core.actor.CluserActor;
 import com.codebroker.core.actor.WorldActor;
 import com.codebroker.core.eventbus.CluserEnvelope;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
-import com.message.thrift.actor.CluserInitMessage;
+import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.cluser.CluserInitMessage;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -362,7 +364,6 @@ import akka.cluster.Member;
 import akka.cluster.UniqueAddress;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import redis.clients.jedis.params.sortedset.ZAddParams;
 
 /**
  * 集群事件
@@ -409,9 +410,9 @@ public class ClusterListener extends AbstractActor {
 			systemActorSelection.tell(new WorldActor.NewServerComeIn(longUid, member.address().toString()),
 					getSender());
 
-			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,
-					longUid);
-			getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor").tell(cluserInitMessage,
+			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,	longUid);
+			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessage(Operation.CLUSER_INIT,cluserInitMessage);
+			getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor").tell(tbaseMessage,
 					cluserActor);
 
 		}).match(UnreachableMember.class, mUnreachable -> {

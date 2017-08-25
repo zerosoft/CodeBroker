@@ -4,11 +4,9 @@ import org.apache.thrift.TBase;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
 import org.apache.thrift.TSerializer;
-import org.apache.thrift.protocol.TBinaryProtocol;
 
 import com.message.thrift.actor.ActorMessage;
 
-import akka.serialization.JSerializer;
 import akka.serialization.SerializerWithStringManifest;
 
 public class ThriftSerializer  extends SerializerWithStringManifest {

@@ -1,5 +1,9 @@
 package com.codebroker.core.actor;
 
+import java.nio.ByteBuffer;
+
+import org.apache.thrift.TDeserializer;
+import org.apache.thrift.TSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,13 +12,16 @@ import com.codebroker.api.IoSession;
 import com.codebroker.core.actor.UserActor.Disconnect;
 import com.codebroker.core.actor.UserActor.ReciveIosessionMessage;
 import com.codebroker.core.actor.WorldActor.UserReconnectionTry;
-import com.codebroker.net.BaseByteArrayPacket;
+import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.protocol.ByteBufferPacket;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.setting.SystemMessageType;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.message.protocol.Message;
 import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER;
 import com.message.protocol.PBSystem.SC_USER_RECONNECTION_FAIL;
 import com.message.protocol.PBSystem.SC_USER_RECONNECTION_SUCCESS;
+import com.message.thrift.actor.ActorMessage;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -106,7 +113,32 @@ public class SessionActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(UserConnect2Server.class, msg -> {
+		return ReceiveBuilder.create().match(byte[].class, msg -> {
+			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+			switch (actorMessage.op) {
+			case SESSION_USER_LOGOUT:
+
+				break;
+			case SESSION_USER_CONNECT_TO_SERVER:
+
+				break;
+			case SESSION_ENTER_WORLD:
+				
+				break;
+			case SESSION_REBIND_USER:
+				
+				break;
+			case SESSION_RECIVE_IOMESSAGE:
+				
+				break;
+			case SESSION_USERSEND_MESSAGE:
+				
+				break;
+			default:
+				break;
+			}
+
+		}).match(UserConnect2Server.class, msg -> {
 			if (msg.success) {
 				SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
 				sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());

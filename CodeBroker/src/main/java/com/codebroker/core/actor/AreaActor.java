@@ -13,12 +13,10 @@ import com.codebroker.api.IUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.core.ServerEngine;
-import com.codebroker.core.entities.Area;
 import com.codebroker.core.entities.CodeBrokerEvent;
 import com.codebroker.core.entities.CodeEvent;
 import com.codebroker.core.entities.Grid;
 import com.codebroker.core.entities.User;
-import com.codebroker.core.eventbus.CodebrokerEnvelope;
 import com.codebroker.exception.NoActorRefException;
 import com.message.thrift.actor.ActorMessage;
 
@@ -83,6 +81,9 @@ public class AreaActor extends AbstractActor {
 	@Override
 	public Receive createReceive() {
 		return ReceiveBuilder.create()
+				.match(byte[].class, msg->{
+					System.out.println(new String(msg));
+				})
 		.match(ActorMessage.class, msg -> {
 			switch (msg.op) {
 			case AREA_CREATE_NPC:

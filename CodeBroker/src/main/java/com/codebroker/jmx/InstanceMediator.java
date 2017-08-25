@@ -6,9 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.apache.thrift.TDeserializer;
+
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.proxy.TransportSupervisorProxy;
 import com.codebroker.net.IoMonitorImpl;
+import com.message.thrift.actor.ActorMessage;
 
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
@@ -22,6 +25,10 @@ public class InstanceMediator extends MBean<ServerEngine> {
 		createProperties(avalonInstance);
 		createMBeans(managementService);
 		registerMBeans();
+		ActorMessage s=new ActorMessage();
+		
+		TDeserializer deserializer=new TDeserializer();
+		
 	}
 
 	private void createMBeans(ManagementService managementService) {

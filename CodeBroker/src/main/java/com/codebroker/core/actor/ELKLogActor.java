@@ -2,7 +2,6 @@ package com.codebroker.core.actor;
 
 import com.codebroker.core.ContextResolver;
 import com.codebroker.redis.RedisService;
-import com.codebroker.util.JSONUtil;
 
 import akka.actor.AbstractActor;
 import akka.japi.pf.ReceiveBuilder;

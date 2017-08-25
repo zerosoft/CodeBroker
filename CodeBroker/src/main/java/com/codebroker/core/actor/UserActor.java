@@ -8,7 +8,7 @@ import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.entities.User;
-import com.codebroker.net.BaseByteArrayPacket;
+import com.codebroker.protocol.BaseByteArrayPacket;
 
 import akka.actor.AbstractActor;
 /**

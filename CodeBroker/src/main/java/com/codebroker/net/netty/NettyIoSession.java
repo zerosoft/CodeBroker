@@ -2,7 +2,7 @@ package com.codebroker.net.netty;
 
 import com.codebroker.api.IoSession;
 import com.codebroker.core.actor.SessionActor;
-import com.codebroker.net.BaseByteArrayPacket;
+import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.util.AkkaMediator;
 
 import akka.actor.ActorRef;
