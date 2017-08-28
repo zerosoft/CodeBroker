@@ -9,7 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.codebroker.api.IUser;
 import com.codebroker.core.entities.User;
-import com.codebroker.core.manager.UserManager;
+import com.codebroker.protocol.ThriftSerializerFactory;
+import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.session.ReBindUser;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -17,7 +19,6 @@ import akka.actor.Props;
 
 public class UserManagerActor extends AbstractActor {
 
-	private final UserManager manager;
 
 	public static final String IDENTIFY = UserManagerActor.class.getSimpleName().toString();
 
@@ -27,10 +28,6 @@ public class UserManagerActor extends AbstractActor {
 	private Map<String, User> userMap = new TreeMap<String, User>();
 	private Map<String, String> rebindKeyUserMap = new TreeMap<String, String>();
 
-	public UserManagerActor(UserManager manager) {
-		super();
-		this.manager = manager;
-	}
 
 	@Override
 	public Receive createReceive() {
@@ -63,12 +60,21 @@ public class UserManagerActor extends AbstractActor {
 			if (userMap.containsKey(key)) {
 				User user = userMap.get(key);
 				user.rebindIoSession(getSender());
-				getSender().tell(new SessionActor.ReBindUser(true), user.getActorRef());
+				
+				ReBindUser reBindUser=new ReBindUser(true);
+				byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_REBIND_USER, reBindUser);
+//				new SessionActor.ReBindUser(true)
+				getSender().tell(actorMessageWithSubClass, user.getActorRef());
 			} else {
-				getSender().tell(new SessionActor.ReBindUser(false), ActorRef.noSender());
+				ReBindUser reBindUser=new ReBindUser(false);
+				byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_REBIND_USER, reBindUser);
+				getSender().tell(actorMessageWithSubClass, ActorRef.noSender());
 			}
 		} else {
-			getSender().tell(new SessionActor.ReBindUser(false), ActorRef.noSender());
+			ReBindUser reBindUser=new ReBindUser(false);
+			byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_REBIND_USER, reBindUser);
+			
+			getSender().tell(actorMessageWithSubClass, ActorRef.noSender());
 		}
 	}
 

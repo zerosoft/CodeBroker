@@ -20,8 +20,10 @@ import com.codebroker.core.manager.AkkaBootService;
 import com.codebroker.core.manager.AreaManager;
 import com.codebroker.core.manager.UserManager;
 import com.codebroker.exception.NoAuthException;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
 import com.google.common.collect.Lists;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -83,12 +85,17 @@ public class WorldActor extends AbstractActor {
 				user = AkkaMediator.getCallBak(userManagerRef,
 						new UserManagerActor.CreateUserWithSession(actorRef, handleLogin));
 			} catch (Exception e) {
-				getSender().tell(new SessionActor.UserConnect2Server(false), getSelf());
+				com.message.thrift.actor.session.UserConnect2Server connect2Server=new com.message.thrift.actor.session.UserConnect2Server(false);
+				getSender().tell(ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_CONNECT_TO_SERVER, connect2Server), getSelf());
 				e.printStackTrace();
 			}
-			getSender().tell(new SessionActor.UserConnect2Server(true), user.getActorRef());
+			com.message.thrift.actor.session.UserConnect2Server connect2Server=new com.message.thrift.actor.session.UserConnect2Server(true);
+			getSender().tell(ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_CONNECT_TO_SERVER, connect2Server), getSelf());
+//			getSender().tell(new SessionActor.UserConnect2Server(true), user.getActorRef());
 		} catch (NoAuthException e1) {
-			getSender().tell(new SessionActor.UserConnect2Server(false), getSelf());
+			com.message.thrift.actor.session.UserConnect2Server connect2Server=new com.message.thrift.actor.session.UserConnect2Server(false);
+			getSender().tell(ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_CONNECT_TO_SERVER, connect2Server), getSelf());
+//			getSender().tell(new SessionActor.UserConnect2Server(false), getSelf());
 		}
 	}
 

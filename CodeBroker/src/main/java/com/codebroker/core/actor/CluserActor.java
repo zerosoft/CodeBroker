@@ -36,7 +36,7 @@ import akka.japi.pf.ReceiveBuilder;
  */
 public class CluserActor extends AbstractActor {
 
-	private Logger logger=LoggerFactory.getLogger(getClass());
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	/** 1560657262 */
 	public long uid;
 	/** 192.168.0.127 */
@@ -55,52 +55,42 @@ public class CluserActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create()
-		.match(byte[].class, msg->{
+		return ReceiveBuilder.create().match(byte[].class, msg -> {
 			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			case CLUSER_INIT:
-				CluserInitMessage initMessage=new CluserInitMessage();
+				CluserInitMessage initMessage = new CluserInitMessage();
 				ThriftSerializerFactory.deserialize(initMessage, actorMessage.messageRaw);
 				cluserRegedit(initMessage);
 				break;
 			case CLUSER_HELLO:
-				CluserHelloMessage cluserHelloMessage=new CluserHelloMessage();
+				CluserHelloMessage cluserHelloMessage = new CluserHelloMessage();
 				ThriftSerializerFactory.deserialize(cluserHelloMessage, actorMessage.getMessageRaw());
 				handshake(cluserHelloMessage);
 				break;
 			case CLUSER_SEND:
-				CluserSendMessage cluserSendMessage=new CluserSendMessage();
+				CluserSendMessage cluserSendMessage = new CluserSendMessage();
 				ThriftSerializerFactory.deserialize(cluserSendMessage, actorMessage.getMessageRaw());
 				sendMessage(cluserSendMessage);
 				break;
 			case CLUSER_RECIVE:
-				CluserReciveMessage cluserReciveMessage=new CluserReciveMessage();
+				CluserReciveMessage cluserReciveMessage = new CluserReciveMessage();
 				ThriftSerializerFactory.deserialize(cluserReciveMessage, actorMessage.getMessageRaw());
 				reciveCluserMessage(cluserReciveMessage);
 				break;
 
 			default:
+				logger.info("unknow message " + msg);
 				break;
 			}
-		})		
-//		  .match(CluserInitMessage.class, msg -> {
-//			cluserRegedit(msg);
-//		}).match(CluserHelloMessage.class, msg -> {
-//			handshake(msg);
-//		}).match(CluserSendMessage.class, msg -> {
-//			sendMessage(msg);
-//		}).match(CluserReciveMessage.class, msg -> {
-//			reciveCluserMessage(msg);
-//		})
-		  .matchAny(msg->{
-			logger.info("unknow message "+msg);
+		}).matchAny(msg -> {
+			logger.info("unknow message " + msg);
 		}).build();
 	}
 
 	private void reciveCluserMessage(CluserReciveMessage msg) {
 		ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(msg.actorPath);
-		byte[] tbaseMessage = ThriftSerializerFactory.getActorMessage(Operation.CLUSER_RECIVE,msg);
+		byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_RECIVE, msg);
 		systemActorSelection.tell(tbaseMessage, getSender());
 	}
 
@@ -109,7 +99,7 @@ public class CluserActor extends AbstractActor {
 			if (serverCluserActorProxy.getServerId() == msg.serverId) {
 				// 目标Actor Path,命令,命令元数据
 				CluserReciveMessage message = new CluserReciveMessage(msg.actorPath, msg.cmd, msg.messageRaw);
-				byte[] tbaseMessage = ThriftSerializerFactory.getActorMessage(Operation.CLUSER_RECIVE,message);
+				byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_RECIVE, message);
 				serverCluserActorProxy.sendMessage(tbaseMessage, getSelf());
 			}
 		}
@@ -162,7 +152,7 @@ public class CluserActor extends AbstractActor {
 	private void cluserRegedit(CluserInitMessage msg) {
 		// 如果是本机的话
 		if (getSender().equals(getSelf())) {
-			logger.info("Get self Node uid="+uid);
+			logger.info("Get self Node uid=" + uid);
 			this.uid = msg.longUid;
 			this.host = msg.host;
 			this.hostPort = msg.hostPort;
@@ -174,7 +164,7 @@ public class CluserActor extends AbstractActor {
 			boolean has = false;
 			for (ServerCluserActorProxy serverCluserActorProxy : list) {
 				if (serverCluserActorProxy.uid == msg.longUid) {
-					logger.info("Get allready Node uid="+uid);
+					logger.info("Get allready Node uid=" + uid);
 					cluserActorProxy = serverCluserActorProxy;
 					cluserActorProxy.host = msg.host;
 					cluserActorProxy.hostPort = msg.hostPort;
@@ -185,7 +175,7 @@ public class CluserActor extends AbstractActor {
 				}
 			}
 			if (!has) {
-				logger.info("Get not ready Node uid="+uid);
+				logger.info("Get not ready Node uid=" + uid);
 				cluserActorProxy = new ServerCluserActorProxy(msg.longUid, msg.host, msg.hostPort, msg.port, msg.system,
 						msg.protocol);
 				list.add(cluserActorProxy);
@@ -193,8 +183,8 @@ public class CluserActor extends AbstractActor {
 			// 不是本机的处理
 
 			CluserHelloMessage cluserHelloMessage = new CluserHelloMessage(ServerEngine.serverId, uid, Handshake.SEND);
-			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessage(Operation.CLUSER_HELLO,cluserHelloMessage);
-			
+			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_HELLO, cluserHelloMessage);
+
 			Address addr = new Address(msg.protocol, msg.system, msg.host, msg.port);
 			ActorSystem actorSystem = ContextResolver.getActorSystem();
 			// 跟对方服务器握手

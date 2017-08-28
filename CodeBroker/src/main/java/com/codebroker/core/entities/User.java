@@ -4,10 +4,17 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.thrift.TException;
+
 import com.codebroker.api.IUser;
+import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.UserActor;
+import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
+import com.message.thrift.actor.ActorMessage;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.ActorRef;
 
@@ -50,26 +57,44 @@ public class User extends EventDispatcher implements IUser, Serializable {
 
 	@Override
 	public void sendMessage(int requestId, Object message) {
-		getActorRef().tell(new UserActor.SendMessage(requestId, message), ActorRef.noSender());
+
+		ActorMessage actorMessage = new ActorMessage();
+		ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
+		actorMessage.messageRaw = byteArrayPacket.toByteBuffer();
+
+		byte[] bytes = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_SEND_PACKET_TO_IOSESSION,actorMessage);
+		getActorRef().tell(bytes, ActorRef.noSender());
 	}
 
 	@Override
 	public void disconnect() {
-		getActorRef().tell(new UserActor.Disconnect(), ActorRef.noSender());
+		try {
+			// new UserActor.Disconnect()
+			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_DISCONNECT), ActorRef.noSender());
+		} catch (TException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public boolean isConnected() {
 		try {
-			return AkkaMediator.getCallBak(getActorRef(), new UserActor.IsConnected());
+			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_IS_CONNECTED);
+			return AkkaMediator.getCallBak(getActorRef(),tbaseMessage);
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
 	public void rebindIoSession(ActorRef actorRef) {
-		getActorRef().tell(new UserActor.ReBindIoSession(actorRef), ActorRef.noSender());
+		try {
+			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_REUSER_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
+		} catch (TException e) {
+			e.printStackTrace();
+		}
+
 	}
+
 
 	@Override
 	public Object getProperty(Object key) {

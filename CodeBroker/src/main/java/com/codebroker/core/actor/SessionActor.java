@@ -1,19 +1,12 @@
 package com.codebroker.core.actor;
 
-import java.nio.ByteBuffer;
-
-import org.apache.thrift.TDeserializer;
-import org.apache.thrift.TSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codebroker.api.IUser;
 import com.codebroker.api.IoSession;
-import com.codebroker.core.actor.UserActor.Disconnect;
-import com.codebroker.core.actor.UserActor.ReciveIosessionMessage;
+import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.actor.WorldActor.UserReconnectionTry;
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.protocol.ByteBufferPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.setting.SystemMessageType;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -22,6 +15,9 @@ import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER;
 import com.message.protocol.PBSystem.SC_USER_RECONNECTION_FAIL;
 import com.message.protocol.PBSystem.SC_USER_RECONNECTION_SUCCESS;
 import com.message.thrift.actor.ActorMessage;
+import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.session.UserConnect2Server;
+import com.message.thrift.actor.user.ReciveIosessionMessage;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -71,11 +67,12 @@ public class SessionActor extends AbstractActor {
 	 * 
 	 * @param message
 	 */
-	private void processIOSessionReciveMessage(BaseByteArrayPacket message) {
+	private void processIOSessionReciveMessage(ByteArrayPacket message) {
 		// 检查授权
 		if (authorization) {
-			ReciveIosessionMessage connect2Server = new ReciveIosessionMessage(message);
-			userActor.tell(connect2Server, getSelf());
+			ReciveIosessionMessage connect2Server = new ReciveIosessionMessage(message.getOpCode(),message.toByteBuffer());
+			byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_RECIVE_IOSESSION_MESSAGE, connect2Server);
+			userActor.tell(actorMessageWithSubClass, getSelf());
 		} else {
 			// 发送给world
 			// ActorSelection[Anchor(akka://AVALON/user/NettyIoSession1#883410430),
@@ -106,8 +103,8 @@ public class SessionActor extends AbstractActor {
 		super.postStop();
 		// 如果有授权，就要通知授权网络断开
 		if (authorization) {
-			Disconnect disconnect = new Disconnect();
-			userActor.tell(disconnect, getSelf());
+			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_DISCONNECT);
+			userActor.tell(tbaseMessage, getSelf());
 		}
 	}
 
@@ -120,99 +117,50 @@ public class SessionActor extends AbstractActor {
 
 				break;
 			case SESSION_USER_CONNECT_TO_SERVER:
-
+				UserConnect2Server connect2Server=new UserConnect2Server();
+				ThriftSerializerFactory.deserialize(connect2Server, actorMessage.messageRaw);
+					if (connect2Server.success) {
+						SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
+						sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());
+						processConnectionSessionsBinding();
+					} else {
+						SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
+						sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
+						ioSession.close(true);
+					}
 				break;
 			case SESSION_ENTER_WORLD:
 				
 				break;
 			case SESSION_REBIND_USER:
-				
+				com.message.thrift.actor.session.ReBindUser reBindUser=new com.message.thrift.actor.session.ReBindUser();
+				ThriftSerializerFactory.deserialize(reBindUser, actorMessage.messageRaw);
+				if (reBindUser.success) {
+					processConnectionSessionsBinding();
+				} else {
+					ioSession.close(true);
+				}
 				break;
-			case SESSION_RECIVE_IOMESSAGE:
-				
+			case SESSION_RECIVE_PACKET:
+				ByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(); 
+				baseByteArrayPacket.fromBuffer(actorMessage.messageRaw);
+				processIOSessionReciveMessage(baseByteArrayPacket);
 				break;
-			case SESSION_USERSEND_MESSAGE:
-				
+			case SESSION_USER_SEND_PACKET:
+				ByteArrayPacket messagePackage = new BaseByteArrayPacket();
+				messagePackage.fromBuffer(actorMessage.messageRaw);
+				ioSession.write(messagePackage);
+				break;
+			case USER_GET_IUSER:
+				userActor.tell(msg, getSender());
 				break;
 			default:
 				break;
 			}
 
-		}).match(UserConnect2Server.class, msg -> {
-			if (msg.success) {
-				SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
-				sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());
-				processConnectionSessionsBinding();
-			} else {
-				SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
-				sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
-				ioSession.close(true);
-			}
-		}).match(UserSendMessage2Net.class, msg -> {
-			sessionSendMessage(msg.requestId, msg.value);
-		}).match(IosessionReciveMessage.class, msg -> {
-			processIOSessionReciveMessage(msg.message);
-		}).match(ReBindUser.class, msg -> {
-			if (msg.findUser) {
-				processConnectionSessionsBinding();
-			} else {
-				ioSession.close(true);
-			}
-		}).match(UserActor.GetIUser.class, msg -> {
-			userActor.tell(msg, getSender());
 		}).matchAny(o -> logger.info("received unknown message")).build();
 	}
 
-	public static class UserLogout {
-	}
 
-	public static class UserConnect2Server {
-		public final boolean success;
 
-		public UserConnect2Server(boolean success) {
-			super();
-			this.success = success;
-		}
-
-	}
-
-	public static class EnterWorld {
-		public final IUser user;
-
-		public EnterWorld(IUser user) {
-			super();
-			this.user = user;
-		}
-	}
-
-	public static class UserSendMessage2Net {
-		public final int requestId;
-		public final byte[] value;
-
-		public UserSendMessage2Net(int requestId, byte[] value) {
-			super();
-			this.requestId = requestId;
-			this.value = value;
-		}
-
-	}
-
-	public static class IosessionReciveMessage {
-		public final BaseByteArrayPacket message;
-
-		public IosessionReciveMessage(BaseByteArrayPacket message) {
-			super();
-			this.message = message;
-		}
-	}
-
-	public static class ReBindUser {
-		public final boolean findUser;
-
-		public ReBindUser(boolean findUser) {
-			super();
-			this.findUser = findUser;
-		}
-
-	}
 }

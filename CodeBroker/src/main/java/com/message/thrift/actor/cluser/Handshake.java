@@ -6,11 +6,6 @@
  */
 package com.message.thrift.actor.cluser;
 
-
-import java.util.Map;
-import java.util.HashMap;
-import org.apache.thrift.TEnum;
-
 public enum Handshake implements org.apache.thrift.TEnum {
   SEND(0),
   BACK(1);

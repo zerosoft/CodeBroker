@@ -6,11 +6,6 @@
  */
 package com.message.thrift.actor;
 
-
-import java.util.Map;
-import java.util.HashMap;
-import org.apache.thrift.TEnum;
-
 /**
  * 操作命令
  */
@@ -56,7 +51,7 @@ public enum Operation implements org.apache.thrift.TEnum {
   USER_RECIVE_IOSESSION_MESSAGE(11),
   USER_REUSER_BINDUSER_IOSESSION_ACTOR(12),
   USER_GET_IUSER(13),
-  USER_SENDMESSAGE_TO_IOSESSION(14),
+  USER_SEND_PACKET_TO_IOSESSION(14),
   /**
    * 用户进入空间
    */
@@ -70,8 +65,8 @@ public enum Operation implements org.apache.thrift.TEnum {
   SESSION_USER_LOGOUT(19),
   SESSION_USER_CONNECT_TO_SERVER(20),
   SESSION_ENTER_WORLD(21),
-  SESSION_USERSEND_MESSAGE(22),
-  SESSION_RECIVE_IOMESSAGE(23),
+  SESSION_USER_SEND_PACKET(22),
+  SESSION_RECIVE_PACKET(23),
   SESSION_REBIND_USER(24),
   CLUSER_INIT(25),
   CLUSER_HELLO(26),
@@ -126,7 +121,7 @@ public enum Operation implements org.apache.thrift.TEnum {
       case 13:
         return USER_GET_IUSER;
       case 14:
-        return USER_SENDMESSAGE_TO_IOSESSION;
+        return USER_SEND_PACKET_TO_IOSESSION;
       case 15:
         return USER_ENTER_AREA;
       case 16:
@@ -142,9 +137,9 @@ public enum Operation implements org.apache.thrift.TEnum {
       case 21:
         return SESSION_ENTER_WORLD;
       case 22:
-        return SESSION_USERSEND_MESSAGE;
+        return SESSION_USER_SEND_PACKET;
       case 23:
-        return SESSION_RECIVE_IOMESSAGE;
+        return SESSION_RECIVE_PACKET;
       case 24:
         return SESSION_REBIND_USER;
       case 25:

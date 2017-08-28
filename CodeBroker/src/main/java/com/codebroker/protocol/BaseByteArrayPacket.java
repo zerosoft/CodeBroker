@@ -1,5 +1,7 @@
 package com.codebroker.protocol;
 
+import java.nio.ByteBuffer;
+
 import com.codebroker.api.internal.ByteArrayPacket;
 
 public class BaseByteArrayPacket implements ByteArrayPacket {
@@ -51,6 +53,22 @@ public class BaseByteArrayPacket implements ByteArrayPacket {
 		this.opcode=byteArrayToInt(opcodeByte);
 		System.arraycopy(binary, 4,rawByte , 0, rawByte.length);
 		this.RawData=rawByte;
+	}
+	
+	@Override
+	public ByteBuffer toByteBuffer() {
+		byte[] binary = toBinary();
+		ByteBuffer buffer=ByteBuffer.allocate(binary.length);
+		buffer.put(binary);
+		buffer.flip();
+		return buffer;
+	}
+
+	@Override
+	public void fromBuffer(ByteBuffer buffer) {
+		byte[] binary = new byte[buffer.remaining()];
+		buffer.get(binary);
+		fromBinary(binary);
 	}
 	
 	public  int byteArrayToInt(byte[] b) {

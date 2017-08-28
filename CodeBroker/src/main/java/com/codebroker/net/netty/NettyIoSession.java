@@ -1,9 +1,16 @@
 package com.codebroker.net.netty;
 
+import java.nio.ByteBuffer;
+
+import org.apache.thrift.TException;
+
 import com.codebroker.api.IoSession;
 import com.codebroker.core.actor.SessionActor;
 import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
+import com.message.thrift.actor.ActorMessage;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -69,8 +76,26 @@ public class NettyIoSession implements IoSession {
 	 */
 	private void sendMessageToTransport(Object msg) {
 		if (msg instanceof BaseByteArrayPacket) {
-			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage((BaseByteArrayPacket) msg);
-			actorRef.tell(message, ActorRef.noSender());
+			ActorMessage message=new ActorMessage();
+			
+			byte[] binary = ((BaseByteArrayPacket) msg).toBinary();
+			ByteBuffer buffer=ByteBuffer.allocate(binary.length);
+			buffer.put(binary);
+			buffer.flip();
+			
+			message.messageRaw=buffer;
+			message.op=Operation.SESSION_RECIVE_PACKET;
+			byte[] actorMessage;
+			try {
+				actorMessage = ThriftSerializerFactory.getActorMessage(message);
+				actorRef.tell(actorMessage, ActorRef.noSender());
+			} catch (TException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+//			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage((BaseByteArrayPacket) msg);
+			
 		}
 	}
 

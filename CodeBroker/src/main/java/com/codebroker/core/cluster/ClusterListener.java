@@ -411,7 +411,7 @@ public class ClusterListener extends AbstractActor {
 					getSender());
 
 			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,	longUid);
-			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessage(Operation.CLUSER_INIT,cluserInitMessage);
+			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_INIT,cluserInitMessage);
 			getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor").tell(tbaseMessage,
 					cluserActor);
 

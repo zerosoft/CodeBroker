@@ -1,5 +1,6 @@
 package com.codebroker.api.internal;
 
+import java.nio.ByteBuffer;
 
 /**
  * 网络封包 获取操作码及数据内容.
@@ -33,4 +34,17 @@ public interface ByteArrayPacket{
 	 * @param binary
 	 */
 	public void fromBinary(byte[] binary);
+	
+	/**
+	 * 获得序列化后的
+	 * @return
+	 */
+	public ByteBuffer toByteBuffer();
+	
+	/**
+	 * 序列化返回对象
+	 * @param binary
+	 */
+	public void fromBuffer(ByteBuffer buffer);
+
 }

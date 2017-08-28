@@ -18,7 +18,9 @@ import com.codebroker.core.entities.CodeEvent;
 import com.codebroker.core.entities.Grid;
 import com.codebroker.core.entities.User;
 import com.codebroker.exception.NoActorRefException;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -205,7 +207,10 @@ public class AreaActor extends AbstractActor {
 			userMap.put(msg.user.getUserId(), msg.user);
 			getSender().tell(true, getSelf());
 			// 通知user进入所在actor
-			((User) msg.user).getActorRef().tell(new UserActor.EnterArea(), getSelf());
+			
+			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
+//			new UserActor.EnterArea()
+			((User) msg.user).getActorRef().tell(tbaseMessage, getSelf());
 
 			broadCastAllUser("JSON　SOMEONE ENTER");
 		}
