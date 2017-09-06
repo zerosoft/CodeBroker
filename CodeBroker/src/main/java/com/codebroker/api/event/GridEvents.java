@@ -1,0 +1,9 @@
+package com.codebroker.api.event;
+
+public enum GridEvents {
+	GRID_NAME_CHANGE,
+	GRID_CAPACITY_CHANGE, 
+	GRID_PASSWORD_STATE_CHANGE, 
+	GRID_USER_COUNT_CHANGE, 
+	GRID_VARIABLES_UPDATE;
+}

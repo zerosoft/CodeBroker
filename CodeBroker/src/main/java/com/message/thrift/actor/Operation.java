@@ -60,7 +60,13 @@ public enum Operation implements org.apache.thrift.TEnum {
    * 用户离开空间
    */
   USER_LEAVE_AREA(16),
+  /**
+   * 用户进入格子
+   */
   USER_ENTER_GRID(17),
+  /**
+   * 用户离开格子
+   */
   USER_LEAVE_GRID(18),
   SESSION_USER_LOGOUT(19),
   SESSION_USER_CONNECT_TO_SERVER(20),
@@ -71,7 +77,20 @@ public enum Operation implements org.apache.thrift.TEnum {
   CLUSER_INIT(25),
   CLUSER_HELLO(26),
   CLUSER_SEND(27),
-  CLUSER_RECIVE(28);
+  CLUSER_RECIVE(28),
+  WORLD_INITIALIZE(29),
+  WORLD_USER_CONNECT_2_WORLD(30),
+  WORLD_USER_RECONNECTION_TRY(31),
+  WORLD_CREATE_USER_RESULT(32),
+  WORLD_NER_SERVER_COMING(33),
+  WORLD_HAND_SHAKE(34),
+  AREA_MANAGER_CREATE_AREA(35),
+  AREA_MANAGER_REMOVE_AREA(36),
+  AREA_MANAGER_GET_AREA_BY_ID(37),
+  AREA_MANAGER_GET_ALL_AREA(38),
+  USER_MANAGER_CREATE_USER(39),
+  USER_MANAGER_REMOVE_USER(40),
+  USER_MANAGER_CREATE_USER_WITH_SESSION(41);
 
   private final int value;
 
@@ -150,6 +169,32 @@ public enum Operation implements org.apache.thrift.TEnum {
         return CLUSER_SEND;
       case 28:
         return CLUSER_RECIVE;
+      case 29:
+        return WORLD_INITIALIZE;
+      case 30:
+        return WORLD_USER_CONNECT_2_WORLD;
+      case 31:
+        return WORLD_USER_RECONNECTION_TRY;
+      case 32:
+        return WORLD_CREATE_USER_RESULT;
+      case 33:
+        return WORLD_NER_SERVER_COMING;
+      case 34:
+        return WORLD_HAND_SHAKE;
+      case 35:
+        return AREA_MANAGER_CREATE_AREA;
+      case 36:
+        return AREA_MANAGER_REMOVE_AREA;
+      case 37:
+        return AREA_MANAGER_GET_AREA_BY_ID;
+      case 38:
+        return AREA_MANAGER_GET_ALL_AREA;
+      case 39:
+        return USER_MANAGER_CREATE_USER;
+      case 40:
+        return USER_MANAGER_REMOVE_USER;
+      case 41:
+        return USER_MANAGER_CREATE_USER_WITH_SESSION;
       default:
         return null;
     }

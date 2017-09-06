@@ -1,9 +1,12 @@
 package com.codebroker.core;
 
-import com.codebroker.api.event.IEvent;
+import com.codebroker.api.event.AddEventListener;
+import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IEventListener;
+import com.codebroker.api.event.RemoveEventListener;
 import com.codebroker.core.actor.AreaActor;
+import com.codebroker.core.data.IObject;
 import com.codebroker.exception.NoActorRefException;
 import com.codebroker.util.AkkaMediator;
 
@@ -33,7 +36,7 @@ public abstract class EventDispatcher implements IEventDispatcher {
 	@Override
 	public void addEventListener(String topic, IEventListener eventListener) {
 		if (actorRef != null) {
-			actorRef.tell(new AreaActor.AddEventListener(topic, eventListener), ActorRef.noSender());
+			actorRef.tell(new AddEventListener(topic, eventListener), ActorRef.noSender());
 		}
 	}
 
@@ -41,7 +44,7 @@ public abstract class EventDispatcher implements IEventDispatcher {
 	public boolean hasEventListener(String paramString) {
 		try {
 			if (actorRef != null) {
-				return AkkaMediator.getCallBak(actorRef, new AreaActor.HasEventListener(paramString));
+				return AkkaMediator.getCallBak(actorRef, new HasEventListener(paramString));
 			} else {
 				return false;
 			}
@@ -53,14 +56,14 @@ public abstract class EventDispatcher implements IEventDispatcher {
 	@Override
 	public void removeEventListener(String paramString) {
 		if (actorRef != null) {
-			actorRef.tell(new AreaActor.RemoveEventListener(paramString), ActorRef.noSender());
+			actorRef.tell(new RemoveEventListener(paramString), ActorRef.noSender());
 		}
 	}
 
 	@Override
-	public void dispatchEvent(IEvent paramIEvent) {
+	public void dispatchEvent(IObject object) {
 		if (actorRef != null) {
-			actorRef.tell(new AreaActor.DispatchEvent(paramIEvent), ActorRef.noSender());
+			actorRef.tell(object, ActorRef.noSender());
 		}
 
 	}

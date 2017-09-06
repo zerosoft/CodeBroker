@@ -1,13 +1,11 @@
 package com.codebroker.core.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public final class CObjectLite extends CObject implements Serializable {
+public final class CObjectLite extends CObject {
 
-	private static final long serialVersionUID = -5521650136155259409L;
 
 	public static CObject newInstance() {
 		return new CObjectLite();

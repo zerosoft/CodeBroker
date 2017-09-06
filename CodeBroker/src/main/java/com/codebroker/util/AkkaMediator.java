@@ -45,7 +45,7 @@ public class AkkaMediator {
 	 *             超时异常
 	 */
 	public static <T> T getCallBak(ActorRef actorRef, Object object) throws Exception {
-		Timeout timeout = new Timeout(Duration.create(5, "seconds"));
+		Timeout timeout = new Timeout(Duration.create(50, "seconds"));
 		Future<Object> future = Patterns.ask(actorRef, object, timeout);
 		T result = (T) Await.result(future, timeout.duration());
 		return result;

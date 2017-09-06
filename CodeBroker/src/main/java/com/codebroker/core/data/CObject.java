@@ -1,6 +1,5 @@
 package com.codebroker.core.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,8 +14,8 @@ import com.codebroker.protocol.serialization.DefaultSFSDataSerializer;
 import com.codebroker.protocol.serialization.IDataSerializer;
 import com.codebroker.util.ByteUtils;
 
-public class CObject implements IObject, Serializable {
-	private static final long serialVersionUID = -7831250257586664230L;
+public class CObject implements IObject {
+	
 	private Map<String, DataWrapper> dataHolder = null;
 	private IDataSerializer serializer = null;
 
@@ -129,12 +128,13 @@ public class CObject implements IObject, Serializable {
 			return (Boolean) o.getObject();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Boolean> getBoolArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {
 			return null;
 		} else {
-			return (Collection) o.getObject();
+			return (Collection<Boolean>) o.getObject();
 		}
 	}
 
@@ -164,13 +164,13 @@ public class CObject implements IObject, Serializable {
 			return (Double) o.getObject();
 		}
 	}
-
+	@SuppressWarnings("unchecked")
 	public Collection<Double> getDoubleArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {
 			return null;
 		} else {
-			return (Collection) o.getObject();
+			return (Collection<Double>) o.getObject();
 		}
 	}
 
@@ -181,13 +181,13 @@ public class CObject implements IObject, Serializable {
 		else
 			return (Float) o.getObject();
 	}
-
-	public Collection getFloatArray(String key) {
+	@SuppressWarnings("unchecked")
+	public Collection<Float> getFloatArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null)
 			return null;
 		else
-			return (Collection) o.getObject();
+			return (Collection<Float>) o.getObject();
 	}
 
 	public Integer getInt(String key) {
@@ -197,7 +197,7 @@ public class CObject implements IObject, Serializable {
 		else
 			return (Integer) o.getObject();
 	}
-
+	@SuppressWarnings("unchecked")
 	public Collection<Integer> getIntArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {
@@ -220,6 +220,7 @@ public class CObject implements IObject, Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Long> getLongArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {
@@ -255,6 +256,7 @@ public class CObject implements IObject, Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Short> getShortArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {
@@ -300,6 +302,7 @@ public class CObject implements IObject, Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<String> getUtfStringArray(String key) {
 		DataWrapper o = dataHolder.get(key);
 		if (o == null) {

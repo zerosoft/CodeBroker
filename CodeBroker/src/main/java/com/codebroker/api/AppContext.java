@@ -363,6 +363,19 @@ public final class AppContext {
 	 */
 	private AppContext() {
 	}
+	
+	/**
+	 * 获得区域管理器
+	 * 
+	 * @return
+	 */
+	public static IWorld getWorld() {
+		try {
+			return InternalContext.getManagerLocator().getWorld();
+		} catch (IllegalStateException ise) {
+			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+		}
+	}
 
 	/**
 	 * 获得区域管理器

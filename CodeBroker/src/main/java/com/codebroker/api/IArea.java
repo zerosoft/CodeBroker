@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.codebroker.api.event.IEventDispatcher;
+import com.codebroker.core.data.IObject;
 
 /**
  * 区域
@@ -100,7 +101,7 @@ public interface IArea extends IEventDispatcher {
 	 * 
 	 * @param jsonString
 	 */
-	public void broadCastAllUser(String jsonString);
+	public void broadCastAllUser(IObject object);
 
 	/**
 	 * 对指定组的用户进行广播
@@ -108,5 +109,5 @@ public interface IArea extends IEventDispatcher {
 	 * @param jsonString
 	 * @param users
 	 */
-	public void broadCastUsers(String jsonString, Collection<IUser> users);
+	public void broadCastUsers(IObject object, Collection<IUser> users);
 }

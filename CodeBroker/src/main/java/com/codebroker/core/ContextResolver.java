@@ -342,6 +342,7 @@ Public License instead of this License.
 package com.codebroker.core;
 
 import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
@@ -451,6 +452,10 @@ public final class ContextResolver {
 
 	public static IUserManager getUserManager() {
 		return context.getUserManager();
+	}
+
+	public static IWorld getWorld() {
+		return context.getWorld();
 	}
 
 }

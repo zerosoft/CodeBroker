@@ -10,8 +10,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.codebroker.api.IUser;
 import com.codebroker.core.entities.User;
 import com.codebroker.protocol.ThriftSerializerFactory;
+import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.session.ReBindUser;
+import com.message.thrift.actor.usermanager.CreateUser;
+import com.message.thrift.actor.usermanager.CreateUserWithSession;
+import com.message.thrift.actor.usermanager.RemoveUser;
+import com.message.thrift.actor.world.CreateUserResult;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -27,19 +32,48 @@ public class UserManagerActor extends AbstractActor {
 	private static final AtomicInteger USER_ID = new AtomicInteger(1);
 	private Map<String, User> userMap = new TreeMap<String, User>();
 	private Map<String, String> rebindKeyUserMap = new TreeMap<String, String>();
+	private final ActorRef worldRef;
 
+	public UserManagerActor(ActorRef worldRef) {
+		super();
+		this.worldRef = worldRef;
+	}
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder().match(CreateUser.class, msg -> {
-			createUser(msg.npc, null, msg.reBindKey);
-		}).match(RemoveUser.class, msg -> {
-			removeUser(msg);
-		}).match(GetUserList.class, msg -> {
+		return receiveBuilder()
+		 .match(byte[].class, msg -> {
+			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+			switch (actorMessage.op) 
+			{
+			case USER_MANAGER_CREATE_USER:
+				CreateUser createUser=new CreateUser();
+				ThriftSerializerFactory.deserialize(createUser, actorMessage.messageRaw);
+				createUser(createUser.npc, null, createUser.reBindKey);
+				break;
+			case USER_MANAGER_REMOVE_USER:
+				RemoveUser removeUser=new RemoveUser();
+				ThriftSerializerFactory.deserialize(removeUser, actorMessage.messageRaw);
+				removeUser(removeUser.userID);
+				break;
+			case USER_MANAGER_CREATE_USER_WITH_SESSION:
+				CreateUserWithSession createUserWithSession=new CreateUserWithSession();
+				ThriftSerializerFactory.deserialize(createUserWithSession, actorMessage.messageRaw);
+				createWorldUser(createUserWithSession.reBindKey,getSender());
+				createUser(false, getSender(), createUserWithSession.reBindKey);
+				break;
+			default:
+
+				break;
+			}
+		})
+		 .match(GetUserList.class, msg -> {
 			getUserList(msg);
-		}).match(CreateUserWithSession.class, msg -> {
-			createUser(false, msg.ioSession, msg.reBindKey);
-		}).match(SetReBindKey.class, msg -> {
+		})
+//		 .match(CreateUserWithSession.class, msg -> {
+//			createUser(false, msg.ioSession, msg.reBindKey);
+//		})
+		 .match(SetReBindKey.class, msg -> {
 			rebindKeyUserMap.put(msg.reBindKey, msg.userId);
 		}).match(FindUserByRebindKey.class, msg -> {
 			processReBind(msg);
@@ -47,6 +81,32 @@ public class UserManagerActor extends AbstractActor {
 			User user = userMap.get(msg.userId);
 			getSender().tell(user, getSelf());
 		}).build();
+	}
+
+	private void createWorldUser(String reBindKey, ActorRef sender) {
+		int id = USER_ID.incrementAndGet();
+		User user = new User();
+		ActorRef actorOf = null;
+		ActorContext context = getContext();
+
+		String userid = USER_PRFIX + id;
+		user.setUserId(userid);
+		user.setNpc(false);
+		CreateUserResult createUserResult=new CreateUserResult();
+		try {
+			actorOf = context.actorOf(Props.create(UserActor.class, user, false, sender), userid);
+			user.setActorRef(actorOf);
+		} catch (Exception e) {
+			createUserResult.result=false;
+			byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_CREATE_USER_RESULT, createUserResult);
+			getSender().tell(actorMessageWithSubClass,sender);
+		}
+		createUserResult.result=true;
+		userMap.put(userid, user);
+		
+		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_CREATE_USER_RESULT, createUserResult);
+		worldRef.tell(actorMessageWithSubClass, sender);
+
 	}
 
 	/**
@@ -95,8 +155,8 @@ public class UserManagerActor extends AbstractActor {
 		getSender().tell(list, getSelf());
 	}
 
-	private void removeUser(RemoveUser msg) {
-		userMap.remove(msg.userID);
+	private void removeUser(String userId) {
+		userMap.remove(userId);
 	}
 
 	private void createUser(boolean npc, ActorRef ioSession, String reBindKey) {
@@ -113,38 +173,38 @@ public class UserManagerActor extends AbstractActor {
 		user.setActorRef(actorOf);
 
 		userMap.put(userid, user);
-
+		
 		getSender().tell(user, getSelf());
 	}
 
-	/**
-	 * 创建一个用户
-	 * 
-	 * @author xl
-	 *
-	 */
-	public static class CreateUser {
-		public final boolean npc;
-		public final String reBindKey;
+//	/**
+//	 * 创建一个用户
+//	 * 
+//	 * @author xl
+//	 *
+//	 */
+//	public static class CreateUser {
+//		public final boolean npc;
+//		public final String reBindKey;
+//
+//		public CreateUser(boolean npc, String reBindKey) {
+//			super();
+//			this.npc = npc;
+//			this.reBindKey = reBindKey;
+//		}
+//	}
 
-		public CreateUser(boolean npc, String reBindKey) {
-			super();
-			this.npc = npc;
-			this.reBindKey = reBindKey;
-		}
-	}
-
-	public static class CreateUserWithSession {
-		public final ActorRef ioSession;
-		public final String reBindKey;
-
-		public CreateUserWithSession(ActorRef ioSession, String reBindKey) {
-			super();
-			this.ioSession = ioSession;
-			this.reBindKey = reBindKey;
-		}
-
-	}
+//	public static class CreateUserWithSession {
+//		public final ActorRef ioSession;
+//		public final String reBindKey;
+//
+//		public CreateUserWithSession(ActorRef ioSession, String reBindKey) {
+//			super();
+//			this.ioSession = ioSession;
+//			this.reBindKey = reBindKey;
+//		}
+//
+//	}
 
 	public static class SetReBindKey {
 		public final String reBindKey;
@@ -158,15 +218,6 @@ public class UserManagerActor extends AbstractActor {
 
 	}
 
-	public static class RemoveUser {
-		public final String userID;
-
-		public RemoveUser(String userID) {
-			super();
-			this.userID = userID;
-		}
-
-	}
 
 	public static class GetUserList {
 		public enum Type {

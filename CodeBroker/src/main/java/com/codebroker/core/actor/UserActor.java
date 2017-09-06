@@ -1,15 +1,15 @@
 package com.codebroker.core.actor;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.codebroker.api.IUser;
-import com.codebroker.api.event.IEvent;
+import com.codebroker.api.event.AddEventListener;
+import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.internal.ByteArrayPacket;
+import com.codebroker.api.event.RemoveEventListener;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.User;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
@@ -51,32 +51,33 @@ public class UserActor extends AbstractActor {
 	@Override
 	public Receive createReceive() {
 		return receiveBuilder()
-		.match(byte[].class, msg -> {
+		    .match(byte[].class, msg -> 
+		{
 			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			case USER_DISCONNECT:
-
+				//断开链接
 				break;
 			case USER_SEND_PACKET_TO_IOSESSION:
 				sendMessage(actorMessage.messageRaw);
-				break;	
+				break;
 			case USER_RECIVE_IOSESSION_MESSAGE:
-				ReciveIosessionMessage message=new ReciveIosessionMessage();
+				ReciveIosessionMessage message = new ReciveIosessionMessage();
 				ThriftSerializerFactory.deserialize(message, actorMessage.messageRaw);
-				handleClientRequest(message.opcode,message.message);
+				handleClientRequest(message.opcode, message.message);
 				break;
 			case USER_IS_CONNECTED:
 				getSender().tell(ioSessionRef == null, getSelf());
 				break;
 			case USER_REUSER_BINDUSER_IOSESSION_ACTOR:
-				//从新绑定
+				// 从新绑定
 				this.ioSessionRef = getSender();
 				break;
-				
+
 			case USER_GET_IUSER:
 				getSender().tell(user, getSelf());
 				break;
-				
+
 			case USER_ENTER_AREA:
 				if (inArea != null) {
 					inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
@@ -88,7 +89,7 @@ public class UserActor extends AbstractActor {
 				inGrid = null;
 				break;
 			case USER_LEAVE_AREA:
-				
+
 				break;
 			case USER_ENTER_GRID:
 				if (inGrid != null) {
@@ -102,70 +103,36 @@ public class UserActor extends AbstractActor {
 				}
 				break;
 			default:
-				
+
 				break;
 			}
 		})
-//		.match(Disconnect.class, msg -> {
-//
-//		}).match(SendMessage.class, msg -> {
-//			sendMessage(msg);
-//		})
-//		.match(ReciveIosessionMessage.class, msg -> {
-//			handleClientRequest(msg);
-//		})
-//		.match(IsConnected.class, msg -> {
-//			getSender().tell(ioSessionRef == null, getSelf());
-//		})
-//		.match(ReBindIoSession.class, msg -> {
-//			this.ioSessionRef = msg.ioSession;
-//		})
-//		.match(GetIUser.class, msg -> {
-//			getSender().tell(user, getSelf());
-//		})
-				/* 进出区域和格子 */
-//				.match(EnterArea.class, msg -> {}).match(LeaveArea.class, msg -> {
-//					if (inArea != null) {
-//						inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
-//					}
-//					if (inGrid != null) {
-//						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-//					}
-//					inGrid = null;
-//				})
-//				.match(EnterGrid.class, msg -> {
-//					if (inGrid != null) {
-//						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-//					}
-//					inGrid = getSender();
-//				})
-//				.match(LeaveGrid.class, msg -> {
-//					if (inGrid != null) {
-//						inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-//					}
-//				})
-				// 事件分发
-				.match(AddEventListener.class, msg -> {
-					eventListener.put(msg.topic, msg.paramIEventListener);
-				}).match(RemoveEventListener.class, msg -> {
-					eventListener.remove(msg.topic);
-				}).match(HasEventListener.class, msg -> {
-					getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-				}).match(DispatchEvent.class, msg -> {
-					dispatchEvent(msg);
-				}).build();
+		//处理分发事件
+		.match(IObject.class, msg->{
+			dispatchEvent(msg);		
+		})
+		//绑定本地事件处理
+		  .match(AddEventListener.class, msg -> {
+			eventListener.put(msg.topic, msg.paramIEventListener);
+		}).match(RemoveEventListener.class, msg -> {
+			eventListener.remove(msg.topic);
+		}).match(HasEventListener.class, msg -> {
+			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+		})
+		  .build();
 	}
 
 	private void handleClientRequest(int requestId, ByteBuffer params) {
-		byte[] msg=new byte[params.remaining()];
+		byte[] msg = new byte[params.remaining()];
 		params.get(msg);
 		ContextResolver.getAppListener().handleClientRequest(user, requestId, msg);
 	}
 
 	private void sendMessage(ByteBuffer byteBuffer) {
-		ActorMessage actorMessage=new ActorMessage();
-		actorMessage.messageRaw=byteBuffer;
-		byte[] bs = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET, actorMessage);
+		ActorMessage actorMessage = new ActorMessage();
+		actorMessage.messageRaw = byteBuffer;
+		byte[] bs = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET,
+				actorMessage);
 		ioSessionRef.tell(bs, getSelf());
 	}
 
@@ -174,64 +141,18 @@ public class UserActor extends AbstractActor {
 	 * 
 	 * @param msg
 	 */
-	private void dispatchEvent(DispatchEvent msg) {
-		IEvent paramIEvent = msg.paramIEvent;
+	private void dispatchEvent(IObject msg) {
+		String topic = msg.getUtfString("e");
 		try {
-			IEventListener iEventListener = eventListener.get(paramIEvent.getTopic());
+			IEventListener iEventListener = eventListener.get(topic);
 			if (iEventListener != null) {
-				iEventListener.handleEvent(paramIEvent);
+				iEventListener.handleEvent(topic,msg);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
-
-
-	public static class AddEventListener {
-		public final String topic;
-		public final IEventListener paramIEventListener;
-
-		public AddEventListener(String topic, IEventListener paramIEventListener) {
-			super();
-			this.topic = topic;
-			this.paramIEventListener = paramIEventListener;
-		}
-
-	}
-
-	public static class RemoveEventListener {
-		public final String topic;
-
-		public RemoveEventListener(String topic) {
-			super();
-			this.topic = topic;
-		}
-	}
-
-	public static class DispatchEvent implements Serializable {
-
-		private static final long serialVersionUID = -382183759904733665L;
-
-		public final IEvent paramIEvent;
-
-		public DispatchEvent(IEvent paramIEvent) {
-			super();
-			this.paramIEvent = paramIEvent;
-		}
-
-	}
-
-	public static class HasEventListener implements Serializable {
-
-		private static final long serialVersionUID = 6661678840156738466L;
-
-		public final String topic;
-
-		public HasEventListener(String topic) {
-			super();
-			this.topic = topic;
-		}
-
-	}
+	
+	
 
 }

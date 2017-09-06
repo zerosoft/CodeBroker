@@ -343,11 +343,14 @@ package com.codebroker.core.cluster;
 
 import com.codebroker.core.actor.CluserActor;
 import com.codebroker.core.actor.WorldActor;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.core.eventbus.CluserEnvelope;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.cluser.CluserInitMessage;
+import com.message.thrift.actor.world.NewServerComeIn;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -407,13 +410,21 @@ public class ClusterListener extends AbstractActor {
 
 			log.info("Member is Up: {} address {} longId {}", member, address.toString(), longUid);
 			ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
-			systemActorSelection.tell(new WorldActor.NewServerComeIn(longUid, member.address().toString()),
-					getSender());
+			//发送新加入服务器信息
+			NewServerComeIn comeIn=new NewServerComeIn(longUid, member.address().toString());
+			byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_NER_SERVER_COMING, comeIn);
+			
+			systemActorSelection.tell(actorMessageWithSubClass,	getSender());
 
 			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,	longUid);
 			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_INIT,cluserInitMessage);
-			getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor").tell(tbaseMessage,
+			ActorSelection actorSelection = getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor");
+			actorSelection.tell(tbaseMessage,
 					cluserActor);
+			
+			IObject iObject=CObject.newInstance();
+			iObject.putUtfString("hello", "world");
+			actorSelection.tell(iObject, getSelf());
 
 		}).match(UnreachableMember.class, mUnreachable -> {
 			log.info("Member detected as unreachable: {}", mUnreachable.member());

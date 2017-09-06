@@ -1,6 +1,8 @@
 package com.codebroker.core.actor;
 
+import com.alibaba.fastjson.JSON;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.data.IObject;
 import com.codebroker.redis.RedisService;
 
 import akka.actor.AbstractActor;
@@ -19,30 +21,20 @@ public class ELKLogActor extends AbstractActor {
 
 	public static final String IDENTIFY = ELKLogActor.class.getName();
 
-	/**
-	 * ELK日志
-	 * 
-	 * @author xl
-	 *
-	 */
-	public static class ELKSystemLog {
-		public String clazzName;
-
-		public String message;
-
-		public ELKSystemLog() {
-			super();
-		}
-
-	}
-
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create().match(ELKSystemLog.class, msg -> {
+		return ReceiveBuilder.create()
+		    .match(IObject.class, msg -> 
+		    {
 			RedisService component = ContextResolver.getComponent(RedisService.class);
 			if (component != null) {
-				Jedis jedis = component.getJedis();
-//				jedis.lpush(LOG_KEY, JSONUtil.objectToFastJSON(msg));
+				try {
+					Jedis jedis = component.getJedis();
+					String json = msg.toJson();
+					jedis.lpush(LOG_KEY,json);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}).build();
 	}

@@ -1,5 +1,7 @@
 package com.codebroker.api.event;
 
+import com.codebroker.core.data.IObject;
+
 /**
  * 事件分发处理
  * 
@@ -14,5 +16,5 @@ public interface IEventDispatcher {
 
 	public void removeEventListener(String topic);
 
-	public void dispatchEvent(IEvent paramIEvent);
+	public void dispatchEvent(IObject iObject);
 }

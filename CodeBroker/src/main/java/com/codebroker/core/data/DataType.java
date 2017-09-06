@@ -1,25 +1,33 @@
 package com.codebroker.core.data;
 
 public enum DataType {
-	NULL, BOOL, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, UTF_STRING, BOOL_ARRAY, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, UTF_STRING_ARRAY, ARRAY, OBJECT, CLASS;
+	NULL(0), 
+	BOOL(1),
+	BYTE(2), 
+	SHORT(3), 
+	INT(4), 
+	LONG(5), 
+	FLOAT(6), 
+	DOUBLE(7), 
+	UTF_STRING(8), 
+	BOOL_ARRAY(9), 
+	BYTE_ARRAY(10), 
+	SHORT_ARRAY(11), 
+	INT_ARRAY(12), 
+	LONG_ARRAY(13), 
+	FLOAT_ARRAY(14), 
+	DOUBLE_ARRAY(15), 
+	UTF_STRING_ARRAY(16), 
+	ARRAY(17), 
+	OBJECT(18), 
+	CLASS(19);
 
-	private int typeID;
+	
+	public final int typeID;
 
-	public static DataType fromTypeId(int typeId) {
-		for (DataType item : values()) {
-			if (item.getTypeID() == typeId) {
-				return item;
-			}
-		}
-
-		throw new IllegalArgumentException("Unknown typeId for DataType");
+	private DataType(int typeID) {
+		this.typeID = typeID;
 	}
 
-	public static DataType fromClass(Class<?> clazz) {
-		return null;
-	}
-
-	public int getTypeID() {
-		return this.typeID;
-	}
+	
 }

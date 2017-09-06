@@ -9,22 +9,25 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.thrift.TException;
+
 import com.codebroker.api.IUser;
-import com.codebroker.api.event.IEvent;
+import com.codebroker.api.event.AddEventListener;
+import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventListener;
+import com.codebroker.api.event.RemoveEventListener;
 import com.codebroker.core.ServerEngine;
-import com.codebroker.core.entities.CodeBrokerEvent;
-import com.codebroker.core.entities.CodeEvent;
+import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.Grid;
 import com.codebroker.core.entities.User;
-import com.codebroker.exception.NoActorRefException;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.UserEneterArea;
+import com.message.thrift.actor.usermanager.CreateUser;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
@@ -43,20 +46,21 @@ import scala.concurrent.duration.Duration;
  */
 public class AreaActor extends AbstractActor {
 
-	private final ActorRef world;
+	private final ActorRef worldRef;
+	private final ActorRef userManagerRef;
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
 	// 用户
-	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
+	private Map<String, ActorRef> userMap = new TreeMap<String, ActorRef>();
 	// 创建NPC
-	private Map<String, User> npcMap = new TreeMap<String, User>();
+	private Map<String, ActorRef> npcMap = new TreeMap<String, ActorRef>();
 	// 格子
 	private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
 
-	public AreaActor(ActorRef world) {
+	public AreaActor(ActorRef worldRef, ActorRef userManagerRef) {
 		super();
-		this.world = world;
-
+		this.worldRef = worldRef;
+		this.userManagerRef = userManagerRef;
 	}
 
 	@Override
@@ -67,36 +71,52 @@ public class AreaActor extends AbstractActor {
 			childRef.tell(PoisonPill.getInstance(), getSelf());
 		}
 
-		for (IUser iUser : userMap.values()) {
-			iUser.dispatchEvent(new CodeEvent());
-		}
-
-		for (User user : npcMap.values()) {
-			try {
-				user.getActorRef().tell(PoisonPill.getInstance(), getSelf());
-			} catch (NoActorRefException e) {
-
-			}
-		}
+		// for (ActorRef iUser : userMap.values()) {
+		// iUser.dispatchEvent(new CodeEvent());
+		// }
+		//
+		// for (ActorRef user : npcMap.values()) {
+		// try {
+		// user.getActorRef().tell(PoisonPill.getInstance(), getSelf());
+		// } catch (NoActorRefException e) {
+		//
+		// }
+		// }
 	}
 
 	@Override
 	public Receive createReceive() {
 		return ReceiveBuilder.create()
 				.match(byte[].class, msg->{
-					System.out.println(new String(msg));
+					 ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+					 switch (actorMessage.op) {
+					case AREA_CREATE_NPC:
+						createNPC();
+						break;
+					case AREA_USER_ENTER_AREA:
+						UserEneterArea eneterArea=new UserEneterArea();
+						ThriftSerializerFactory.deserialize(eneterArea, actorMessage.messageRaw);
+						enterArea(eneterArea.userId,getSender());
+						break;
+					default:
+						break;
+					}
 				})
 		.match(ActorMessage.class, msg -> {
 			switch (msg.op) {
 			case AREA_CREATE_NPC:
 				createNPC();
 				break;
-
+			case AREA_USER_ENTER_AREA:
+				
+				break;
+			case AREA_USER_LEAVE_AREA:
+				break;
 			default:
 				break;
 			}
 		}).match(EnterArea.class, msg -> {
-			enterArea(msg);
+//			(msg);
 		}).match(LeaveArea.class, msg -> {
 			leaveArea(msg);
 		}).match(CreateGrid.class, msg -> {
@@ -107,48 +127,61 @@ public class AreaActor extends AbstractActor {
 			getGridById(msg);
 		}).match(GetAllGrids.class, msg -> {
 			getAllGrid();
-		}).match(GetPlayers.class, msg -> {
-			Collection<IUser> values = userMap.values();
-			List<IUser> list = new ArrayList<IUser>();
-			list.addAll(values);
-			getSender().tell(list, getSelf());
-		}).match(Terminated.class, msg -> {
+		})
+		.match(GetPlayers.class, msg -> {
+//			Collection<IUser> values = userMap.values();
+//			List<IUser> list = new ArrayList<IUser>();
+//			list.addAll(values);
+//			getSender().tell(list, getSelf());
+		})
+		.match(Terminated.class, msg -> {
 			String name = msg.actor().path().name();
 		})
-				// 广播信息
-				.match(BroadCastAllUser.class, msg -> {
-					broadCastAllUser(msg.jsonString);
-				}).match(AddEventListener.class, msg -> {
-					eventListener.put(msg.topic, msg.paramIEventListener);
-				}).match(RemoveEventListener.class, msg -> {
-					eventListener.remove(msg.topic);
-				}).match(HasEventListener.class, msg -> {
-					getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-				}).match(DispatchEvent.class, msg -> {
-					dispatchEvent(msg);
-				}).build();
+		// 广播信息
+		.match(BroadCastAllUser.class, msg -> {
+			broadCastAllUser(msg.jsonString);
+		})
+		//处理分发事件
+		.match(IObject.class, msg->{
+			dispatchEvent(msg);		
+		})
+		//绑定本地事件处理
+		.match(AddEventListener.class, msg -> {
+			eventListener.put(msg.topic, msg.paramIEventListener);
+		}).match(RemoveEventListener.class, msg -> {
+			eventListener.remove(msg.topic);
+		}).match(HasEventListener.class, msg -> {
+			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+		})
+		.build();
 	}
 
-	private void dispatchEvent(DispatchEvent msg) {
-		IEvent paramIEvent = msg.paramIEvent;
+	/**
+	 * 处理分发信息
+	 * 
+	 * @param msg
+	 */
+	private void dispatchEvent(IObject msg) {
+		String topic = msg.getUtfString("e");
 		try {
-			IEventListener iEventListener = eventListener.get(paramIEvent.getTopic());
+			IEventListener iEventListener = eventListener.get(topic);
 			if (iEventListener != null) {
-				iEventListener.handleEvent(paramIEvent);
+				iEventListener.handleEvent(topic,msg);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
+	
 
 	private void broadCastAllUser(String jsonString) {
-		Collection<IUser> values = userMap.values();
-		CodeEvent codeEvent = new CodeEvent();
-		codeEvent.setParameter(jsonString);
-		codeEvent.setTopic(CodeBrokerEvent.AREA_EVENT);
-		for (IUser iUser : values) {
-			iUser.dispatchEvent(codeEvent);
-		}
+//		Collection<IUser> values = userMap.values();
+//		CodeEvent codeEvent = new CodeEvent();
+//		codeEvent.setParameter(jsonString);
+//		codeEvent.setTopic(CodeBrokerEvent.AREA_EVENT);
+//		for (IUser iUser : values) {
+//			iUser.dispatchEvent(codeEvent);
+//		}
 	}
 
 	private void createGrid(CreateGrid msg) {
@@ -200,30 +233,54 @@ public class AreaActor extends AbstractActor {
 		}
 	}
 
-	private void enterArea(EnterArea msg) throws Exception {
-		if (userMap.containsKey(msg.user.getUserId())) {
+//	private void enterArea(EnterArea msg) throws Exception {
+//		if (userMap.containsKey(msg.user.getUserId())) {
+//			getSender().tell(false, getSelf());
+//		} else {
+//			userMap.put(msg.user.getUserId(), msg.user);
+//			getSender().tell(true, getSelf());
+//			// 通知user进入所在actor
+//
+//			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
+//			// new UserActor.EnterArea()
+//			((User) msg.user).getActorRef().tell(tbaseMessage, getSelf());
+//
+//			broadCastAllUser("JSON　SOMEONE ENTER");
+//		}
+//	}
+
+	private void enterArea(String userId, ActorRef sender) {
+		if (userMap.containsKey(userId)) {
 			getSender().tell(false, getSelf());
 		} else {
-			userMap.put(msg.user.getUserId(), msg.user);
+			userMap.put(userId, sender);
 			getSender().tell(true, getSelf());
 			// 通知user进入所在actor
-			
-			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
-//			new UserActor.EnterArea()
-			((User) msg.user).getActorRef().tell(tbaseMessage, getSelf());
 
+			byte[] tbaseMessage;
+			try {
+				tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
+				sender.tell(tbaseMessage, getSelf());
+
+			} catch (TException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// new UserActor.EnterArea()
+		
 			broadCastAllUser("JSON　SOMEONE ENTER");
 		}
 	}
 
 	private void createNPC() throws Exception {
-		ActorSelection actorSelection = getContext()
-				.actorSelection("/user/" + WorldActor.IDENTIFY + "/" + UserManagerActor.IDENTIFY);
 		Timeout timeout = new Timeout(Duration.create(5, "seconds"));
-		Future<Object> future = Patterns.ask(actorSelection,
-				new UserManagerActor.CreateUser(true, UUID.randomUUID().toString()), timeout);
+
+		CreateUser createUser = new CreateUser(true, UUID.randomUUID().toString());
+		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER, createUser);
+		Future<Object> future = Patterns.ask(userManagerRef, actorMessageWithSubClass, timeout);
+
 		User result = (User) Await.result(future, timeout.duration());
-		npcMap.put(result.getUserId(), result);
+//		npcMap.put(result.getUserId(), result);
 
 		getSender().tell(result, getSelf());
 	}
@@ -307,52 +364,9 @@ public class AreaActor extends AbstractActor {
 		}
 	}
 
-	public static class AddEventListener {
-		public final String topic;
-		public final IEventListener paramIEventListener;
 
-		public AddEventListener(String topic, IEventListener paramIEventListener) {
-			super();
-			this.topic = topic;
-			this.paramIEventListener = paramIEventListener;
-		}
 
-	}
 
-	public static class RemoveEventListener {
-		public final String topic;
-
-		public RemoveEventListener(String topic) {
-			super();
-			this.topic = topic;
-		}
-	}
-
-	public static class DispatchEvent implements Serializable {
-
-		private static final long serialVersionUID = -382183759904733665L;
-
-		public final IEvent paramIEvent;
-
-		public DispatchEvent(IEvent paramIEvent) {
-			super();
-			this.paramIEvent = paramIEvent;
-		}
-
-	}
-
-	public static class HasEventListener implements Serializable {
-
-		private static final long serialVersionUID = 6661678840156738466L;
-
-		public final String topic;
-
-		public HasEventListener(String topic) {
-			super();
-			this.topic = topic;
-		}
-
-	}
 
 	public static class GetPlayers implements Serializable {
 

@@ -341,6 +341,9 @@ Public License instead of this License.
  */
 package com.codebroker.core.actor;
 
+import java.io.Serializable;
+
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -348,7 +351,9 @@ import com.codebroker.core.cluster.ClusterDistributedPub;
 import com.codebroker.core.cluster.ClusterDistributedSub;
 import com.codebroker.core.cluster.ClusterListener;
 import com.codebroker.core.model.CodeDeadLetter;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.LogUtil;
+import com.message.thrift.actor.Operation;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -420,7 +425,14 @@ public class CodeBrokerSystem extends AbstractActor {
 		 */
 		ActorRef world = actorSystem.actorOf(Props.create(WorldActor.class), WorldActor.IDENTIFY);
 		this.getContext().watch(world);
-		world.tell(new WorldActor.Initialize(), getSelf());
+		//初始化WORLD
+		try {
+			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.WORLD_INITIALIZE);
+			world.tell(tbaseMessage, getSelf());
+		} catch (TException e) {
+			e.printStackTrace();
+		}
+	
 		logger.info("World Path=" + world.path().toString());
 		/**
 		 * ELK日志记录
@@ -432,14 +444,16 @@ public class CodeBrokerSystem extends AbstractActor {
 		/**
 		 * 分布式发布Actor
 		 */
+		Props pub = Props.create(ClusterDistributedPub.class);
 		ActorRef clusterDistributedPub = 
-				actorSystem.actorOf(Props.create(ClusterDistributedPub.class),ClusterDistributedPub.IDENTIFY);
+				actorSystem.actorOf(pub,ClusterDistributedPub.IDENTIFY);
 		this.getContext().watch(clusterDistributedPub);
 		/**
 		 * 分布式订阅 Actor
 		 */
+		Props sub = Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC");
 		ActorRef clusterDistributedSub = 
-				actorSystem.actorOf(Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC"), ClusterDistributedSub.IDENTIFY);
+				actorSystem.actorOf(sub, ClusterDistributedSub.IDENTIFY);
 		this.getContext().watch(clusterDistributedSub);
 	}
 
@@ -448,10 +462,34 @@ public class CodeBrokerSystem extends AbstractActor {
 		return ReceiveBuilder.create()
 		.match(InitAkkaSystem.class, msg -> {
 			processInitAvalon();
+		}).match(RestAkkaSystem.class, msg->{
+			
+		}).match(CloseAkkaSystem.class, msg->{
+			
 		}).build();
 	}
-
-	public static class InitAkkaSystem {
+	/**
+	 * 初始化Akka系统
+	 * @author zero
+	 *
+	 */
+	public static class InitAkkaSystem implements Serializable{
+		private static final long serialVersionUID = 6462859024035662121L;
 	}
-
+	/**
+	 * 关闭Akka系统
+	 * @author zero
+	 *
+	 */
+	public static class CloseAkkaSystem implements Serializable{
+		private static final long serialVersionUID = 806701713038586180L;
+	}
+	/**
+	 * 重启Akka系统
+	 * @author zero
+	 *
+	 */
+	public static class RestAkkaSystem implements Serializable{
+		private static final long serialVersionUID = 806701713038586180L;
+	}
 }

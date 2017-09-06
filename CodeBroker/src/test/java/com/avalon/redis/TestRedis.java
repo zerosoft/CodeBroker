@@ -1,16 +1,6 @@
 package com.avalon.redis;
 
-import java.util.List;
-import java.util.Set;
-
 import com.codebroker.redis.RedisService;
-import com.codebroker.redis.collections.ListStructure;
-import com.codebroker.redis.collections.RankingStructure;
-import com.codebroker.redis.collections.ScoresPoint;
-import com.codebroker.redis.collections.SetStructure;
-import com.codebroker.redis.collections.builder.buider.RankingStructureBuilder;
-import com.codebroker.redis.collections.builder.buider.RedisStrutureBuilder;
-import com.codebroker.redis.collections.builder.buider.SetStructureBuilder;
 import com.codebroker.util.PropertiesWrapper;
 
 import jodd.props.Props;

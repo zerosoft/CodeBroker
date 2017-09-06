@@ -7,6 +7,8 @@ import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.GridActor;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.util.AkkaMediator;
 
@@ -41,17 +43,14 @@ public class Grid extends EventDispatcher implements IGrid {
 	}
 
 	@Override
-	public void broadCastAllUser(String jsonString) {
-		getActorRef().tell(new GridActor.BroadCastAllUser(jsonString), ActorRef.noSender());
+	public void broadCastAllUser(IObject object) {
+		getActorRef().tell(object, ActorRef.noSender());
 	}
 
 	@Override
-	public void broadCastUsers(String jsonString, Collection<IUser> users) {
+	public void broadCastUsers(IObject object, Collection<IUser> users) {
 		for (IUser iUser : users) {
-			CodeEvent codeEvent = new CodeEvent();
-			codeEvent.setTopic(CodeBrokerEvent.GRID_EVENT);
-			codeEvent.setParameter(jsonString);
-			iUser.dispatchEvent(codeEvent);
+			iUser.dispatchEvent(object);
 		}
 	}
 
@@ -63,6 +62,7 @@ public class Grid extends EventDispatcher implements IGrid {
 		throw new CodeBrokerException("NO");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<IUser> getPlayers() throws Exception {
 		return (List<IUser>) AkkaMediator.getCallBak(getActorRef(), new GridActor.GetPlayers());

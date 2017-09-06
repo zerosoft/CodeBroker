@@ -1,8 +1,8 @@
 package com.swing;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.JButton;
 
 public class RegeditPanel extends JPanel {
 	private JTextField textField;

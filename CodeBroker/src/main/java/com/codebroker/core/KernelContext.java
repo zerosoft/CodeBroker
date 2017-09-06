@@ -344,6 +344,7 @@ package com.codebroker.core;
 import java.util.MissingResourceException;
 
 import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.ComponentRegistry;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.manager.IAreaManager;
@@ -499,12 +500,17 @@ class KernelContext {
 
 	public IAreaManager getAreaManager() {
 		AkkaBootService component = getComponent(AkkaBootService.class);
-		return component.gridLeader;
+		return component.iAreaManager;
 	}
 
 	public IUserManager getUserManager() {
 		AkkaBootService component = getComponent(AkkaBootService.class);
 		return component.getUserManager();
+	}
+
+	public IWorld getWorld() {
+		AkkaBootService component = getComponent(AkkaBootService.class);
+		return component.world;
 	}
 
 }

@@ -1,7 +1,7 @@
 package com.avalon.io.tcp;
 
-import com.codebroker.net.netty.filter.MessageHeadDataCodecDecoder;
-import com.codebroker.net.netty.filter.MessageHeadDataCodecEncoder;
+import com.codebroker.net.netty.filter.ByteArrayPacketCodecDecoder;
+import com.codebroker.net.netty.filter.ByteArrayPacketCodecEncoder;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -13,8 +13,8 @@ public class ClientInitializer extends ChannelInitializer<SocketChannel>{
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 		ChannelPipeline pipeline = ch.pipeline();
-		pipeline.addLast("MessageHead-decoder", new MessageHeadDataCodecDecoder());
-		pipeline.addLast("MessageHead-encoder", new MessageHeadDataCodecEncoder());
+		pipeline.addLast("MessageHead-decoder", new ByteArrayPacketCodecDecoder());
+		pipeline.addLast("MessageHead-encoder", new ByteArrayPacketCodecEncoder());
 		pipeline.addLast("handler", new ClientHandler());
 	}
 

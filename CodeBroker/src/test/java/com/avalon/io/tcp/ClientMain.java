@@ -3,8 +3,7 @@ package com.avalon.io.tcp;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import com.codebroker.net.MessagePackImpl;
-import com.codebroker.util.MessageHead;
+import com.codebroker.protocol.BaseByteArrayPacket;
 import com.message.protocol.Message;
 import com.message.protocol.PBGame.CS_REGISTER;
 import com.message.protocol.PBSystem.CS_USER_CONNECT_TO_SERVER;
@@ -39,16 +38,16 @@ public class ClientMain {
 	                if (line == null) {
 	                    break;
 	                }
-	                MessageHead head=null;
+	                BaseByteArrayPacket head=null;
 	                if (line.startsWith("1")) {
 	                	CS_USER_CONNECT_TO_SERVER.Builder builder=CS_USER_CONNECT_TO_SERVER.newBuilder();
 	                	builder.setName("Test");
 	                	builder.setParams("Param");
 	                	CS_USER_CONNECT_TO_SERVER build = builder.build();
-	                	head=new MessageHead(new MessagePackImpl(Message.PB.SystemKey.CS_USER_CONNECT_TO_SERVER_VALUE,build.toByteArray()));	
+	                	head=new BaseByteArrayPacket(Message.PB.SystemKey.CS_USER_CONNECT_TO_SERVER_VALUE,build.toByteArray());	
 					}else if (line.startsWith("2")) {
 						CS_REGISTER register=CS_REGISTER.newBuilder().setName("1").setPassword("1").build();
-						head=new MessageHead(new MessagePackImpl(Message.PB.MessageKey.CS_REGISTER_VALUE,register.toByteArray()));
+						head=new BaseByteArrayPacket(Message.PB.MessageKey.CS_REGISTER_VALUE,register.toByteArray());
 					}
 	                // Sends the received line to the server.
 	                lastWriteFuture = ch.writeAndFlush(head);

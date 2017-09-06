@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.codebroker.core.data.CArray;
@@ -47,6 +48,8 @@ import com.codebroker.exception.CRuntimeException;
 
 public class DefaultSFSDataSerializer implements IDataSerializer {
 
+	private static final long serialVersionUID = -6749126348064423022L;
+	
 	private static final String CLASS_MARKER_KEY = "$C";
 	private static final String CLASS_FIELDS_KEY = "$F";
 
@@ -83,9 +86,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private IArray decodeSFSArray(ByteBuffer buffer) {
 		CArray sfsArray = CArray.newInstance();
 		byte headerBuffer = buffer.get();
-		if (headerBuffer != DataType.ARRAY.getTypeID()) {
+		if (headerBuffer != DataType.ARRAY.typeID) {
 			throw new IllegalStateException(
-					"Invalid DataType. Expected: " + DataType.ARRAY.getTypeID() + ", found: " + headerBuffer);
+					"Invalid DataType. Expected: " + DataType.ARRAY.typeID + ", found: " + headerBuffer);
 		} else {
 			short size = buffer.getShort();
 			if (size < 0) {
@@ -124,9 +127,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private IObject decodeSFSObject(ByteBuffer buffer) {
 		CObject sfsObject = CObject.newInstance();
 		byte headerBuffer = buffer.get();
-		if (headerBuffer != DataType.OBJECT.getTypeID()) {
+		if (headerBuffer != DataType.OBJECT.typeID) {
 			throw new IllegalStateException(
-					"Invalid DataType. Expected: " + DataType.OBJECT.getTypeID() + ", found: " + headerBuffer);
+					"Invalid DataType. Expected: " + DataType.OBJECT.typeID + ", found: " + headerBuffer);
 		} else {
 			short size = buffer.getShort();
 			if (size < 0) {
@@ -239,7 +242,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	public byte[] object2binary(IObject object) {
 		ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CHUNK_SIZE);
-		buffer.put((byte) DataType.OBJECT.getTypeID());
+		buffer.put((byte) DataType.OBJECT.typeID);
 		buffer.putShort((short) object.size());
 		return this.obj2bin(object, buffer);
 	}
@@ -249,8 +252,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 		DataWrapper wrapper;
 		Object dataObj;
-		for (Iterator<String> result = keys.iterator(); result
-				.hasNext(); buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj)) {
+		for (Iterator<String> result = keys.iterator(); 
+				result.hasNext(); 
+				buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj)) {
 			String pos = result.next();
 			wrapper = object.get(pos);
 			dataObj = wrapper.getObject();
@@ -266,7 +270,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	public byte[] array2binary(IArray array) {
 		ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CHUNK_SIZE);
-		buffer.put((byte) DataType.ARRAY.getTypeID());
+		buffer.put((byte) DataType.ARRAY.typeID);
 		buffer.putShort((short) array.size());
 		return this.arr2bin(array, buffer);
 	}
@@ -274,8 +278,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private byte[] arr2bin(IArray array, ByteBuffer buffer) {
 		DataWrapper wrapper;
 		Object pos;
-		for (Iterator<DataWrapper> iter = array.iterator(); iter
-				.hasNext(); buffer = this.encodeObject(buffer, wrapper.getTypeId(), pos)) {
+		for (Iterator<DataWrapper> iter = array.iterator(); 
+				iter.hasNext(); 
+				buffer = this.encodeObject(buffer, wrapper.getTypeId(), pos)) {
 			wrapper = (DataWrapper) iter.next();
 			pos = wrapper.getObject();
 		}
@@ -332,45 +337,45 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private DataWrapper decodeObject(ByteBuffer buffer) throws CCodecException {
 		DataWrapper decodedObject = null;
 		byte headerByte = buffer.get();
-		if (headerByte == DataType.NULL.getTypeID()) {
+		if (headerByte == DataType.NULL.typeID) {
 			decodedObject = this.binDecode_NULL(buffer);
-		} else if (headerByte == DataType.BOOL.getTypeID()) {
+		} else if (headerByte == DataType.BOOL.typeID) {
 			decodedObject = this.binDecode_BOOL(buffer);
-		} else if (headerByte == DataType.BOOL_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.BOOL_ARRAY.typeID) {
 			decodedObject = this.binDecode_BOOL_ARRAY(buffer);
-		} else if (headerByte == DataType.BYTE.getTypeID()) {
+		} else if (headerByte == DataType.BYTE.typeID) {
 			decodedObject = this.binDecode_BYTE(buffer);
-		} else if (headerByte == DataType.BYTE_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.BYTE_ARRAY.typeID) {
 			decodedObject = this.binDecode_BYTE_ARRAY(buffer);
-		} else if (headerByte == DataType.SHORT.getTypeID()) {
+		} else if (headerByte == DataType.SHORT.typeID) {
 			decodedObject = this.binDecode_SHORT(buffer);
-		} else if (headerByte == DataType.SHORT_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.SHORT_ARRAY.typeID) {
 			decodedObject = this.binDecode_SHORT_ARRAY(buffer);
-		} else if (headerByte == DataType.INT.getTypeID()) {
+		} else if (headerByte == DataType.INT.typeID) {
 			decodedObject = this.binDecode_INT(buffer);
-		} else if (headerByte == DataType.INT_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.INT_ARRAY.typeID) {
 			decodedObject = this.binDecode_INT_ARRAY(buffer);
-		} else if (headerByte == DataType.LONG.getTypeID()) {
+		} else if (headerByte == DataType.LONG.typeID) {
 			decodedObject = this.binDecode_LONG(buffer);
-		} else if (headerByte == DataType.LONG_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.LONG_ARRAY.typeID) {
 			decodedObject = this.binDecode_LONG_ARRAY(buffer);
-		} else if (headerByte == DataType.FLOAT.getTypeID()) {
+		} else if (headerByte == DataType.FLOAT.typeID) {
 			decodedObject = this.binDecode_FLOAT(buffer);
-		} else if (headerByte == DataType.FLOAT_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.FLOAT_ARRAY.typeID) {
 			decodedObject = this.binDecode_FLOAT_ARRAY(buffer);
-		} else if (headerByte == DataType.DOUBLE.getTypeID()) {
+		} else if (headerByte == DataType.DOUBLE.typeID) {
 			decodedObject = this.binDecode_DOUBLE(buffer);
-		} else if (headerByte == DataType.DOUBLE_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.DOUBLE_ARRAY.typeID) {
 			decodedObject = this.binDecode_DOUBLE_ARRAY(buffer);
-		} else if (headerByte == DataType.UTF_STRING.getTypeID()) {
+		} else if (headerByte == DataType.UTF_STRING.typeID) {
 			decodedObject = this.binDecode_UTF_STRING(buffer);
-		} else if (headerByte == DataType.UTF_STRING_ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.UTF_STRING_ARRAY.typeID) {
 			decodedObject = this.binDecode_UTF_STRING_ARRAY(buffer);
-		} else if (headerByte == DataType.ARRAY.getTypeID()) {
+		} else if (headerByte == DataType.ARRAY.typeID) {
 			buffer.position(buffer.position() - 1);
 			decodedObject = new DataWrapper(DataType.ARRAY, this.decodeSFSArray((ByteBuffer) buffer));
 		} else {
-			if (headerByte != DataType.OBJECT.getTypeID()) {
+			if (headerByte != DataType.OBJECT.typeID) {
 				throw new CCodecException("Unknow DataType ID: " + headerByte);
 			}
 
@@ -391,65 +396,65 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	@SuppressWarnings("unchecked")
 	private ByteBuffer encodeObject(ByteBuffer buffer, DataType typeId, Object object) {
-		switch (typeId.ordinal()) {
-		case 1:
+		switch (typeId) {
+		case NULL:
 			buffer = this.binEncode_NULL(buffer);
 			break;
-		case 2:
+		case BOOL:
 			buffer = this.binEncode_BOOL(buffer, (Boolean) object);
 			break;
-		case 3:
+		case BYTE:
 			buffer = this.binEncode_BYTE(buffer, (Byte) object);
 			break;
-		case 4:
+		case SHORT:
 			buffer = this.binEncode_SHORT(buffer, (Short) object);
 			break;
-		case 5:
+		case INT:
 			buffer = this.binEncode_INT(buffer, (Integer) object);
 			break;
-		case 6:
+		case LONG:
 			buffer = this.binEncode_LONG(buffer, (Long) object);
 			break;
-		case 7:
+		case FLOAT:
 			buffer = this.binEncode_FLOAT(buffer, (Float) object);
 			break;
-		case 8:
+		case DOUBLE:
 			buffer = this.binEncode_DOUBLE(buffer, (Double) object);
 			break;
-		case 9:
+		case UTF_STRING:
 			buffer = this.binEncode_UTF_STRING(buffer, (String) object);
 			break;
-		case 10:
+		case BOOL_ARRAY:
 			buffer = this.binEncode_BOOL_ARRAY(buffer, (Collection<Boolean>) object);
 			break;
-		case 11:
+		case BYTE_ARRAY:
 			buffer = this.binEncode_BYTE_ARRAY(buffer, (byte[]) object);
 			break;
-		case 12:
+		case SHORT_ARRAY:
 			buffer = this.binEncode_SHORT_ARRAY(buffer, (Collection<Short>) object);
 			break;
-		case 13:
+		case INT_ARRAY:
 			buffer = this.binEncode_INT_ARRAY(buffer, (Collection<Integer>) object);
 			break;
-		case 14:
-			buffer = this.binEncode_LONG_ARRAY(buffer, (Collection) object);
+		case LONG_ARRAY:
+			buffer = this.binEncode_LONG_ARRAY(buffer, (Collection<Long>) object);
 			break;
-		case 15:
-			buffer = this.binEncode_FLOAT_ARRAY(buffer, (Collection) object);
+		case FLOAT_ARRAY:
+			buffer = this.binEncode_FLOAT_ARRAY(buffer, (Collection<Float>) object);
 			break;
-		case 16:
-			buffer = this.binEncode_DOUBLE_ARRAY(buffer, (Collection) object);
+		case DOUBLE_ARRAY:
+			buffer = this.binEncode_DOUBLE_ARRAY(buffer, (Collection<Double>) object);
 			break;
-		case 17:
-			buffer = this.binEncode_UTF_STRING_ARRAY(buffer, (Collection) object);
+		case UTF_STRING_ARRAY:
+			buffer = this.binEncode_UTF_STRING_ARRAY(buffer, (Collection<String>) object);
 			break;
-		case 18:
+		case ARRAY:
 			buffer = this.addData(buffer, this.array2binary((CArray) object));
 			break;
-		case 19:
+		case OBJECT:
 			buffer = this.addData(buffer, this.object2binary((CObject) object));
 			break;
-		case 20:
+		case CLASS:
 			buffer = this.addData(buffer, this.object2binary(this.pojo2cbo(object)));
 			break;
 		default:
@@ -523,7 +528,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private DataWrapper binDecode_BOOL_ARRAY(ByteBuffer buffer) throws CCodecException {
 		short arraySize = this.getTypeArraySize(buffer);
-		ArrayList array = new ArrayList();
+		ArrayList<Boolean> array = new ArrayList<Boolean>();
 
 		for (int j = 0; j < arraySize; ++j) {
 			byte boolData = buffer.get();
@@ -554,7 +559,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private DataWrapper binDecode_SHORT_ARRAY(ByteBuffer buffer) throws CCodecException {
 		short arraySize = this.getTypeArraySize(buffer);
-		ArrayList array = new ArrayList();
+		ArrayList<Short> array = new ArrayList<Short>();
 
 		for (int j = 0; j < arraySize; ++j) {
 			short shortValue = buffer.getShort();
@@ -645,46 +650,46 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	}
 
 	private ByteBuffer binEncode_BOOL(ByteBuffer buffer, Boolean value) {
-		byte[] data = new byte[] { (byte) DataType.BOOL.getTypeID(), (byte) (value.booleanValue() ? 1 : 0) };
+		byte[] data = new byte[] { (byte) DataType.BOOL.typeID, (byte) (value.booleanValue() ? 1 : 0) };
 		return this.addData(buffer, data);
 	}
 
 	private ByteBuffer binEncode_BYTE(ByteBuffer buffer, Byte value) {
-		byte[] data = new byte[] { (byte) DataType.BYTE.getTypeID(), value.byteValue() };
+		byte[] data = new byte[] { (byte) DataType.BYTE.typeID, value.byteValue() };
 		return this.addData(buffer, data);
 	}
 
 	private ByteBuffer binEncode_SHORT(ByteBuffer buffer, Short value) {
 		ByteBuffer buf = ByteBuffer.allocate(3);
-		buf.put((byte) DataType.SHORT.getTypeID());
+		buf.put((byte) DataType.SHORT.typeID);
 		buf.putShort(value.shortValue());
 		return this.addData(buffer, buf.array());
 	}
 
 	private ByteBuffer binEncode_INT(ByteBuffer buffer, Integer value) {
 		ByteBuffer buf = ByteBuffer.allocate(5);
-		buf.put((byte) DataType.INT.getTypeID());
+		buf.put((byte) DataType.INT.typeID);
 		buf.putInt(value.intValue());
 		return this.addData(buffer, buf.array());
 	}
 
 	private ByteBuffer binEncode_LONG(ByteBuffer buffer, Long value) {
 		ByteBuffer buf = ByteBuffer.allocate(9);
-		buf.put((byte) DataType.LONG.getTypeID());
+		buf.put((byte) DataType.LONG.typeID);
 		buf.putLong(value.longValue());
 		return this.addData(buffer, buf.array());
 	}
 
 	private ByteBuffer binEncode_FLOAT(ByteBuffer buffer, Float value) {
 		ByteBuffer buf = ByteBuffer.allocate(5);
-		buf.put((byte) DataType.FLOAT.getTypeID());
+		buf.put((byte) DataType.FLOAT.typeID);
 		buf.putFloat(value.floatValue());
 		return this.addData(buffer, buf.array());
 	}
 
 	private ByteBuffer binEncode_DOUBLE(ByteBuffer buffer, Double value) {
 		ByteBuffer buf = ByteBuffer.allocate(9);
-		buf.put((byte) DataType.DOUBLE.getTypeID());
+		buf.put((byte) DataType.DOUBLE.typeID);
 		buf.putDouble(value.doubleValue());
 		return this.addData(buffer, buf.array());
 	}
@@ -692,7 +697,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private ByteBuffer binEncode_UTF_STRING(ByteBuffer buffer, String value) {
 		byte[] stringBytes = value.getBytes();
 		ByteBuffer buf = ByteBuffer.allocate(3 + stringBytes.length);
-		buf.put((byte) DataType.UTF_STRING.getTypeID());
+		buf.put((byte) DataType.UTF_STRING.typeID);
 		buf.putShort((short) stringBytes.length);
 		buf.put(stringBytes);
 		return this.addData(buffer, buf.array());
@@ -700,7 +705,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_BOOL_ARRAY(ByteBuffer buffer, Collection<Boolean> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + value.size());
-		buf.put((byte) DataType.BOOL_ARRAY.getTypeID());
+		buf.put((byte) DataType.BOOL_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator var5 = value.iterator();
 
@@ -714,7 +719,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_BYTE_ARRAY(ByteBuffer buffer, byte[] value) {
 		ByteBuffer buf = ByteBuffer.allocate(5 + value.length);
-		buf.put((byte) DataType.BYTE_ARRAY.getTypeID());
+		buf.put((byte) DataType.BYTE_ARRAY.typeID);
 		buf.putInt(value.length);
 		buf.put(value);
 		return this.addData(buffer, buf.array());
@@ -722,7 +727,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_SHORT_ARRAY(ByteBuffer buffer, Collection<Short> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 2 * value.size());
-		buf.put((byte) DataType.SHORT_ARRAY.getTypeID());
+		buf.put((byte) DataType.SHORT_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator var5 = value.iterator();
 
@@ -736,7 +741,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_INT_ARRAY(ByteBuffer buffer, Collection<Integer> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
-		buf.put((byte) DataType.INT_ARRAY.getTypeID());
+		buf.put((byte) DataType.INT_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator<Integer> var5 = value.iterator();
 
@@ -750,7 +755,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_LONG_ARRAY(ByteBuffer buffer, Collection<Long> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
-		buf.put((byte) DataType.LONG_ARRAY.getTypeID());
+		buf.put((byte) DataType.LONG_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator<Long> var6 = value.iterator();
 
@@ -764,7 +769,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_FLOAT_ARRAY(ByteBuffer buffer, Collection<Float> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
-		buf.put((byte) DataType.FLOAT_ARRAY.getTypeID());
+		buf.put((byte) DataType.FLOAT_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator<Float> var5 = value.iterator();
 
@@ -778,7 +783,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private ByteBuffer binEncode_DOUBLE_ARRAY(ByteBuffer buffer, Collection<Double> value) {
 		ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
-		buf.put((byte) DataType.DOUBLE_ARRAY.getTypeID());
+		buf.put((byte) DataType.DOUBLE_ARRAY.typeID);
 		buf.putShort((short) value.size());
 		Iterator<Double> var6 = value.iterator();
 
@@ -803,7 +808,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 		}
 
 		ByteBuffer byteBuffer = ByteBuffer.allocate(3 + stringDataLen);
-		byteBuffer.put((byte) DataType.UTF_STRING_ARRAY.getTypeID());
+		byteBuffer.put((byte) DataType.UTF_STRING_ARRAY.typeID);
 		byteBuffer.putShort((short) value.size());
 		byte[][] var10 = binStrings;
 		int length = binStrings.length;
@@ -857,7 +862,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 		String classFullName = pojoClazz.getCanonicalName();
 		if (classFullName == null) {
 			throw new IllegalArgumentException("Anonymous classes cannot be serialized!");
-		} else if (!(pojo instanceof SerializableSFSType)) {
+		} else if (!(pojo instanceof SerializableType)) {
 			throw new IllegalStateException("Cannot serialize object: " + pojo + ", type: " + classFullName
 					+ " -- It doesn\'t implement the SerializableSFSType interface");
 		} else {
@@ -933,7 +938,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 				wrapper = new DataWrapper(DataType.ARRAY, this.unrollCollection((Collection) value));
 			} else if (value instanceof Map) {
 				wrapper = new DataWrapper(DataType.OBJECT, this.unrollMap((Map) value));
-			} else if (value instanceof SerializableSFSType) {
+			} else if (value instanceof SerializableType) {
 				wrapper = new DataWrapper(DataType.OBJECT, this.pojo2cbo(value));
 			}
 
@@ -991,7 +996,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 				String e = sfsObj.getUtfString(CLASS_MARKER_KEY);
 				Class theClass = Class.forName(e);
 				pojo = theClass.newInstance();
-				if (!(pojo instanceof SerializableSFSType)) {
+				if (!(pojo instanceof SerializableType)) {
 					throw new IllegalStateException("Cannot deserialize object: " + pojo + ", type: " + e
 							+ " -- It doesn\'t implement the SerializableSFSType interface");
 				} else {
@@ -1106,7 +1111,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	private Object unwrapPojoField(DataWrapper wrapper) {
 		Object obj = null;
 		DataType type = wrapper.getTypeId();
-		if (type.getTypeID() <= DataType.UTF_STRING.getTypeID()) {
+		if (type.typeID <= DataType.UTF_STRING.typeID) {
 			obj = wrapper.getObject();
 		} else if (type == DataType.ARRAY) {
 			obj = this.rebuildArray((IArray) wrapper.getObject());
@@ -1145,17 +1150,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 	}
 
 	public String array2json(List list) {
-		for (Object object : list) {
-
-		}
-		// return JSONArray.p(list).toString();
-		return null;
+		return JSON.toJSONString(list);
 	}
 
 	@Override
 	public String object2json(Map map) {
-		// return JSONObject.pa(map).toString();
-		return null;
+		return JSON.toJSONString(map);
 	}
 
 }

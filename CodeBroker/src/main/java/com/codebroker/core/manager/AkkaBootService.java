@@ -349,6 +349,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codebroker.api.IWorld;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.core.actor.CodeBrokerSystem;
@@ -395,10 +396,11 @@ public class AkkaBootService extends BaseCoreService {
 
 	private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
 
-	public IAreaManager gridLeader;
+	public IAreaManager iAreaManager;
 
 	public IUserManager userManager;
 
+	public IWorld world;
 	@Override
 	public void init(Object obj) {
 		logger.debug("Code Broker Mediator init");
@@ -421,8 +423,8 @@ public class AkkaBootService extends BaseCoreService {
 		/**
 		 * 创建CB系统
 		 */
-		ActorRef codeBrokerAkkaSystem = system.actorOf(Props.create(CodeBrokerSystem.class, system),
-				CodeBrokerSystem.IDENTIFY);
+		ActorRef codeBrokerAkkaSystem = 
+				system.actorOf(Props.create(CodeBrokerSystem.class, system),CodeBrokerSystem.IDENTIFY);
 		codeBrokerAkkaSystem.tell(new CodeBrokerSystem.InitAkkaSystem(), ActorRef.noSender());
 
 	}
@@ -499,11 +501,11 @@ public class AkkaBootService extends BaseCoreService {
 	}
 
 	public IAreaManager getGridLeader() {
-		return gridLeader;
+		return iAreaManager;
 	}
 
 	public void setGridLeader(IAreaManager gridLeader) {
-		this.gridLeader = gridLeader;
+		this.iAreaManager = gridLeader;
 	}
 
 	public IUserManager getUserManager() {

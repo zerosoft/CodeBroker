@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.codebroker.api.IoSession;
 import com.codebroker.api.internal.ByteArrayPacket;
-import com.codebroker.core.actor.WorldActor.UserReconnectionTry;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.setting.SystemMessageType;
@@ -18,6 +17,8 @@ import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.session.UserConnect2Server;
 import com.message.thrift.actor.user.ReciveIosessionMessage;
+import com.message.thrift.actor.world.UserConnect2World;
+import com.message.thrift.actor.world.UserReconnectionTry;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -78,20 +79,31 @@ public class SessionActor extends AbstractActor {
 			// ActorSelection[Anchor(akka://AVALON/user/NettyIoSession1#883410430),
 			// Path(/AvalonWorld)]
 			ActorSelection actorSelection = getContext().actorSelection("/user/" + WorldActor.IDENTIFY);
+			/**
+			 * 处理玩家登入
+			 */
 			if (message.getOpCode() == SystemMessageType.USER_LOGIN.id) {
 				try {
 					CS_USER_CONNECT_TO_SERVER login = CS_USER_CONNECT_TO_SERVER.parseFrom(message.getRawData());
-					WorldActor.UserConnect2Server connect2Server = new WorldActor.UserConnect2Server(login.getName(),
-							login.getParams());
-					actorSelection.tell(connect2Server, getSelf());
+					
+					UserConnect2World userConnect2World=new UserConnect2World(login.getName(),login.getParams());
+					byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_USER_CONNECT_2_WORLD, userConnect2World);
+					actorSelection.tell(actorMessageWithSubClass, getSelf());
+					
 				} catch (InvalidProtocolBufferException e) {
 					e.printStackTrace();
 				}
 
-			} else if (message.getOpCode() == SystemMessageType.USER_RECONNECTION_TRY.id) {
+			}
+			/**
+			 * 处理用户重新连接
+			*/ 
+			else if (message.getOpCode() == SystemMessageType.USER_RECONNECTION_TRY.id) {
 				// TODO 协议
-				UserReconnectionTry connect2Server = new UserReconnectionTry("");
-				actorSelection.tell(connect2Server, getSelf());
+				UserReconnectionTry reconnectionTry = new UserReconnectionTry("");
+				byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_USER_RECONNECTION_TRY, reconnectionTry);
+				
+				actorSelection.tell(actorMessageWithSubClass, getSelf());
 			}
 
 			logger.debug("LocalTransportActor no bindingConnectionSession onReceive msg");

@@ -148,6 +148,7 @@ public class CArray implements IArray {
 		return ((wrapper != null) ? (String) wrapper.getObject() : null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Boolean> getBoolArray(int index) {
 		DataWrapper wrapper = this.dataHolder.get(index);
 		return (wrapper != null ? (Collection<Boolean>) wrapper.getObject() : null);
@@ -175,31 +176,37 @@ public class CArray implements IArray {
 		return intCollection;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Short> getShortArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		return ((wrapper != null) ? (Collection<Short>) wrapper.getObject() : null);
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	public Collection<Integer> getIntArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		return ((wrapper != null) ? (Collection<Integer>) wrapper.getObject() : null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Long> getLongArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		return ((wrapper != null) ? (Collection<Long>) wrapper.getObject() : null);
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	public Collection<Float> getFloatArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		return ((wrapper != null) ? (Collection<Float>) wrapper.getObject() : null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Double> getDoubleArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		return ((wrapper != null) ? (Collection<Double>) wrapper.getObject() : null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<String> getUtfStringArray(int index) {
 		DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
 		Collection<String> object = (Collection<String>) wrapper.getObject();

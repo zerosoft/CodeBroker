@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actor.ServerCluserActorProxy.State;
+import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
 import com.google.common.collect.Queues;
@@ -83,7 +84,10 @@ public class CluserActor extends AbstractActor {
 				logger.info("unknow message " + msg);
 				break;
 			}
-		}).matchAny(msg -> {
+		}).match(IObject.class, msg->{
+			System.out.println("woddeede "+msg.getUtfString("hello"));
+		})
+			.matchAny(msg -> {
 			logger.info("unknow message " + msg);
 		}).build();
 	}

@@ -9,10 +9,13 @@ import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.AreaActor;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.util.AkkaMediator;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.UserEneterArea;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -29,6 +32,7 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 
 	@Override
 	public boolean enterArea(IUser user) throws Exception {
+		UserEneterArea eneterArea=new UserEneterArea(user.getUserId());
 		return (boolean) AkkaMediator.getCallBak(getActorRef(), new AreaActor.EnterArea(user));
 	}
 
@@ -78,17 +82,14 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 	}
 
 	@Override
-	public void broadCastAllUser(String jsonString) {
-		getActorRef().tell(new AreaActor.BroadCastAllUser(jsonString), ActorRef.noSender());
+	public void broadCastAllUser(IObject object) {
+		getActorRef().tell(object, ActorRef.noSender());
 	}
 
 	@Override
-	public void broadCastUsers(String jsonString, Collection<IUser> users) {
+	public void broadCastUsers(IObject object, Collection<IUser> users) {
 		for (IUser iUser : users) {
-			CodeEvent codeEvent = new CodeEvent();
-			codeEvent.setTopic(CodeBrokerEvent.AREA_EVENT);
-			codeEvent.setParameter(jsonString);
-			iUser.dispatchEvent(codeEvent);
+			iUser.dispatchEvent(object);
 		}
 	}
 
@@ -97,6 +98,7 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 		getActorRef().tell(PoisonPill.getInstance(), ActorRef.noSender());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<IUser> getPlayers() throws Exception {
 		return (List<IUser>) AkkaMediator.getCallBak(getActorRef(), new AreaActor.GetPlayers());

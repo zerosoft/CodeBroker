@@ -1,7 +1,16 @@
 package com.codebroker.api.event;
 
-public interface IEventListener {
+import com.codebroker.core.data.IObject;
 
-	public void handleEvent(IEvent event);
+public interface IEventListener {
+	/**
+	 * 分发事件
+	 * @param topic
+	 * @param iObject
+	 */
+	public void handleEvent(String topic,IObject iObject);
 
 }
+
+
+

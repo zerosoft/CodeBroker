@@ -6,7 +6,11 @@ import java.util.UUID;
 import com.codebroker.api.IUser;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.core.actor.UserManagerActor;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
+import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.usermanager.CreateUser;
+import com.message.thrift.actor.usermanager.RemoveUser;
 
 import akka.actor.ActorRef;
 
@@ -22,13 +26,18 @@ public class UserManager implements IUserManager {
 
 	@Override
 	public IUser createUser(boolean npc) throws Exception {
-		return (IUser) AkkaMediator.getCallBak(managerRef,
-				new UserManagerActor.CreateUser(npc, UUID.randomUUID().toString()));
+		CreateUser createUser=new CreateUser(npc, UUID.randomUUID().toString());
+		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER, createUser);		
+		
+		return (IUser) AkkaMediator.getCallBak(managerRef,actorMessageWithSubClass);
 	}
 
 	@Override
 	public void removeUser(String userId) {
-		managerRef.tell(new UserManagerActor.RemoveUser(userId), ActorRef.noSender());
+		RemoveUser removeUser=new RemoveUser(userId);
+		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);		
+		
+		managerRef.tell(actorMessageWithSubClass, ActorRef.noSender());
 	}
 
 	public ActorRef getManagerRef() {

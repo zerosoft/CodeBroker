@@ -341,6 +341,7 @@ Public License instead of this License.
  */
 package com.codebroker.api.internal;
 
+import com.codebroker.api.IWorld;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 
@@ -370,7 +371,10 @@ public interface ManagerLocator {
 	 */
 	ActorSystem getActorSystem();
 
+	IWorld getWorld();
+
 	IAreaManager getAreaManager();
 
 	IUserManager getUserManager();
+
 }

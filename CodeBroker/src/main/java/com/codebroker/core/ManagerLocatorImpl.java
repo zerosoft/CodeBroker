@@ -341,6 +341,7 @@ Public License instead of this License.
  */
 package com.codebroker.core;
 
+import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.ManagerLocator;
 import com.codebroker.api.manager.IAreaManager;
@@ -379,6 +380,11 @@ class ManagerLocatorImpl implements ManagerLocator {
 	@Override
 	public IUserManager getUserManager() {
 		return ContextResolver.getUserManager();
+	}
+
+	@Override
+	public IWorld getWorld() {
+		return ContextResolver.getWorld();
 	}
 
 }

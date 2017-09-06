@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import com.codebroker.api.event.IEventDispatcher;
+import com.codebroker.core.data.IObject;
 
 /**
  * 用户操作接口
@@ -22,12 +23,6 @@ public interface IUser extends IEventDispatcher {
 
 	public boolean isConnected();
 
-	public Object getProperty(Object key);
-
-	public void setProperty(Object key, Object value);
-
-	public boolean containsProperty(Object key);
-
-	public void removeProperty(Object key);
+	public IObject getIObject();
 
 }

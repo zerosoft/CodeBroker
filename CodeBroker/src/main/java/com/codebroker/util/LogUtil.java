@@ -3,8 +3,7 @@ package com.codebroker.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codebroker.core.actor.ELKLogActor;
-import com.codebroker.core.actor.ELKLogActor.ELKSystemLog;
+import com.codebroker.core.data.CObject;
 
 import akka.actor.ActorRef;
 
@@ -21,10 +20,10 @@ public class LogUtil {
 	public static void snedELKLogMessage(String clazzName, String message) {
 		try {
 			if (elkLog != null) {
-				ELKLogActor.ELKSystemLog log = new ELKSystemLog();
-				log.clazzName = clazzName;
-				log.message = message;
-				elkLog.tell(log, ActorRef.noSender());
+				CObject cObject=CObject.newInstance();
+				cObject.putUtfString("c", clazzName);
+				cObject.putUtfString("m", message);
+				elkLog.tell(cObject, ActorRef.noSender());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

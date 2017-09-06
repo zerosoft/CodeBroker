@@ -6,10 +6,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.codebroker.core.actor.CodeBrokerSystem;
-import com.codebroker.core.actor.UserManagerActor;
 import com.codebroker.core.actor.AreaActor;
-import com.codebroker.core.actor.AreaManagerActor;
+import com.codebroker.core.actor.UserManagerActor;
 import com.codebroker.core.entities.Area;
 import com.codebroker.core.manager.UserManager;
 
@@ -41,8 +39,11 @@ public class TestGridActor {
 				System.out.println(nmanager.path().toString());
 				
 				Area proxy=new Area();
-				final ActorRef actorOf = system.actorOf(Props.create(AreaActor.class,proxy));
-				  
+				final ActorRef actorOf = system.actorOf(Props.create(AreaActor.class,nmanager));
+				
+				byte[] bb="hello".getBytes();
+				
+				actorOf.tell(bb, ActorRef.noSender());
 			}};
 	}
 }

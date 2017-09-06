@@ -1,11 +1,12 @@
 package com.codebroker;
 
+import java.io.File;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.codebroker.core.actor.CodeBrokerSystem;
-import com.codebroker.util.AkkaMediator;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -13,9 +14,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import static org.junit.Assert.*;
-
-import java.io.File;
 
 
 public class CodeBrokerTest{

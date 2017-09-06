@@ -9,7 +9,9 @@ import org.apache.thrift.TException;
 import com.codebroker.api.IUser;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.EventDispatcher;
-import com.codebroker.core.actor.UserActor;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.CObjectLite;
+import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
@@ -32,7 +34,7 @@ public class User extends EventDispatcher implements IUser, Serializable {
 
 	private boolean npc;
 
-	private final ConcurrentMap<Object, Object> properties = new ConcurrentHashMap<Object, Object>();
+	private final IObject iObject = CObjectLite.newInstance();
 
 	public String getUserId() {
 		return userId;
@@ -69,7 +71,6 @@ public class User extends EventDispatcher implements IUser, Serializable {
 	@Override
 	public void disconnect() {
 		try {
-			// new UserActor.Disconnect()
 			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_DISCONNECT), ActorRef.noSender());
 		} catch (TException e) {
 			e.printStackTrace();
@@ -95,25 +96,11 @@ public class User extends EventDispatcher implements IUser, Serializable {
 
 	}
 
-
 	@Override
-	public Object getProperty(Object key) {
-		return properties.get(key);
+	public IObject getIObject() {
+		return iObject;
 	}
 
-	@Override
-	public void setProperty(Object key, Object value) {
-		properties.put(key, value);
-	}
 
-	@Override
-	public boolean containsProperty(Object key) {
-		return properties.containsKey(key);
-	}
-
-	@Override
-	public void removeProperty(Object key) {
-		properties.remove(key);
-	}
 
 }
