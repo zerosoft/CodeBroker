@@ -14,6 +14,7 @@ import com.codebroker.core.entities.User;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.user.ReciveIosessionMessage;
 
 import akka.actor.AbstractActor;
@@ -69,7 +70,7 @@ public class UserActor extends AbstractActor {
 			case USER_IS_CONNECTED:
 				getSender().tell(ioSessionRef == null, getSelf());
 				break;
-			case USER_REUSER_BINDUSER_IOSESSION_ACTOR:
+			case USER_RE_BINDUSER_IOSESSION_ACTOR:
 				// 从新绑定
 				this.ioSessionRef = getSender();
 				break;
@@ -80,7 +81,8 @@ public class UserActor extends AbstractActor {
 
 			case USER_ENTER_AREA:
 				if (inArea != null) {
-					inArea.tell(new AreaActor.LeaveArea(userId), getSelf());
+					LeaveArea leaveArea=new LeaveArea(userId);
+					inArea.tell(ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
 				}
 				inArea = getSender();
 				if (inGrid != null) {
@@ -131,8 +133,8 @@ public class UserActor extends AbstractActor {
 	private void sendMessage(ByteBuffer byteBuffer) {
 		ActorMessage actorMessage = new ActorMessage();
 		actorMessage.messageRaw = byteBuffer;
-		byte[] bs = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET,
-				actorMessage);
+		byte[] bs = ThriftSerializerFactory
+				.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET,actorMessage);
 		ioSessionRef.tell(bs, getSelf());
 	}
 

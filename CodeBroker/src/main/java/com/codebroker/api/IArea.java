@@ -21,20 +21,7 @@ public interface IArea extends IEventDispatcher {
 	 */
 	public String getId() throws Exception;
 
-	/**
-	 * 创建一个NPC
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public IUser createNPC() throws Exception;
 
-	/**
-	 * 销毁一个NPC
-	 * 
-	 * @param npcId
-	 */
-	public void removeNPC(String npcId);
 
 	/**
 	 * 进入区域
@@ -43,7 +30,7 @@ public interface IArea extends IEventDispatcher {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean enterArea(IUser user) throws Exception;
+	public void enterArea(IUser user) throws Exception;
 
 	/**
 	 * 离开区域

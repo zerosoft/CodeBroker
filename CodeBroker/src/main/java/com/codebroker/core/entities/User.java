@@ -1,15 +1,12 @@
 package com.codebroker.core.entities;
 
-import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.thrift.TException;
 
 import com.codebroker.api.IUser;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.EventDispatcher;
-import com.codebroker.core.data.CObject;
+import com.codebroker.core.actor.UserManagerActor;
 import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
@@ -26,35 +23,27 @@ import akka.actor.ActorRef;
  * @author xl
  *
  */
-public class User extends EventDispatcher implements IUser, Serializable {
+public class User extends EventDispatcher implements IUser{
 
-	private static final long serialVersionUID = -2129345416143459874L;
-
-	private String userId;
-
-	private boolean npc;
 
 	private final IObject iObject = CObjectLite.newInstance();
 
 	public String getUserId() {
-		return userId;
+		return iObject.getUtfString("userId");
 	}
 
 	public void setUserId(String userId) {
-		this.userId = userId;
+		iObject.putUtfString("userId",userId);
 	}
 
 	public boolean isNpc() {
-		return npc;
+		return getUserId().startsWith(UserManagerActor.NPC_PRFIX);
 	}
 
-	public void setNpc(boolean npc) {
-		this.npc = npc;
-	}
 
 	@Override
 	public String getName() {
-		return null;
+		return iObject.getUtfString("userName");
 	}
 
 	@Override
@@ -89,7 +78,7 @@ public class User extends EventDispatcher implements IUser, Serializable {
 
 	public void rebindIoSession(ActorRef actorRef) {
 		try {
-			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_REUSER_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
+			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_RE_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
 		} catch (TException e) {
 			e.printStackTrace();
 		}

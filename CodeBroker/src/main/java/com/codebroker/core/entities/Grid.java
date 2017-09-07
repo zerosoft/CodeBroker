@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
+import com.codebroker.api.event.EventTypes;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.GridActor;
-import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.util.AkkaMediator;
@@ -44,11 +44,13 @@ public class Grid extends EventDispatcher implements IGrid {
 
 	@Override
 	public void broadCastAllUser(IObject object) {
+		object.putInt("e", EventTypes.GRID_BROAD_CAST);
 		getActorRef().tell(object, ActorRef.noSender());
 	}
 
 	@Override
 	public void broadCastUsers(IObject object, Collection<IUser> users) {
+		object.putInt("e", EventTypes.GRID_BROAD_CAST);
 		for (IUser iUser : users) {
 			iUser.dispatchEvent(object);
 		}

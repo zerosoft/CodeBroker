@@ -2,7 +2,6 @@ package com.codebroker.core.actor;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,18 +14,16 @@ import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.cluster.ClusterDistributedPub;
+import com.codebroker.core.local.WorldCreateNPC;
 import com.codebroker.core.manager.AkkaBootService;
 import com.codebroker.core.manager.AreaManager;
 import com.codebroker.core.manager.UserManager;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
-import com.google.common.collect.Lists;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.areamanager.CreateArea;
-import com.message.thrift.actor.session.UserConnect2Server;
 import com.message.thrift.actor.usermanager.CreateUserWithSession;
-import com.message.thrift.actor.world.CreateUserResult;
 import com.message.thrift.actor.world.HandShake;
 import com.message.thrift.actor.world.NewServerComeIn;
 import com.message.thrift.actor.world.UserConnect2World;
@@ -46,7 +43,10 @@ import akka.japi.pf.ReceiveBuilder;
  *
  */
 public class WorldActor extends AbstractActor {
-
+	
+	public static final String USER_PRFIX = "USER-";
+	public static final String NPC_PRFIX = "NPC-";
+	
 	public static final String IDENTIFY = WorldActor.class.getSimpleName().toString();
 	/**
 	 * 保存服务器WorldActor地址的
@@ -58,6 +58,8 @@ public class WorldActor extends AbstractActor {
 	private ActorRef areaManagerRef;
 	//用户管理器的地址引用
 	private ActorRef userManagerRef;
+	//NPC用户管理器的地址引用
+	private ActorRef npcManagerRef;
 
 	private static Logger logger = LoggerFactory.getLogger("WorldActor");
 
@@ -88,20 +90,6 @@ public class WorldActor extends AbstractActor {
 						.getActorMessageWithSubClass(Operation.AREA_MANAGER_CREATE_AREA, createArea);
 				areaManagerRef.tell(actorMessageWithSubClass, getSender());
 				break;
-			case WORLD_CREATE_USER_RESULT:
-				CreateUserResult createUserResult = new CreateUserResult();
-				ThriftSerializerFactory.deserialize(createUserResult, actorMessage.messageRaw);
-				if (createUserResult.result) {
-					getSender().tell(ThriftSerializerFactory.getActorMessageWithSubClass(
-							Operation.SESSION_USER_CONNECT_TO_SERVER, new UserConnect2Server(true)), getSelf());
-				} else {
-					getSender().tell(
-							ThriftSerializerFactory.getActorMessageWithSubClass(
-									Operation.SESSION_USER_CONNECT_TO_SERVER, new UserConnect2Server(false)),
-							getSelf());
-				}
-
-				break;
 			case WORLD_NER_SERVER_COMING:
 				NewServerComeIn newServerComeIn=new NewServerComeIn();
 				ThriftSerializerFactory.deserialize(newServerComeIn, actorMessage.messageRaw);
@@ -115,7 +103,13 @@ public class WorldActor extends AbstractActor {
 			default:
 				break;
 			}
-		}).match(String.class, msg -> {
+		})
+		//转发给用户管理器
+		.match(WorldCreateNPC.class, msg->{
+			userManagerRef.tell(msg, getSelf());
+		})
+		
+		.match(String.class, msg -> {
 			processStringMessage(msg);
 		}).match(HelloWorld.class, msg -> {
 			System.err.println(getSender().path().toString());

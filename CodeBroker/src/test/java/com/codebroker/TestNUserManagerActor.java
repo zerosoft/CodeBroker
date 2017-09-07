@@ -1,27 +1,17 @@
 package com.codebroker;
 
-import java.util.List;
-import java.util.UUID;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.codebroker.api.IUser;
 import com.codebroker.core.actor.CodeBrokerSystem;
 import com.codebroker.core.actor.UserManagerActor;
-import com.codebroker.core.actor.UserManagerActor.GetUserList;
 import com.codebroker.core.manager.UserManager;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.pattern.Patterns;
 import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 public class TestNUserManagerActor {
 	static ActorSystem system;

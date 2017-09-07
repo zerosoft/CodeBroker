@@ -11,15 +11,11 @@ import com.codebroker.api.IUser;
 
 public interface IUserManager {
 
-	public IUser createUser(boolean npc) throws Exception;
+	public void createUser(boolean npc) throws Exception;
 
 	public void removeUser(String userId);
 
 	public IUser getPlayerUser(String userId) throws Exception;
-
-	public List<IUser> getPlayerUser() throws Exception;
-
-	public List<IUser> getNPCUser() throws Exception;
 
 	public List<IUser> getAllUser() throws Exception;
 }

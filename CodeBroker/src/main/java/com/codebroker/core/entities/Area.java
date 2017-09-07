@@ -1,20 +1,20 @@
 package com.codebroker.core.entities;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 import com.codebroker.api.IArea;
 import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
+import com.codebroker.api.event.EventTypes;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.AreaActor;
-import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
+import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
-import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.area.UserEneterArea;
 
 import akka.actor.ActorRef;
@@ -26,14 +26,14 @@ import akka.actor.PoisonPill;
  * @author xl
  *
  */
-public class Area extends EventDispatcher implements IArea, Serializable {
-
-	private static final long serialVersionUID = -1706402463773889231L;
+public class Area extends EventDispatcher implements IArea {
 
 	@Override
-	public boolean enterArea(IUser user) throws Exception {
-		UserEneterArea eneterArea=new UserEneterArea(user.getUserId());
-		return (boolean) AkkaMediator.getCallBak(getActorRef(), new AreaActor.EnterArea(user));
+	public void enterArea(IUser user) throws Exception {
+		UserEneterArea eneterArea = new UserEneterArea(user.getUserId());
+		getActorRef().tell(
+				ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_ENTER_AREA, eneterArea),
+				getActorRef());
 	}
 
 	@Override
@@ -44,20 +44,13 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 		throw new CodeBrokerException("NO");
 	}
 
-	@Override
-	public IUser createNPC() throws Exception {
-		ActorMessage message = new ActorMessage(Operation.AREA_CREATE_NPC);
-		return (IUser) AkkaMediator.getCallBak(getActorRef(), message);
-	}
 
 	@Override
 	public void leaveArea(String userID) {
-		getActorRef().tell(new AreaActor.LeaveArea(userID), ActorRef.noSender());
-	}
-
-	@Override
-	public void removeNPC(String npcId) {
-		getActorRef().tell(new AreaActor.LeaveArea(npcId), ActorRef.noSender());
+		LeaveArea leaveArea = new LeaveArea(userID);
+		getActorRef().tell(
+				ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea),
+				ActorRef.noSender());
 	}
 
 	@Override
@@ -83,11 +76,13 @@ public class Area extends EventDispatcher implements IArea, Serializable {
 
 	@Override
 	public void broadCastAllUser(IObject object) {
+		object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
 		getActorRef().tell(object, ActorRef.noSender());
 	}
 
 	@Override
 	public void broadCastUsers(IObject object, Collection<IUser> users) {
+		object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
 		for (IUser iUser : users) {
 			iUser.dispatchEvent(object);
 		}

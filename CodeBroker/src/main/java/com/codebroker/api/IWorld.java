@@ -5,5 +5,5 @@ package com.codebroker.api;
  *
  */
 public interface IWorld {
-
+	public void createNPC(NPCControl control);
 }

@@ -5,7 +5,6 @@ import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.RemoveEventListener;
-import com.codebroker.core.actor.AreaActor;
 import com.codebroker.core.data.IObject;
 import com.codebroker.exception.NoActorRefException;
 import com.codebroker.util.AkkaMediator;
