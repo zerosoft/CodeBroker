@@ -123,8 +123,6 @@ public class FileLoad {
 				dataModel.put("imports", string.getValue().imports);
 				dataModel.put("FieldSequence", string.getValue().pbInfos);
 				dataModel.put("key", messageKey.get(string.getKey() + "_VALUE"));
-				System.out.println(messageKey.get(string.getKey() + "_VALUE"));
-				System.out.println(string.getKey() + "_VALUE");
 				Util.isExist(BEAN_PATH + string.getValue().parName.toLowerCase() + "\\"
 						+ Util.getJavaName(string.getKey()) + "Bean.java");
 				Writer out = new OutputStreamWriter(
@@ -230,7 +228,6 @@ public class FileLoad {
 											+ java.lang.reflect.Modifier.STATIC + java.lang.reflect.Modifier.FINAL)) {
 										messageKey.put(string4.getName(),string4.getDeclaringClass().getName().replaceAll("\\$", ".") + "."
 														+ string4.getName());
-										System.out.println(string4.getName()+"put key {}"+string4.getDeclaringClass().getName().replaceAll("\\$", ".") + "."+ string4.getName());
 									}
 								}
 							}

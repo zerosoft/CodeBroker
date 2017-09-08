@@ -263,63 +263,71 @@ public final class Message {
        */
       CS_CHAT_PRV(2, 103),
       /**
+       * <code>CS_CREATE_USER = 117;</code>
+       */
+      CS_CREATE_USER(3, 117),
+      /**
        * <code>CS_ENTER_AREA = 104;</code>
        */
-      CS_ENTER_AREA(3, 104),
+      CS_ENTER_AREA(4, 104),
       /**
        * <code>CS_ENTER_GRID = 105;</code>
        */
-      CS_ENTER_GRID(4, 105),
+      CS_ENTER_GRID(5, 105),
       /**
        * <code>CS_GET_AREA_LIST = 106;</code>
        */
-      CS_GET_AREA_LIST(5, 106),
+      CS_GET_AREA_LIST(6, 106),
       /**
        * <code>CS_GET_GRID_LIST = 107;</code>
        */
-      CS_GET_GRID_LIST(6, 107),
+      CS_GET_GRID_LIST(7, 107),
       /**
        * <code>CS_LOGIN = 108;</code>
        */
-      CS_LOGIN(7, 108),
+      CS_LOGIN(8, 108),
       /**
        * <code>CS_REGISTER = 109;</code>
        */
-      CS_REGISTER(8, 109),
+      CS_REGISTER(9, 109),
       /**
        * <code>SC_CHAT = 110;</code>
        */
-      SC_CHAT(9, 110),
+      SC_CHAT(10, 110),
       /**
        * <code>SC_CHAT_PRV = 111;</code>
        */
-      SC_CHAT_PRV(10, 111),
+      SC_CHAT_PRV(11, 111),
+      /**
+       * <code>SC_CREATE_USER = 118;</code>
+       */
+      SC_CREATE_USER(12, 118),
       /**
        * <code>SC_ENTER_AREA = 112;</code>
        */
-      SC_ENTER_AREA(11, 112),
+      SC_ENTER_AREA(13, 112),
       /**
        * <code>SC_ENTER_GRID = 113;</code>
        */
-      SC_ENTER_GRID(12, 113),
+      SC_ENTER_GRID(14, 113),
       /**
        * <code>SC_GET_AREA_LIST = 114;</code>
        */
-      SC_GET_AREA_LIST(13, 114),
+      SC_GET_AREA_LIST(15, 114),
       /**
        * <code>SC_GET_GRID_LIST = 115;</code>
        */
-      SC_GET_GRID_LIST(14, 115),
+      SC_GET_GRID_LIST(16, 115),
       /**
        * <code>SC_LOGIN = 116;</code>
        */
-      SC_LOGIN(15, 116),
+      SC_LOGIN(17, 116),
+      ;
+
       /**
        * <code>SC_REGISTER = 117;</code>
        */
-      SC_REGISTER(16, 117),
-      ;
-
+      public static final MessageKey SC_REGISTER = CS_CREATE_USER;
       /**
        * <code>PB = 101;</code>
        */
@@ -332,6 +340,10 @@ public final class Message {
        * <code>CS_CHAT_PRV = 103;</code>
        */
       public static final int CS_CHAT_PRV_VALUE = 103;
+      /**
+       * <code>CS_CREATE_USER = 117;</code>
+       */
+      public static final int CS_CREATE_USER_VALUE = 117;
       /**
        * <code>CS_ENTER_AREA = 104;</code>
        */
@@ -365,6 +377,10 @@ public final class Message {
        */
       public static final int SC_CHAT_PRV_VALUE = 111;
       /**
+       * <code>SC_CREATE_USER = 118;</code>
+       */
+      public static final int SC_CREATE_USER_VALUE = 118;
+      /**
        * <code>SC_ENTER_AREA = 112;</code>
        */
       public static final int SC_ENTER_AREA_VALUE = 112;
@@ -397,6 +413,7 @@ public final class Message {
           case 101: return PB;
           case 102: return CS_CHAT;
           case 103: return CS_CHAT_PRV;
+          case 117: return CS_CREATE_USER;
           case 104: return CS_ENTER_AREA;
           case 105: return CS_ENTER_GRID;
           case 106: return CS_GET_AREA_LIST;
@@ -405,12 +422,12 @@ public final class Message {
           case 109: return CS_REGISTER;
           case 110: return SC_CHAT;
           case 111: return SC_CHAT_PRV;
+          case 118: return SC_CREATE_USER;
           case 112: return SC_ENTER_AREA;
           case 113: return SC_ENTER_GRID;
           case 114: return SC_GET_AREA_LIST;
           case 115: return SC_GET_GRID_LIST;
           case 116: return SC_LOGIN;
-          case 117: return SC_REGISTER;
           default: return null;
         }
       }
@@ -440,7 +457,9 @@ public final class Message {
         return com.message.protocol.Message.PB.getDescriptor().getEnumTypes().get(1);
       }
 
-      private static final MessageKey[] VALUES = values();
+      private static final MessageKey[] VALUES = {
+        PB, CS_CHAT, CS_CHAT_PRV, CS_CREATE_USER, CS_ENTER_AREA, CS_ENTER_GRID, CS_GET_AREA_LIST, CS_GET_GRID_LIST, CS_LOGIN, CS_REGISTER, SC_CHAT, SC_CHAT_PRV, SC_CREATE_USER, SC_ENTER_AREA, SC_ENTER_GRID, SC_GET_AREA_LIST, SC_GET_GRID_LIST, SC_LOGIN, SC_REGISTER, 
+      };
 
       public static MessageKey valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
@@ -693,7 +712,7 @@ public final class Message {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\032system/pb_messagekey.proto\"\332\004\n\002PB\"\236\002\n\t" +
+      "\n\032system/pb_messagekey.proto\"\202\005\n\002PB\"\236\002\n\t" +
       "SystemKey\022\035\n\031CS_USER_CONNECT_TO_SERVER\020\001" +
       "\022%\n!SC_USER_CONNECT_TO_SERVER_SUCCESS\020\002\022" +
       "\"\n\036SC_USER_CONNECT_TO_SERVER_FAIL\020\003\022\026\n\022C" +
@@ -701,11 +720,12 @@ public final class Message {
       "ION_TRY\020\005\022 \n\034SC_USER_RECONNECTION_SUCCES" +
       "S\020\006\022\035\n\031SC_USER_RECONNECTION_FAIL\020\007\022\027\n\023CS" +
       "_USER_ENTER_WORLD\020\010\022\027\n\023SC_USER_ENTER_WOR" +
-      "LD\020\t\"\262\002\n\nMessageKey\022\006\n\002PB\020e\022\013\n\007CS_CHAT\020f" +
-      "\022\017\n\013CS_CHAT_PRV\020g\022\021\n\rCS_ENTER_AREA\020h\022\021\n\r",
-      "CS_ENTER_GRID\020i\022\024\n\020CS_GET_AREA_LIST\020j\022\024\n" +
-      "\020CS_GET_GRID_LIST\020k\022\014\n\010CS_LOGIN\020l\022\017\n\013CS_" +
-      "REGISTER\020m\022\013\n\007SC_CHAT\020n\022\017\n\013SC_CHAT_PRV\020o" +
+      "LD\020\t\"\332\002\n\nMessageKey\022\006\n\002PB\020e\022\013\n\007CS_CHAT\020f" +
+      "\022\017\n\013CS_CHAT_PRV\020g\022\022\n\016CS_CREATE_USER\020u\022\021\n",
+      "\rCS_ENTER_AREA\020h\022\021\n\rCS_ENTER_GRID\020i\022\024\n\020C" +
+      "S_GET_AREA_LIST\020j\022\024\n\020CS_GET_GRID_LIST\020k\022" +
+      "\014\n\010CS_LOGIN\020l\022\017\n\013CS_REGISTER\020m\022\013\n\007SC_CHA" +
+      "T\020n\022\017\n\013SC_CHAT_PRV\020o\022\022\n\016SC_CREATE_USER\020v" +
       "\022\021\n\rSC_ENTER_AREA\020p\022\021\n\rSC_ENTER_GRID\020q\022\024" +
       "\n\020SC_GET_AREA_LIST\020r\022\024\n\020SC_GET_GRID_LIST" +
       "\020s\022\014\n\010SC_LOGIN\020t\022\017\n\013SC_REGISTER\020uB\037\n\024com" +

@@ -75,3 +75,12 @@ message CS_ENTER_GRID{
 message SC_ENTER_GRID{
   required string message = 1;
 }
+
+message CS_CREATE_USER{
+	required string name =1;
+}
+
+message SC_CREATE_USER{
+	required string states =1;
+}
+
