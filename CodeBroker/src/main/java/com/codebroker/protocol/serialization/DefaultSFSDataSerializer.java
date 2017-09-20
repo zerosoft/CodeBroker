@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.codebroker.api.event.Event;
 import com.codebroker.core.data.CArray;
 import com.codebroker.core.data.CArrayLite;
 import com.codebroker.core.data.CObject;
@@ -45,6 +46,8 @@ import com.codebroker.core.data.IArray;
 import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CCodecException;
 import com.codebroker.exception.CRuntimeException;
+import com.codebroker.protocol.ThriftSerializerFactory;
+import com.message.thrift.actor.event.RemoteEventMessage;
 
 public class DefaultSFSDataSerializer implements IDataSerializer {
 
@@ -55,7 +58,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
 	private static final String FIELD_NAME_KEY = "N";
 	private static final String FIELD_VALUE_KEY = "V";
-
+	private static ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	private static DefaultSFSDataSerializer instance = new DefaultSFSDataSerializer();
 	private static int BUFFER_CHUNK_SIZE = 512;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -71,6 +74,32 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 		return 255 & b;
 	}
 
+	public Event binary2Event(byte[] data) {
+		Event event=new Event();
+		RemoteEventMessage eventMessage = thriftSerializerFactory.getEventMessage(data);
+		event.topic = eventMessage.topic;
+		byte[] bytes=new byte[eventMessage.iobject.remaining()];
+		eventMessage.iobject.get(bytes);
+		CObject cObject=CObject.newFromBinaryData(bytes);
+		event.message = cObject;
+		return event;
+	}
+	
+	
+	public byte[] Event2binary(Event event) {
+		RemoteEventMessage eventMessage=new RemoteEventMessage();
+		eventMessage.topic=event.topic;
+		byte[] binary = event.message.toBinary();
+		ByteBuffer buffer=ByteBuffer.allocate(binary.length);
+		buffer.put(binary);
+		buffer.flip();
+		eventMessage.iobject=buffer;
+		
+		byte[] deserializeEventMessage = thriftSerializerFactory.deserializeEventMessage(eventMessage);
+		return deserializeEventMessage;
+	}
+	
+	
 	public IArray binary2array(byte[] data) {
 		if (data.length < 3) {
 			throw new IllegalStateException(

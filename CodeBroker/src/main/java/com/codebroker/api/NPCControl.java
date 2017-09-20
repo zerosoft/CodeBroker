@@ -1,5 +1,7 @@
 package com.codebroker.api;
 
+import com.codebroker.core.data.IObject;
+
 public interface NPCControl {
 	/**
 	 * 初始化
@@ -8,7 +10,7 @@ public interface NPCControl {
 	/**
 	 * 执行
 	 */
-	public void execute();
+	public void execute(IObject iObject);
 	/**
 	 * 销毁
 	 */

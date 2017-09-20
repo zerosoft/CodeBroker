@@ -21,8 +21,6 @@ public interface IArea extends IEventDispatcher {
 	 */
 	public String getId() throws Exception;
 
-
-
 	/**
 	 * 进入区域
 	 * 
@@ -71,8 +69,10 @@ public interface IArea extends IEventDispatcher {
 	 * @throws Exception
 	 */
 	public Collection<IGrid> getAllGrid() throws Exception;
+
 	/**
 	 * 获得当前区域里的所有玩家
+	 * 
 	 * @return
 	 * @throws Exception
 	 */

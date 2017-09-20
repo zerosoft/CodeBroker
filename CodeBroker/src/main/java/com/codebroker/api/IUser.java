@@ -10,19 +10,44 @@ import com.codebroker.core.data.IObject;
  *
  */
 public interface IUser extends IEventDispatcher {
-
-	public String getName() throws Exception;
-
+	/**
+	 * 获得用户id
+	 * @return
+	 * @throws Exception
+	 */
 	public String getUserId() throws Exception;
-
+	/**
+	 * 获得用户名
+	 * @return
+	 * @throws Exception
+	 */
+	public String getName() throws Exception;
+	
+	/**
+	 * 坚持这个用户是不是NPC
+	 * @return
+	 * @throws Exception
+	 */
 	public boolean isNpc() throws Exception;
-
-	public void sendMessage(int requestId, Object message);
-
+	/**
+	 * 发送消息给IO会话
+	 * @param requestId
+	 * @param message
+	 */
+	public void sendMessageToIoSession(int requestId, Object message);
+	/**
+	 * 主动断开链接
+	 */
 	public void disconnect();
-
+	/**
+	 * 会话是否连通网络
+	 * @return
+	 */
 	public boolean isConnected();
-
+	/**
+	 * 获取IObject
+	 * @return
+	 */
 	public IObject getIObject();
 
 }

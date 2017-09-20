@@ -27,12 +27,12 @@ import akka.actor.PoisonPill;
  *
  */
 public class Area extends EventDispatcher implements IArea {
-
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	@Override
 	public void enterArea(IUser user) throws Exception {
 		UserEneterArea eneterArea = new UserEneterArea(user.getUserId());
 		getActorRef().tell(
-				ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_ENTER_AREA, eneterArea),
+				thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_ENTER_AREA, eneterArea),
 				getActorRef());
 	}
 
@@ -49,7 +49,7 @@ public class Area extends EventDispatcher implements IArea {
 	public void leaveArea(String userID) {
 		LeaveArea leaveArea = new LeaveArea(userID);
 		getActorRef().tell(
-				ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea),
+				thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea),
 				ActorRef.noSender());
 	}
 

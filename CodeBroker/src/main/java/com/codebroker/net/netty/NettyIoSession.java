@@ -29,7 +29,7 @@ public class NettyIoSession implements IoSession {
 	public static final String NAME = "NettyIoSession";
 
 	final ChannelHandlerContext ctx;
-
+	private ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	final long sessionId;
 
 	private ActorRef actorRef;
@@ -87,14 +87,11 @@ public class NettyIoSession implements IoSession {
 			message.op=Operation.SESSION_RECIVE_PACKET;
 			byte[] actorMessage;
 			try {
-				actorMessage = ThriftSerializerFactory.getActorMessage(message);
+				actorMessage = thriftSerializerFactory.getActorMessage(message);
 				actorRef.tell(actorMessage, ActorRef.noSender());
 			} catch (TException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-//			SessionActor.IosessionReciveMessage message = new SessionActor.IosessionReciveMessage((BaseByteArrayPacket) msg);
 			
 		}
 	}

@@ -1,10 +1,10 @@
 package com.codebroker.core;
 
-import com.codebroker.api.event.AddEventListener;
-import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.RemoveEventListener;
+import com.codebroker.api.event.event.AddEventListener;
+import com.codebroker.api.event.event.HasEventListener;
+import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.core.data.IObject;
 import com.codebroker.exception.NoActorRefException;
 import com.codebroker.util.AkkaMediator;

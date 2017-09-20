@@ -64,9 +64,12 @@ public enum Operation implements org.apache.thrift.TEnum {
    * 用户离开格子
    */
   USER_LEAVE_GRID(17),
-  SESSION_USER_LOGOUT(18),
-  SESSION_USER_CONNECT_TO_SERVER(19),
-  SESSION_ENTER_WORLD(20),
+  /**
+   * NPC消息
+   */
+  USER_GET_NPC_MESSAGE(18),
+  SESSION_USER_LOGOUT(19),
+  SESSION_USER_CONNECT_TO_SERVER(20),
   SESSION_USER_SEND_PACKET(21),
   SESSION_RECIVE_PACKET(22),
   SESSION_REBIND_USER(23),
@@ -77,18 +80,18 @@ public enum Operation implements org.apache.thrift.TEnum {
   WORLD_INITIALIZE(28),
   WORLD_USER_CONNECT_2_WORLD(29),
   WORLD_USER_RECONNECTION_TRY(30),
-  WORLD_CREATE_USER_RESULT(31),
-  WORLD_NER_SERVER_COMING(32),
-  WORLD_HAND_SHAKE(33),
-  AREA_MANAGER_CREATE_AREA(34),
-  AREA_MANAGER_REMOVE_AREA(35),
-  AREA_MANAGER_GET_AREA_BY_ID(36),
-  AREA_MANAGER_GET_ALL_AREA(37),
-  USER_MANAGER_CREATE_USER(38),
-  USER_MANAGER_REMOVE_USER(39),
-  USER_MANAGER_CREATE_USER_WITH_SESSION(40),
-  USER_MANAGER_SESSION_REBING_USER(41),
-  USER_MANAGER_CREATE_USER_RESULT(42);
+  WORLD_NER_SERVER_COMING(31),
+  WORLD_HAND_SHAKE(32),
+  AREA_MANAGER_CREATE_AREA(33),
+  AREA_MANAGER_REMOVE_AREA(34),
+  AREA_MANAGER_GET_AREA_BY_ID(35),
+  AREA_MANAGER_GET_ALL_AREA(36),
+  USER_MANAGER_CREATE_USER(37),
+  USER_MANAGER_REMOVE_USER(38),
+  USER_MANAGER_CREATE_USER_WITH_SESSION(39),
+  USER_MANAGER_SESSION_REBING_USER(40),
+  USER_MANAGER_CREATE_USER_RESULT(41),
+  EVENT_REMOTE_MESSAGE(42);
 
   private final int value;
 
@@ -146,11 +149,11 @@ public enum Operation implements org.apache.thrift.TEnum {
       case 17:
         return USER_LEAVE_GRID;
       case 18:
-        return SESSION_USER_LOGOUT;
+        return USER_GET_NPC_MESSAGE;
       case 19:
-        return SESSION_USER_CONNECT_TO_SERVER;
+        return SESSION_USER_LOGOUT;
       case 20:
-        return SESSION_ENTER_WORLD;
+        return SESSION_USER_CONNECT_TO_SERVER;
       case 21:
         return SESSION_USER_SEND_PACKET;
       case 22:
@@ -172,29 +175,29 @@ public enum Operation implements org.apache.thrift.TEnum {
       case 30:
         return WORLD_USER_RECONNECTION_TRY;
       case 31:
-        return WORLD_CREATE_USER_RESULT;
-      case 32:
         return WORLD_NER_SERVER_COMING;
-      case 33:
+      case 32:
         return WORLD_HAND_SHAKE;
-      case 34:
+      case 33:
         return AREA_MANAGER_CREATE_AREA;
-      case 35:
+      case 34:
         return AREA_MANAGER_REMOVE_AREA;
-      case 36:
+      case 35:
         return AREA_MANAGER_GET_AREA_BY_ID;
-      case 37:
+      case 36:
         return AREA_MANAGER_GET_ALL_AREA;
-      case 38:
+      case 37:
         return USER_MANAGER_CREATE_USER;
-      case 39:
+      case 38:
         return USER_MANAGER_REMOVE_USER;
-      case 40:
+      case 39:
         return USER_MANAGER_CREATE_USER_WITH_SESSION;
-      case 41:
+      case 40:
         return USER_MANAGER_SESSION_REBING_USER;
-      case 42:
+      case 41:
         return USER_MANAGER_CREATE_USER_RESULT;
+      case 42:
+        return EVENT_REMOTE_MESSAGE;
       default:
         return null;
     }

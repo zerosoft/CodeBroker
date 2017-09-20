@@ -10,8 +10,8 @@ import akka.actor.ActorRef;
 public class World extends EventDispatcher implements IWorld{
 
 	@Override
-	public void createNPC(NPCControl control) {
-		getActorRef().tell(new WorldCreateNPC(control), ActorRef.noSender());
+	public void createNPC(String npcId,NPCControl control) {
+		getActorRef().tell(new WorldCreateNPC(npcId,control), ActorRef.noSender());
 	}
 
 }

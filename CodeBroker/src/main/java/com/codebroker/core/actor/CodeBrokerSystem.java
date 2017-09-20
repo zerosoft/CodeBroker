@@ -370,7 +370,7 @@ import akka.japi.pf.ReceiveBuilder;
 public class CodeBrokerSystem extends AbstractActor {
 
 	private static Logger logger = LoggerFactory.getLogger("CodeBrokerSystem");
-
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	public static final String IDENTIFY = CodeBrokerSystem.class.getSimpleName();
 
 	static class selfCreator implements Creator<CodeBrokerSystem> {
@@ -427,7 +427,7 @@ public class CodeBrokerSystem extends AbstractActor {
 		this.getContext().watch(world);
 		//初始化WORLD
 		try {
-			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.WORLD_INITIALIZE);
+			byte[] tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.WORLD_INITIALIZE);
 			world.tell(tbaseMessage, getSelf());
 		} catch (TException e) {
 			e.printStackTrace();

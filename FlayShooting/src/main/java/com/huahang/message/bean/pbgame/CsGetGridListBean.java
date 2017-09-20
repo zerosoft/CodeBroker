@@ -1,9 +1,9 @@
 package com.huahang.message.bean.pbgame;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.codebroker.api.JavaProtocolTransform;
-import com.message.protocol.PBGame.CS_GET_GRID_LIST.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.message.protocol.PBGame.CS_GET_GRID_LIST.Builder;
 
 public class CsGetGridListBean implements JavaProtocolTransform {
 	

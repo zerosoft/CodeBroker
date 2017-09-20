@@ -24,7 +24,7 @@ import akka.actor.ActorRef;
  *
  */
 public class User extends EventDispatcher implements IUser{
-
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 
 	private final IObject iObject = CObjectLite.newInstance();
 
@@ -47,20 +47,20 @@ public class User extends EventDispatcher implements IUser{
 	}
 
 	@Override
-	public void sendMessage(int requestId, Object message) {
+	public void sendMessageToIoSession(int requestId, Object message) {
 
 		ActorMessage actorMessage = new ActorMessage();
 		ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
 		actorMessage.messageRaw = byteArrayPacket.toByteBuffer();
 
-		byte[] bytes = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_SEND_PACKET_TO_IOSESSION,actorMessage);
+		byte[] bytes = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_SEND_PACKET_TO_IOSESSION,actorMessage);
 		getActorRef().tell(bytes, ActorRef.noSender());
 	}
 
 	@Override
 	public void disconnect() {
 		try {
-			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_DISCONNECT), ActorRef.noSender());
+			getActorRef().tell(thriftSerializerFactory.getTbaseMessage(Operation.USER_DISCONNECT), ActorRef.noSender());
 		} catch (TException e) {
 			e.printStackTrace();
 		}
@@ -69,7 +69,7 @@ public class User extends EventDispatcher implements IUser{
 	@Override
 	public boolean isConnected() {
 		try {
-			byte[] tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_IS_CONNECTED);
+			byte[] tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.USER_IS_CONNECTED);
 			return AkkaMediator.getCallBak(getActorRef(),tbaseMessage);
 		} catch (Exception e) {
 			return false;
@@ -78,7 +78,7 @@ public class User extends EventDispatcher implements IUser{
 
 	public void rebindIoSession(ActorRef actorRef) {
 		try {
-			getActorRef().tell(ThriftSerializerFactory.getTbaseMessage(Operation.USER_RE_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
+			getActorRef().tell(thriftSerializerFactory.getTbaseMessage(Operation.USER_RE_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
 		} catch (TException e) {
 			e.printStackTrace();
 		}

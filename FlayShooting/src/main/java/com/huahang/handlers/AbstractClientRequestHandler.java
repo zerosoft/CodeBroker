@@ -10,7 +10,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * 客户端请求处理的核心类
+ * 客户端请求处理的核心类以PB为例，可根据需求调整
  */
 public abstract class AbstractClientRequestHandler implements IClientRequestHandler {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractClientRequestHandler.class);
@@ -90,7 +90,7 @@ public abstract class AbstractClientRequestHandler implements IClientRequestHand
 	public void sendResponse(int requestid, JavaProtocolTransform retObj, IUser user) {
 		if (retObj == null) {
 		}
-		user.sendMessage(requestid, retObj);
+		user.sendMessageToIoSession(requestid, retObj);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public abstract class AbstractClientRequestHandler implements IClientRequestHand
 	 *
 	 * @return
 	 */
-	public Optional<Integer> getRequestId(Class clazz) {
+	public Optional<Integer> getRequestId(Class<? extends JavaProtocolTransform> clazz) {
 		Integer reqId = null;
 		try {
 			reqId =clazz.getField("REQUEST_ID").getInt(null);

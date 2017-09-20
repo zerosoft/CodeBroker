@@ -341,6 +341,7 @@ Public License instead of this License.
  */
 package com.codebroker.core.cluster;
 
+import com.codebroker.api.event.Event;
 import com.codebroker.core.actor.CluserActor;
 import com.codebroker.core.actor.WorldActor;
 import com.codebroker.core.data.CObject;
@@ -377,6 +378,7 @@ public class ClusterListener extends AbstractActor {
 
 	public static final String IDENTIFY = ClusterListener.class.getSimpleName();
 	public static CluserEnvelope cluserEnvelope = new CluserEnvelope();
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 	Cluster cluster = Cluster.get(getContext().getSystem());
 	ActorRef cluserActor;
@@ -396,7 +398,8 @@ public class ClusterListener extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder().match(MemberUp.class, mUp -> {
+		return receiveBuilder()
+			.match(MemberUp.class, mUp -> {
 			// akka.tcp://CodeBroker@192.168.0.127:2551
 			Member member = mUp.member();
 			Address address = member.address();
@@ -412,19 +415,20 @@ public class ClusterListener extends AbstractActor {
 			ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
 			//发送新加入服务器信息
 			NewServerComeIn comeIn=new NewServerComeIn(longUid, member.address().toString());
-			byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_NER_SERVER_COMING, comeIn);
+			byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_NER_SERVER_COMING, comeIn);
 			
 			systemActorSelection.tell(actorMessageWithSubClass,	getSender());
 
 			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,	longUid);
-			byte[] tbaseMessage = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_INIT,cluserInitMessage);
+			log.info("cluserInitMessage is: {"+host +"} host {"+ hostPort+" } hostPort {"+ port+" } port {"+ system+" } system {"+ protocol+"} protocol {"+ longUid +"} longUid");
+			byte[] tbaseMessage = thriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_INIT,cluserInitMessage);
 			ActorSelection actorSelection = getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor");
-			actorSelection.tell(tbaseMessage,
-					cluserActor);
+			actorSelection.tell(tbaseMessage,cluserActor);
 			
 			IObject iObject=CObject.newInstance();
 			iObject.putUtfString("hello", "world");
-			actorSelection.tell(iObject, getSelf());
+			Event event=new Event("Event",iObject);
+			actorSelection.tell(event, getSelf());
 
 		}).match(UnreachableMember.class, mUnreachable -> {
 			log.info("Member detected as unreachable: {}", mUnreachable.member());

@@ -1,9 +1,9 @@
 package com.huahang.message.bean.pbgame;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.codebroker.api.JavaProtocolTransform;
-import com.message.protocol.PBGame.SC_CHAT_PRV.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.message.protocol.PBGame.SC_CHAT_PRV.Builder;
 
 public class ScChatPrvBean implements JavaProtocolTransform {
 	

@@ -1,9 +1,9 @@
 package com.huahang.message.bean.message;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.codebroker.api.JavaProtocolTransform;
-import com.message.protocol.Message.PB.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.message.protocol.Message.PB.Builder;
 
 public class PbBean implements JavaProtocolTransform {
 	

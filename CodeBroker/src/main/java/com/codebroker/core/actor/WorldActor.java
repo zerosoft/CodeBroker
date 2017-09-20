@@ -43,7 +43,7 @@ import akka.japi.pf.ReceiveBuilder;
  *
  */
 public class WorldActor extends AbstractActor {
-	
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	public static final String USER_PRFIX = "USER-";
 	public static final String NPC_PRFIX = "NPC-";
 	
@@ -69,35 +69,35 @@ public class WorldActor extends AbstractActor {
 	public Receive createReceive() {	
 		return ReceiveBuilder.create()
 			.match(byte[].class, msg -> {
-			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+			ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			case WORLD_INITIALIZE:
 				initialize();
 				break;
 			case WORLD_USER_CONNECT_2_WORLD:
 				UserConnect2World userConnect2World = new UserConnect2World();
-				ThriftSerializerFactory.deserialize(userConnect2World, actorMessage.messageRaw);
+				thriftSerializerFactory.deserialize(userConnect2World, actorMessage.messageRaw);
 				userConnect2Server(userConnect2World.name, userConnect2World.params, getSender());
 				break;
 			case WORLD_USER_RECONNECTION_TRY:
 				UserReconnectionTry reconnectionTry = new UserReconnectionTry();
-				ThriftSerializerFactory.deserialize(reconnectionTry, actorMessage.messageRaw);
+				thriftSerializerFactory.deserialize(reconnectionTry, actorMessage.messageRaw);
 				processReconnection(reconnectionTry.reBindKey, getSender());
 				break;
 			case AREA_MANAGER_CREATE_AREA:
 				CreateArea createArea = new CreateArea();
-				byte[] actorMessageWithSubClass = ThriftSerializerFactory
+				byte[] actorMessageWithSubClass = thriftSerializerFactory
 						.getActorMessageWithSubClass(Operation.AREA_MANAGER_CREATE_AREA, createArea);
 				areaManagerRef.tell(actorMessageWithSubClass, getSender());
 				break;
 			case WORLD_NER_SERVER_COMING:
 				NewServerComeIn newServerComeIn=new NewServerComeIn();
-				ThriftSerializerFactory.deserialize(newServerComeIn, actorMessage.messageRaw);
+				thriftSerializerFactory.deserialize(newServerComeIn, actorMessage.messageRaw);
 				processNewCome(newServerComeIn.serverUId,newServerComeIn.remotePath);
 				break;
 			case WORLD_HAND_SHAKE:
 				HandShake handShake=new HandShake();
-				ThriftSerializerFactory.deserialize(handShake, actorMessage.messageRaw);
+				thriftSerializerFactory.deserialize(handShake, actorMessage.messageRaw);
 				processShank(handShake.serverId,handShake.serverUid);
 				break;
 			default:
@@ -177,7 +177,7 @@ public class WorldActor extends AbstractActor {
 			handleLogin = "Test1234";
 		}
 		CreateUserWithSession createUserWithSession = new CreateUserWithSession(handleLogin);
-		byte[] actorMessageWithSubClass = ThriftSerializerFactory
+		byte[] actorMessageWithSubClass = thriftSerializerFactory
 				.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER_WITH_SESSION, createUserWithSession);
 		userManagerRef.tell(actorMessageWithSubClass, sessionActorRef);
 	}
@@ -189,7 +189,7 @@ public class WorldActor extends AbstractActor {
 		ActorSelection remoteActorSelection = AkkaMediator.getRemoteActorSelection(fixSupervisorPath);
 		
 		HandShake handShake=new HandShake(ServerEngine.serverId, serverUId);
-		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_HAND_SHAKE, handShake);
+		byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_HAND_SHAKE, handShake);
 		
 		remoteActorSelection.tell(actorMessageWithSubClass, getSelf());
 	}

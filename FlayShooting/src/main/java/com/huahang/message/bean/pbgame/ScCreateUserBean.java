@@ -1,9 +1,9 @@
 package com.huahang.message.bean.pbgame;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.codebroker.api.JavaProtocolTransform;
-import com.message.protocol.PBGame.SC_CREATE_USER.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.message.protocol.PBGame.SC_CREATE_USER.Builder;
 
 public class ScCreateUserBean implements JavaProtocolTransform {
 	

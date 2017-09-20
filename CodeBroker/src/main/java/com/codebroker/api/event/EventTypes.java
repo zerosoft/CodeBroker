@@ -2,7 +2,7 @@ package com.codebroker.api.event;
 
 public class EventTypes {
 	public final static String KEY="et"; 
-	
+	public final static String TOPIC="e"; 
 	private static int index = 0;
 	/**
 	 * 格子广播

@@ -19,13 +19,13 @@ import akka.actor.ActorRef;
  *
  */
 public class UserManager implements IUserManager {
-
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	private ActorRef managerRef;
 
 	@Override
 	public void createUser(boolean npc) throws Exception {
 		CreateUser createUser=new CreateUser(npc, UUID.randomUUID().toString(), null);
-		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER, createUser);		
+		byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER, createUser);		
 		
 		managerRef.tell(actorMessageWithSubClass, ActorRef.noSender());
 	}
@@ -33,7 +33,7 @@ public class UserManager implements IUserManager {
 	@Override
 	public void removeUser(String userId) {
 		RemoveUser removeUser=new RemoveUser(userId);
-		byte[] actorMessageWithSubClass = ThriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);		
+		byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);		
 		
 		managerRef.tell(actorMessageWithSubClass, ActorRef.noSender());
 	}

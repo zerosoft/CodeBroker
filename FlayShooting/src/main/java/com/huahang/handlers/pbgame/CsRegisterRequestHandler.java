@@ -1,11 +1,10 @@
 package com.huahang.handlers.pbgame;
 
-import com.codebroker.api.JavaProtocolTransform;
 import com.codebroker.api.IUser;
+import com.codebroker.api.JavaProtocolTransform;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.huahang.handlers.AbstractClientRequestHandler;
 import com.huahang.message.bean.pbgame.CsRegisterBean;
-import com.message.protocol.PBGame.CS_REGISTER.*;
 
 public class  CsRegisterRequestHandler extends AbstractClientRequestHandler{
 
@@ -27,6 +26,9 @@ public class  CsRegisterRequestHandler extends AbstractClientRequestHandler{
 	@Override
 	public JavaProtocolTransform handleRequest(IUser user, JavaProtocolTransform params) {
 		CsRegisterBean bean=(CsRegisterBean) params;
+		
+		user.disconnect();
+		
 		return null;
 	}
 

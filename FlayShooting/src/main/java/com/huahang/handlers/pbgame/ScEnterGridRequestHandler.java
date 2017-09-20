@@ -1,11 +1,10 @@
 package com.huahang.handlers.pbgame;
 
-import com.codebroker.api.JavaProtocolTransform;
 import com.codebroker.api.IUser;
+import com.codebroker.api.JavaProtocolTransform;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.huahang.handlers.AbstractClientRequestHandler;
 import com.huahang.message.bean.pbgame.ScEnterGridBean;
-import com.message.protocol.PBGame.SC_ENTER_GRID.*;
 
 public class  ScEnterGridRequestHandler extends AbstractClientRequestHandler{
 

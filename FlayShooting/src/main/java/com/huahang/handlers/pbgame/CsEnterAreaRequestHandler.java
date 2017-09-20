@@ -1,11 +1,10 @@
 package com.huahang.handlers.pbgame;
 
-import com.codebroker.api.JavaProtocolTransform;
 import com.codebroker.api.IUser;
+import com.codebroker.api.JavaProtocolTransform;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.huahang.handlers.AbstractClientRequestHandler;
 import com.huahang.message.bean.pbgame.CsEnterAreaBean;
-import com.message.protocol.PBGame.CS_ENTER_AREA.*;
 
 public class  CsEnterAreaRequestHandler extends AbstractClientRequestHandler{
 

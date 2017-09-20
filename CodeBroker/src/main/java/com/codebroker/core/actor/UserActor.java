@@ -4,10 +4,12 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.codebroker.api.event.AddEventListener;
-import com.codebroker.api.event.HasEventListener;
+import com.codebroker.api.NPCControl;
+import com.codebroker.api.event.EventTypes;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.RemoveEventListener;
+import com.codebroker.api.event.event.AddEventListener;
+import com.codebroker.api.event.event.HasEventListener;
+import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.User;
@@ -16,6 +18,7 @@ import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.user.ReciveIosessionMessage;
+import com.message.thrift.actor.usermanager.RemoveUser;
 
 import akka.actor.AbstractActor;
 /**
@@ -26,26 +29,45 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 
 public class UserActor extends AbstractActor {
-
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 	private String userId;
-	private String name;
-
 	private final User user;
-	private final boolean npc;
 
 	private ActorRef ioSessionRef;
-
+	private NPCControl npcControl;
+	
+	private ActorRef userManagerRef;
+	
 	private ActorRef inGrid;
-
 	private ActorRef inArea;
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-
-	public UserActor(User user, boolean npc, ActorRef ioSession) {
+	/**
+	 * 创建NPC
+	 * @param npcId
+	 * @param user
+	 * @param npcControl
+	 * @param userManagerRef
+	 */
+	public UserActor(String npcId,User user, NPCControl npcControl,ActorRef userManagerRef) {
+		super();
+		this.userId=npcId;
+		this.user = user;
+		this.npcControl = npcControl;
+		this.userManagerRef=userManagerRef;
+		user.setActorRef(getSelf());
+	}
+	/**
+	 * 创建用户
+	 * @param user
+	 * @param ioSession
+	 * @param userManagerRef
+	 */
+	public UserActor(User user, ActorRef ioSession,ActorRef userManagerRef) {
 		super();
 		this.user = user;
-		this.npc = npc;
 		this.ioSessionRef = ioSession;
+		this.userManagerRef=userManagerRef;
 		user.setActorRef(getSelf());
 	}
 
@@ -54,9 +76,24 @@ public class UserActor extends AbstractActor {
 		return receiveBuilder()
 		    .match(byte[].class, msg -> 
 		{
-			ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+			ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			case USER_DISCONNECT:
+				//切断网络
+				byte[] tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.SESSION_USER_LOGOUT);
+				ioSessionRef.tell(tbaseMessage,getSelf());
+				//管理器移除
+				RemoveUser removeUser=new RemoveUser(userId);
+				byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);
+				userManagerRef.tell(actorMessageWithSubClass, getSelf());
+				
+				if (inGrid!=null) {
+					
+				}
+				
+				if (inArea!=null) {
+					
+				}
 				//断开链接
 				break;
 			case USER_SEND_PACKET_TO_IOSESSION:
@@ -64,7 +101,7 @@ public class UserActor extends AbstractActor {
 				break;
 			case USER_RECIVE_IOSESSION_MESSAGE:
 				ReciveIosessionMessage message = new ReciveIosessionMessage();
-				ThriftSerializerFactory.deserialize(message, actorMessage.messageRaw);
+				thriftSerializerFactory.deserialize(message, actorMessage.messageRaw);
 				handleClientRequest(message.opcode, message.message);
 				break;
 			case USER_IS_CONNECTED:
@@ -82,7 +119,7 @@ public class UserActor extends AbstractActor {
 			case USER_ENTER_AREA:
 				if (inArea != null) {
 					LeaveArea leaveArea=new LeaveArea(userId);
-					inArea.tell(ThriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
+					inArea.tell(thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
 				}
 				inArea = getSender();
 				if (inGrid != null) {
@@ -112,6 +149,10 @@ public class UserActor extends AbstractActor {
 		//处理分发事件
 		.match(IObject.class, msg->{
 			dispatchEvent(msg);		
+		}).match(IObject.class, msg->{
+			if (npcControl!=null) {
+				npcControl.execute(msg);
+			}
 		})
 		//绑定本地事件处理
 		  .match(AddEventListener.class, msg -> {
@@ -133,7 +174,7 @@ public class UserActor extends AbstractActor {
 	private void sendMessage(ByteBuffer byteBuffer) {
 		ActorMessage actorMessage = new ActorMessage();
 		actorMessage.messageRaw = byteBuffer;
-		byte[] bs = ThriftSerializerFactory
+		byte[] bs = thriftSerializerFactory
 				.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET,actorMessage);
 		ioSessionRef.tell(bs, getSelf());
 	}
@@ -144,7 +185,7 @@ public class UserActor extends AbstractActor {
 	 * @param msg
 	 */
 	private void dispatchEvent(IObject msg) {
-		String topic = msg.getUtfString("e");
+		String topic = msg.getUtfString(EventTypes.TOPIC);
 		try {
 			IEventListener iEventListener = eventListener.get(topic);
 			if (iEventListener != null) {

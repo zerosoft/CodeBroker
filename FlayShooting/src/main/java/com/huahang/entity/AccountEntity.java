@@ -1,7 +1,6 @@
 package com.huahang.entity;
 
 import org.jongo.marshall.jackson.oid.MongoId;
-import org.jongo.marshall.jackson.oid.MongoObjectId;
 
 public class AccountEntity {
 	

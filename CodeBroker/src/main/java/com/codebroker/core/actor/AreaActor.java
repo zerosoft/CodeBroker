@@ -10,11 +10,11 @@ import java.util.TreeMap;
 
 import org.apache.thrift.TException;
 
-import com.codebroker.api.event.AddEventListener;
 import com.codebroker.api.event.EventTypes;
-import com.codebroker.api.event.HasEventListener;
 import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.RemoveEventListener;
+import com.codebroker.api.event.event.AddEventListener;
+import com.codebroker.api.event.event.HasEventListener;
+import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
@@ -42,6 +42,7 @@ public class AreaActor extends AbstractActor {
 
 	private final ActorRef worldRef;
 	private final ActorRef userManagerRef;
+	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
 	// 用户
@@ -74,16 +75,16 @@ public class AreaActor extends AbstractActor {
 	public Receive createReceive() {
 		return ReceiveBuilder.create()
 				.match(byte[].class, msg->{
-					 ActorMessage actorMessage = ThriftSerializerFactory.getActorMessage(msg);
+					 ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
 					 switch (actorMessage.op) {
 					case AREA_USER_ENTER_AREA:
 						UserEneterArea eneterArea=new UserEneterArea();
-						ThriftSerializerFactory.deserialize(eneterArea, actorMessage.messageRaw);
+						thriftSerializerFactory.deserialize(eneterArea, actorMessage.messageRaw);
 						enterArea(eneterArea.userId,getSender());
 						break;
 					case AREA_USER_LEAVE_AREA:
 						LeaveArea leaveArea=new LeaveArea();
-						ThriftSerializerFactory.deserialize(leaveArea, actorMessage.messageRaw);
+						thriftSerializerFactory.deserialize(leaveArea, actorMessage.messageRaw);
 						leaveArea(leaveArea.userId);
 						break;
 					default:
@@ -209,7 +210,7 @@ public class AreaActor extends AbstractActor {
 
 			byte[] tbaseMessage;
 			try {
-				tbaseMessage = ThriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
+				tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.USER_ENTER_AREA);
 				sender.tell(tbaseMessage, getSelf());
 
 			} catch (TException e) {
