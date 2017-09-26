@@ -1,6 +1,6 @@
 package com.codebroker.api;
 
-import com.codebroker.core.data.IObject;
+import com.codebroker.api.event.Event;
 
 public interface NPCControl {
 	/**
@@ -10,7 +10,7 @@ public interface NPCControl {
 	/**
 	 * 执行
 	 */
-	public void execute(IObject iObject);
+	public void execute(Event event);
 	/**
 	 * 销毁
 	 */

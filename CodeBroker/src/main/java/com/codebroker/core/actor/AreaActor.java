@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import org.apache.thrift.TException;
 
-import com.codebroker.api.event.EventTypes;
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
@@ -22,8 +22,11 @@ import com.codebroker.core.entities.Grid;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.CreateGrid;
 import com.message.thrift.actor.area.LeaveArea;
+import com.message.thrift.actor.area.RemoveGrid;
 import com.message.thrift.actor.area.UserEneterArea;
+import com.message.thrift.actor.usermanager.CreateUser;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -40,6 +43,10 @@ import akka.japi.pf.ReceiveBuilder;
  */
 public class AreaActor extends AbstractActor {
 
+	public transient static final String AREA_CLOSE="AREA_CLOSE";
+	public transient static final String AREA_ENTER_USER="AREA_ENTER_USER";
+	public transient static final String AREA_LEAVE_USER="AREA_LEAVE_USER";
+	public transient static final String USER_ID="USER_ID";
 	private final ActorRef worldRef;
 	private final ActorRef userManagerRef;
 	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
@@ -65,9 +72,9 @@ public class AreaActor extends AbstractActor {
 		}
 
 		 for (ActorRef iUser : userMap.values()) {
-			 IObject object=CObject.newInstance();
-			 object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
-			 iUser.tell(object, getSelf());
+			 Event event=new Event();
+			 event.setTopic(AREA_CLOSE);
+			 iUser.tell(event, getSelf());
 		 }
 	}
 
@@ -87,15 +94,20 @@ public class AreaActor extends AbstractActor {
 						thriftSerializerFactory.deserialize(leaveArea, actorMessage.messageRaw);
 						leaveArea(leaveArea.userId);
 						break;
+					case AREA_CREATE_GRID:
+						CreateGrid createGrid=new CreateGrid();
+						thriftSerializerFactory.deserialize(createGrid, actorMessage.messageRaw);
+						createGrid(createGrid.getGridId());
+						break;
+					case AREA_REMOVE_GRID:
+						RemoveGrid removeGrid=new RemoveGrid();
+						thriftSerializerFactory.deserialize(removeGrid, actorMessage.messageRaw);
+						removeGrid(removeGrid.getGridId());
 					default:
 						break;
 					}
 				})
-		.match(CreateGrid.class, msg -> {
-			createGrid(msg);
-		}).match(RemoveGrid.class, msg -> {
-			removeGrid(msg);
-		}).match(GetGridById.class, msg -> {
+		.match(GetGridById.class, msg -> {
 			getGridById(msg);
 		}).match(GetAllGrids.class, msg -> {
 			getAllGrid();
@@ -103,12 +115,8 @@ public class AreaActor extends AbstractActor {
 		.match(Terminated.class, msg -> {
 			String name = msg.actor().path().name();
 		})
-		// 广播信息
-		.match(IObject.class, msg -> {
-			broadCastAllUser(msg);
-		})
 		//处理分发事件
-		.match(IObject.class, msg->{
+		.match(Event.class, msg->{
 			dispatchEvent(msg);		
 		})
 		//绑定本地事件处理
@@ -127,12 +135,11 @@ public class AreaActor extends AbstractActor {
 	 * 
 	 * @param msg
 	 */
-	private void dispatchEvent(IObject msg) {
-		String topic = msg.getUtfString("e");
+	private void dispatchEvent(Event msg) {
 		try {
-			IEventListener iEventListener = eventListener.get(topic);
+			IEventListener iEventListener = eventListener.get(msg.getTopic());
 			if (iEventListener != null) {
-				iEventListener.handleEvent(topic,msg);
+				iEventListener.handleEvent(msg);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -140,34 +147,33 @@ public class AreaActor extends AbstractActor {
 	}
 	
 
-	private void broadCastAllUser(IObject object) {
+	private void broadCastAllUser(Event object) {
 		Collection<ActorRef> values = userMap.values();
-		object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
 		for (ActorRef iUser : values) {
 			iUser.tell(object, getSelf());
 		}
 	}
 
-	private void createGrid(CreateGrid msg) {
-		if (gridMap.containsKey(msg.gridId)) {
-			getSender().tell(gridMap.get(msg.gridId), getSelf());
+	private void createGrid(String gridId) {
+		if (gridMap.containsKey(gridId)) {
+			getSender().tell(gridMap.get(gridId), getSelf());
 		} else {
 
 			Grid gridProxy = new Grid();
-			ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, getSelf()), msg.gridId);
+			ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, getSelf()), gridId);
 			gridProxy.setActorRef(actorOf);
 
 			getContext().watch(actorOf);
 			getSender().tell(gridProxy, getSelf());
 
-			gridMap.put(msg.gridId, gridProxy);
+			gridMap.put(gridId, gridProxy);
 
 			ServerEngine.envelope.subscribe(actorOf, getSelf().path().name());
 		}
 	}
 
-	private void removeGrid(RemoveGrid msg) {
-		Grid grid2 = gridMap.get(msg.gridId);
+	private void removeGrid(String gridId) {
+		Grid grid2 = gridMap.get(gridId);
 		if (grid2 != null) {
 			ServerEngine.envelope.unsubscribe(grid2.getActorRef());
 			grid2.destory();
@@ -192,10 +198,14 @@ public class AreaActor extends AbstractActor {
 		if (userMap.containsKey(userId)) {
 			userMap.remove(userId);
 
+			Event event=new Event();
+			event.setTopic(AREA_LEAVE_USER);
 			IObject iObject=CObject.newInstance();
-			iObject.putUtfString("userid", userId);
+			iObject.putUtfString(USER_ID, userId);
+			event.setMessage(iObject);
+			
 			// 广播玩家离开
-			broadCastAllUser(iObject);
+			broadCastAllUser(event);
 		}
 	}
 
@@ -216,10 +226,15 @@ public class AreaActor extends AbstractActor {
 			} catch (TException e) {
 				e.printStackTrace();
 			}
+			
+			Event event=new Event();
+			event.setTopic(AREA_ENTER_USER);
+			
 			IObject object=CObject.newInstance();
-			object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
-			object.putUtfString(EventTypes.AREA_USER_ENTER_AREA, userId);
-			broadCastAllUser(object);
+			object.putUtfString(USER_ID, userId);
+			event.setMessage(object);
+			
+			broadCastAllUser(event);
 		}
 	}
 
@@ -230,26 +245,6 @@ public class AreaActor extends AbstractActor {
 	}
 
 
-	public static class CreateGrid implements Serializable {
-		private static final long serialVersionUID = 5561938563026536958L;
-		public final String gridId;
-
-		public CreateGrid(String gridId) {
-			super();
-			this.gridId = gridId;
-		}
-
-	}
-
-	public static class RemoveGrid implements Serializable {
-		private static final long serialVersionUID = -3522073369320700653L;
-		public final String gridId;
-
-		public RemoveGrid(String gridId) {
-			super();
-			this.gridId = gridId;
-		}
-	}
 
 	public static class GetGridById implements Serializable {
 		private static final long serialVersionUID = -4927817351189923926L;

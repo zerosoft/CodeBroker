@@ -1,5 +1,6 @@
 package com.codebroker.core;
 
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
@@ -60,7 +61,7 @@ public abstract class EventDispatcher implements IEventDispatcher {
 	}
 
 	@Override
-	public void dispatchEvent(IObject object) {
+	public void dispatchEvent(Event object) {
 		if (actorRef != null) {
 			actorRef.tell(object, ActorRef.noSender());
 		}

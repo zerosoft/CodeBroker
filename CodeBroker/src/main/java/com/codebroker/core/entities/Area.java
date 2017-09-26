@@ -6,15 +6,16 @@ import java.util.List;
 import com.codebroker.api.IArea;
 import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
-import com.codebroker.api.event.EventTypes;
+import com.codebroker.api.event.Event;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.AreaActor;
-import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
 import com.message.thrift.actor.Operation;
+import com.message.thrift.actor.area.CreateGrid;
 import com.message.thrift.actor.area.LeaveArea;
+import com.message.thrift.actor.area.RemoveGrid;
 import com.message.thrift.actor.area.UserEneterArea;
 
 import akka.actor.ActorRef;
@@ -47,20 +48,22 @@ public class Area extends EventDispatcher implements IArea {
 
 	@Override
 	public void leaveArea(String userID) {
-		LeaveArea leaveArea = new LeaveArea(userID);
+		LeaveArea base = new LeaveArea(userID);
 		getActorRef().tell(
-				thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea),
+				thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, base),
 				ActorRef.noSender());
 	}
 
 	@Override
-	public IGrid createGrid(String gridId) throws Exception {
-		return (IGrid) AkkaMediator.getCallBak(getActorRef(), new AreaActor.CreateGrid(gridId));
+	public void createGrid(String gridId) throws Exception {
+		CreateGrid base=new CreateGrid(gridId);
+		getActorRef().tell(thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_CREATE_GRID, base), ActorRef.noSender());
 	}
 
 	@Override
 	public void removeGridById(String gridId) {
-		getActorRef().tell(new AreaActor.RemoveGrid(gridId), ActorRef.noSender());
+		RemoveGrid base = new RemoveGrid(gridId);
+		getActorRef().tell(thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_REMOVE_GRID, base), ActorRef.noSender());
 	}
 
 	@Override
@@ -75,14 +78,12 @@ public class Area extends EventDispatcher implements IArea {
 	}
 
 	@Override
-	public void broadCastAllUser(IObject object) {
-		object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
+	public void broadCastAllUser(Event object) {
 		getActorRef().tell(object, ActorRef.noSender());
 	}
 
 	@Override
-	public void broadCastUsers(IObject object, Collection<IUser> users) {
-		object.putInt(EventTypes.KEY, EventTypes.AREA_BROAD_CAST);
+	public void broadCastUsers(Event object, Collection<IUser> users) {
 		for (IUser iUser : users) {
 			iUser.dispatchEvent(object);
 		}

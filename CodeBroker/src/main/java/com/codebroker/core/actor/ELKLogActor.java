@@ -1,5 +1,7 @@
 package com.codebroker.core.actor;
 
+import java.util.MissingResourceException;
+
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.IObject;
 import com.codebroker.redis.RedisService;
@@ -22,19 +24,16 @@ public class ELKLogActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder.create()
-		    .match(IObject.class, msg -> 
-		    {
-			RedisService component = ContextResolver.getComponent(RedisService.class);
-			if (component != null) {
-				try {
-					Jedis jedis = component.getJedis();
-					String json = msg.toJson();
-					jedis.lpush(LOG_KEY,json);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		return ReceiveBuilder.create().match(IObject.class, msg -> {
+			try {
+				RedisService component = ContextResolver.getComponent(RedisService.class);
+				Jedis jedis = component.getJedis();
+				String json = msg.toJson();
+				jedis.lpush(LOG_KEY, json);
+			} catch (MissingResourceException e) {
+				// TODO: handle exception
 			}
+
 		}).build();
 	}
 

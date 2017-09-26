@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.codebroker.api.IUser;
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
@@ -57,7 +58,7 @@ public class GridActor extends AbstractActor {
 			getSender().tell(list, getSelf());
 		})
 		//处理分发事件
-		.match(IObject.class, msg->{
+		.match(Event.class, msg->{
 			dispatchEvent(msg);		
 		})
 		// 广播相关
@@ -75,12 +76,11 @@ public class GridActor extends AbstractActor {
 	 * 
 	 * @param msg
 	 */
-	private void dispatchEvent(IObject msg) {
-		String topic = msg.getUtfString("e");
+	private void dispatchEvent(Event msg) {
 		try {
-			IEventListener iEventListener = eventListener.get(topic);
+			IEventListener iEventListener = eventListener.get(msg.getTopic());
 			if (iEventListener != null) {
-				iEventListener.handleEvent(topic,msg);
+				iEventListener.handleEvent(msg);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

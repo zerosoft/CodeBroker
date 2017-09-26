@@ -478,8 +478,12 @@ public class ServerEngine implements InstanceMXBean {
 		/**
 		 * 注册Redis服务
 		 */
-		IService redisService = new RedisService();
-		systemRegistry.addComponent(redisService);
+		if(propertiesWrapper.getBooleanProperty("redis", false)){
+			System.err.println("reids not need");
+			IService redisService = new RedisService();
+			systemRegistry.addComponent(redisService);
+		}
+		
 
 		InternalContext.setManagerLocator(new ManagerLocatorImpl());
 		application = new KernelContext(application);

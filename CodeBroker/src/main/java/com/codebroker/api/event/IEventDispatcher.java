@@ -30,5 +30,5 @@ public interface IEventDispatcher {
 	 * 分发事件
 	 * @param iObject
 	 */
-	public void dispatchEvent(IObject iObject);
+	public void dispatchEvent(Event event);
 }

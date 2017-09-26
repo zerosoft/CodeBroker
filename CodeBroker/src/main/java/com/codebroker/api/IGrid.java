@@ -3,8 +3,8 @@ package com.codebroker.api;
 import java.util.Collection;
 import java.util.List;
 
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventDispatcher;
-import com.codebroker.core.data.IObject;
 
 /**
  * 区域中的格子
@@ -49,14 +49,14 @@ public interface IGrid extends IEventDispatcher {
 	 * @param jsonString
 	 * @param users
 	 */
-	public void broadCastUsers(IObject object, Collection<IUser> users);
+	public void broadCastUsers(Event object, Collection<IUser> users);
 
 	/**
 	 * 广播当前格子中的所有用户
 	 * 
 	 * @param jsonString
 	 */
-	public void broadCastAllUser(IObject object);
+	public void broadCastAllUser(Event object);
 
 	/**
 	 * 销毁格子

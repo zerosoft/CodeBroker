@@ -50,11 +50,18 @@ public class User extends EventDispatcher implements IUser{
 	public void sendMessageToIoSession(int requestId, Object message) {
 
 		ActorMessage actorMessage = new ActorMessage();
+		
 		ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
 		actorMessage.messageRaw = byteArrayPacket.toByteBuffer();
-
-		byte[] bytes = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_SEND_PACKET_TO_IOSESSION,actorMessage);
-		getActorRef().tell(bytes, ActorRef.noSender());
+		actorMessage.op=Operation.USER_SEND_PACKET_TO_IOSESSION;
+		try {
+			byte[] bytes = thriftSerializerFactory.getActorMessage(actorMessage);
+			getActorRef().tell(bytes, ActorRef.noSender());
+		} catch (TException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	@Override

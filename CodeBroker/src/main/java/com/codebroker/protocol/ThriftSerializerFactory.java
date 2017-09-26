@@ -80,7 +80,7 @@ public class ThriftSerializerFactory {
 		return serialize;
 	}
 
-	public byte[] getTbaseMessage(TBase<?, ?> message) throws TException {
+	private byte[] getTbaseMessage(TBase<?, ?> message) throws TException {
 		byte[] serialize = null;
 		serialize = serializer.serialize(message);
 		return serialize;

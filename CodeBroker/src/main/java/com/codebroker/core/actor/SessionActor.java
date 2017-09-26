@@ -3,6 +3,8 @@ package com.codebroker.core.actor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.IoSession;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.protocol.BaseByteArrayPacket;
@@ -34,7 +36,7 @@ import akka.japi.pf.ReceiveBuilder;
 public class SessionActor extends AbstractActor {
 
 	private static Logger logger = LoggerFactory.getLogger("TCPTransportActor");
-	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
+	ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
 	private ActorRef userActor;
 	// 关联我的网络会话
 	private final IoSession ioSession;
@@ -72,8 +74,10 @@ public class SessionActor extends AbstractActor {
 	private void processIOSessionReciveMessage(ByteArrayPacket message) {
 		// 检查授权
 		if (authorization) {
-			ReciveIosessionMessage connect2Server = new ReciveIosessionMessage(message.getOpCode(),message.toByteBuffer());
-			byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_RECIVE_IOSESSION_MESSAGE, connect2Server);
+			ReciveIosessionMessage connect2Server = new ReciveIosessionMessage(message.getOpCode(),
+					message.toByteBuffer());
+			byte[] actorMessageWithSubClass = thriftSerializerFactory
+					.getActorMessageWithSubClass(Operation.USER_RECIVE_IOSESSION_MESSAGE, connect2Server);
 			userActor.tell(actorMessageWithSubClass, getSelf());
 		} else {
 			// 发送给world
@@ -83,28 +87,37 @@ public class SessionActor extends AbstractActor {
 			/**
 			 * 处理玩家登入
 			 */
-			if (message.getOpCode() == SystemMessageType.USER_LOGIN.id) {
+			if (message.getOpCode() == SystemMessageType.USER_LOGIN_PB.id) {
 				try {
 					CS_USER_CONNECT_TO_SERVER login = CS_USER_CONNECT_TO_SERVER.parseFrom(message.getRawData());
-					
-					UserConnect2World userConnect2World=new UserConnect2World(login.getName(),login.getParams());
-					byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_USER_CONNECT_2_WORLD, userConnect2World);
+
+					UserConnect2World userConnect2World = new UserConnect2World(login.getName(), login.getParams());
+					byte[] actorMessageWithSubClass = thriftSerializerFactory
+							.getActorMessageWithSubClass(Operation.WORLD_USER_CONNECT_2_WORLD, userConnect2World);
 					actorSelection.tell(actorMessageWithSubClass, getSelf());
-					
+
 				} catch (InvalidProtocolBufferException e) {
 					e.printStackTrace();
 				}
+			} else if (message.getOpCode() == SystemMessageType.USER_LOGIN_JSON.id) {
+				String para = new String(message.getRawData());
+				JSONObject parseObject = JSON.parseObject(para);
 
+				UserConnect2World userConnect2World = new UserConnect2World(parseObject.getString("name"),
+						parseObject.getString("parm"));
+				byte[] actorMessageWithSubClass = thriftSerializerFactory
+						.getActorMessageWithSubClass(Operation.WORLD_USER_CONNECT_2_WORLD, userConnect2World);
+				actorSelection.tell(actorMessageWithSubClass, getSelf());
 			}
 			/**
 			 * 处理用户重新连接
-			*/ 
+			 */
 			else if (message.getOpCode() == SystemMessageType.USER_RECONNECTION_TRY.id) {
 				// TODO 协议
 				UserReconnectionTry reconnectionTry = new UserReconnectionTry("");
-				byte[] actorMessageWithSubClass = 
-						thriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_USER_RECONNECTION_TRY, reconnectionTry);
-				
+				byte[] actorMessageWithSubClass = thriftSerializerFactory
+						.getActorMessageWithSubClass(Operation.WORLD_USER_RECONNECTION_TRY, reconnectionTry);
+
 				actorSelection.tell(actorMessageWithSubClass, getSelf());
 			}
 
@@ -124,9 +137,7 @@ public class SessionActor extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return ReceiveBuilder
-			.create()
-			.match(byte[].class, msg -> {
+		return ReceiveBuilder.create().match(byte[].class, msg -> {
 			ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			/**
@@ -134,24 +145,25 @@ public class SessionActor extends AbstractActor {
 			 */
 			case SESSION_USER_LOGOUT:
 				ioSession.close(true);
-				//关闭自己
+				// 关闭自己
 				self().tell(PoisonPill.getInstance(), getSelf());
 				break;
 			case SESSION_USER_CONNECT_TO_SERVER:
-				UserConnect2Server connect2Server=new UserConnect2Server();
+				UserConnect2Server connect2Server = new UserConnect2Server();
 				thriftSerializerFactory.deserialize(connect2Server, actorMessage.messageRaw);
-					if (connect2Server.success) {
-						SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
-						sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE, success.toByteArray());
-						processConnectionSessionsBinding();
-					} else {
-						SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
-						sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
-						ioSession.close(true);
-					}
+				if (connect2Server.success) {
+					SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
+					sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE,
+							success.toByteArray());
+					processConnectionSessionsBinding();
+				} else {
+					SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
+					sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
+					ioSession.close(true);
+				}
 				break;
 			case SESSION_REBIND_USER:
-				com.message.thrift.actor.session.ReBindUser reBindUser=new com.message.thrift.actor.session.ReBindUser();
+				com.message.thrift.actor.session.ReBindUser reBindUser = new com.message.thrift.actor.session.ReBindUser();
 				thriftSerializerFactory.deserialize(reBindUser, actorMessage.messageRaw);
 				if (reBindUser.success) {
 					processConnectionSessionsBinding();
@@ -160,7 +172,7 @@ public class SessionActor extends AbstractActor {
 				}
 				break;
 			case SESSION_RECIVE_PACKET:
-				ByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(); 
+				ByteArrayPacket baseByteArrayPacket = new BaseByteArrayPacket();
 				baseByteArrayPacket.fromBuffer(actorMessage.messageRaw);
 				processIOSessionReciveMessage(baseByteArrayPacket);
 				break;
@@ -176,10 +188,7 @@ public class SessionActor extends AbstractActor {
 				break;
 			}
 
-		}).matchAny(o -> logger.info("received unknown message"))
-		  .build();
+		}).matchAny(o -> logger.info("received unknown message")).build();
 	}
-
-
 
 }

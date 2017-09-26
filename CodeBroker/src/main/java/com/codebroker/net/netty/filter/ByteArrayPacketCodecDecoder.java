@@ -24,7 +24,6 @@ public class ByteArrayPacketCodecDecoder extends ByteToMessageDecoder {
 		}
 
 		in.markReaderIndex();
-//		byte[] bytes = ByteBufUtil.getBytes(in);
 
 		int dataLength = in.readInt();
 		if (in.readableBytes() < dataLength) {

@@ -4,8 +4,10 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.thrift.TException;
+
 import com.codebroker.api.NPCControl;
-import com.codebroker.api.event.EventTypes;
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
@@ -29,72 +31,75 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 
 public class UserActor extends AbstractActor {
-	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
+	ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
 	private String userId;
 	private final User user;
 
 	private ActorRef ioSessionRef;
 	private NPCControl npcControl;
-	
+
 	private ActorRef userManagerRef;
-	
+
 	private ActorRef inGrid;
 	private ActorRef inArea;
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
+
 	/**
 	 * 创建NPC
+	 * 
 	 * @param npcId
 	 * @param user
 	 * @param npcControl
 	 * @param userManagerRef
 	 */
-	public UserActor(String npcId,User user, NPCControl npcControl,ActorRef userManagerRef) {
+	public UserActor(String npcId, User user, NPCControl npcControl, ActorRef userManagerRef) {
 		super();
-		this.userId=npcId;
+		this.userId = npcId;
 		this.user = user;
 		this.npcControl = npcControl;
-		this.userManagerRef=userManagerRef;
+		this.userManagerRef = userManagerRef;
 		user.setActorRef(getSelf());
 	}
+
 	/**
 	 * 创建用户
+	 * 
 	 * @param user
 	 * @param ioSession
 	 * @param userManagerRef
 	 */
-	public UserActor(User user, ActorRef ioSession,ActorRef userManagerRef) {
+	public UserActor(User user, ActorRef ioSession, ActorRef userManagerRef) {
 		super();
 		this.user = user;
 		this.ioSessionRef = ioSession;
-		this.userManagerRef=userManagerRef;
+		this.userManagerRef = userManagerRef;
 		user.setActorRef(getSelf());
 	}
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder()
-		    .match(byte[].class, msg -> 
-		{
+		return receiveBuilder().match(byte[].class, msg -> {
 			ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
 			switch (actorMessage.op) {
 			case USER_DISCONNECT:
-				//切断网络
+				// 切断网络
 				byte[] tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.SESSION_USER_LOGOUT);
-				ioSessionRef.tell(tbaseMessage,getSelf());
-				//管理器移除
-				RemoveUser removeUser=new RemoveUser(userId);
-				byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);
+				ioSessionRef.tell(tbaseMessage, getSelf());
+				// 管理器移除
+				RemoveUser removeUser = new RemoveUser(userId);
+				byte[] actorMessageWithSubClass = thriftSerializerFactory
+						.getActorMessageWithSubClass(Operation.USER_MANAGER_REMOVE_USER, removeUser);
 				userManagerRef.tell(actorMessageWithSubClass, getSelf());
-				
-				if (inGrid!=null) {
-					
+
+				if (inGrid != null) {
+
 				}
-				
-				if (inArea!=null) {
-					
+
+				if (inArea != null) {
+
 				}
-				//断开链接
+				// 断开链接
 				break;
 			case USER_SEND_PACKET_TO_IOSESSION:
 				sendMessage(actorMessage.messageRaw);
@@ -118,8 +123,9 @@ public class UserActor extends AbstractActor {
 
 			case USER_ENTER_AREA:
 				if (inArea != null) {
-					LeaveArea leaveArea=new LeaveArea(userId);
-					inArea.tell(thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
+					LeaveArea leaveArea = new LeaveArea(userId);
+					inArea.tell(thriftSerializerFactory.getActorMessageWithSubClass(Operation.AREA_USER_LEAVE_AREA,
+							leaveArea), getSelf());
 				}
 				inArea = getSender();
 				if (inGrid != null) {
@@ -146,23 +152,23 @@ public class UserActor extends AbstractActor {
 				break;
 			}
 		})
-		//处理分发事件
-		.match(IObject.class, msg->{
-			dispatchEvent(msg);		
-		}).match(IObject.class, msg->{
-			if (npcControl!=null) {
-				npcControl.execute(msg);
-			}
-		})
-		//绑定本地事件处理
-		  .match(AddEventListener.class, msg -> {
-			eventListener.put(msg.topic, msg.paramIEventListener);
-		}).match(RemoveEventListener.class, msg -> {
-			eventListener.remove(msg.topic);
-		}).match(HasEventListener.class, msg -> {
-			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-		})
-		  .build();
+			// 处理分发事件
+			.match(Event.class, msg -> {
+				if (npcControl != null) {
+					npcControl.execute(msg);
+				} else {
+					dispatchEvent(msg);
+				}
+			}).match(IObject.class, msg -> {
+			})
+			// 绑定本地事件处理
+			.match(AddEventListener.class, msg -> {
+				eventListener.put(msg.topic, msg.paramIEventListener);
+			}).match(RemoveEventListener.class, msg -> {
+				eventListener.remove(msg.topic);
+			}).match(HasEventListener.class, msg -> {
+				getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+			}).build();
 	}
 
 	private void handleClientRequest(int requestId, ByteBuffer params) {
@@ -174,9 +180,16 @@ public class UserActor extends AbstractActor {
 	private void sendMessage(ByteBuffer byteBuffer) {
 		ActorMessage actorMessage = new ActorMessage();
 		actorMessage.messageRaw = byteBuffer;
-		byte[] bs = thriftSerializerFactory
-				.getActorMessageWithSubClass(Operation.SESSION_USER_SEND_PACKET,actorMessage);
-		ioSessionRef.tell(bs, getSelf());
+		actorMessage.op=Operation.SESSION_USER_SEND_PACKET;
+		byte[] bs;
+		try {
+			bs = thriftSerializerFactory.getActorMessage(actorMessage);
+			ioSessionRef.tell(bs, getSelf());
+		} catch (TException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**
@@ -184,18 +197,15 @@ public class UserActor extends AbstractActor {
 	 * 
 	 * @param msg
 	 */
-	private void dispatchEvent(IObject msg) {
-		String topic = msg.getUtfString(EventTypes.TOPIC);
+	private void dispatchEvent(Event msg) {
 		try {
-			IEventListener iEventListener = eventListener.get(topic);
+			IEventListener iEventListener = eventListener.get(msg.getTopic());
 			if (iEventListener != null) {
-				iEventListener.handleEvent(topic,msg);
+				iEventListener.handleEvent(msg);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
-	
-	
 
 }

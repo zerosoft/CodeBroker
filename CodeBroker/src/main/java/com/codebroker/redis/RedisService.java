@@ -177,6 +177,7 @@ public class RedisService extends BaseCoreService {
 		log.debug("开始执行默认的配置,使用单例redis");
 		System.err.println("cant find redis.properties file,load default set ---->127.0.0.1->32768");
 		// 判断是否使用pool 如果不使用则是单例的redis
+	
 		isPool = wrapper.getBooleanProperty("redis.isPool", true);
 		url = wrapper.getProperty("redis.url");
 		port = wrapper.getIntProperty("redis.port", 6379);

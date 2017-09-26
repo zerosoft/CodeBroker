@@ -3,6 +3,7 @@ package com.codebroker.api;
 import java.util.Collection;
 import java.util.List;
 
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.core.data.IObject;
 
@@ -44,7 +45,7 @@ public interface IArea extends IEventDispatcher {
 	 * @return
 	 * @throws Exception
 	 */
-	public IGrid createGrid(String gridId) throws Exception;
+	public void createGrid(String gridId) throws Exception;
 
 	/**
 	 * 删除一个格子
@@ -88,7 +89,7 @@ public interface IArea extends IEventDispatcher {
 	 * 
 	 * @param jsonString
 	 */
-	public void broadCastAllUser(IObject object);
+	public void broadCastAllUser(Event object);
 
 	/**
 	 * 对指定组的用户进行广播
@@ -96,5 +97,5 @@ public interface IArea extends IEventDispatcher {
 	 * @param jsonString
 	 * @param users
 	 */
-	public void broadCastUsers(IObject object, Collection<IUser> users);
+	public void broadCastUsers(Event object, Collection<IUser> users);
 }

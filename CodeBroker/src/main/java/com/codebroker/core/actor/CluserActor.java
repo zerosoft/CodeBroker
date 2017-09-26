@@ -88,8 +88,8 @@ public class CluserActor extends AbstractActor {
 		}).match(IObject.class, msg->{
 			System.out.println("woddeede "+msg.getUtfString("hello"));
 		}).match(Event.class, msg->{
-			System.out.println(msg.topic);
-			System.out.println(msg.message.toJson());
+			System.out.println(msg.getTopic());
+			System.out.println(msg.getMessage().toJson());
 		})
 			.matchAny(msg -> {
 			logger.info("unknow message " + msg);
