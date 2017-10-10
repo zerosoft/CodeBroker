@@ -177,8 +177,7 @@ public class WorldActor extends AbstractActor {
 			handleLogin = "Test1234";
 		}
 		CreateUserWithSession createUserWithSession = new CreateUserWithSession(handleLogin);
-		byte[] actorMessageWithSubClass = thriftSerializerFactory
-				.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER_WITH_SESSION, createUserWithSession);
+		byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.USER_MANAGER_CREATE_USER_WITH_SESSION, createUserWithSession);
 		userManagerRef.tell(actorMessageWithSubClass, sessionActorRef);
 	}
 

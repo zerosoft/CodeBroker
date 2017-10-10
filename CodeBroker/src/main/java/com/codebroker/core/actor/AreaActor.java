@@ -26,7 +26,6 @@ import com.message.thrift.actor.area.CreateGrid;
 import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.area.RemoveGrid;
 import com.message.thrift.actor.area.UserEneterArea;
-import com.message.thrift.actor.usermanager.CreateUser;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -47,8 +46,10 @@ public class AreaActor extends AbstractActor {
 	public transient static final String AREA_ENTER_USER="AREA_ENTER_USER";
 	public transient static final String AREA_LEAVE_USER="AREA_LEAVE_USER";
 	public transient static final String USER_ID="USER_ID";
+	
 	private final ActorRef worldRef;
 	private final ActorRef userManagerRef;
+	
 	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
 
 	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
@@ -66,7 +67,9 @@ public class AreaActor extends AbstractActor {
 	@Override
 	public void postStop() throws Exception {
 		super.postStop();
+		
 		Iterable<ActorRef> children = getContext().getChildren();
+		
 		for (ActorRef childRef : children) {
 			childRef.tell(PoisonPill.getInstance(), getSelf());
 		}
@@ -209,11 +212,16 @@ public class AreaActor extends AbstractActor {
 		}
 	}
 
-
+	/**
+	 * 进入区域
+	 * @param userId
+	 * @param sender
+	 */
 	private void enterArea(String userId, ActorRef sender) {
 		if (userMap.containsKey(userId)) {
 			getSender().tell(false, getSelf());
-		} else {
+		} 
+		else {
 			userMap.put(userId, sender);
 			getSender().tell(true, getSelf());
 			// 通知user进入所在actor

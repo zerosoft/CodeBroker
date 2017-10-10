@@ -115,7 +115,8 @@ public class ReplicatedCache extends AbstractActor {
 
 	@Override
 	public Receive createReceive() {
-		return receiveBuilder().match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
+		return receiveBuilder()
+				.match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
 				.match(Evict.class, cmd -> receiveEvict(cmd.key))
 				.match(GetFromCache.class, cmd -> receiveGetFromCache(cmd.key))
 				.match(GetSuccess.class, g -> receiveGetSuccess((GetSuccess<LWWMap<String, Object>>) g))
@@ -125,14 +126,14 @@ public class ReplicatedCache extends AbstractActor {
 	}
 
 	private void receivePutInCache(String key, Object value) {
-		Update<LWWMap<String, Object>> update = new Update<>(dataKey(key), LWWMap.create(), writeLocal(),
-				curr -> curr.put(node, key, value));
+		Update<LWWMap<String, Object>> update =
+				new Update<>(dataKey(key), LWWMap.create(), writeLocal(),curr -> curr.put(node, key, value));
 		replicator.tell(update, self());
 	}
 
 	private void receiveEvict(String key) {
-		Update<LWWMap<String, Object>> update = new Update<>(dataKey(key), LWWMap.create(), writeLocal(),
-				curr -> curr.remove(node, key));
+		Update<LWWMap<String, Object>> update 
+		= new Update<>(dataKey(key), LWWMap.create(), writeLocal(),	curr -> curr.remove(node, key));
 		replicator.tell(update, self());
 	}
 

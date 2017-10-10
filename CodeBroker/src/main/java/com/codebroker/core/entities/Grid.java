@@ -8,7 +8,6 @@ import com.codebroker.api.IUser;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.GridActor;
-import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.util.AkkaMediator;
 

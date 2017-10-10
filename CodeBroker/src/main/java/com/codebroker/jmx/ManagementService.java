@@ -16,9 +16,11 @@ import com.codebroker.core.ServerEngine;
 
 public class ManagementService {
 
-	private static Logger logger = LoggerFactory.getLogger("AvalonEngine");
+	private static Logger logger = LoggerFactory.getLogger("codebroker");
 
-	static final String DOMAIN = "com.avalon";
+	//顶级目录
+	static final String DOMAIN = "codebroker";
+	
 	private static final int INITIAL_CAPACITY = 3;
 
 	final InstanceMXBean instance;
@@ -34,7 +36,7 @@ public class ManagementService {
 			mbs.registerMBean(instanceMBean, instanceMBean.objectName);
 		} catch (Exception e) {
 			instanceMBean = null;
-			logger.warn("AvalonInstanceMediator error", e);
+			logger.warn("ManagementService error", e);
 		}
 		this.instanceMBean = instanceMBean;
 	}
@@ -46,22 +48,24 @@ public class ManagementService {
 	public void destroy() {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		try {
-			Set<ObjectName> entries = mbs
-					.queryNames(new ObjectName(DOMAIN + ":instance=" + quote(instance.getName()) + ",*"), null);
+			String quote = quote(instance.getName());
+			ObjectName objectName = new ObjectName(DOMAIN + ":instance=" + quote + ",*");
+			Set<ObjectName> entries = mbs.queryNames(objectName, null);
 			for (ObjectName name : entries) {
 				if (mbs.isRegistered(name)) {
 					mbs.unregisterMBean(name);
 				}
 			}
 		} catch (Exception e) {
-			logger.warn("AvalonInstanceMediator destroy error", e);
+			logger.warn("ManagementService destroy error", e);
 		}
 	}
 
 	public static void shutdownAll() {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		try {
-			Set<ObjectName> entries = mbs.queryNames(new ObjectName(DOMAIN + ":*"), null);
+			ObjectName objectName = new ObjectName(DOMAIN + ":*");
+			Set<ObjectName> entries = mbs.queryNames(objectName, null);
 			for (ObjectName name : entries) {
 				if (mbs.isRegistered(name)) {
 					mbs.unregisterMBean(name);
@@ -84,7 +88,7 @@ public class ManagementService {
 		try {
 			return new ObjectName(DOMAIN, properties);
 		} catch (MalformedObjectNameException e) {
-			logger.warn("AvalonInstanceMediator createObjectName error", e);
+			logger.warn("ManagementService createObjectName error", e);
 			throw new IllegalArgumentException();
 
 		}

@@ -6,17 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import org.apache.thrift.TDeserializer;
-
 import com.codebroker.core.ServerEngine;
-import com.codebroker.core.proxy.TransportSupervisorProxy;
+import com.codebroker.core.proxy.NettyTcpSupervisorProxy;
 import com.codebroker.net.IoMonitorImpl;
-import com.message.thrift.actor.ActorMessage;
 
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 
-@ManagedDescription("AvalonInstance")
+@ManagedDescription("CodeBrokerDesc")
 public class InstanceMediator extends MBean<ServerEngine> {
 	private static final int INITIAL_CAPACITY = 3;
 
@@ -25,19 +22,18 @@ public class InstanceMediator extends MBean<ServerEngine> {
 		createProperties(avalonInstance);
 		createMBeans(managementService);
 		registerMBeans();
-		ActorMessage s=new ActorMessage();
-		
-		TDeserializer deserializer=new TDeserializer();
-		
 	}
-
+	/**
+	 * 注册MBean
+	 * @param managementService
+	 */
 	private void createMBeans(ManagementService managementService) {
 		IoMonitorImpl impl = new IoMonitorImpl();
 		MBean control = new IoMonitorMediator(impl, managementService);
 		register(control);
 
-		TransportSupervisorProxy proxy = TransportSupervisorProxy.getInstance();
-		MBean transport = new TransportSupervisorMediator(proxy, managementService);
+		NettyTcpSupervisorProxy proxy = NettyTcpSupervisorProxy.getInstance();
+		MBean transport = new NettyTcpSupervisorMediator(proxy, managementService);
 		register(transport);
 	}
 
@@ -45,12 +41,10 @@ public class InstanceMediator extends MBean<ServerEngine> {
 
 	}
 
-	private void createProperties(ServerEngine avalonInstance) {
+	private void createProperties(ServerEngine engine) {
 		Hashtable<String, String> properties = new Hashtable<String, String>(INITIAL_CAPACITY);
-		properties.put("type", quote("AvalonInstance"));
-		// properties.put("instance",
-		// quote(avalonInstance.getClass().getSimpleName()));
-		properties.put("name", quote(avalonInstance.getClass().getSimpleName()));
+		properties.put("type", quote("CodeBroker"));
+		properties.put("name", quote(engine.getClass().getSimpleName()));
 		setObjectName(properties);
 	}
 
@@ -70,23 +64,6 @@ public class InstanceMediator extends MBean<ServerEngine> {
 		managedObject.stopEngine();
 	}
 
-	@ManagedAnnotation(value = "ServerMode")
-	@ManagedDescription("ServerMode")
-	public String getServerMode() {
-		return managedObject.getServerMode().modeName;
-	}
-
-	@ManagedAnnotation(value = "GameServerNum")
-	@ManagedDescription("GameServer Num")
-	public int GameServerNum() {
-		return managedObject.GameServerNum();
-	}
-
-	@ManagedAnnotation(value = "GateServreNum")
-	@ManagedDescription("GateServre Num")
-	public int GateServreNum() {
-		return managedObject.GateServreNum();
-	}
 
 	@ManagedAnnotation(value = "reloadClazz", operation = true)
 	@ManagedDescription("reload one class")
@@ -102,8 +79,7 @@ public class InstanceMediator extends MBean<ServerEngine> {
 
 	@ManagedAnnotation(value = "reloadMethod", operation = true)
 	@ManagedDescription("reload one class method")
-	public void reloadMethod(String clazz, String methodName, String context)
-			throws NotFoundException, CannotCompileException, IOException {
+	public void reloadMethod(String clazz, String methodName, String context)throws NotFoundException, CannotCompileException, IOException {
 		managedObject.reloadMethod(clazz, methodName, context);
 	}
 }

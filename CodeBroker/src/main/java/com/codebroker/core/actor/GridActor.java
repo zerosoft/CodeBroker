@@ -14,7 +14,6 @@ import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
 import com.codebroker.api.event.event.RemoveEventListener;
-import com.codebroker.core.data.IObject;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;

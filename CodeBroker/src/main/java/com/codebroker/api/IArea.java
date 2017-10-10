@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventDispatcher;
-import com.codebroker.core.data.IObject;
 
 /**
  * 区域

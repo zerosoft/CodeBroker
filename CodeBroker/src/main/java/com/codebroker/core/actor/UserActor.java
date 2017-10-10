@@ -72,6 +72,7 @@ public class UserActor extends AbstractActor {
 	public UserActor(User user, ActorRef ioSession, ActorRef userManagerRef) {
 		super();
 		this.user = user;
+		this.userId = getSelf().path().name();
 		this.ioSessionRef = ioSession;
 		this.userManagerRef = userManagerRef;
 		user.setActorRef(getSelf());
@@ -99,6 +100,8 @@ public class UserActor extends AbstractActor {
 				if (inArea != null) {
 
 				}
+				
+				ContextResolver.getAppListener().handleLogout(user);
 				// 断开链接
 				break;
 			case USER_SEND_PACKET_TO_IOSESSION:
@@ -181,9 +184,8 @@ public class UserActor extends AbstractActor {
 		ActorMessage actorMessage = new ActorMessage();
 		actorMessage.messageRaw = byteBuffer;
 		actorMessage.op=Operation.SESSION_USER_SEND_PACKET;
-		byte[] bs;
 		try {
-			bs = thriftSerializerFactory.getActorMessage(actorMessage);
+			byte[] bs = thriftSerializerFactory.getActorMessage(actorMessage);
 			ioSessionRef.tell(bs, getSelf());
 		} catch (TException e) {
 			// TODO Auto-generated catch block

@@ -40,12 +40,6 @@ public class User extends EventDispatcher implements IUser{
 		return getUserId().startsWith(UserManagerActor.NPC_PRFIX);
 	}
 
-
-	@Override
-	public String getName() {
-		return iObject.getUtfString("userName");
-	}
-
 	@Override
 	public void sendMessageToIoSession(int requestId, Object message) {
 

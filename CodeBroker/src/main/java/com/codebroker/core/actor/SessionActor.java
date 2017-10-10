@@ -48,9 +48,14 @@ public class SessionActor extends AbstractActor {
 		this.ioSession = ioSession;
 	}
 
-	private void processConnectionSessionsBinding() {
+	private void processConnectionSessionsBinding(String bindingkey) {
 		this.userActor = getSender();
 		this.authorization = true;
+		
+		JSONObject object=new JSONObject();
+		object.put("connection", "ok");
+		object.put("bindingkey", bindingkey);
+		sessionSendMessage(SystemMessageType.USER_LOGIN_JSON.id, object.toString().getBytes());
 	}
 
 	/**
@@ -153,9 +158,8 @@ public class SessionActor extends AbstractActor {
 				thriftSerializerFactory.deserialize(connect2Server, actorMessage.messageRaw);
 				if (connect2Server.success) {
 					SC_USER_RECONNECTION_SUCCESS success = SC_USER_RECONNECTION_SUCCESS.newBuilder().build();
-					sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE,
-							success.toByteArray());
-					processConnectionSessionsBinding();
+					sessionSendMessage(Message.PB.SystemKey.SC_USER_CONNECT_TO_SERVER_SUCCESS_VALUE,success.toByteArray());
+					processConnectionSessionsBinding(connect2Server.bindingkey);
 				} else {
 					SC_USER_RECONNECTION_FAIL fail = SC_USER_RECONNECTION_FAIL.newBuilder().build();
 					sessionSendMessage(Message.PB.SystemKey.SC_USER_RECONNECTION_FAIL_VALUE, fail.toByteArray());
@@ -166,7 +170,7 @@ public class SessionActor extends AbstractActor {
 				com.message.thrift.actor.session.ReBindUser reBindUser = new com.message.thrift.actor.session.ReBindUser();
 				thriftSerializerFactory.deserialize(reBindUser, actorMessage.messageRaw);
 				if (reBindUser.success) {
-					processConnectionSessionsBinding();
+					processConnectionSessionsBinding(reBindUser.bindingkey);
 				} else {
 					ioSession.close(true);
 				}

@@ -16,12 +16,6 @@ public interface IUser extends IEventDispatcher {
 	 * @throws Exception
 	 */
 	public String getUserId() throws Exception;
-	/**
-	 * 获得用户名
-	 * @return
-	 * @throws Exception
-	 */
-	public String getName() throws Exception;
 	
 	/**
 	 * 坚持这个用户是不是NPC

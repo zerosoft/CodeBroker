@@ -5,7 +5,10 @@ import java.nio.ByteBuffer;
 import org.apache.thrift.TException;
 
 import com.codebroker.api.IoSession;
+import com.codebroker.core.actor.CodeBrokerSystem;
 import com.codebroker.core.actor.SessionActor;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.monitor.MonitorEventType;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.AkkaMediator;
@@ -50,6 +53,13 @@ public class NettyIoSession implements IoSession {
 	public void write(Object msg) {
 		if (msg instanceof BaseByteArrayPacket) {
 			ctx.writeAndFlush(msg);
+			
+			CObject newInstance = CObject.newInstance();
+			newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_WRITE_FLOW);
+			newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
+			newInstance.putDouble(MonitorEventType.SESSION_FLOW,((BaseByteArrayPacket) msg).getRawData().length+4);
+			newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
+			AkkaMediator.getInbox().send(CodeBrokerSystem.monitorManager,newInstance);
 		}
 	}
 
@@ -74,7 +84,7 @@ public class NettyIoSession implements IoSession {
 	 * 
 	 * @param msg
 	 */
-	private void sendMessageToTransport(Object msg) {
+	private void send2SessionActor(Object msg) {
 		if (msg instanceof BaseByteArrayPacket) {
 			ActorMessage message=new ActorMessage();
 			
@@ -89,6 +99,13 @@ public class NettyIoSession implements IoSession {
 			try {
 				actorMessage = thriftSerializerFactory.getActorMessage(message);
 				actorRef.tell(actorMessage, ActorRef.noSender());
+				
+				CObject newInstance = CObject.newInstance();
+				newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_RECIVE_FLOW);
+				newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
+				newInstance.putDouble(MonitorEventType.SESSION_FLOW,binary.length);
+				newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
+				AkkaMediator.getInbox().send(CodeBrokerSystem.monitorManager,newInstance);
 			} catch (TException e) {
 				e.printStackTrace();
 			}
@@ -96,7 +113,7 @@ public class NettyIoSession implements IoSession {
 		}
 	}
 
-	public void processMessage(Object msg) {
-		sendMessageToTransport(msg);
+	public void processRecvieMessage(Object msg) {
+		send2SessionActor(msg);
 	}
 }
