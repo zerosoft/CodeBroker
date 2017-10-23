@@ -2,19 +2,19 @@ package com.codebroker.redis.collections;
 
 public interface CountStructure<T extends Number> {
 
-	T get();
+    T get();
 
-	T increment();
+    T increment();
 
-	T increment(T count);
+    T increment(T count);
 
-	T decrement();
+    T decrement();
 
-	T decrement(T count);
+    T decrement(T count);
 
-	void delete();
+    void delete();
 
-	void expires(int ttlSeconds);
+    void expires(int ttlSeconds);
 
-	void persist();
+    void persist();
 }

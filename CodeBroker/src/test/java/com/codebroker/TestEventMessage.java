@@ -1,14 +1,14 @@
 package com.codebroker;
 
+import com.codebroker.protocol.ThriftSerializerFactory;
 import org.apache.thrift.TException;
 import org.junit.Test;
 
-import com.codebroker.protocol.ThriftSerializerFactory;
-
 public class TestEventMessage {
-	ThriftSerializerFactory ThriftSerializerFactory=new ThriftSerializerFactory();
-	@Test
-	public void testSD() throws TException {
+    ThriftSerializerFactory ThriftSerializerFactory = new ThriftSerializerFactory();
+
+    @Test
+    public void testSD() throws TException {
 //		IObject object = CObject.newInstance();
 //		object.putUtfString("ee", "sss");
 //		object.putInt("VI", 13);
@@ -24,8 +24,8 @@ public class TestEventMessage {
 //		Event event2 = new Event(raw);
 //		System.out.println(event2.topic);
 //		System.out.println(event2.message.toJson());
-	}
-	
+    }
+
 //	public Event(byte[] bs) throws TException {
 //	super();
 //	RemoteEventMessage message=new RemoteEventMessage();
@@ -46,6 +46,6 @@ public class TestEventMessage {
 //	buffer.put(binary);
 //	buffer.flip();
 //	remoteEventMessage.iobject=buffer;
-//	return thriftSerializerFactory.getActorMessageWithSubClass(Operation.EVENT_REMOTE_MESSAGE,remoteEventMessage);
+//	return thriftSerializerFactory.getActorMessageByteArray(Operation.EVENT_REMOTE_MESSAGE,remoteEventMessage);
 //}
 }

@@ -1,5 +1,5 @@
 package com.codebroker.exception;
 
-public class NoServerException extends Exception {
+public class NoServerException extends CodeBrokerException {
 
 }

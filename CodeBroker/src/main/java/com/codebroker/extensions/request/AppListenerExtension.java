@@ -341,12 +341,6 @@ Public License instead of this License.
  */
 package com.codebroker.extensions.request;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IHandlerFactory;
@@ -354,8 +348,14 @@ import com.codebroker.api.IUser;
 import com.codebroker.extensions.request.filter.ClientExtensionFilter;
 import com.codebroker.extensions.request.filter.FilterAction;
 import com.codebroker.extensions.request.filter.IFilterChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 请求拓展接口.
  *
@@ -363,97 +363,94 @@ import com.codebroker.extensions.request.filter.IFilterChain;
  */
 public abstract class AppListenerExtension implements CodeBrokerAppListener {
 
-	private Logger logger = LoggerFactory.getLogger(getClass());
+    private final IHandlerFactory handlerFactory = new ClientHandlerFactory();
+    private final IFilterChain filterChain = new ClientExtensionFilterChain(this);
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    private List<IUser> users;
 
-	private final IHandlerFactory handlerFactory = new ClientHandlerFactory();
+    private String name;
 
-	private final IFilterChain filterChain = new ClientExtensionFilterChain(this);
+    public void destroy(Object obj) {
+        handlerFactory.clearAll();
+        filterChain.destroy();
+    }
 
-	private List<IUser> users;
+    public void addRequestHandler(int requestId, Class<?> theClass) {
+        if (!(IClientRequestHandler.class).isAssignableFrom(theClass)) {
+            // throw new
+            // ALawsRuntimeException(String.format("Provided Request Handler
+            // does not implement IClientRequestHandler: %s, Cmd: %s",
+            // new Object[] {theClass, requestId }));
+        } else {
+            logger.info("add handler id {} class {}", requestId, theClass);
+            handlerFactory.addHandler(requestId, theClass);
+        }
+    }
 
-	private String name;
+    protected void addRequestHandler(int requestId, IClientRequestHandler requestHandler) {
+        handlerFactory.addHandler(requestId, requestHandler);
+    }
 
-	public void destroy(Object obj) {
-		handlerFactory.clearAll();
-		filterChain.destroy();
-	}
+    protected void removeRequestHandler(int requestId) {
+        handlerFactory.removeHandler(requestId);
+    }
 
-	public void addRequestHandler(int requestId, Class<?> theClass) {
-		if (!(IClientRequestHandler.class).isAssignableFrom(theClass)) {
-			// throw new
-			// ALawsRuntimeException(String.format("Provided Request Handler
-			// does not implement IClientRequestHandler: %s, Cmd: %s",
-			// new Object[] {theClass, requestId }));
-		} else {
-			logger.info("add handler id {} class {}", requestId, theClass);
-			handlerFactory.addHandler(requestId, theClass);
-		}
-	}
+    protected void clearAllHandlers() {
+        handlerFactory.clearAll();
+    }
 
-	protected void addRequestHandler(int requestId, IClientRequestHandler requestHandler) {
-		handlerFactory.addHandler(requestId, requestHandler);
-	}
+    public void handleClientRequest(IUser user, int requestId, Object params) {
+        if (filterChain.size() > 0 && filterChain.runRequestInChain(requestId, this, params) == FilterAction.HALT) {
+            return;
+        }
+        try {
+            IClientRequestHandler handler = (IClientRequestHandler) handlerFactory.findHandler(requestId);
+            if (handler == null) {
+                logger.info("hander is no found" + requestId);
+            }
+            handler.handleClientRequest(user, params);
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
-	protected void removeRequestHandler(int requestId) {
-		handlerFactory.removeHandler(requestId);
-	}
+    }
 
-	protected void clearAllHandlers() {
-		handlerFactory.clearAll();
-	}
+    public final void addFilter(int filterId, ClientExtensionFilter filter) {
+        filterChain.addFilter(filterId, filter);
+    }
 
-	public void handleClientRequest(IUser user, int requestId, Object params) {
-		if (filterChain.size() > 0 && filterChain.runRequestInChain(requestId, this, params) == FilterAction.HALT) {
-			return;
-		}
-		try {
-			IClientRequestHandler handler = (IClientRequestHandler) handlerFactory.findHandler(requestId);
-			if (handler == null) {
-				logger.info("hander is no found" + requestId);
-			}
-			handler.handleClientRequest(user, params);
-		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
+    public void removeFilter(int filterId) {
+        filterChain.remove(filterId);
+    }
 
-	}
+    public void clearFilters() {
+        filterChain.destroy();
+    }
 
-	public final void addFilter(int filterId, ClientExtensionFilter filter) {
-		filterChain.addFilter(filterId, filter);
-	}
+    @Override
+    public int getUserCount() {
+        return users.size();
+    }
 
-	public void removeFilter(int filterId) {
-		filterChain.remove(filterId);
-	}
+    @Override
+    public Collection<IUser> getUserList() {
+        return users;
+    }
 
-	public void clearFilters() {
-		filterChain.destroy();
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public int getUserCount() {
-		return users.size();
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public Collection<IUser> getUserList() {
-		return users;
-	}
+    @Override
+    public void handleMessage(Object obj) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public void handleMessage(Object obj) {
-		// TODO Auto-generated method stub
-
-	}
+    }
 
 }

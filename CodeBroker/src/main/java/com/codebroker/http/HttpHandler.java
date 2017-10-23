@@ -5,8 +5,8 @@ import akka.http.javadsl.model.HttpResponse;
 
 public interface HttpHandler {
 
-	public String getUrlPath();
+    public String getUrlPath();
 
-	public HttpResponse tet(HttpRequest request);
+    public HttpResponse tet(HttpRequest request);
 
 }

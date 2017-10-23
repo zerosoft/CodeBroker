@@ -1,10 +1,5 @@
 package distributed;
 
-import static akka.cluster.ddata.Replicator.readLocal;
-import static akka.cluster.ddata.Replicator.writeLocal;
-
-import java.util.Optional;
-
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -13,150 +8,150 @@ import akka.cluster.ddata.DistributedData;
 import akka.cluster.ddata.Key;
 import akka.cluster.ddata.LWWMap;
 import akka.cluster.ddata.LWWMapKey;
-import akka.cluster.ddata.Replicator.Get;
-import akka.cluster.ddata.Replicator.GetSuccess;
-import akka.cluster.ddata.Replicator.NotFound;
-import akka.cluster.ddata.Replicator.Update;
-import akka.cluster.ddata.Replicator.UpdateResponse;
+import akka.cluster.ddata.Replicator.*;
 import scala.Option;
+
+import java.util.Optional;
+
+import static akka.cluster.ddata.Replicator.*;
 
 @SuppressWarnings("unchecked")
 public class ReplicatedCache extends AbstractActor {
 
-	static class Request {
-		public final String key;
-		public final ActorRef replyTo;
+    private final ActorRef replicator = DistributedData.get(context().system()).replicator();
+    private final Cluster node = Cluster.get(context().system());
 
-		public Request(String key, ActorRef replyTo) {
-			this.key = key;
-			this.replyTo = replyTo;
-		}
-	}
+    public static Props props() {
+        return Props.create(ReplicatedCache.class);
+    }
 
-	public static class PutInCache {
-		public final String key;
-		public final Object value;
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
+                .match(Evict.class, cmd -> receiveEvict(cmd.key))
+                .match(GetFromCache.class, cmd -> receiveGetFromCache(cmd.key))
+                .match(GetSuccess.class, g -> receiveGetSuccess((GetSuccess<LWWMap<String, Object>>) g))
+                .match(NotFound.class, n -> receiveNotFound((NotFound<LWWMap<String, Object>>) n))
+                .match(UpdateResponse.class, u -> {
+                }).build();
+    }
 
-		public PutInCache(String key, Object value) {
-			this.key = key;
-			this.value = value;
-		}
-	}
+    private void receivePutInCache(String key, Object value) {
+        Update<LWWMap<String, Object>> update =
+                new Update<>(dataKey(key), LWWMap.create(), writeLocal(), curr -> curr.put(node, key, value));
+        replicator.tell(update, self());
+    }
 
-	public static class GetFromCache {
-		public final String key;
+    private void receiveEvict(String key) {
+        Update<LWWMap<String, Object>> update
+                = new Update<>(dataKey(key), LWWMap.create(), writeLocal(), curr -> curr.remove(node, key));
+        replicator.tell(update, self());
+    }
 
-		public GetFromCache(String key) {
-			this.key = key;
-		}
-	}
+    private void receiveGetFromCache(String key) {
+        Optional<Object> ctx = Optional.of(new Request(key, sender()));
+        Get<LWWMap<String, Object>> get = new Get<>(dataKey(key), readLocal(), ctx);
+        replicator.tell(get, self());
+    }
 
-	public static class Cached {
-		public final String key;
-		public final Optional<Object> value;
+    private void receiveGetSuccess(GetSuccess<LWWMap<String, Object>> g) {
+        Request req = (Request) g.getRequest().get();
+        Option<Object> valueOption = g.dataValue().get(req.key);
+        Optional<Object> valueOptional = Optional.ofNullable(valueOption.isDefined() ? valueOption.get() : null);
+        req.replyTo.tell(new Cached(req.key, valueOptional), self());
+    }
 
-		public Cached(String key, Optional<Object> value) {
-			this.key = key;
-			this.value = value;
-		}
+    private void receiveNotFound(NotFound<LWWMap<String, Object>> n) {
+        Request req = (Request) n.getRequest().get();
+        req.replyTo.tell(new Cached(req.key, Optional.empty()), self());
+    }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
-		}
+    private Key<LWWMap<String, Object>> dataKey(String entryKey) {
+        return LWWMapKey.create("cache-" + Math.abs(entryKey.hashCode()) % 100);
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Cached other = (Cached) obj;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
-				return false;
-			return true;
-		}
+    static class Request {
+        public final String key;
+        public final ActorRef replyTo;
 
-		@Override
-		public String toString() {
-			return "Cached [key=" + key + ", value=" + value + "]";
-		}
+        public Request(String key, ActorRef replyTo) {
+            this.key = key;
+            this.replyTo = replyTo;
+        }
+    }
 
-	}
+    public static class PutInCache {
+        public final String key;
+        public final Object value;
 
-	public static class Evict {
-		public final String key;
+        public PutInCache(String key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
 
-		public Evict(String key) {
-			this.key = key;
-		}
-	}
+    public static class GetFromCache {
+        public final String key;
 
-	public static Props props() {
-		return Props.create(ReplicatedCache.class);
-	}
+        public GetFromCache(String key) {
+            this.key = key;
+        }
+    }
 
-	private final ActorRef replicator = DistributedData.get(context().system()).replicator();
-	private final Cluster node = Cluster.get(context().system());
+    public static class Cached {
+        public final String key;
+        public final Optional<Object> value;
 
-	@Override
-	public Receive createReceive() {
-		return receiveBuilder()
-				.match(PutInCache.class, cmd -> receivePutInCache(cmd.key, cmd.value))
-				.match(Evict.class, cmd -> receiveEvict(cmd.key))
-				.match(GetFromCache.class, cmd -> receiveGetFromCache(cmd.key))
-				.match(GetSuccess.class, g -> receiveGetSuccess((GetSuccess<LWWMap<String, Object>>) g))
-				.match(NotFound.class, n -> receiveNotFound((NotFound<LWWMap<String, Object>>) n))
-				.match(UpdateResponse.class, u -> {
-				}).build();
-	}
+        public Cached(String key, Optional<Object> value) {
+            this.key = key;
+            this.value = value;
+        }
 
-	private void receivePutInCache(String key, Object value) {
-		Update<LWWMap<String, Object>> update =
-				new Update<>(dataKey(key), LWWMap.create(), writeLocal(),curr -> curr.put(node, key, value));
-		replicator.tell(update, self());
-	}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((key == null) ? 0 : key.hashCode());
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
+        }
 
-	private void receiveEvict(String key) {
-		Update<LWWMap<String, Object>> update 
-		= new Update<>(dataKey(key), LWWMap.create(), writeLocal(),	curr -> curr.remove(node, key));
-		replicator.tell(update, self());
-	}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Cached other = (Cached) obj;
+            if (key == null) {
+                if (other.key != null)
+                    return false;
+            } else if (!key.equals(other.key))
+                return false;
+            if (value == null) {
+                if (other.value != null)
+                    return false;
+            } else if (!value.equals(other.value))
+                return false;
+            return true;
+        }
 
-	private void receiveGetFromCache(String key) {
-		Optional<Object> ctx = Optional.of(new Request(key, sender()));
-		Get<LWWMap<String, Object>> get = new Get<>(dataKey(key), readLocal(), ctx);
-		replicator.tell(get, self());
-	}
+        @Override
+        public String toString() {
+            return "Cached [key=" + key + ", value=" + value + "]";
+        }
 
-	private void receiveGetSuccess(GetSuccess<LWWMap<String, Object>> g) {
-		Request req = (Request) g.getRequest().get();
-		Option<Object> valueOption = g.dataValue().get(req.key);
-		Optional<Object> valueOptional = Optional.ofNullable(valueOption.isDefined() ? valueOption.get() : null);
-		req.replyTo.tell(new Cached(req.key, valueOptional), self());
-	}
+    }
 
-	private void receiveNotFound(NotFound<LWWMap<String, Object>> n) {
-		Request req = (Request) n.getRequest().get();
-		req.replyTo.tell(new Cached(req.key, Optional.empty()), self());
-	}
+    public static class Evict {
+        public final String key;
 
-	private Key<LWWMap<String, Object>> dataKey(String entryKey) {
-		return LWWMapKey.create("cache-" + Math.abs(entryKey.hashCode()) % 100);
-	}
+        public Evict(String key) {
+            this.key = key;
+        }
+    }
 
 }

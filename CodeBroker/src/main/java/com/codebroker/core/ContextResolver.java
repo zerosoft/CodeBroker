@@ -341,6 +341,7 @@ Public License instead of this License.
  */
 package com.codebroker.core;
 
+import akka.actor.ActorSystem;
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.IService;
@@ -348,114 +349,107 @@ import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.util.PropertiesWrapper;
 
-import akka.actor.ActorSystem;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * 上下文解析器.
  */
 public final class ContextResolver {
 
-	private static KernelContext context;
+    private static KernelContext context;
 
-	/**
-	 * Instantiates a new context resolver.
-	 */
-	private ContextResolver() {
-	}
+    /**
+     * Instantiates a new context resolver.
+     */
+    private ContextResolver() {
+    }
 
-	/**
-	 * Gets the properties wrapper.
-	 *
-	 * @return the properties wrapper
-	 */
-	public static PropertiesWrapper getPropertiesWrapper() {
-		return context.getPropertiesWrapper();
-	}
+    /**
+     * Gets the properties wrapper.
+     *
+     * @return the properties wrapper
+     */
+    public static PropertiesWrapper getPropertiesWrapper() {
+        return context.getPropertiesWrapper();
+    }
 
-	/**
-	 * Gets the app listener.
-	 *
-	 * @return the app listener
-	 */
-	public static CodeBrokerAppListener getAppListener() {
-		return context.getAppListener();
-	}
+    /**
+     * Gets the app listener.
+     *
+     * @return the app listener
+     */
+    public static CodeBrokerAppListener getAppListener() {
+        return context.getAppListener();
+    }
 
-	/**
-	 * Gets the manager.
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param type
-	 *            the type
-	 * @return the manager
-	 */
-	public static <T> T getManager(Class<T> type) {
-		return context.getManager(type);
-	}
+    /**
+     * Gets the manager.
+     *
+     * @param <T>  the generic type
+     * @param type the type
+     * @return the manager
+     */
+    public static <T> T getManager(Class<T> type) {
+        return context.getManager(type);
+    }
 
-	/**
-	 * 系统组件
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param type
-	 *            the type
-	 * @return the component
-	 */
-	public static <T> T getComponent(Class<T> type) {
-		return context.getComponent(type);
-	}
+    /**
+     * 系统组件
+     *
+     * @param <T>  the generic type
+     * @param type the type
+     * @return the component
+     */
+    public static <T> T getComponent(Class<T> type) {
+        return context.getComponent(type);
+    }
 
-	/**
-	 * Gets the context.
-	 *
-	 * @return the context
-	 */
-	static KernelContext getContext() {
-		return context;
-	}
+    /**
+     * Gets the context.
+     *
+     * @return the context
+     */
+    static KernelContext getContext() {
+        return context;
+    }
 
-	/**
-	 * Sets the task state.
-	 *
-	 * @param ctx
-	 *            the new task state
-	 */
-	static void setTaskState(KernelContext ctx) {
-		context = ctx;
-	}
+    /**
+     * Sets the task state.
+     *
+     * @param ctx the new task state
+     */
+    static void setTaskState(KernelContext ctx) {
+        context = ctx;
+    }
 
-	/**
-	 * Sets the manager.
-	 *
-	 * @param type
-	 *            the new manager
-	 */
-	public static void setManager(IService type) {
-		context.setManager(type);
-	}
+    /**
+     * Sets the manager.
+     *
+     * @param type the new manager
+     */
+    public static void setManager(IService type) {
+        context.setManager(type);
+    }
 
-	/**
-	 * Gets the actor system.
-	 *
-	 * @return the actor system
-	 */
-	public static ActorSystem getActorSystem() {
-		return context.getActorSystem();
-	}
+    /**
+     * Gets the actor system.
+     *
+     * @return the actor system
+     */
+    public static ActorSystem getActorSystem() {
+        return context.getActorSystem();
+    }
 
-	public static IAreaManager getAreaManager() {
-		return context.getAreaManager();
-	}
+    public static IAreaManager getAreaManager() {
+        return context.getAreaManager();
+    }
 
-	public static IUserManager getUserManager() {
-		return context.getUserManager();
-	}
+    public static IUserManager getUserManager() {
+        return context.getUserManager();
+    }
 
-	public static IWorld getWorld() {
-		return context.getWorld();
-	}
+    public static IWorld getWorld() {
+        return context.getWorld();
+    }
 
 }

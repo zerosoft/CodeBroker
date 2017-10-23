@@ -4,15 +4,14 @@ import java.util.Map;
 
 /**
  * 图
- * 
- * @author xl
  *
  * @param <T>
+ * @author xl
  */
 public interface MapStructure<T> extends Expirable {
 
-	Map<String, T> get(String key);
+    Map<String, T> get(String key);
 
-	void delete(String key);
+    void delete(String key);
 
 }

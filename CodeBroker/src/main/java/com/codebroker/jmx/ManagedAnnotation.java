@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ManagedAnnotation {
-	String value();
+    String value();
 
-	boolean operation() default false;
+    boolean operation() default false;
 }

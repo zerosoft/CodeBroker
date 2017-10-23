@@ -7,20 +7,20 @@ package com.codebroker.api.internal;
  */
 public class InternalContext {
 
-	private static volatile ManagerLocator managerLocator;
+    private static volatile ManagerLocator managerLocator;
 
-	private InternalContext() {
-	}
+    private InternalContext() {
+    }
 
-	public static ManagerLocator getManagerLocator() {
-		ManagerLocator locator = managerLocator;
-		if (locator == null) {
-			throw new IllegalStateException("ManagerLocator is not set");
-		}
-		return locator;
-	}
+    public static ManagerLocator getManagerLocator() {
+        ManagerLocator locator = managerLocator;
+        if (locator == null) {
+            throw new IllegalStateException("ManagerLocator is not set");
+        }
+        return locator;
+    }
 
-	public static synchronized void setManagerLocator(ManagerLocator managerLocator) {
-		InternalContext.managerLocator = managerLocator;
-	}
+    public static synchronized void setManagerLocator(ManagerLocator managerLocator) {
+        InternalContext.managerLocator = managerLocator;
+    }
 }

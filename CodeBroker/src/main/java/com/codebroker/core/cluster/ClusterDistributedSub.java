@@ -9,39 +9,38 @@ import akka.event.LoggingAdapter;
 
 /**
  * 分布式订阅
- * 
- * @author xl
  *
+ * @author xl
  */
 public class ClusterDistributedSub extends AbstractActor {
 
-	public static final String IDENTIFY = ClusterDistributedSub.class.getSimpleName();
+    public static final String IDENTIFY = ClusterDistributedSub.class.getSimpleName();
 
-	LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+    LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-	public static class Subscribe {
-		public final String topic;
+    public ClusterDistributedSub(String topic) {
+        ActorRef mediator = DistributedPubSub.get(getContext().system()).mediator();
+        mediator.tell(new DistributedPubSubMediator.Subscribe(topic, getSelf()), getSelf());
+    }
 
-		public Subscribe(String topic) {
-			super();
-			this.topic = topic;
-		}
-	}
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder().match(Subscribe.class, msg -> {
+            ActorRef mediator = DistributedPubSub.get(getContext().system()).mediator();
+            mediator.tell(new DistributedPubSubMediator.Subscribe(msg.topic, getSelf()), getSelf());
+        }).match(String.class, msg -> {
+            log.info("Got: {}", msg);
+        }).match(DistributedPubSubMediator.SubscribeAck.class, msg -> log.info("subscribing")).matchAny(msg -> {
+            System.out.println(msg);
+        }).build();
+    }
 
-	public ClusterDistributedSub(String topic) {
-		ActorRef mediator = DistributedPubSub.get(getContext().system()).mediator();
-		mediator.tell(new DistributedPubSubMediator.Subscribe(topic, getSelf()), getSelf());
-	}
+    public static class Subscribe {
+        public final String topic;
 
-	@Override
-	public Receive createReceive() {
-		return receiveBuilder().match(Subscribe.class, msg -> {
-			ActorRef mediator = DistributedPubSub.get(getContext().system()).mediator();
-			mediator.tell(new DistributedPubSubMediator.Subscribe(msg.topic, getSelf()), getSelf());
-		}).match(String.class, msg -> {
-			log.info("Got: {}", msg);
-		}).match(DistributedPubSubMediator.SubscribeAck.class, msg -> log.info("subscribing")).matchAny(msg -> {
-			System.out.println(msg);
-		}).build();
-	}
+        public Subscribe(String topic) {
+            super();
+            this.topic = topic;
+        }
+    }
 }

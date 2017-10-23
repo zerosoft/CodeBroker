@@ -347,30 +347,29 @@ package com.codebroker.exception;
  *
  * @author ZERO
  */
-public class ManagerNotFoundException extends RuntimeException {
+public class ManagerNotFoundException extends CodeBrokerException {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 3861547344642024902L;
+    /**
+     * The Constant serialVersionUID.
+     */
+    private static final long serialVersionUID = 3861547344642024902L;
 
-	/**
-	 * Instantiates a new manager not found exception.
-	 *
-	 * @param message
-	 *            the message
-	 */
-	public ManagerNotFoundException(String message) {
-		super(message);
-	}
+    /**
+     * Instantiates a new manager not found exception.
+     *
+     * @param message the message
+     */
+    public ManagerNotFoundException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Instantiates a new manager not found exception.
-	 *
-	 * @param message
-	 *            the message
-	 * @param cause
-	 *            the cause
-	 */
-	public ManagerNotFoundException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Instantiates a new manager not found exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public ManagerNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -342,6 +342,7 @@ Public License instead of this License.
 package com.codebroker.extensions.request.filter;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 过滤链条的下面是否执行.
  *
@@ -350,8 +351,12 @@ package com.codebroker.extensions.request.filter;
  */
 public enum FilterAction {
 
-	/** The continue. */
-	CONTINUE,
-	/** The halt. */
-	HALT;
+    /**
+     * The continue.
+     */
+    CONTINUE,
+    /**
+     * The halt.
+     */
+    HALT;
 }

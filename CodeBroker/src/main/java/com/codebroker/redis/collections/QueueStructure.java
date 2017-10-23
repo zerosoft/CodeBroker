@@ -4,15 +4,14 @@ import java.util.Queue;
 
 /**
  * 队列
- * 
- * @author xl
  *
  * @param <T>
+ * @author xl
  */
 public interface QueueStructure<T> extends Expirable {
 
-	Queue<T> get(String key);
+    Queue<T> get(String key);
 
-	void delete(String key);
+    void delete(String key);
 
 }

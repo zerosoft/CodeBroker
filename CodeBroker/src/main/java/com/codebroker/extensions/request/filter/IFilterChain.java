@@ -344,6 +344,7 @@ package com.codebroker.extensions.request.filter;
 import com.codebroker.extensions.request.AppListenerExtension;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 过滤链.
  *
@@ -351,46 +352,40 @@ import com.codebroker.extensions.request.AppListenerExtension;
  */
 public interface IFilterChain {
 
-	/**
-	 * 对一个filterName添加一个过滤器.
-	 *
-	 * @param filterId
-	 *            the filter id
-	 * @param clientExtensionFilter
-	 *            the client extension filter
-	 */
-	public void addFilter(int filterId, ClientExtensionFilter clientExtensionFilter);
+    /**
+     * 对一个filterName添加一个过滤器.
+     *
+     * @param filterId              the filter id
+     * @param clientExtensionFilter the client extension filter
+     */
+    public void addFilter(int filterId, ClientExtensionFilter clientExtensionFilter);
 
-	/**
-	 * Removes the.
-	 *
-	 * @param filterId
-	 *            the filter id
-	 */
-	public void remove(int filterId);
+    /**
+     * Removes the.
+     *
+     * @param filterId the filter id
+     */
+    public void remove(int filterId);
 
-	/**
-	 * Run request in chain.
-	 *
-	 * @param requestId
-	 *            the request id
-	 * @param extension
-	 *            the extension
-	 * @param object
-	 *            the object
-	 * @return the filter action
-	 */
-	public FilterAction runRequestInChain(int requestId, AppListenerExtension extension, Object object);
+    /**
+     * Run request in chain.
+     *
+     * @param requestId the request id
+     * @param extension the extension
+     * @param object    the object
+     * @return the filter action
+     */
+    public FilterAction runRequestInChain(int requestId, AppListenerExtension extension, Object object);
 
-	/**
-	 * Size.
-	 *
-	 * @return the int
-	 */
-	public int size();
+    /**
+     * Size.
+     *
+     * @return the int
+     */
+    public int size();
 
-	/**
-	 * Destroy.
-	 */
-	public void destroy();
+    /**
+     * Destroy.
+     */
+    public void destroy();
 }

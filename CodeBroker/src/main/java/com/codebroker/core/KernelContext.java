@@ -341,8 +341,7 @@ Public License instead of this License.
  */
 package com.codebroker.core;
 
-import java.util.MissingResourceException;
-
+import akka.actor.ActorSystem;
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.ComponentRegistry;
@@ -354,9 +353,10 @@ import com.codebroker.core.manager.AkkaBootService;
 import com.codebroker.exception.ManagerNotFoundException;
 import com.codebroker.util.PropertiesWrapper;
 
-import akka.actor.ActorSystem;
+import java.util.MissingResourceException;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 内核上下文
  *
@@ -364,153 +364,147 @@ import akka.actor.ActorSystem;
  */
 class KernelContext {
 
-	/** The application name. */
-	private final String applicationName;
+    /**
+     * The propertieswrapper.
+     */
+    protected final PropertiesWrapper propertieswrapper;
+    /**
+     * The manager components.
+     */
+    protected final ComponentRegistry managerComponents;
+    /**
+     * The service components.
+     */
+    protected final ComponentRegistry serviceComponents;
+    /**
+     * The application name.
+     */
+    private final String applicationName;
+    /**
+     * The app listener.
+     */
+    private CodeBrokerAppListener appListener;
 
-	/** The propertieswrapper. */
-	protected final PropertiesWrapper propertieswrapper;
+    /**
+     * Instantiates a new kernel context.
+     *
+     * @param context the context
+     */
+    KernelContext(KernelContext context) {
+        this(context.applicationName, context.serviceComponents, context.managerComponents, context.propertieswrapper);
+    }
 
-	/** The manager components. */
-	protected final ComponentRegistry managerComponents;
+    /**
+     * Instantiates a new kernel context.
+     *
+     * @param applicationName   the application name
+     * @param serviceComponents the service components
+     * @param managerComponents the manager components
+     * @param propertieswrapper the propertieswrapper
+     * @param serverMode        the server mode
+     */
+    protected KernelContext(String applicationName, ComponentRegistry serviceComponents,
+                            ComponentRegistry managerComponents, PropertiesWrapper propertieswrapper) {
+        this.applicationName = applicationName;
+        this.serviceComponents = serviceComponents;
+        this.managerComponents = managerComponents;
+        this.propertieswrapper = propertieswrapper;
+    }
 
-	/** The service components. */
-	protected final ComponentRegistry serviceComponents;
+    /**
+     * Gets the manager.
+     *
+     * @param <T>  the generic type
+     * @param type the type
+     * @return the manager
+     */
+    <T> T getManager(Class<T> type) {
+        try {
+            return managerComponents.getComponent(type);
+        } catch (MissingResourceException mre) {
+            throw new ManagerNotFoundException("couldn't find manager: " + type.getName());
+        }
+    }
 
-	/** The app listener. */
-	private CodeBrokerAppListener appListener;
+    /**
+     * Gets the component.
+     *
+     * @param <T>  the generic type
+     * @param type the type
+     * @return the component
+     */
+    <T> T getComponent(Class<T> type) {
+        return serviceComponents.getComponent(type);
+    }
 
-	/**
-	 * Instantiates a new kernel context.
-	 *
-	 * @param context
-	 *            the context
-	 */
-	KernelContext(KernelContext context) {
-		this(context.applicationName, context.serviceComponents, context.managerComponents, context.propertieswrapper);
-	}
+    /**
+     * Gets the app listener.
+     *
+     * @return the app listener
+     */
+    public CodeBrokerAppListener getAppListener() {
+        return appListener;
+    }
 
-	/**
-	 * Instantiates a new kernel context.
-	 *
-	 * @param applicationName
-	 *            the application name
-	 * @param serviceComponents
-	 *            the service components
-	 * @param managerComponents
-	 *            the manager components
-	 * @param propertieswrapper
-	 *            the propertieswrapper
-	 * @param serverMode
-	 *            the server mode
-	 */
-	protected KernelContext(String applicationName, ComponentRegistry serviceComponents,
-			ComponentRegistry managerComponents, PropertiesWrapper propertieswrapper) {
-		this.applicationName = applicationName;
-		this.serviceComponents = serviceComponents;
-		this.managerComponents = managerComponents;
-		this.propertieswrapper = propertieswrapper;
-	}
+    /**
+     * Sets the app listener.
+     *
+     * @param appListener the new app listener
+     */
+    public void setAppListener(CodeBrokerAppListener appListener) {
+        this.appListener = appListener;
+    }
 
-	/**
-	 * Gets the manager.
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param type
-	 *            the type
-	 * @return the manager
-	 */
-	<T> T getManager(Class<T> type) {
-		try {
-			return managerComponents.getComponent(type);
-		} catch (MissingResourceException mre) {
-			throw new ManagerNotFoundException("couldn't find manager: " + type.getName());
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return applicationName;
+    }
 
-	/**
-	 * Gets the component.
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param type
-	 *            the type
-	 * @return the component
-	 */
-	<T> T getComponent(Class<T> type) {
-		return serviceComponents.getComponent(type);
-	}
+    /**
+     * Gets the properties wrapper.
+     *
+     * @return the properties wrapper
+     */
+    public PropertiesWrapper getPropertiesWrapper() {
+        return propertieswrapper;
+    }
 
-	/**
-	 * Gets the app listener.
-	 *
-	 * @return the app listener
-	 */
-	public CodeBrokerAppListener getAppListener() {
-		return appListener;
-	}
+    /**
+     * Sets the manager.
+     *
+     * @param type the new manager
+     */
+    public void setManager(IService type) {
+        ((ComponentRegistryImpl) managerComponents).addComponent(type);
+    }
 
-	/**
-	 * Sets the app listener.
-	 *
-	 * @param appListener
-	 *            the new app listener
-	 */
-	public void setAppListener(CodeBrokerAppListener appListener) {
-		this.appListener = appListener;
-	}
+    /**
+     * Gets the actor system.
+     *
+     * @return the actor system
+     */
+    public ActorSystem getActorSystem() {
+        AkkaBootService component = getComponent(AkkaBootService.class);
+        return component.getSystem();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		return applicationName;
-	}
+    public IAreaManager getAreaManager() {
+        AkkaBootService component = getComponent(AkkaBootService.class);
+        return component.iAreaManager;
+    }
 
-	/**
-	 * Gets the properties wrapper.
-	 *
-	 * @return the properties wrapper
-	 */
-	public PropertiesWrapper getPropertiesWrapper() {
-		return propertieswrapper;
-	}
+    public IUserManager getUserManager() {
+        AkkaBootService component = getComponent(AkkaBootService.class);
+        return component.getUserManager();
+    }
 
-	/**
-	 * Sets the manager.
-	 *
-	 * @param type
-	 *            the new manager
-	 */
-	public void setManager(IService type) {
-		((ComponentRegistryImpl) managerComponents).addComponent(type);
-	}
-
-	/**
-	 * Gets the actor system.
-	 *
-	 * @return the actor system
-	 */
-	public ActorSystem getActorSystem() {
-		AkkaBootService component = getComponent(AkkaBootService.class);
-		return component.getSystem();
-	}
-
-	public IAreaManager getAreaManager() {
-		AkkaBootService component = getComponent(AkkaBootService.class);
-		return component.iAreaManager;
-	}
-
-	public IUserManager getUserManager() {
-		AkkaBootService component = getComponent(AkkaBootService.class);
-		return component.getUserManager();
-	}
-
-	public IWorld getWorld() {
-		AkkaBootService component = getComponent(AkkaBootService.class);
-		return component.world;
-	}
+    public IWorld getWorld() {
+        AkkaBootService component = getComponent(AkkaBootService.class);
+        return component.world;
+    }
 
 }

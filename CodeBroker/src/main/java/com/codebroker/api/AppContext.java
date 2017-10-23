@@ -341,16 +341,16 @@ Public License instead of this License.
  */
 package com.codebroker.api;
 
+import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.exception.ManagerNotFoundException;
 
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * 引擎应用的上下文.
  *
@@ -358,107 +358,102 @@ import akka.actor.ActorSystem;
  */
 public final class AppContext {
 
-	/**
-	 * Instantiates a new app context.
-	 */
-	private AppContext() {
-	}
-	
-	/**
-	 * 获得区域管理器
-	 * 
-	 * @return
-	 */
-	public static IWorld getWorld() {
-		try {
-			return InternalContext.getManagerLocator().getWorld();
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * Instantiates a new app context.
+     */
+    private AppContext() {
+    }
 
-	/**
-	 * 获得区域管理器
-	 * 
-	 * @return
-	 */
-	public static IAreaManager getAreaManager() {
-		try {
-			return InternalContext.getManagerLocator().getAreaManager();
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * 获得区域管理器
+     *
+     * @return
+     */
+    public static IWorld getWorld() {
+        try {
+            return InternalContext.getManagerLocator().getWorld();
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
 
-	/**
-	 * 获得用户管理器
-	 * 
-	 * @return
-	 */
-	public static IUserManager getUserManager() {
-		try {
-			return InternalContext.getManagerLocator().getUserManager();
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * 获得区域管理器
+     *
+     * @return
+     */
+    public static IAreaManager getAreaManager() {
+        try {
+            return InternalContext.getManagerLocator().getAreaManager();
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
 
-	/**
-	 * Gets the manager.
-	 *
-	 * @param <T>
-	 *            the generic type
-	 * @param type
-	 *            the type
-	 * @return the manager
-	 */
-	public static <T> T getManager(Class<T> type) {
-		try {
-			return InternalContext.getManagerLocator().getManager(type);
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * 获得用户管理器
+     *
+     * @return
+     */
+    public static IUserManager getUserManager() {
+        try {
+            return InternalContext.getManagerLocator().getUserManager();
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
 
-	/**
-	 * Sets the manager.
-	 *
-	 * @param service
-	 *            the new manager
-	 */
-	public static void setManager(IService service) {
-		InternalContext.getManagerLocator().setManager(service);
-	}
+    /**
+     * Gets the manager.
+     *
+     * @param <T>  the generic type
+     * @param type the type
+     * @return the manager
+     */
+    public static <T> T getManager(Class<T> type) {
+        try {
+            return InternalContext.getManagerLocator().getManager(type);
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
 
-	/**
-	 * Gets the actor system.
-	 *
-	 * @return the actor system
-	 */
-	public static ActorSystem getActorSystem() {
-		try {
-			return InternalContext.getManagerLocator().getActorSystem();
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * Sets the manager.
+     *
+     * @param service the new manager
+     */
+    public static void setManager(IService service) {
+        InternalContext.getManagerLocator().setManager(service);
+    }
 
-	/**
-	 * 获得全路径actor
-	 * 
-	 * @param address
-	 *            actor的地址
-	 * @param actorName
-	 *            actor的名称
-	 * @return
-	 */
-	public static ActorSelection getActorSelection(String address, String actorName) {
-		try {
-			ActorSystem actorSystem = InternalContext.getManagerLocator().getActorSystem();
-			return actorSystem.actorSelection(address + "/user/" + actorName);
-		} catch (IllegalStateException ise) {
-			throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-		}
-	}
+    /**
+     * Gets the actor system.
+     *
+     * @return the actor system
+     */
+    public static ActorSystem getActorSystem() {
+        try {
+            return InternalContext.getManagerLocator().getActorSystem();
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
+
+    /**
+     * 获得全路径actor
+     *
+     * @param address   actor的地址
+     * @param actorName actor的名称
+     * @return
+     */
+    public static ActorSelection getActorSelection(String address, String actorName) {
+        try {
+            ActorSystem actorSystem = InternalContext.getManagerLocator().getActorSystem();
+            return actorSystem.actorSelection(address + "/user/" + actorName);
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
 
 }

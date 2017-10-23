@@ -1,163 +1,221 @@
 package com.codebroker.core.actor;
 
-import java.io.Serializable;
-
+import akka.actor.*;
+import akka.japi.Creator;
+import akka.japi.pf.ReceiveBuilder;
+import com.codebroker.core.cluster.ClusterDistributedPub;
+import com.codebroker.core.cluster.ClusterDistributedSub;
+import com.codebroker.core.cluster.ClusterListener;
+import com.codebroker.core.message.CommonMessage;
+import com.codebroker.core.model.CodeDeadLetter;
+import com.codebroker.core.monitor.MonitorManager;
+import com.codebroker.exception.NoInstanceException;
+import com.codebroker.protocol.ThriftSerializerFactory;
+import com.codebroker.util.LogUtil;
+import com.message.thrift.actor.Operation;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codebroker.core.cluster.ClusterDistributedPub;
-import com.codebroker.core.cluster.ClusterDistributedSub;
-import com.codebroker.core.cluster.ClusterListener;
-import com.codebroker.core.model.CodeDeadLetter;
-import com.codebroker.core.monitor.MonitorManager;
-import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.LogUtil;
-import com.message.thrift.actor.Operation;
-
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.DeadLetter;
-import akka.actor.Props;
-import akka.japi.Creator;
-import akka.japi.pf.ReceiveBuilder;
-
 /**
+ * 自定义最高级的Actor系统
  *
  * @author ZERO
  */
 public class CodeBrokerSystem extends AbstractActor {
-	
-	public static ActorRef monitorManager;
 
-	private static Logger logger = LoggerFactory.getLogger("CodeBrokerSystem");
-	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
-	public static final String IDENTIFY = CodeBrokerSystem.class.getSimpleName();
+    public static final String IDENTIFY = CodeBrokerSystem.class.getSimpleName();
+    /**
+     * 外部使用的单例
+     */
+    public static CodeBrokerSystem instance;
+    private static Logger logger = LoggerFactory.getLogger("CodeBrokerSystem");
+    private final ActorSystem actorSystem;
+    ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
+    private ActorRef monitorManager;
+    private ActorRef clusterListener;
+    private ActorRef world;
+    private ActorRef elkLogger;
+    private ActorRef clusterDistributedPub;
+    private ActorRef clusterDistributedSub;
+    private ActorRef deadLetterRef;
 
-	static class selfCreator implements Creator<CodeBrokerSystem> {
+    public CodeBrokerSystem(ActorSystem actorSystem) {
+        super();
+        this.actorSystem = actorSystem;
+        CodeBrokerSystem.instance = this;
+    }
 
-		private static final long serialVersionUID = -4506944735716145059L;
+    public static CodeBrokerSystem getInstance() {
+        if (instance == null)
+            throw new NoInstanceException();
+        return instance;
+    }
 
-		private final ActorSystem actorSystem;
+    public static Props props(ActorSystem actorSystem) {
+        Props create = Props.create(new selfCreator(actorSystem));
+        create.withDispatcher("session-default-dispatcher");
+        return create;
+    }
 
-		public selfCreator(ActorSystem actorSystem) {
-			super();
-			this.actorSystem = actorSystem;
-		}
+    private void processStart() {
+        /**
+         * 集群监听
+         */
+        clusterListener =
+                actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
+        this.getContext().watch(clusterListener);
 
-		@Override
-		public CodeBrokerSystem create() throws Exception {
-			return new CodeBrokerSystem(actorSystem);
-		}
+        /**
+         * 错误地址信息
+         */
+        Props avalonDeadLetterProps = Props.create(CodeDeadLetter.class);
+        deadLetterRef = actorSystem.actorOf(avalonDeadLetterProps);
+        actorSystem.eventStream().subscribe(deadLetterRef, DeadLetter.class);
+        /**
+         * 初始化游戏世界
+         */
+        world = actorSystem.actorOf(Props.create(WorldActor.class), WorldActor.IDENTIFY);
+        this.getContext().watch(world);
+        //初始化WORLD
+        try {
+            byte[] tbaseMessage = thriftSerializerFactory.getOnlySerializerByteArray(Operation.WORLD_INITIALIZE);
+            world.tell(tbaseMessage, getSelf());
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
-	}
+        logger.info("World Path=" + world.path().toString());
+        /**
+         * ELK日志记录
+         */
+        elkLogger = actorSystem.actorOf(Props.create(ELKLogActor.class), ELKLogActor.IDENTIFY);
+        this.getContext().watch(elkLogger);
+        LogUtil.elkLog = elkLogger;
+        logger.info("ELKActor Path=" + elkLogger.path().toString());
+        /**
+         * 分布式发布Actor
+         */
+        Props pub = Props.create(ClusterDistributedPub.class);
+        clusterDistributedPub =
+                actorSystem.actorOf(pub, ClusterDistributedPub.IDENTIFY);
+        this.getContext().watch(clusterDistributedPub);
+        /**
+         * 分布式订阅 Actor
+         */
+        Props sub = Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC");
+        clusterDistributedSub =
+                actorSystem.actorOf(sub, ClusterDistributedSub.IDENTIFY);
+        this.getContext().watch(clusterDistributedSub);
+        /**
+         * 数据相关监听Actor
+         */
+        Props create = Props.create(MonitorManager.class);
+        monitorManager = actorSystem.actorOf(create, MonitorManager.IDENTIFY);
+        this.getContext().watch(monitorManager);
+    }
 
-	public static Props props(ActorSystem actorSystem) {
-		Props create = Props.create(new selfCreator(actorSystem));
-		create.withDispatcher("session-default-dispatcher");
-		return create;
-	}
+    @Override
+    public Receive createReceive() {
+        return ReceiveBuilder.create()
+                .match(CommonMessage.Start.class, msg -> {
+                    processStart();
+                }).match(CommonMessage.Restart.class, msg -> {
+                    processRestart();
+                }).match(CommonMessage.Close.class, msg -> {
+                    processStop();
+                }).build();
+    }
 
-	public CodeBrokerSystem(ActorSystem actorSystem) {
-		super();
-		this.actorSystem = actorSystem;
-	}
+    private void processStop() {
+        Iterable<ActorRef> children = getContext().getChildren();
+        for (ActorRef actorRef : children) {
+            actorRef.tell(PoisonPill.getInstance(), getSelf());
+        }
+    }
 
-	private final ActorSystem actorSystem;
+    private void processRestart() {
+        Iterable<ActorRef> children = getContext().getChildren();
+        for (ActorRef actorRef : children) {
+            actorRef.tell(PoisonPill.getInstance(), getSelf());
+        }
+    }
 
-	ActorRef lastSender = getContext().system().deadLetters();
+    public ActorRef getMonitorManager() {
+        return monitorManager;
+    }
 
-	private void processInitAvalon() {
-		/**
-		 * 集群监听
-		 */
-		ActorRef clusterListener = 
-		actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
-		this.getContext().watch(clusterListener);
+    public void setMonitorManager(ActorRef monitorManager) {
+        this.monitorManager = monitorManager;
+    }
 
-		/**
-		 * 错误地址信息
-		 */
-		Props avalonDeadLetterProps = Props.create(CodeDeadLetter.class);
-		ActorRef avalonDeadLetterRef = actorSystem.actorOf(avalonDeadLetterProps);
-		actorSystem.eventStream().subscribe(avalonDeadLetterRef, DeadLetter.class);
-		/**
-		 * 初始化最高级世界
-		 */
-		ActorRef world = actorSystem.actorOf(Props.create(WorldActor.class), WorldActor.IDENTIFY);
-		this.getContext().watch(world);
-		//初始化WORLD
-		try {
-			byte[] tbaseMessage = thriftSerializerFactory.getTbaseMessage(Operation.WORLD_INITIALIZE);
-			world.tell(tbaseMessage, getSelf());
-		} catch (TException e) {
-			e.printStackTrace();
-		}
-	
-		logger.info("World Path=" + world.path().toString());
-		/**
-		 * ELK日志记录
-		 */
-		ActorRef elkLogger = actorSystem.actorOf(Props.create(ELKLogActor.class), ELKLogActor.IDENTIFY);
-		this.getContext().watch(elkLogger);
-		LogUtil.elkLog = elkLogger;
-		logger.info("ELKActor Path=" + elkLogger.path().toString());
-		/**
-		 * 分布式发布Actor
-		 */
-		Props pub = Props.create(ClusterDistributedPub.class);
-		ActorRef clusterDistributedPub = 
-				actorSystem.actorOf(pub,ClusterDistributedPub.IDENTIFY);
-		this.getContext().watch(clusterDistributedPub);
-		/**
-		 * 分布式订阅 Actor
-		 */
-		Props sub = Props.create(ClusterDistributedSub.class, "CODE_BORKER_TOPIC");
-		ActorRef clusterDistributedSub = 
-				actorSystem.actorOf(sub, ClusterDistributedSub.IDENTIFY);
-		this.getContext().watch(clusterDistributedSub);
-		/**
-		 * 数据相关监听Actor
-		 */
-		Props create = Props.create(MonitorManager.class);
-		monitorManager = actorSystem.actorOf(create,MonitorManager.IDENTIFY);
-		this.getContext().watch(monitorManager);
-	}
+    public ActorRef getClusterListener() {
+        return clusterListener;
+    }
 
-	@Override
-	public Receive createReceive() {
-		return ReceiveBuilder.create()
-		.match(InitAkkaSystem.class, msg -> {
-			processInitAvalon();
-		}).match(RestAkkaSystem.class, msg->{
-			
-		}).match(CloseAkkaSystem.class, msg->{
-			
-		}).build();
-	}
-	/**
-	 * 初始化Akka系统
-	 * @author zero
-	 *
-	 */
-	public static class InitAkkaSystem implements Serializable{
-		private static final long serialVersionUID = 6462859024035662121L;
-	}
-	/**
-	 * 关闭Akka系统
-	 * @author zero
-	 *
-	 */
-	public static class CloseAkkaSystem implements Serializable{
-		private static final long serialVersionUID = 806701713038586180L;
-	}
-	/**
-	 * 重启Akka系统
-	 * @author zero
-	 *
-	 */
-	public static class RestAkkaSystem implements Serializable{
-		private static final long serialVersionUID = 806701713038586180L;
-	}
+    public void setClusterListener(ActorRef clusterListener) {
+        this.clusterListener = clusterListener;
+    }
+
+    public ActorRef getWorld() {
+        return world;
+    }
+
+    public void setWorld(ActorRef world) {
+        this.world = world;
+    }
+
+    public ActorRef getElkLogger() {
+        return elkLogger;
+    }
+
+    public void setElkLogger(ActorRef elkLogger) {
+        this.elkLogger = elkLogger;
+    }
+
+    public ActorRef getClusterDistributedPub() {
+        return clusterDistributedPub;
+    }
+
+    public void setClusterDistributedPub(ActorRef clusterDistributedPub) {
+        this.clusterDistributedPub = clusterDistributedPub;
+    }
+
+    public ActorRef getClusterDistributedSub() {
+        return clusterDistributedSub;
+    }
+
+    public void setClusterDistributedSub(ActorRef clusterDistributedSub) {
+        this.clusterDistributedSub = clusterDistributedSub;
+    }
+
+    public ActorRef getDeadLetterRef() {
+        return deadLetterRef;
+    }
+
+    public void setDeadLetterRef(ActorRef deadLetterRef) {
+        this.deadLetterRef = deadLetterRef;
+    }
+
+    public ActorSystem getActorSystem() {
+        return actorSystem;
+    }
+
+    static class selfCreator implements Creator<CodeBrokerSystem> {
+
+        private static final long serialVersionUID = -4506944735716145059L;
+
+        private final ActorSystem actorSystem;
+
+        public selfCreator(ActorSystem actorSystem) {
+            super();
+            this.actorSystem = actorSystem;
+        }
+
+        @Override
+        public CodeBrokerSystem create() throws Exception {
+            return new CodeBrokerSystem(actorSystem);
+        }
+
+    }
 }

@@ -4,18 +4,17 @@ import java.util.List;
 
 /**
  * 键值对
- * 
- * @author xl
  *
  * @param <T>
+ * @author xl
  */
 public interface keyValueRedisStructure<T> {
 
-	T get(String key);
+    T get(String key);
 
-	void set(String key, T bean);
+    void set(String key, T bean);
 
-	List<T> multiplesGet(Iterable<String> keys);
+    List<T> multiplesGet(Iterable<String> keys);
 
-	void delete(String key);
+    void delete(String key);
 }

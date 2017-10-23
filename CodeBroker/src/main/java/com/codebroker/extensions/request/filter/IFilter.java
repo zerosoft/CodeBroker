@@ -344,6 +344,7 @@ package com.codebroker.extensions.request.filter;
 import com.codebroker.extensions.request.AppListenerExtension;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 过滤器.
  *
@@ -351,30 +352,26 @@ import com.codebroker.extensions.request.AppListenerExtension;
  */
 public interface IFilter {
 
-	/**
-	 * Inits the.
-	 *
-	 * @param clientExtension
-	 *            the client extension
-	 */
-	public void init(AppListenerExtension clientExtension);
+    /**
+     * Inits the.
+     *
+     * @param clientExtension the client extension
+     */
+    public void init(AppListenerExtension clientExtension);
 
-	/**
-	 * Destroy.
-	 */
-	public void destroy();
+    /**
+     * Destroy.
+     */
+    public void destroy();
 
-	/**
-	 * Handle client request.
-	 *
-	 * @param handlerKey
-	 *            the handler key
-	 * @param clientExtension
-	 *            the client extension
-	 * @param object
-	 *            the object
-	 * @return the filter action
-	 */
-	public FilterAction handleClientRequest(int handlerKey, AppListenerExtension clientExtension, Object object);
+    /**
+     * Handle client request.
+     *
+     * @param handlerKey      the handler key
+     * @param clientExtension the client extension
+     * @param object          the object
+     * @return the filter action
+     */
+    public FilterAction handleClientRequest(int handlerKey, AppListenerExtension clientExtension, Object object);
 
 }

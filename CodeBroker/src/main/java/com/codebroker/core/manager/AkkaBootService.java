@@ -341,18 +341,12 @@ Public License instead of this License.
  */
 package com.codebroker.core.manager;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import akka.actor.*;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.core.actor.CodeBrokerSystem;
+import com.codebroker.core.message.CommonMessage;
 import com.codebroker.core.service.BaseCoreService;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.setting.SystemEnvironment;
@@ -360,14 +354,14 @@ import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Inbox;
-import akka.actor.Props;
-import akka.actor.Terminated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Akka的启动类
@@ -376,144 +370,137 @@ import scala.concurrent.Future;
  */
 public class AkkaBootService extends BaseCoreService {
 
-	private static final String DEF_KEY = "CodeBroker";
+    public static final String CONF_NAME = "conf";
+    public static final String DEF_AKKA_CONFIG_NAME = "application.conf";
+    private static final String DEF_KEY = "CodeBroker";
+    private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
+    public IAreaManager iAreaManager;
+    public IUserManager userManager;
+    public IWorld world;
+    /**
+     * The system.
+     */
+    private ActorSystem system;
+    /**
+     * akka的信箱
+     */
+    private Inbox inbox;
+    private ManagementService managementService;
+    private Map<String, AbstractActor> tmpActor = new ConcurrentHashMap<String, AbstractActor>();
+    private Map<String, ActorRef> localPath = new HashMap<String, ActorRef>();
 
-	public static final String CONF_NAME = "conf";
+    @Override
+    public void init(Object obj) {
+        logger.debug("Code Broker Mediator init");
+        File root = new File("");
+        String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
+        logger.debug("conf path:" + searchPath);
+        PropertiesWrapper propertiesWrapper = (PropertiesWrapper) obj;
 
-	public static final String DEF_AKKA_CONFIG_NAME = "application.conf";
+        String property = propertiesWrapper.getProperty(SystemEnvironment.AKKA_FILE_NAME, DEF_AKKA_CONFIG_NAME);
+        String fielPath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
 
-	/** The system. */
-	private ActorSystem system;
+        logger.debug("akka conf path:" + fielPath);
+        File config = FileUtil.scanFileByPath(fielPath, property);
 
-	/** akka的信箱 */
-	private Inbox inbox;
+        String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME, DEF_KEY);
+        logger.debug("AKKA_NAME:" + akkaName);
+        String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_KEY);
+        logger.debug("configName:" + configName);
+        initActorSystem(config, akkaName, configName);
+        /**
+         * 创建CB系统
+         */
+        ActorRef codeBrokerAkkaSystem = system.actorOf(Props.create(CodeBrokerSystem.class, system), CodeBrokerSystem.IDENTIFY);
+        codeBrokerAkkaSystem.tell(new CommonMessage.Start(), ActorRef.noSender());
 
-	private ManagementService managementService;
+    }
 
-	private Map<String, AbstractActor> tmpActor = new ConcurrentHashMap<String, AbstractActor>();
+    public void initActorSystem(File file, String akkaName, String configName) {
+        logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
+        Config cg = ConfigFactory.parseFile(file);
 
-	private Map<String, ActorRef> localPath = new HashMap<String, ActorRef>();
+        cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
+        Config config = ConfigFactory.load(cg).getConfig(configName);
+        system = ActorSystem.create(akkaName, config);
+        inbox = Inbox.create(system);
+        logger.debug("init Actor System end");
+    }
 
-	private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.api.internal.IService#destroy(java.lang.Object)
+     */
+    @Override
+    public void destroy(Object obj) {
+        logger.debug("akkasystem close");
+        Future<Terminated> terminate = system.terminate();
+        while (terminate.isCompleted()) {
+            logger.debug("akkasystem closed");
+        }
 
-	public IAreaManager iAreaManager;
+    }
 
-	public IUserManager userManager;
+    @Override
+    public String getName() {
+        return AkkaBootService.class.getSimpleName();
+    }
 
-	public IWorld world;
-	@Override
-	public void init(Object obj) {
-		logger.debug("Code Broker Mediator init");
-		File root = new File("");
-		String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
-		logger.debug("conf path:" + searchPath);
-		PropertiesWrapper propertiesWrapper = (PropertiesWrapper) obj;
+    public ActorSystem getSystem() {
+        return system;
+    }
 
-		String property = propertiesWrapper.getProperty(SystemEnvironment.AKKA_FILE_NAME, DEF_AKKA_CONFIG_NAME);
-		String fielPath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
+    public void setSystem(ActorSystem system) {
+        this.system = system;
+    }
 
-		logger.debug("akka conf path:" + fielPath);
-		File config = FileUtil.scanFileByPath(fielPath, property);
+    public Inbox getInbox() {
+        return inbox;
+    }
 
-		String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME, DEF_KEY);
-		logger.debug("AKKA_NAME:" + akkaName);
-		String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_KEY);
-		logger.debug("configName:" + configName);
-		initActorSystem(config, akkaName, configName);
-		/**
-		 * 创建CB系统
-		 */
-		ActorRef codeBrokerAkkaSystem = 
-				system.actorOf(Props.create(CodeBrokerSystem.class, system),CodeBrokerSystem.IDENTIFY);
-		codeBrokerAkkaSystem.tell(new CodeBrokerSystem.InitAkkaSystem(), ActorRef.noSender());
+    public void setInbox(Inbox inbox) {
+        this.inbox = inbox;
+    }
 
-	}
+    public ManagementService getManagementService() {
+        return managementService;
+    }
 
-	public void initActorSystem(File file, String akkaName, String configName) {
-		logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
-		Config cg = ConfigFactory.parseFile(file);
+    public void setManagementService(ManagementService managementService) {
+        this.managementService = managementService;
+    }
 
-		cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
-		Config config = ConfigFactory.load(cg).getConfig(configName);
-		system = ActorSystem.create(akkaName, config);
-		inbox = Inbox.create(system);
-		logger.debug("init Actor System end");
-	}
+    public ActorRef getLocalPath(String IDENTIFY) {
+        return localPath.get(IDENTIFY);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.api.internal.IService#destroy(java.lang.Object)
-	 */
-	@Override
-	public void destroy(Object obj) {
-		logger.debug("akkasystem close");
-		Future<Terminated> terminate = system.terminate();
-		while (terminate.isCompleted()) {
-			logger.debug("akkasystem closed");
-		}
+    public void setLocalPath(String IDENTIFY, ActorRef actorRef) {
+        localPath.put(IDENTIFY, actorRef);
+    }
 
-	}
+    public void putTmpActor(String key, AbstractActor actor) {
+        tmpActor.put(key, actor);
+    }
 
-	@Override
-	public String getName() {
-		return AkkaBootService.class.getSimpleName();
-	}
+    public AbstractActor getTmpActor(String key) {
+        return tmpActor.get(key);
+    }
 
-	public ActorSystem getSystem() {
-		return system;
-	}
+    public IAreaManager getGridLeader() {
+        return iAreaManager;
+    }
 
-	public Inbox getInbox() {
-		return inbox;
-	}
+    public void setGridLeader(IAreaManager gridLeader) {
+        this.iAreaManager = gridLeader;
+    }
 
-	public void setInbox(Inbox inbox) {
-		this.inbox = inbox;
-	}
+    public IUserManager getUserManager() {
+        return userManager;
+    }
 
-	public ManagementService getManagementService() {
-		return managementService;
-	}
-
-	public void setManagementService(ManagementService managementService) {
-		this.managementService = managementService;
-	}
-
-	public void setSystem(ActorSystem system) {
-		this.system = system;
-	}
-
-	public ActorRef getLocalPath(String IDENTIFY) {
-		return localPath.get(IDENTIFY);
-	}
-
-	public void setLocalPath(String IDENTIFY, ActorRef actorRef) {
-		localPath.put(IDENTIFY, actorRef);
-	}
-
-	public void putTmpActor(String key, AbstractActor actor) {
-		tmpActor.put(key, actor);
-	}
-
-	public AbstractActor getTmpActor(String key) {
-		return tmpActor.get(key);
-	}
-
-	public IAreaManager getGridLeader() {
-		return iAreaManager;
-	}
-
-	public void setGridLeader(IAreaManager gridLeader) {
-		this.iAreaManager = gridLeader;
-	}
-
-	public IUserManager getUserManager() {
-		return userManager;
-	}
-
-	public void setUserManager(IUserManager userManager) {
-		this.userManager = userManager;
-	}
+    public void setUserManager(IUserManager userManager) {
+        this.userManager = userManager;
+    }
 
 }

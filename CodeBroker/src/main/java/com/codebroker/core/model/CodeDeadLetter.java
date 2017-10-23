@@ -352,13 +352,13 @@ import akka.japi.pf.ReceiveBuilder;
  */
 public class CodeDeadLetter extends AbstractActor {
 
-	@Override
-	public Receive createReceive() {
-		return ReceiveBuilder.create().match(DeadLetter.class, msg -> {
-			System.out.println(msg);
-		}).matchAny(msg -> {
-			System.out.println(msg);
-		}).build();
-	}
+    @Override
+    public Receive createReceive() {
+        return ReceiveBuilder.create().match(DeadLetter.class, msg -> {
+            System.out.println(msg);
+        }).matchAny(msg -> {
+            System.out.println(msg);
+        }).build();
+    }
 
 }

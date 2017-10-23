@@ -341,6 +341,17 @@ Public License instead of this License.
  */
 package com.codebroker.core.cluster;
 
+import akka.actor.*;
+import akka.cluster.Cluster;
+import akka.cluster.ClusterEvent;
+import akka.cluster.ClusterEvent.MemberEvent;
+import akka.cluster.ClusterEvent.MemberRemoved;
+import akka.cluster.ClusterEvent.MemberUp;
+import akka.cluster.ClusterEvent.UnreachableMember;
+import akka.cluster.Member;
+import akka.cluster.UniqueAddress;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.actor.CluserActor;
 import com.codebroker.core.actor.WorldActor;
@@ -353,22 +364,6 @@ import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.cluser.CluserInitMessage;
 import com.message.thrift.actor.world.NewServerComeIn;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
-import akka.cluster.ClusterEvent.MemberEvent;
-import akka.cluster.ClusterEvent.MemberRemoved;
-import akka.cluster.ClusterEvent.MemberUp;
-import akka.cluster.ClusterEvent.UnreachableMember;
-import akka.cluster.Member;
-import akka.cluster.UniqueAddress;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-
 /**
  * 集群事件
  *
@@ -376,70 +371,70 @@ import akka.event.LoggingAdapter;
  */
 public class ClusterListener extends AbstractActor {
 
-	public static final String IDENTIFY = ClusterListener.class.getSimpleName();
-	public static CluserEnvelope cluserEnvelope = new CluserEnvelope();
-	ThriftSerializerFactory thriftSerializerFactory=new ThriftSerializerFactory();
-	LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
-	Cluster cluster = Cluster.get(getContext().getSystem());
-	ActorRef cluserActor;
+    public static final String IDENTIFY = ClusterListener.class.getSimpleName();
+    public static CluserEnvelope cluserEnvelope = new CluserEnvelope();
+    ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
+    LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    Cluster cluster = Cluster.get(getContext().getSystem());
+    ActorRef cluserActor;
 
-	// subscribe to cluster changes
-	@Override
-	public void preStart() {
-		cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(), MemberEvent.class, UnreachableMember.class);
-		cluserActor = getContext().actorOf(Props.create(CluserActor.class), "CluserActor");
-	}
+    // subscribe to cluster changes
+    @Override
+    public void preStart() {
+        cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(), MemberEvent.class, UnreachableMember.class);
+        cluserActor = getContext().actorOf(Props.create(CluserActor.class), "CluserActor");
+    }
 
-	// re-subscribe when restart
-	@Override
-	public void postStop() {
-		cluster.unsubscribe(getSelf());
-	}
+    // re-subscribe when restart
+    @Override
+    public void postStop() {
+        cluster.unsubscribe(getSelf());
+    }
 
-	@Override
-	public Receive createReceive() {
-		return receiveBuilder()
-			.match(MemberUp.class, mUp -> {
-			// akka.tcp://CodeBroker@192.168.0.127:2551
-			Member member = mUp.member();
-			Address address = member.address();
-			String host = address.host().get();// 192.168.0.127
-			String hostPort = address.hostPort();// CodeBroker@192.168.0.127:2551
-			Integer port = (Integer) address.port().get();
-			String system = address.system();// CodeBroker
-			String protocol = address.protocol();// akka.tcp
-			UniqueAddress uniqueAddress = member.uniqueAddress();
-			long longUid = uniqueAddress.longUid();// 1560657262
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(MemberUp.class, mUp -> {
+                    // akka.tcp://CodeBroker@192.168.0.127:2551
+                    Member member = mUp.member();
+                    Address address = member.address();
+                    String host = address.host().get();// 192.168.0.127
+                    String hostPort = address.hostPort();// CodeBroker@192.168.0.127:2551
+                    Integer port = (Integer) address.port().get();
+                    String system = address.system();// CodeBroker
+                    String protocol = address.protocol();// akka.tcp
+                    UniqueAddress uniqueAddress = member.uniqueAddress();
+                    long longUid = uniqueAddress.longUid();// 1560657262
 
-			log.info("Member is Up: {} address {} longId {}", member, address.toString(), longUid);
-			ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
-			//发送新加入服务器信息
-			NewServerComeIn comeIn=new NewServerComeIn(longUid, member.address().toString());
-			byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageWithSubClass(Operation.WORLD_NER_SERVER_COMING, comeIn);
-			
-			systemActorSelection.tell(actorMessageWithSubClass,	getSender());
+                    log.info("Member is Up: {} address {} longId {}", member, address.toString(), longUid);
+                    ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
+                    //发送新加入服务器信息
+                    NewServerComeIn comeIn = new NewServerComeIn(longUid, member.address().toString());
+                    byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.WORLD_NER_SERVER_COMING, comeIn);
 
-			CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol,	longUid);
-			log.info("cluserInitMessage is: {"+host +"} host {"+ hostPort+" } hostPort {"+ port+" } port {"+ system+" } system {"+ protocol+"} protocol {"+ longUid +"} longUid");
-			byte[] tbaseMessage = thriftSerializerFactory.getActorMessageWithSubClass(Operation.CLUSER_INIT,cluserInitMessage);
-			ActorSelection actorSelection = getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor");
-			actorSelection.tell(tbaseMessage,cluserActor);
-			
-			IObject iObject=CObject.newInstance();
-			iObject.putUtfString("hello", "world");
-			Event event=new Event("Event",iObject);
-			actorSelection.tell(event, getSelf());
+                    systemActorSelection.tell(actorMessageWithSubClass, getSender());
 
-		}).match(UnreachableMember.class, mUnreachable -> {
-			log.info("Member detected as unreachable: {}", mUnreachable.member());
-		}).match(MemberRemoved.class, mRemoved -> {
-			Member member = mRemoved.member();
-			member.uniqueAddress().longUid();
-			log.info("Member is Removed: {}", member);
-			ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
-			systemActorSelection.tell(new WorldActor.RemoveServer(member.uniqueAddress().longUid()), getSelf());
-		}).match(MemberEvent.class, message -> {
-			// ignore
-		}).build();
-	}
+                    CluserInitMessage cluserInitMessage = new CluserInitMessage(host, hostPort, port, system, protocol, longUid);
+                    log.info("cluserInitMessage is: {" + host + "} host {" + hostPort + " } hostPort {" + port + " } port {" + system + " } system {" + protocol + "} protocol {" + longUid + "} longUid");
+                    byte[] tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.CLUSER_INIT, cluserInitMessage);
+                    ActorSelection actorSelection = getContext().actorSelection(member.address() + "/user/ClusterListener/CluserActor");
+                    actorSelection.tell(tbaseMessage, cluserActor);
+
+                    IObject iObject = CObject.newInstance();
+                    iObject.putUtfString("hello", "world");
+                    Event event = new Event("Event", iObject);
+                    actorSelection.tell(event, getSelf());
+
+                }).match(UnreachableMember.class, mUnreachable -> {
+                    log.info("Member detected as unreachable: {}", mUnreachable.member());
+                }).match(MemberRemoved.class, mRemoved -> {
+                    Member member = mRemoved.member();
+                    member.uniqueAddress().longUid();
+                    log.info("Member is Removed: {}", member);
+                    ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
+                    systemActorSelection.tell(new WorldActor.RemoveServer(member.uniqueAddress().longUid()), getSelf());
+                }).match(MemberEvent.class, message -> {
+                    // ignore
+                }).build();
+    }
 }

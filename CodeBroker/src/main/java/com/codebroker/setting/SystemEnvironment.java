@@ -342,81 +342,118 @@ Public License instead of this License.
 package com.codebroker.setting;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class SystemEnvironment.
  */
 public class SystemEnvironment {
 
-	/** The Constant ENGINE_NAME. */
-	public static final String ENGINE_NAME = "CodeBroker";
+    /**
+     * The Constant ENGINE_NAME.
+     */
+    public static final String ENGINE_NAME = "CodeBroker";
 
-	/** The Constant APP_ROOT. */
-	public static final String APP_ROOT = "com.codebroker";
+    /**
+     * The Constant APP_ROOT.
+     */
+    public static final String APP_ROOT = "com.codebroker";
 
-	/** The Constant APP_NAME. */
-	public static final String APP_NAME = APP_ROOT + ".app.name";
+    /**
+     * The Constant APP_NAME.
+     */
+    public static final String APP_NAME = APP_ROOT + ".app.name";
 
-	/** The Constant APP_ID. */
-	public static final String DEBUG = APP_ROOT + ".debug";
+    /**
+     * The Constant APP_ID.
+     */
+    public static final String DEBUG = APP_ROOT + ".debug";
 
-	public static final String APP_ID = APP_ROOT + ".app.id";
+    public static final String APP_ID = APP_ROOT + ".app.id";
 
-	/** The Constant APP_ID. */
-	public static final String GATE_BINDING = APP_ROOT + ".gate.binding";
+    /**
+     * The Constant APP_ID.
+     */
+    public static final String GATE_BINDING = APP_ROOT + ".gate.binding";
 
-	/** The Constant APP_ID. */
-	public static final String GATE_SESSION_TIME_OUT = APP_ROOT + ".gate.session.timeout";
+    /**
+     * The Constant APP_ID.
+     */
+    public static final String GATE_SESSION_TIME_OUT = APP_ROOT + ".gate.session.timeout";
 
-	public static final String GATE_SESSION_CHECK_TIME = APP_ROOT + ".gate.session.checktime";
+    public static final String GATE_SESSION_CHECK_TIME = APP_ROOT + ".gate.session.checktime";
 
-	/** The Constant APP_LISTENER. */
-	public static final String APP_LISTENER = APP_ROOT + ".app.listener";
+    /**
+     * The Constant APP_LISTENER.
+     */
+    public static final String APP_LISTENER = APP_ROOT + ".app.listener";
 
-	/** The Constant APP_SESSION_LISTENER. */
-	public static final String APP_SESSION_LISTENER = APP_ROOT + ".app.session.listener";
+    /**
+     * The Constant APP_SESSION_LISTENER.
+     */
+    public static final String APP_SESSION_LISTENER = APP_ROOT + ".app.session.listener";
 
-	/** The Constant AKKA_NAME. */
-	public static final String AKKA_NAME = APP_ROOT + ".akka.name";
+    /**
+     * The Constant AKKA_NAME.
+     */
+    public static final String AKKA_NAME = APP_ROOT + ".akka.name";
 
-	public static final String RELOAD = APP_ROOT + ".reload";
+    public static final String RELOAD = APP_ROOT + ".reload";
 
-	public static final String RELOAD_PORT = APP_ROOT + ".app.reload.port";
+    public static final String RELOAD_PORT = APP_ROOT + ".app.reload.port";
 
-	public static final String RELOAD_PATH = APP_ROOT + ".app.reload.path";
+    public static final String RELOAD_PATH = APP_ROOT + ".app.reload.path";
 
-	/** The Constant AKKA_CONFIG_NAME. */
-	public static final String AKKA_CONFIG_NAME = APP_ROOT + ".akka.config";
+    /**
+     * The Constant AKKA_CONFIG_NAME.
+     */
+    public static final String AKKA_CONFIG_NAME = APP_ROOT + ".akka.config";
 
-	public static final String AKKA_FILE_NAME = APP_ROOT + ".akka.configname";
+    public static final String AKKA_FILE_NAME = APP_ROOT + ".akka.configname";
 
-	/** The Constant AKKA_CONFIG_PATH. */
-	public static final String AKKA_CONFIG_PATH = AKKA_CONFIG_NAME + ".config.path";
+    /**
+     * The Constant AKKA_CONFIG_PATH.
+     */
+    public static final String AKKA_CONFIG_PATH = AKKA_CONFIG_NAME + ".config.path";
 
-	/** The Constant ENGINE_MODEL. */
-	public static final String ENGINE_MODEL = APP_ROOT + ".model";
+    /**
+     * The Constant ENGINE_MODEL.
+     */
+    public static final String ENGINE_MODEL = APP_ROOT + ".model";
 
-	public static final String AKKA_USER_PATH = "/user/";
-	/** The Constant AVALON_CLUSTER_NAME. */
+    public static final String AKKA_USER_PATH = "/user/";
+    /** The Constant AVALON_CLUSTER_NAME. */
 
-	/** The Constant NETTY_BOSS_GROUP_NUM. */
-	public static final String NETTY_BOSS_GROUP_NUM = APP_ROOT + "netty.bossgroup";
+    /**
+     * The Constant NETTY_BOSS_GROUP_NUM.
+     */
+    public static final String NETTY_BOSS_GROUP_NUM = APP_ROOT + "netty.bossgroup";
 
-	/** The Constant NETTY_WORKER_GROUP_NUM. */
-	public static final String NETTY_WORKER_GROUP_NUM = APP_ROOT + "netty.workergroup";
+    /**
+     * The Constant NETTY_WORKER_GROUP_NUM.
+     */
+    public static final String NETTY_WORKER_GROUP_NUM = APP_ROOT + "netty.workergroup";
 
-	/** The Constant NETTY_BACKLOG. */
-	public static final String NETTY_BACKLOG = APP_ROOT + "netty.backlog";
+    /**
+     * The Constant NETTY_BACKLOG.
+     */
+    public static final String NETTY_BACKLOG = APP_ROOT + "netty.backlog";
 
-	/** The Constant NETTY_SERVER_NAME. */
-	public static final String NETTY_SERVER_NAME = APP_ROOT + ".netty.server.name";
+    /**
+     * The Constant NETTY_SERVER_NAME.
+     */
+    public static final String NETTY_SERVER_NAME = APP_ROOT + ".netty.server.name";
 
-	/** The Constant TCP_PROT. */
-	public static final String TCP_PROT = APP_ROOT + ".tcp.port";
-	/** The Constant NETTY_HTTP_PORT. */
-	public static final String NETTY_HTTP_PORT = "netty.http.port";
+    /**
+     * The Constant TCP_PROT.
+     */
+    public static final String TCP_PROT = APP_ROOT + ".tcp.port";
+    /**
+     * The Constant NETTY_HTTP_PORT.
+     */
+    public static final String NETTY_HTTP_PORT = "netty.http.port";
 
-	public static final String DB_MYBATIS_CACHE = APP_ROOT + ".mybatis.cached";
+    public static final String DB_MYBATIS_CACHE = APP_ROOT + ".mybatis.cached";
 
-	public static final String DB_MYBATIS_CACHE_TIME = APP_ROOT + ".mybatis.cached.time";
+    public static final String DB_MYBATIS_CACHE_TIME = APP_ROOT + ".mybatis.cached.time";
 
 }

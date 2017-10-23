@@ -1,13 +1,7 @@
 package com.codebroker.core.actor;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
+import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventListener;
@@ -15,118 +9,116 @@ import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
 import com.codebroker.api.event.event.RemoveEventListener;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
+import java.io.Serializable;
+import java.util.*;
+
 /**
  * 格子Actor对象
- * @author zero
  *
+ * @author zero
  */
 public class GridActor extends AbstractActor {
-	/**
-	 * 父类Actor
-	 */
-	private final ActorRef parentAreaRef;
-	
-	public GridActor(ActorRef parentAreaRef) {
-		super();
-		this.parentAreaRef = parentAreaRef;
-	}
+    /**
+     * 父类Actor
+     */
+    private final ActorRef parentAreaRef;
+    private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
+    private Map<String, IUser> userMap = new TreeMap<String, IUser>();
 
-	private Map<String, IUser> userMap = new TreeMap<String, IUser>();
+    public GridActor(ActorRef parentAreaRef) {
+        super();
+        this.parentAreaRef = parentAreaRef;
+    }
 
-	private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
-	@Override
-	public Receive createReceive() {
-		return receiveBuilder()
-		  .match(EnterGrid.class, msg -> {
-			if (userMap.containsKey(msg.user.getUserId())) {
-				getSender().tell(false, getSelf());
-			} else {
-				userMap.put(msg.user.getUserId(), msg.user);
-				getSender().tell(true, getSelf());
-			}
-		}).match(LeaveGrid.class, msg -> {
-			if (userMap.containsKey(msg.userId)) {
-				userMap.remove(msg.userId);
-			}
-		}).match(GetPlayers.class, msg -> {
-			Collection<IUser> values = userMap.values();
-			List<IUser> list = new ArrayList<IUser>();
-			list.addAll(values);
-			getSender().tell(list, getSelf());
-		})
-		//处理分发事件
-		.match(Event.class, msg->{
-			dispatchEvent(msg);		
-		})
-		// 广播相关
-		.match(AddEventListener.class, msg -> {
-			eventListener.put(msg.topic, msg.paramIEventListener);
-		}).match(RemoveEventListener.class, msg -> {
-			eventListener.remove(msg.topic);
-		}).match(HasEventListener.class, msg -> {
-			getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-		}).build();
-	}
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(EnterGrid.class, msg -> {
+                    if (userMap.containsKey(msg.user.getUserId())) {
+                        getSender().tell(false, getSelf());
+                    } else {
+                        userMap.put(msg.user.getUserId(), msg.user);
+                        getSender().tell(true, getSelf());
+                    }
+                }).match(LeaveGrid.class, msg -> {
+                    if (userMap.containsKey(msg.userId)) {
+                        userMap.remove(msg.userId);
+                    }
+                }).match(GetPlayers.class, msg -> {
+                    Collection<IUser> values = userMap.values();
+                    List<IUser> list = new ArrayList<IUser>();
+                    list.addAll(values);
+                    getSender().tell(list, getSelf());
+                })
+                //处理分发事件
+                .match(Event.class, msg -> {
+                    dispatchEvent(msg);
+                })
+                // 广播相关
+                .match(AddEventListener.class, msg -> {
+                    eventListener.put(msg.topic, msg.paramIEventListener);
+                }).match(RemoveEventListener.class, msg -> {
+                    eventListener.remove(msg.topic);
+                }).match(HasEventListener.class, msg -> {
+                    getSender().tell(eventListener.containsKey(msg.topic), getSelf());
+                }).build();
+    }
 
-	/**
-	 * 处理分发信息
-	 * 
-	 * @param msg
-	 */
-	private void dispatchEvent(Event msg) {
-		try {
-			IEventListener iEventListener = eventListener.get(msg.getTopic());
-			if (iEventListener != null) {
-				iEventListener.handleEvent(msg);
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-	}
-	
-
-	public static class EnterGrid implements Serializable {
-
-		private static final long serialVersionUID = -7809307785484209371L;
-		public final IUser user;
-
-		public EnterGrid(IUser user) {
-			super();
-			this.user = user;
-		}
-
-	}
-
-	public static class LeaveGrid implements Serializable {
-		private static final long serialVersionUID = 2793900887224969528L;
-		public final String userId;
-
-		public LeaveGrid(String userId) {
-			super();
-			this.userId = userId;
-		}
-	}
-
-	public static class BroadCastAllUser implements Serializable {
-		private static final long serialVersionUID = 2143027987941307508L;
-
-		public final String jsonString;
-
-		public BroadCastAllUser(String jsonString) {
-			super();
-			this.jsonString = jsonString;
-		}
-
-	}
+    /**
+     * 处理分发信息
+     *
+     * @param msg
+     */
+    private void dispatchEvent(Event msg) {
+        try {
+            IEventListener iEventListener = eventListener.get(msg.getTopic());
+            if (iEventListener != null) {
+                iEventListener.handleEvent(msg);
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
 
 
+    public static class EnterGrid implements Serializable {
+
+        private static final long serialVersionUID = -7809307785484209371L;
+        public final IUser user;
+
+        public EnterGrid(IUser user) {
+            super();
+            this.user = user;
+        }
+
+    }
+
+    public static class LeaveGrid implements Serializable {
+        private static final long serialVersionUID = 2793900887224969528L;
+        public final String userId;
+
+        public LeaveGrid(String userId) {
+            super();
+            this.userId = userId;
+        }
+    }
+
+    public static class BroadCastAllUser implements Serializable {
+        private static final long serialVersionUID = 2143027987941307508L;
+
+        public final String jsonString;
+
+        public BroadCastAllUser(String jsonString) {
+            super();
+            this.jsonString = jsonString;
+        }
+
+    }
 
 
-	public static class GetPlayers implements Serializable {
+    public static class GetPlayers implements Serializable {
 
-		private static final long serialVersionUID = -6878647894314032793L;
+        private static final long serialVersionUID = -6878647894314032793L;
 
-	}
+    }
 }

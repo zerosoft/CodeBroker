@@ -347,9 +347,11 @@ package com.codebroker.exception;
  *
  * @author ZERO
  */
-public class FileNotExitException extends RuntimeException {
+public class FileNotExitException extends CodeBrokerException {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = -4819934004199096254L;
+    /**
+     * The Constant serialVersionUID.
+     */
+    private static final long serialVersionUID = -4819934004199096254L;
 
 }

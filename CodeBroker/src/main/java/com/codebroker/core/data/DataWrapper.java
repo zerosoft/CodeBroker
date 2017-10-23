@@ -4,21 +4,21 @@ import java.io.Serializable;
 
 public class DataWrapper implements Serializable {
 
-	private static final long serialVersionUID = -3218718719001693201L;
+    private static final long serialVersionUID = -3218718719001693201L;
 
-	private DataType typeId;
-	private Object object;
+    private DataType typeId;
+    private Object object;
 
-	public DataWrapper(DataType typeId, Object object) {
-		this.typeId = typeId;
-		this.object = object;
-	}
+    public DataWrapper(DataType typeId, Object object) {
+        this.typeId = typeId;
+        this.object = object;
+    }
 
-	public DataType getTypeId() {
-		return typeId;
-	}
+    public DataType getTypeId() {
+        return typeId;
+    }
 
-	public Object getObject() {
-		return object;
-	}
+    public Object getObject() {
+        return object;
+    }
 }

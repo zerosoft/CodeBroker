@@ -1,5 +1,5 @@
 package com.codebroker.exception;
 
-public class CBLoginException extends Exception {
+public class CBLoginException extends CodeBrokerException {
 
 }

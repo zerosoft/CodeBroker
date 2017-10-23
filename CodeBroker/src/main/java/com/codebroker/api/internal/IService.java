@@ -342,6 +342,7 @@ Public License instead of this License.
 package com.codebroker.api.internal;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * 系统级组件服务.
  *
@@ -349,43 +350,39 @@ package com.codebroker.api.internal;
  */
 public interface IService {
 
-	/**
-	 * 初始化.
-	 *
-	 * @param obj
-	 *            the obj
-	 */
-	public void init(Object obj);
+    /**
+     * 初始化.
+     *
+     * @param obj the obj
+     */
+    public void init(Object obj);
 
-	/**
-	 * 销毁.
-	 *
-	 * @param obj
-	 *            the obj
-	 */
-	public void destroy(Object obj);
+    /**
+     * 销毁.
+     *
+     * @param obj the obj
+     */
+    public void destroy(Object obj);
 
-	/**
-	 * 处理消息.
-	 *
-	 * @param obj
-	 *            the obj
-	 */
-	public void handleMessage(Object obj);
+    /**
+     * 处理消息.
+     *
+     * @param obj the obj
+     */
+    public void handleMessage(Object obj);
 
-	/**
-	 * 获得服务名称.
-	 *
-	 * @return the name
-	 */
-	public String getName();
+    /**
+     * 获得服务名称.
+     *
+     * @return the name
+     */
+    public String getName();
 
-	/**
-	 * 设置服务名称.
-	 *
-	 * @param name
-	 *            the new name
-	 */
-	public void setName(String name);
+    /**
+     * 设置服务名称.
+     *
+     * @param name the new name
+     */
+    public void setName(String name);
 
 }

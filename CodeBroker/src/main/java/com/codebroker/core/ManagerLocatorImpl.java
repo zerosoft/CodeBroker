@@ -341,15 +341,15 @@ Public License instead of this License.
  */
 package com.codebroker.core;
 
+import akka.actor.ActorSystem;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.ManagerLocator;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 
-import akka.actor.ActorSystem;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * 开放给逻辑层的内容管理器.
  *
@@ -357,34 +357,34 @@ import akka.actor.ActorSystem;
  */
 class ManagerLocatorImpl implements ManagerLocator {
 
-	@Override
-	public <T> T getManager(Class<T> type) {
-		return ContextResolver.getManager(type);
-	}
+    @Override
+    public <T> T getManager(Class<T> type) {
+        return ContextResolver.getManager(type);
+    }
 
-	@Override
-	public void setManager(IService type) {
-		ContextResolver.setManager(type);
-	}
+    @Override
+    public void setManager(IService type) {
+        ContextResolver.setManager(type);
+    }
 
-	@Override
-	public ActorSystem getActorSystem() {
-		return ContextResolver.getActorSystem();
-	}
+    @Override
+    public ActorSystem getActorSystem() {
+        return ContextResolver.getActorSystem();
+    }
 
-	@Override
-	public IAreaManager getAreaManager() {
-		return ContextResolver.getAreaManager();
-	}
+    @Override
+    public IAreaManager getAreaManager() {
+        return ContextResolver.getAreaManager();
+    }
 
-	@Override
-	public IUserManager getUserManager() {
-		return ContextResolver.getUserManager();
-	}
+    @Override
+    public IUserManager getUserManager() {
+        return ContextResolver.getUserManager();
+    }
 
-	@Override
-	public IWorld getWorld() {
-		return ContextResolver.getWorld();
-	}
+    @Override
+    public IWorld getWorld() {
+        return ContextResolver.getWorld();
+    }
 
 }

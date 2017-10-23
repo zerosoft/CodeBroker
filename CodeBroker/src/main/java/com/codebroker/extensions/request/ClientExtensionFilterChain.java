@@ -341,123 +341,128 @@ Public License instead of this License.
  */
 package com.codebroker.extensions.request;
 
+import com.codebroker.extensions.request.filter.ClientExtensionFilter;
+import com.codebroker.extensions.request.filter.FilterAction;
+import com.codebroker.extensions.request.filter.IFilterChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.codebroker.extensions.request.filter.ClientExtensionFilter;
-import com.codebroker.extensions.request.filter.FilterAction;
-import com.codebroker.extensions.request.filter.IFilterChain;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class ClientExtensionFilterChain.
  */
 public class ClientExtensionFilterChain implements IFilterChain {
 
-	/** The filters. */
-	private final Collection<ClientExtensionFilter> filters = new ConcurrentLinkedQueue<ClientExtensionFilter>();
+    /**
+     * The filters.
+     */
+    private final Collection<ClientExtensionFilter> filters = new ConcurrentLinkedQueue<ClientExtensionFilter>();
 
-	/** The player. */
-	private final AppListenerExtension player;
+    /**
+     * The player.
+     */
+    private final AppListenerExtension player;
 
-	/** The log. */
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+    /**
+     * The log.
+     */
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	/**
-	 * Instantiates a new client extension filter chain.
-	 *
-	 * @param clientExtension
-	 *            the client extension
-	 */
-	public ClientExtensionFilterChain(AppListenerExtension clientExtension) {
-		this.player = clientExtension;
-	}
+    /**
+     * Instantiates a new client extension filter chain.
+     *
+     * @param clientExtension the client extension
+     */
+    public ClientExtensionFilterChain(AppListenerExtension clientExtension) {
+        this.player = clientExtension;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.filter.IFilterChain#addFilter(int,
-	 * com.avalon.extensions.request.filter.ClientExtensionFilter)
-	 */
-	public void addFilter(int filterId, ClientExtensionFilter filter) {
-		if (filters.contains(filter)) {
-			// throw new
-			// ALawsRuntimeException("A filter with the same name already
-			// exists: "
-			// + filterName + ", Ext: " + player);
-		} else {
-			filter.setFilterId(filterId);
-			// filter.init(parentExtension);
-			filters.add(filter);
-			return;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.filter.IFilterChain#addFilter(int,
+     * com.avalon.extensions.request.filter.ClientExtensionFilter)
+     */
+    public void addFilter(int filterId, ClientExtensionFilter filter) {
+        if (filters.contains(filter)) {
+            // throw new
+            // ALawsRuntimeException("A filter with the same name already
+            // exists: "
+            // + filterName + ", Ext: " + player);
+        } else {
+            filter.setFilterId(filterId);
+            // filter.init(parentExtension);
+            filters.add(filter);
+            return;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.filter.IFilterChain#remove(int)
-	 */
-	public void remove(int filterId) {
-		for (Iterator<ClientExtensionFilter> it = filters.iterator(); it.hasNext();) {
-			ClientExtensionFilter filter = it.next();
-			if (filter.getFilterId() == filterId) {
-				it.remove();
-				break;
-			}
-		}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.filter.IFilterChain#remove(int)
+     */
+    public void remove(int filterId) {
+        for (Iterator<ClientExtensionFilter> it = filters.iterator(); it.hasNext(); ) {
+            ClientExtensionFilter filter = it.next();
+            if (filter.getFilterId() == filterId) {
+                it.remove();
+                break;
+            }
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.avalon.extensions.request.filter.IFilterChain#runRequestInChain(int,
-	 * com.avalon.extensions.request.ClientExtension, java.lang.Object)
-	 */
-	public FilterAction runRequestInChain(int requestId, AppListenerExtension clientExtension, Object params) {
-		FilterAction filterAction = FilterAction.CONTINUE;
-		for (Iterator<ClientExtensionFilter> iterator = filters.iterator(); iterator.hasNext();) {
-			ClientExtensionFilter filter = iterator.next();
-			try {
-				if (filterAction == FilterAction.HALT) {
-					break;
-				}
-				filterAction = filter.handleClientRequest(requestId, player, params);
-			} catch (Exception e) {
-				log.warn(String.format("Exception in FilterChain execution:%s --- Filter: %s, Req: %s, Ext: %s",
-						new Object[] { e.toString(), filter.getFilterId(), requestId, player }));
-			}
-		}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.avalon.extensions.request.filter.IFilterChain#runRequestInChain(int,
+     * com.avalon.extensions.request.ClientExtension, java.lang.Object)
+     */
+    public FilterAction runRequestInChain(int requestId, AppListenerExtension clientExtension, Object params) {
+        FilterAction filterAction = FilterAction.CONTINUE;
+        for (Iterator<ClientExtensionFilter> iterator = filters.iterator(); iterator.hasNext(); ) {
+            ClientExtensionFilter filter = iterator.next();
+            try {
+                if (filterAction == FilterAction.HALT) {
+                    break;
+                }
+                filterAction = filter.handleClientRequest(requestId, player, params);
+            } catch (Exception e) {
+                log.warn(String.format("Exception in FilterChain execution:%s --- Filter: %s, Req: %s, Ext: %s",
+                        new Object[]{e.toString(), filter.getFilterId(), requestId, player}));
+            }
+        }
 
-		return filterAction;
-	}
+        return filterAction;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.filter.IFilterChain#size()
-	 */
-	public int size() {
-		return filters.size();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.filter.IFilterChain#size()
+     */
+    public int size() {
+        return filters.size();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.filter.IFilterChain#destroy()
-	 */
-	public void destroy() {
-		ClientExtensionFilter filter;
-		for (Iterator<ClientExtensionFilter> iterator = filters.iterator(); iterator.hasNext(); filter.destroy()) {
-			filter = iterator.next();
-		}
-		filters.clear();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.filter.IFilterChain#destroy()
+     */
+    public void destroy() {
+        ClientExtensionFilter filter;
+        for (Iterator<ClientExtensionFilter> iterator = filters.iterator(); iterator.hasNext(); filter.destroy()) {
+            filter = iterator.next();
+        }
+        filters.clear();
+    }
 
 }

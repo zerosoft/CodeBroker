@@ -341,11 +341,10 @@ Public License instead of this License.
  */
 package com.codebroker.api.internal;
 
+import akka.actor.ActorSystem;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
-
-import akka.actor.ActorSystem;
 
 /**
  * 外层API调用核心.
@@ -354,27 +353,26 @@ import akka.actor.ActorSystem;
  */
 public interface ManagerLocator {
 
-	<T> T getManager(Class<T> type);
+    <T> T getManager(Class<T> type);
 
-	/**
-	 * 放入自定义的服务（公用服务）.
-	 *
-	 * @param type
-	 *            the new manager
-	 */
-	void setManager(IService type);
+    /**
+     * 放入自定义的服务（公用服务）.
+     *
+     * @param type the new manager
+     */
+    void setManager(IService type);
 
-	/**
-	 * 获得Akka Actor系统.
-	 *
-	 * @return the actor system
-	 */
-	ActorSystem getActorSystem();
+    /**
+     * 获得Akka Actor系统.
+     *
+     * @return the actor system
+     */
+    ActorSystem getActorSystem();
 
-	IWorld getWorld();
+    IWorld getWorld();
 
-	IAreaManager getAreaManager();
+    IAreaManager getAreaManager();
 
-	IUserManager getUserManager();
+    IUserManager getUserManager();
 
 }

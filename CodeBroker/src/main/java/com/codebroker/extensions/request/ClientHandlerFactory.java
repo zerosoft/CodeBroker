@@ -341,102 +341,104 @@ Public License instead of this License.
  */
 package com.codebroker.extensions.request;
 
+import com.codebroker.api.IHandlerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.codebroker.api.IHandlerFactory;
-
 // TODO: Auto-generated Javadoc
+
 /**
  * A factory for creating ClientHandler objects.
  */
 public class ClientHandlerFactory implements IHandlerFactory {
 
-	/** The handlers. */
-	private final Map<Integer, Class<?>> handlers = new ConcurrentHashMap<Integer, Class<?>>();
+    /**
+     * The handlers.
+     */
+    private final Map<Integer, Class<?>> handlers = new ConcurrentHashMap<Integer, Class<?>>();
 
-	/** The cached handlers. */
-	private final Map<Integer, Object> cachedHandlers = new ConcurrentHashMap<Integer, Object>();
+    /**
+     * The cached handlers.
+     */
+    private final Map<Integer, Object> cachedHandlers = new ConcurrentHashMap<Integer, Object>();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
-	 * java.lang.Class)
-	 */
-	public void addHandler(int handlerKey, Class<?> handlerClass) {
-		handlers.put(handlerKey, handlerClass);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
+     * java.lang.Class)
+     */
+    public void addHandler(int handlerKey, Class<?> handlerClass) {
+        handlers.put(handlerKey, handlerClass);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
-	 * java.lang.Object)
-	 */
-	public void addHandler(int handlerKey, Object requestHandler) {
-		cachedHandlers.put(handlerKey, requestHandler);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
+     * java.lang.Object)
+     */
+    public void addHandler(int handlerKey, Object requestHandler) {
+        cachedHandlers.put(handlerKey, requestHandler);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.IHandlerFactory#clearAll()
-	 */
-	public synchronized void clearAll() {
-		handlers.clear();
-		cachedHandlers.clear();
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.IHandlerFactory#clearAll()
+     */
+    public synchronized void clearAll() {
+        handlers.clear();
+        cachedHandlers.clear();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.IHandlerFactory#removeHandler(int)
-	 */
-	public synchronized void removeHandler(int handlerKey) {
-		handlers.remove(handlerKey);
-		if (cachedHandlers.containsKey(handlerKey)) {
-			cachedHandlers.remove(handlerKey);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.IHandlerFactory#removeHandler(int)
+     */
+    public synchronized void removeHandler(int handlerKey) {
+        handlers.remove(handlerKey);
+        if (cachedHandlers.containsKey(handlerKey)) {
+            cachedHandlers.remove(handlerKey);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.avalon.extensions.request.IHandlerFactory#findHandler(int)
-	 */
-	public Object findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
-		Object handler = getHandlerInstance(handlerKey);
-		if (handler == null) {
-			handler = getHandlerInstance(handlerKey);
-		}
-		return handler;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.extensions.request.IHandlerFactory#findHandler(int)
+     */
+    public Object findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
+        Object handler = getHandlerInstance(handlerKey);
+        if (handler == null) {
+            handler = getHandlerInstance(handlerKey);
+        }
+        return handler;
+    }
 
-	/**
-	 * Gets the handler instance.
-	 *
-	 * @param handlerKey
-	 *            the handler key
-	 * @return the handler instance
-	 * @throws InstantiationException
-	 *             the instantiation exception
-	 * @throws IllegalAccessException
-	 *             the illegal access exception
-	 */
-	private Object getHandlerInstance(int handlerKey) throws InstantiationException, IllegalAccessException {
-		Object handler = cachedHandlers.get(handlerKey);
-		if (handler != null) {
-			return handler;
-		}
+    /**
+     * Gets the handler instance.
+     *
+     * @param handlerKey the handler key
+     * @return the handler instance
+     * @throws InstantiationException the instantiation exception
+     * @throws IllegalAccessException the illegal access exception
+     */
+    private Object getHandlerInstance(int handlerKey) throws InstantiationException, IllegalAccessException {
+        Object handler = cachedHandlers.get(handlerKey);
+        if (handler != null) {
+            return handler;
+        }
 
-		Class<?> handlerClass = handlers.get(handlerKey);
-		if (handlerClass == null) {
-			return null;
-		}
-		handler = handlerClass.newInstance();
-		cachedHandlers.put(handlerKey, handler);
-		return handler;
-	}
+        Class<?> handlerClass = handlers.get(handlerKey);
+        if (handlerClass == null) {
+            return null;
+        }
+        handler = handlerClass.newInstance();
+        cachedHandlers.put(handlerKey, handler);
+        return handler;
+    }
 
 }

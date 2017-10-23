@@ -5,11 +5,11 @@ import com.google.protobuf.Message;
 
 public interface JavaProtocolTransform {
 
-	public void protocolToJavaBean(Message message);
+    public void protocolToJavaBean(Message message);
 
-	public Message javaBeanToProtocol();
+    public Message javaBeanToProtocol();
 
-	public byte[] getByteArray();
+    public byte[] getByteArray();
 
-	public Message bytesToProtocol(byte[] bytes) throws InvalidProtocolBufferException;
+    public Message bytesToProtocol(byte[] bytes) throws InvalidProtocolBufferException;
 }
