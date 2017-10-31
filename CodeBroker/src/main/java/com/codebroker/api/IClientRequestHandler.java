@@ -353,11 +353,10 @@ public interface IClientRequestHandler {
     /**
      * Handle client request.
      *
-     * @param listener the listener
      * @param message  the message
      * @return the io message package
      * @throws InvalidProtocolBufferException the invalid protocol buffer exception
      */
-    public void handleClientRequest(IUser user, Object message);
+    void handleClientRequest(IUser user, Object message);
 
 }

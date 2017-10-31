@@ -1,6 +1,5 @@
-package com.codebroker.database;
+package com.codebroker.core.manager;
 
-import com.codebroker.api.AppContext;
 import com.codebroker.core.service.BaseCoreService;
 import com.codebroker.util.PropertiesWrapper;
 import com.mongodb.DB;
@@ -30,6 +29,7 @@ public class JongoDBService extends BaseCoreService {
         db = client.getDB(mongodbDbName);
         jongo = new Jongo(db);
         setName("JongoDBService");
+        super.setActive();
     }
 
     public Jongo getJongo() {

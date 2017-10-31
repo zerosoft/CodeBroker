@@ -9,12 +9,12 @@ public enum SystemRequest {
     USER_RECONNECTION_SUCCESS(5),
 
     USER_LOGIN_JSON(6),
-
+    USER_LOGIN_REGEDIT(8),
     USER_JOIN_WORLD(7);
 
     public final int id;
 
-    private SystemRequest(int id) {
+    SystemRequest(int id) {
         this.id = id;
     }
 

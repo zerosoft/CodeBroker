@@ -1,5 +1,6 @@
 package com.codebroker.redis;
 
+import com.codebroker.core.service.RedisService;
 import com.codebroker.redis.collections.Ranking;
 import com.codebroker.redis.collections.RankingStructure;
 import com.codebroker.redis.collections.ScoresPoint;

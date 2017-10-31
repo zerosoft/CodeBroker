@@ -341,7 +341,6 @@ Public License instead of this License.
  */
 package com.codebroker.api;
 
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
@@ -440,20 +439,5 @@ public final class AppContext {
         }
     }
 
-    /**
-     * 获得全路径actor
-     *
-     * @param address   actor的地址
-     * @param actorName actor的名称
-     * @return
-     */
-    public static ActorSelection getActorSelection(String address, String actorName) {
-        try {
-            ActorSystem actorSystem = InternalContext.getManagerLocator().getActorSystem();
-            return actorSystem.actorSelection(address + "/user/" + actorName);
-        } catch (IllegalStateException ise) {
-            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
-        }
-    }
 
 }

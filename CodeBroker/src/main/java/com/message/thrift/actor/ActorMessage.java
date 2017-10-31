@@ -104,7 +104,9 @@ public class ActorMessage implements org.apache.thrift.TBase<ActorMessage, Actor
         this.op = null;
     }
 
-    /** Returns true if field op is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field op is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetOp() {
         return this.op != null;
     }
@@ -128,10 +130,6 @@ public class ActorMessage implements org.apache.thrift.TBase<ActorMessage, Actor
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForMessageRaw() {
-        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
-    }
-
     /**
      * 消息二进制结构体，需要二次转换
      */
@@ -140,11 +138,17 @@ public class ActorMessage implements org.apache.thrift.TBase<ActorMessage, Actor
         return this;
     }
 
+    public java.nio.ByteBuffer bufferForMessageRaw() {
+        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
+    }
+
     public void unsetMessageRaw() {
         this.messageRaw = null;
     }
 
-    /** Returns true if field messageRaw is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field messageRaw is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetMessageRaw() {
         return this.messageRaw != null;
     }
@@ -192,7 +196,9 @@ public class ActorMessage implements org.apache.thrift.TBase<ActorMessage, Actor
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -351,7 +357,9 @@ public class ActorMessage implements org.apache.thrift.TBase<ActorMessage, Actor
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         /**
          * 操作的枚举值

@@ -509,8 +509,7 @@ public final class FileUtil {
 
     public static void printOsEnv() {
         Properties props = System.getProperties();
-        LogUtil.logPrintln("Os: " + props.getProperty("os.name") + ", Arch: " + props.getProperty("os.arch")
-                + ", Version: " + props.getProperty("os.version"));
+        LogUtil.logPrintln("Os: " + props.getProperty("os.name") + ", Arch: " + props.getProperty("os.arch") + ", Version: " + props.getProperty("os.version"));
 
         String userDir = System.getProperty("user.dir");
         LogUtil.logPrintln("UserDir: " + userDir);

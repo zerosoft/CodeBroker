@@ -106,7 +106,9 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
 
-    /** Returns true if field serverId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field serverId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetServerId() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
@@ -128,7 +130,9 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         this.actorPath = null;
     }
 
-    /** Returns true if field actorPath is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field actorPath is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetActorPath() {
         return this.actorPath != null;
     }
@@ -153,7 +157,9 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __CMD_ISSET_ID);
     }
 
-    /** Returns true if field cmd is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field cmd is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetCmd() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __CMD_ISSET_ID);
     }
@@ -172,20 +178,22 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForMessageRaw() {
-        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
-    }
-
     public CluserSendMessage setMessageRaw(byte[] messageRaw) {
         this.messageRaw = messageRaw == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(messageRaw.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForMessageRaw() {
+        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
     }
 
     public void unsetMessageRaw() {
         this.messageRaw = null;
     }
 
-    /** Returns true if field messageRaw is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field messageRaw is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetMessageRaw() {
         return this.messageRaw != null;
     }
@@ -255,7 +263,9 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -465,7 +475,9 @@ public class CluserSendMessage implements org.apache.thrift.TBase<CluserSendMess
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         SERVER_ID((short) 1, "serverId"),
         ACTOR_PATH((short) 2, "actorPath"),

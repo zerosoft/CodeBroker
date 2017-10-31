@@ -5,33 +5,29 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.cluster.pubsub.DistributedPubSub;
 import akka.cluster.pubsub.DistributedPubSubMediator;
+import akka.serialization.Serialization;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.cluster.ClusterDistributedSub.Subscribe;
-import com.codebroker.core.entities.Area;
+import com.codebroker.core.manager.CacheManager;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.areamanager.CreateArea;
-import com.message.thrift.actor.areamanager.GetAreaById;
 import com.message.thrift.actor.areamanager.RemoveArea;
 
-import java.io.Serializable;
-import java.util.*;
-
+/**
+ * 区域管理器
+ * 创建销毁区域Area
+ */
 public class AreaManagerActor extends AbstractActor {
 
     public static final String IDENTIFY = AreaManagerActor.class.getSimpleName();
-    private final ActorRef worldRef;
-    private final ActorRef userManagerRef;
+
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     ActorRef mediator;
-    private Map<String, Area> areaMap = new TreeMap<String, Area>();
 
 
-    public AreaManagerActor(ActorRef worldRef, ActorRef userManagerRef) {
-        super();
-        this.worldRef = worldRef;
-        this.userManagerRef = userManagerRef;
-    }
+
 
     @Override
     public void preStart() throws Exception {
@@ -56,106 +52,36 @@ public class AreaManagerActor extends AbstractActor {
                             thriftSerializerFactory.deserialize(removeArea, actorMessage.messageRaw);
                             removeAreaById(removeArea.areaId);
                             break;
-                        case AREA_MANAGER_GET_AREA_BY_ID:
-                            GetAreaById areaById = new GetAreaById();
-                            thriftSerializerFactory.deserialize(areaById, actorMessage.messageRaw);
-                            getSender().tell(areaMap.get(areaById.areaId), getSelf());
-                        case AREA_MANAGER_GET_ALL_AREA:
-                            getAllArea();
-                            break;
                         default:
                             break;
                     }
                 })
                 .match(Subscribe.class, msg -> {
                     mediator.tell(new DistributedPubSubMediator.Subscribe(IDENTIFY, getSelf()), getSelf());
-                }).match(AddArea.class, msg -> {
-                    addArea(msg.serverId, msg.area);
-                }).match(DelArea.class, msg -> {
-                    delArea(msg.serverId, msg.areaId);
                 }).matchAny(msg -> {
                     System.out.println(msg);
                 }).build();
     }
 
-    private void delArea(int serverId, String areaId) {
-        if (ServerEngine.serverId != serverId) {
-            areaMap.remove(areaId);
-        }
-    }
-
-    private void addArea(int serverId, Area area) throws Exception {
-        if (ServerEngine.serverId != serverId) {
-            areaMap.put(area.getId(), area);
-        }
-    }
 
     private void createArea(int loaclGridId) {
-        String key = ServerEngine.serverId + "_" + loaclGridId;
-        if (areaMap.containsKey(key)) {
-            getSender().tell(areaMap.get(loaclGridId), getSelf());
+        CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
+        if (cacheManager.containsAreaKey(loaclGridId)) {
+            return;
         } else {
-            Area gridProxy = new Area();
-            ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, worldRef, userManagerRef), key);
-
-            gridProxy.setActorRef(actorOf);
+            ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, CacheManager.getAreaId(loaclGridId)), CacheManager.getAreaId(loaclGridId));
 
             getContext().watch(actorOf);
-            getSender().tell(gridProxy, getSelf());
 
-            areaMap.put(key, gridProxy);
-            // 发送到通道
-            mediator.tell(new DistributedPubSubMediator.Publish(IDENTIFY,
-                    new AreaManagerActor.AddArea(ServerEngine.serverId, gridProxy)), getSelf());
+            String identifier = Serialization.serializedActorPath(actorOf);
+            cacheManager.setLocalAreaPath(CacheManager.getAreaId(loaclGridId), identifier);
         }
     }
 
     private void removeAreaById(int loaclAreaId) {
-        String key = ServerEngine.serverId + "_" + loaclAreaId;
-        Area gridProxy = areaMap.get(key);
-        getContext().stop(gridProxy.getActorRef());
-        areaMap.remove(key);
-        // 发送到通道
-        mediator.tell(new DistributedPubSubMediator.Publish(IDENTIFY,
-                new AreaManagerActor.DelArea(ServerEngine.serverId, key)), getSelf());
-    }
-
-
-    private void getAllArea() {
-        Collection<Area> values = areaMap.values();
-        List<Area> list = new ArrayList<Area>();
-        list.addAll(values);
-        getSender().tell(list, getSelf());
-    }
-
-    public static class AddArea implements Serializable {
-
-        private static final long serialVersionUID = 5536989985398902217L;
-
-        public final int serverId;
-        public final Area area;
-
-        public AddArea(int serverId, Area area) {
-            super();
-            this.serverId = serverId;
-            this.area = area;
-        }
-
-    }
-
-    public static class DelArea implements Serializable {
-
-        private static final long serialVersionUID = 4051984914024834418L;
-
-        public final int serverId;
-        public final String areaId;
-
-        public DelArea(int serverId, String areaId) {
-            super();
-            this.serverId = serverId;
-            this.areaId = areaId;
-        }
-
+        String key = "SERVER_" + ServerEngine.serverId + ":AREA_" + loaclAreaId;
+        CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
+        cacheManager.removeAreaActorRefPath(key);
     }
 
 

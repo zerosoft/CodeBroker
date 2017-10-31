@@ -359,7 +359,7 @@ import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.eventbus.CluserEnvelope;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.cluser.CluserInitMessage;
 import com.message.thrift.actor.world.NewServerComeIn;
@@ -407,7 +407,7 @@ public class ClusterListener extends AbstractActor {
                     long longUid = uniqueAddress.longUid();// 1560657262
 
                     log.info("Member is Up: {} address {} longId {}", member, address.toString(), longUid);
-                    ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
+                    ActorSelection systemActorSelection = AkkaUtil.getSystemActorSelection(WorldActor.IDENTIFY);
                     //发送新加入服务器信息
                     NewServerComeIn comeIn = new NewServerComeIn(longUid, member.address().toString());
                     byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.WORLD_NER_SERVER_COMING, comeIn);
@@ -431,7 +431,7 @@ public class ClusterListener extends AbstractActor {
                     Member member = mRemoved.member();
                     member.uniqueAddress().longUid();
                     log.info("Member is Removed: {}", member);
-                    ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(WorldActor.IDENTIFY);
+                    ActorSelection systemActorSelection = AkkaUtil.getSystemActorSelection(WorldActor.IDENTIFY);
                     systemActorSelection.tell(new WorldActor.RemoveServer(member.uniqueAddress().longUid()), getSelf());
                 }).match(MemberEvent.class, message -> {
                     // ignore

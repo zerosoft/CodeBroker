@@ -1,12 +1,10 @@
 package model;
 
-import com.avic.sever.game.model.AccountEntity;
 import com.avic.sever.game.model.AccountManager;
-import com.codebroker.database.JongoDBService;
+import com.codebroker.core.manager.JongoDBService;
 import com.codebroker.util.PropertiesWrapper;
 import jodd.props.Props;
 import org.jongo.Jongo;
-import org.jongo.MongoCollection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

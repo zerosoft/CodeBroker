@@ -16,14 +16,11 @@ import java.util.TreeMap;
 public class NPCManagerActor extends AbstractActor {
 
     public static final String IDENTIFY = NPCManagerActor.class.getSimpleName().toString();
-    private final ActorRef worldRef;
+
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     private Map<String, ActorRef> npcRefMap = new TreeMap<String, ActorRef>();
 
-    public NPCManagerActor(ActorRef worldRef) {
-        super();
-        this.worldRef = worldRef;
-    }
+
 
     @Override
     public Receive createReceive() {

@@ -6,7 +6,6 @@ import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import com.codebroker.core.actor.AreaActor;
 import com.codebroker.core.actor.UserManagerActor;
-import com.codebroker.core.entities.Area;
 import com.codebroker.core.manager.UserManager;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,7 +35,6 @@ public class TestGridActor {
             final ActorRef nmanager = system.actorOf(Props.create(UserManagerActor.class, manager), UserManagerActor.IDENTIFY);
             System.out.println(nmanager.path().toString());
 
-            Area proxy = new Area();
             final ActorRef actorOf = system.actorOf(Props.create(AreaActor.class, nmanager));
 
             byte[] bb = "hello".getBytes();

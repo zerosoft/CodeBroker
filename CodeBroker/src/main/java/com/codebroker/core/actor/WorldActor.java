@@ -8,23 +8,24 @@ import akka.japi.pf.ReceiveBuilder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.cluster.ClusterDistributedPub;
 import com.codebroker.core.local.WorldCreateNPC;
-import com.codebroker.core.manager.AkkaBootService;
-import com.codebroker.core.manager.AreaManager;
-import com.codebroker.core.manager.UserManager;
+import com.codebroker.core.manager.CacheManager;
+import com.codebroker.exception.AllReadyRegeditException;
+import com.codebroker.exception.NoAuthException;
+import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
+import com.codebroker.util.LogUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.areamanager.CreateArea;
 import com.message.thrift.actor.usermanager.CreateUserWithSession;
-import com.message.thrift.actor.world.HandShake;
-import com.message.thrift.actor.world.NewServerComeIn;
-import com.message.thrift.actor.world.UserConnect2World;
-import com.message.thrift.actor.world.UserReconnectionTry;
+import com.message.thrift.actor.world.*;
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author server
  */
 public class WorldActor extends AbstractActor {
-    public static final String USER_PRFIX = "USER-";
-    public static final String NPC_PRFIX = "NPC-";
+
+
     public static final String IDENTIFY = WorldActor.class.getSimpleName().toString();
     private static Logger logger = LoggerFactory.getLogger("WorldActor");
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
@@ -55,8 +56,15 @@ public class WorldActor extends AbstractActor {
     private ActorRef areaManagerRef;
     //用户管理器的地址引用
     private ActorRef userManagerRef;
+
     //NPC用户管理器的地址引用
     private ActorRef npcManagerRef;
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+        initialize();
+    }
 
     @Override
     public Receive createReceive() {
@@ -64,13 +72,15 @@ public class WorldActor extends AbstractActor {
                 .match(byte[].class, msg -> {
                     ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
                     switch (actorMessage.op) {
-                        case WORLD_INITIALIZE:
-                            initialize();
-                            break;
                         case WORLD_USER_CONNECT_2_WORLD:
                             UserConnect2World userConnect2World = new UserConnect2World();
                             thriftSerializerFactory.deserialize(userConnect2World, actorMessage.messageRaw);
                             userConnect2Server(userConnect2World.name, userConnect2World.params, getSender());
+                            break;
+                        case WORLD_USER_REGEDIT_2_WORLD:
+                            UserRegedit2World userRegedit2World = new UserRegedit2World();
+                            thriftSerializerFactory.deserialize(userRegedit2World, actorMessage.messageRaw);
+                            userRegedit2Server(userRegedit2World.name, userRegedit2World.params, getSender());
                             break;
                         case WORLD_USER_RECONNECTION_TRY:
                             UserReconnectionTry reconnectionTry = new UserReconnectionTry();
@@ -111,28 +121,54 @@ public class WorldActor extends AbstractActor {
                 .build();
     }
 
+    private void userRegedit2Server(String name, String params, ActorRef sessionActorRef) {
+        // 验证登入
+        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+        boolean handleLogin;
+        if (appListener != null) {
+            try {
+                handleLogin = appListener.handleRegedit(name, params);
+            } catch (AllReadyRegeditException exp) {
+                handleLogin = false;
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("result", handleLogin);
+                sendMessageToIoSession(8, jsonObject.toString().getBytes(), sessionActorRef);
+                return;
+            }
+        } else {
+            handleLogin = false;
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("result", handleLogin);
+        sendMessageToIoSession(8, jsonObject.toString().getBytes(), sessionActorRef);
+    }
+
     private void initialize() {
         logger.debug("initialize Game word need start");
-        AkkaBootService component = ContextResolver.getComponent(AkkaBootService.class);
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
         /**
          * 用户管理器 akka://CodeBroker/user/WorldActor/UserManagerActor
          */
-        UserManager manager = new UserManager();
-        userManagerRef = getContext().actorOf(Props.create(UserManagerActor.class, getSelf()),
-                UserManagerActor.IDENTIFY);
-        manager.setManagerRef(userManagerRef);
+        userManagerRef = getContext().actorOf(Props.create(UserManagerActor.class), UserManagerActor.IDENTIFY);
         getContext().watch(userManagerRef);
-        component.setUserManager(manager);
+
+        component.setLocalPath(UserManagerActor.IDENTIFY, userManagerRef);
         logger.info("UserManager Path= {}", userManagerRef.path().toString());
+        /**
+         * 用户管理器 akka://CodeBroker/user/WorldActor/NPCManagerActor
+         */
+        npcManagerRef = getContext().actorOf(Props.create(NPCManagerActor.class), NPCManagerActor.IDENTIFY);
+        getContext().watch(npcManagerRef);
+
+        component.setLocalPath(NPCManagerActor.IDENTIFY, npcManagerRef);
+        logger.info("NPCManager Path= {}", userManagerRef.path().toString());
 
         /**
          * 初始化空间管理器 akka://CodeBroker/user/WorldActor/AreaManagerActor
          */
-        areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class, getSelf(), userManagerRef),
-                AreaManagerActor.IDENTIFY);
-        AreaManager gridLeaderProxy = new AreaManager(areaManagerRef);
+        areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class), AreaManagerActor.IDENTIFY);
+        component.setLocalPath(AreaManagerActor.IDENTIFY, areaManagerRef);
 
-        component.setGridLeader(gridLeaderProxy);
         getContext().watch(areaManagerRef);
         logger.info("AreaManager Path= {}", areaManagerRef.path().toString());
     }
@@ -152,7 +188,6 @@ public class WorldActor extends AbstractActor {
      * 处理用户从新连接
      *
      * @param actorRef
-     * @param msg
      */
     private void processReconnection(String key, ActorRef actorRef) {
         UserManagerActor.FindUserByRebindKey message = new UserManagerActor.FindUserByRebindKey(key);
@@ -164,7 +199,11 @@ public class WorldActor extends AbstractActor {
         CodeBrokerAppListener appListener = ContextResolver.getAppListener();
         String handleLogin;
         if (appListener != null) {
-            handleLogin = appListener.handleLogin(name, parms);
+            try {
+                handleLogin = appListener.handleLogin(name, parms);
+            } catch (NoAuthException exc) {
+                handleLogin = "Test1234";
+            }
         } else {
             handleLogin = "Test1234";
         }
@@ -176,13 +215,29 @@ public class WorldActor extends AbstractActor {
 
     private void processNewCome(long serverUId, String remotePath) {
         // msg.remotePath=akka.tcp://CodeBroker@192.168.0.127:25514
-        String fixSupervisorPath = AkkaMediator.getFixSupervisorPath(remotePath, WorldActor.IDENTIFY);
-        ActorSelection remoteActorSelection = AkkaMediator.getRemoteActorSelection(fixSupervisorPath);
+        String fixSupervisorPath = AkkaUtil.getFixSupervisorPath(remotePath, WorldActor.IDENTIFY);
+        ActorSelection remoteActorSelection = AkkaUtil.getRemoteActorSelection(fixSupervisorPath);
 
         HandShake handShake = new HandShake(ServerEngine.serverId, serverUId);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.WORLD_HAND_SHAKE, handShake);
 
         remoteActorSelection.tell(actorMessageWithSubClass, getSelf());
+    }
+
+    public void sendMessageToIoSession(int requestId, Object message, ActorRef sessionRef) {
+
+        ActorMessage actorMessage = new ActorMessage();
+
+        ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
+        actorMessage.messageRaw = byteArrayPacket.toByteBuffer();
+        actorMessage.op = Operation.SESSION_USER_SEND_PACKET;
+        try {
+            byte[] bs = thriftSerializerFactory.getActorMessage(actorMessage);
+            sessionRef.tell(bs, getSelf());
+        } catch (TException e) {
+           LogUtil.exceptionPrint(e);
+        }
+
     }
 
     private void processStringMessage(String msg) {
@@ -199,7 +254,7 @@ public class WorldActor extends AbstractActor {
             gmSession.put(COMMAND_ID, actorRef);
         }
 
-        AkkaBootService component = ContextResolver.getComponent(AkkaBootService.class);
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
         ActorRef localPath = component.getLocalPath(ClusterDistributedPub.IDENTIFY);
         localPath.tell("ssss", ActorRef.noSender());
 

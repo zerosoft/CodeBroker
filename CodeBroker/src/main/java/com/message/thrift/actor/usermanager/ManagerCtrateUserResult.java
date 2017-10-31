@@ -81,7 +81,9 @@ public class ManagerCtrateUserResult implements org.apache.thrift.TBase<ManagerC
         this.userId = null;
     }
 
-    /** Returns true if field userId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field userId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetUserId() {
         return this.userId != null;
     }
@@ -105,7 +107,9 @@ public class ManagerCtrateUserResult implements org.apache.thrift.TBase<ManagerC
         this.senderPath = null;
     }
 
-    /** Returns true if field senderPath is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field senderPath is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetSenderPath() {
         return this.senderPath != null;
     }
@@ -149,7 +153,9 @@ public class ManagerCtrateUserResult implements org.apache.thrift.TBase<ManagerC
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -303,7 +309,9 @@ public class ManagerCtrateUserResult implements org.apache.thrift.TBase<ManagerC
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         USER_ID((short) 1, "userId"),
         SENDER_PATH((short) 2, "senderPath");

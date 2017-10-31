@@ -1,7 +1,7 @@
 package db.mongodb;
 
 import com.codebroker.core.ContextResolver;
-import com.codebroker.database.JongoDBService;
+import com.codebroker.core.manager.JongoDBService;
 import org.bson.types.ObjectId;
 import org.jongo.Find;
 import org.jongo.MongoCursor;

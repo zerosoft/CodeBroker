@@ -2,7 +2,7 @@ package model;
 
 import com.avic.sever.game.model.UserEntity;
 import com.avic.sever.game.model.UserManager;
-import com.codebroker.database.JongoDBService;
+import com.codebroker.core.manager.JongoDBService;
 import com.codebroker.util.PropertiesWrapper;
 import jodd.props.Props;
 import org.jongo.Jongo;

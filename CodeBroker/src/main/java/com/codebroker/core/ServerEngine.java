@@ -5,12 +5,17 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
 import com.codebroker.component.ComponentRegistryImpl;
 import com.codebroker.core.eventbus.CodebrokerEnvelope;
-import com.codebroker.core.manager.AkkaBootService;
+import com.codebroker.core.manager.CacheManager;
+import com.codebroker.core.manager.GeoIPService;
+import com.codebroker.core.manager.JongoDBService;
+import com.codebroker.core.service.AkkaBootService;
+import com.codebroker.core.service.ICoreService;
+import com.codebroker.core.service.NettyNetService;
+import com.codebroker.core.service.RedisService;
 import com.codebroker.jmx.InstanceMXBean;
 import com.codebroker.jmx.ManagementService;
-import com.codebroker.net.netty.NettyServer;
-import com.codebroker.redis.RedisService;
 import com.codebroker.setting.SystemEnvironment;
+import com.codebroker.util.FileUtil;
 import com.codebroker.util.HotSwapClassUtil;
 import com.codebroker.util.PropertiesWrapper;
 import javassist.CannotCompileException;
@@ -127,6 +132,8 @@ public class ServerEngine implements InstanceMXBean {
         createServices(name);
         // 创建守护周期任务
         logger.debug("AvalonEngine start Application");
+
+        FileUtil.printOsEnv();
         // 上层逻辑的启动
         startApplication(name);
 
@@ -139,17 +146,6 @@ public class ServerEngine implements InstanceMXBean {
      * @param appName the app name
      */
     private void createServices(String appName) {
-        // 系统级组件
-
-        IService mediator = new AkkaBootService();
-        // 如果是网关和单幅模式需要启动网络服务
-        IService netty = new NettyServer();
-        systemRegistry.addComponent(netty);
-        // jmx相关启动
-        ManagementService managementService = new ManagementService(this);
-        ((AkkaBootService) mediator).setManagementService(managementService);
-        systemRegistry.addComponent(mediator);
-
         /**
          * 注册Redis服务
          */
@@ -158,6 +154,28 @@ public class ServerEngine implements InstanceMXBean {
             IService redisService = new RedisService();
             systemRegistry.addComponent(redisService);
         }
+        if (propertiesWrapper.getBooleanProperty("mongodb", false)) {
+            System.err.println("mongodb not need");
+            IService jongoDBService = new JongoDBService();
+            application.setManager(jongoDBService);
+        }
+        IService geoIPService = new GeoIPService();
+        application.setManager(geoIPService);
+        /**
+         * 缓存服务
+         */
+        IService cacheManager = new CacheManager();
+        systemRegistry.addComponent(cacheManager);
+        // 系统级组件
+
+        IService mediator = new AkkaBootService();
+        // 如果是网关和单幅模式需要启动网络服务
+        IService netty = new NettyNetService();
+        systemRegistry.addComponent(netty);
+        // jmx相关启动
+        ManagementService managementService = new ManagementService(this);
+        ((AkkaBootService) mediator).setManagementService(managementService);
+        systemRegistry.addComponent(mediator);
 
 
         InternalContext.setManagerLocator(new ManagerLocatorImpl());
@@ -184,6 +202,18 @@ public class ServerEngine implements InstanceMXBean {
                 }
             }
         }
+
+
+        for (Object object : application.serviceComponents) {
+            if (object instanceof ICoreService) {
+                while (!((ICoreService) object).isActive()) {
+                    logger.info("Waiting Service");
+                }
+                logger.info(((ICoreService) object).getName() + " Start");
+            }
+        }
+
+
         // 是否开启热替换功能
         // jvm
         // -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
@@ -208,8 +238,7 @@ public class ServerEngine implements InstanceMXBean {
      */
     private void startApplication(String appName) {
         // 启动上层逻辑应用
-        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER,
-                CodeBrokerAppListener.class, new Class[]{});
+        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, CodeBrokerAppListener.class, new Class[]{});
         listener.init(propertiesWrapper);
         application.setAppListener(listener);
     }

@@ -81,7 +81,9 @@ public class UserConnect2World implements org.apache.thrift.TBase<UserConnect2Wo
         this.name = null;
     }
 
-    /** Returns true if field name is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field name is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetName() {
         return this.name != null;
     }
@@ -105,7 +107,9 @@ public class UserConnect2World implements org.apache.thrift.TBase<UserConnect2Wo
         this.params = null;
     }
 
-    /** Returns true if field params is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field params is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetParams() {
         return this.params != null;
     }
@@ -149,7 +153,9 @@ public class UserConnect2World implements org.apache.thrift.TBase<UserConnect2Wo
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -303,7 +309,9 @@ public class UserConnect2World implements org.apache.thrift.TBase<UserConnect2Wo
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         NAME((short) 1, "name"),
         PARAMS((short) 2, "params");

@@ -89,7 +89,9 @@ public class ReciveIosessionMessage implements org.apache.thrift.TBase<ReciveIos
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __OPCODE_ISSET_ID);
     }
 
-    /** Returns true if field opcode is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field opcode is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetOpcode() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __OPCODE_ISSET_ID);
     }
@@ -108,20 +110,22 @@ public class ReciveIosessionMessage implements org.apache.thrift.TBase<ReciveIos
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForMessage() {
-        return org.apache.thrift.TBaseHelper.copyBinary(message);
-    }
-
     public ReciveIosessionMessage setMessage(byte[] message) {
         this.message = message == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(message.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForMessage() {
+        return org.apache.thrift.TBaseHelper.copyBinary(message);
     }
 
     public void unsetMessage() {
         this.message = null;
     }
 
-    /** Returns true if field message is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field message is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetMessage() {
         return this.message != null;
     }
@@ -169,7 +173,9 @@ public class ReciveIosessionMessage implements org.apache.thrift.TBase<ReciveIos
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -323,7 +329,9 @@ public class ReciveIosessionMessage implements org.apache.thrift.TBase<ReciveIos
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         OPCODE((short) 1, "opcode"),
         MESSAGE((short) 2, "message");

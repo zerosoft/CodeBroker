@@ -85,7 +85,9 @@ public class ReBindUser implements org.apache.thrift.TBase<ReBindUser, ReBindUse
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
 
-    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field success is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetSuccess() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SUCCESS_ISSET_ID);
     }
@@ -107,7 +109,9 @@ public class ReBindUser implements org.apache.thrift.TBase<ReBindUser, ReBindUse
         this.bindingkey = null;
     }
 
-    /** Returns true if field bindingkey is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field bindingkey is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetBindingkey() {
         return this.bindingkey != null;
     }
@@ -151,7 +155,9 @@ public class ReBindUser implements org.apache.thrift.TBase<ReBindUser, ReBindUse
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -301,7 +307,9 @@ public class ReBindUser implements org.apache.thrift.TBase<ReBindUser, ReBindUse
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         SUCCESS((short) 1, "success"),
         BINDINGKEY((short) 2, "bindingkey");

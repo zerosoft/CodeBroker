@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class RedisUtils {
 
-    private static final String PREFIX_NAMESPACE = "redis_collection:";
+    private static final String PREFIX_NAMESPACE = "CodeBroker:";
 
     public static String createKeyWithNameSpace(String key, String nameSpace) {
         if (StringUtils.isBlank(key)) {

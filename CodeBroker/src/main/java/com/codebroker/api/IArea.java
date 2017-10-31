@@ -1,7 +1,6 @@
 package com.codebroker.api;
 
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEventDispatcher;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,14 +10,14 @@ import java.util.List;
  *
  * @author xl
  */
-public interface IArea extends IEventDispatcher {
+public interface IArea {
     /**
      * 获取区域ID
      *
      * @return
      * @throws Exception
      */
-    public String getId() throws Exception;
+    public String getId();
 
     /**
      * 进入区域
@@ -27,7 +26,7 @@ public interface IArea extends IEventDispatcher {
      * @return
      * @throws Exception
      */
-    public void enterArea(IUser user) throws Exception;
+    public void enterArea(IUser user);
 
     /**
      * 离开区域
@@ -43,7 +42,7 @@ public interface IArea extends IEventDispatcher {
      * @return
      * @throws Exception
      */
-    public void createGrid(String gridId) throws Exception;
+    public void createGrid(String gridId);
 
     /**
      * 删除一个格子
@@ -59,7 +58,7 @@ public interface IArea extends IEventDispatcher {
      * @return
      * @throws Exception
      */
-    public IGrid getGridById(String gridId) throws Exception;
+    public IGrid getGridById(String gridId);
 
     /**
      * 获得区域内所有格子
@@ -67,7 +66,7 @@ public interface IArea extends IEventDispatcher {
      * @return
      * @throws Exception
      */
-    public Collection<IGrid> getAllGrid() throws Exception;
+    public Collection<IGrid> getAllGrid();
 
     /**
      * 获得当前区域里的所有玩家
@@ -75,7 +74,7 @@ public interface IArea extends IEventDispatcher {
      * @return
      * @throws Exception
      */
-    public List<IUser> getPlayers() throws Exception;
+    public List<IUser> getPlayers();
 
     /**
      * 销毁区域

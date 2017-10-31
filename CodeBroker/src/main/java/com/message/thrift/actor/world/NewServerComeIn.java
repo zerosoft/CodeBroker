@@ -85,7 +85,9 @@ public class NewServerComeIn implements org.apache.thrift.TBase<NewServerComeIn,
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SERVERUID_ISSET_ID);
     }
 
-    /** Returns true if field serverUId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field serverUId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetServerUId() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SERVERUID_ISSET_ID);
     }
@@ -107,7 +109,9 @@ public class NewServerComeIn implements org.apache.thrift.TBase<NewServerComeIn,
         this.remotePath = null;
     }
 
-    /** Returns true if field remotePath is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field remotePath is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetRemotePath() {
         return this.remotePath != null;
     }
@@ -151,7 +155,9 @@ public class NewServerComeIn implements org.apache.thrift.TBase<NewServerComeIn,
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -301,7 +307,9 @@ public class NewServerComeIn implements org.apache.thrift.TBase<NewServerComeIn,
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         SERVER_UID((short) 1, "serverUId"),
         REMOTE_PATH((short) 2, "remotePath");

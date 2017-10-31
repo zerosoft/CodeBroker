@@ -71,7 +71,9 @@ public class CreateUserWithSession implements org.apache.thrift.TBase<CreateUser
         this.reBindKey = null;
     }
 
-    /** Returns true if field reBindKey is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field reBindKey is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetReBindKey() {
         return this.reBindKey != null;
     }
@@ -104,7 +106,9 @@ public class CreateUserWithSession implements org.apache.thrift.TBase<CreateUser
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -225,7 +229,9 @@ public class CreateUserWithSession implements org.apache.thrift.TBase<CreateUser
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         RE_BIND_KEY((short) 1, "reBindKey");
 

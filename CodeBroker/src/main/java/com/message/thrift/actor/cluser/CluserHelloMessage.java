@@ -36,7 +36,6 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
     public int serverId; // required
     public long uid; // required
     /**
-     *
      * @see Handshake
      */
     public Handshake state; // required
@@ -100,7 +99,9 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
 
-    /** Returns true if field serverId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field serverId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetServerId() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
@@ -123,7 +124,9 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __UID_ISSET_ID);
     }
 
-    /** Returns true if field uid is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field uid is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetUid() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __UID_ISSET_ID);
     }
@@ -133,7 +136,6 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
     }
 
     /**
-     *
      * @see Handshake
      */
     public Handshake getState() {
@@ -141,7 +143,6 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
     }
 
     /**
-     *
      * @see Handshake
      */
     public CluserHelloMessage setState(Handshake state) {
@@ -153,7 +154,9 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
         this.state = null;
     }
 
-    /** Returns true if field state is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field state is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetState() {
         return this.state != null;
     }
@@ -208,7 +211,9 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -385,12 +390,13 @@ public class CluserHelloMessage implements org.apache.thrift.TBase<CluserHelloMe
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         SERVER_ID((short) 1, "serverId"),
         UID((short) 2, "uid"),
         /**
-         *
          * @see Handshake
          */
         STATE((short) 3, "state");

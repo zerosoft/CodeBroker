@@ -3,14 +3,16 @@ package com.codebroker.core.manager;
 import akka.actor.ActorRef;
 import com.codebroker.api.IArea;
 import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actor.AreaManagerActor;
+import com.codebroker.core.entities.Area;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.areamanager.CreateArea;
-import com.message.thrift.actor.areamanager.GetAreaById;
 import com.message.thrift.actor.areamanager.RemoveArea;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * 区域管理器
@@ -18,43 +20,39 @@ import java.util.Collection;
  * @author ZERO
  */
 public class AreaManager implements IAreaManager {
-    private final ActorRef gridLeaderRef;
+
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
 
-    public AreaManager(ActorRef gridLeaderRef) {
-        super();
-        this.gridLeaderRef = gridLeaderRef;
+    @Override
+    public void createArea(int loaclAreaId) {
+        CreateArea message = new CreateArea(loaclAreaId);
+        byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_CREATE_AREA, message);
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        AkkaUtil.getInbox().send(localPath, actorMessageWithSubClass);
     }
 
     @Override
-    public IArea createArea(int loaclAreaId) throws Exception {
-        CreateArea message = new CreateArea(loaclAreaId);
-        byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_CREATE_AREA, message);
-        IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, actorMessageWithSubClass);
-        return callBak;
+    public IArea getAreaById(int loaclAreaId) {
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        ActorRef localPath = component.getAreaLocalPaths(loaclAreaId);
+        return new Area(localPath);
     }
 
     @Override
     public void removeArea(int loaclAreaId) {
         RemoveArea message = new RemoveArea(loaclAreaId);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_REMOVE_AREA, message);
-        gridLeaderRef.tell(actorMessageWithSubClass, ActorRef.noSender());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<IArea> getAllArea() throws Exception {
-        byte[] actorMessageWithSubClass = thriftSerializerFactory.getOnlySerializerByteArray(Operation.AREA_MANAGER_GET_ALL_AREA);
-        Collection<IArea> callBak = (Collection<IArea>) AkkaMediator.getCallBak(gridLeaderRef, actorMessageWithSubClass);
-        return callBak;
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        localPath.tell(actorMessageWithSubClass, ActorRef.noSender());
     }
 
     @Override
-    public IArea getAreaById(String areaId) throws Exception {
-        GetAreaById message = new GetAreaById(areaId);
-        byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_GET_AREA_BY_ID, message);
-        IArea callBak = (IArea) AkkaMediator.getCallBak(gridLeaderRef, actorMessageWithSubClass);
-        return callBak;
+    public List<ActorRef> getAllArea() {
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        return component.getAreaLocalPaths();
     }
+
 
 }

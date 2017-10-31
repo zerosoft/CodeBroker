@@ -5,7 +5,7 @@ import akka.actor.ActorRef;
 import akka.cluster.pubsub.DistributedPubSub;
 import akka.cluster.pubsub.DistributedPubSubMediator;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.manager.AkkaBootService;
+import com.codebroker.core.manager.CacheManager;
 
 /**
  * 分布式发布信息
@@ -27,7 +27,7 @@ public class ClusterDistributedPub extends AbstractActor {
         }).
                 // 发布到本地的
                         match(PublicLocalAffinityChannel.class, msg -> {
-                    AkkaBootService component = ContextResolver.getComponent(AkkaBootService.class);
+                    CacheManager component = ContextResolver.getComponent(CacheManager.class);
                     ActorRef localPath = component.getLocalPath(ClusterDistributedSub.IDENTIFY);
                     DistributedPubSubMediator.Send message = new DistributedPubSubMediator.Send(
                             localPath.path().toString(), msg, msg.local);

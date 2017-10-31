@@ -1,6 +1,7 @@
-package com.codebroker.util;
+package com.codebroker.core.manager;
 
 import com.codebroker.core.service.BaseCoreService;
+import com.codebroker.util.PropertiesWrapper;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
@@ -51,7 +52,7 @@ public class GeoIPService extends BaseCoreService {
                 }
             }
         }
-
+        super.setActive();
     }
 
     /**

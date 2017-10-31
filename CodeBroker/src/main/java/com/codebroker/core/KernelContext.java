@@ -349,7 +349,7 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
 import com.codebroker.component.ComponentRegistryImpl;
-import com.codebroker.core.manager.AkkaBootService;
+import com.codebroker.core.service.AkkaBootService;
 import com.codebroker.exception.ManagerNotFoundException;
 import com.codebroker.util.PropertiesWrapper;
 
@@ -494,7 +494,7 @@ class KernelContext {
 
     public IAreaManager getAreaManager() {
         AkkaBootService component = getComponent(AkkaBootService.class);
-        return component.iAreaManager;
+        return component.getiAreaManager();
     }
 
     public IUserManager getUserManager() {

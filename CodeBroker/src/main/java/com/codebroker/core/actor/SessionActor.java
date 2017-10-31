@@ -23,6 +23,7 @@ import com.message.thrift.actor.session.UserConnect2Server;
 import com.message.thrift.actor.user.ReciveIosessionMessage;
 import com.message.thrift.actor.world.UserConnect2World;
 import com.message.thrift.actor.world.UserReconnectionTry;
+import com.message.thrift.actor.world.UserRegedit2World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,10 +105,17 @@ public class SessionActor extends AbstractActor {
                 String para = new String(message.getRawData());
                 JSONObject parseObject = JSON.parseObject(para);
 
-                UserConnect2World userConnect2World = new UserConnect2World(parseObject.getString("name"),
-                        parseObject.getString("parm"));
+                UserConnect2World userConnect2World = new UserConnect2World(parseObject.getString("name"), parseObject.getString("parm"));
                 byte[] actorMessageWithSubClass = thriftSerializerFactory
                         .getActorMessageByteArray(Operation.WORLD_USER_CONNECT_2_WORLD, userConnect2World);
+                actorSelection.tell(actorMessageWithSubClass, getSelf());
+            } else if (message.getOpCode() == SystemRequest.USER_LOGIN_REGEDIT.id) {
+                String para = new String(message.getRawData());
+                JSONObject parseObject = JSON.parseObject(para);
+
+                UserRegedit2World userConnect2World = new UserRegedit2World(parseObject.getString("name"), parseObject.getString("parm"));
+                byte[] actorMessageWithSubClass = thriftSerializerFactory
+                        .getActorMessageByteArray(Operation.WORLD_USER_REGEDIT_2_WORLD, userConnect2World);
                 actorSelection.tell(actorMessageWithSubClass, getSelf());
             }
             /**

@@ -8,7 +8,7 @@ import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actor.ServerCluserActorProxy.State;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.google.common.collect.Queues;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
@@ -97,7 +97,7 @@ public class CluserActor extends AbstractActor {
     }
 
     private void reciveCluserMessage(CluserReciveMessage msg) {
-        ActorSelection systemActorSelection = AkkaMediator.getSystemActorSelection(msg.actorPath);
+        ActorSelection systemActorSelection = AkkaUtil.getSystemActorSelection(msg.actorPath);
         byte[] tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.CLUSER_RECIVE, msg);
         systemActorSelection.tell(tbaseMessage, getSender());
     }

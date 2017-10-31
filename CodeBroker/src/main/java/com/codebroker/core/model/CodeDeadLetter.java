@@ -351,6 +351,7 @@ import akka.japi.pf.ReceiveBuilder;
  * @author ZERO
  */
 public class CodeDeadLetter extends AbstractActor {
+    public static final String IDENTIFY = CodeDeadLetter.class.getSimpleName();
 
     @Override
     public Receive createReceive() {

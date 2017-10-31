@@ -8,7 +8,7 @@ import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
 import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.exception.NoActorRefException;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 
 /**
  * 事件分发器抽象类
@@ -41,7 +41,7 @@ public abstract class EventDispatcher implements IEventDispatcher {
     public boolean hasEventListener(String paramString) {
         try {
             if (actorRef != null) {
-                return AkkaMediator.getCallBak(actorRef, new HasEventListener(paramString));
+                return AkkaUtil.getCallBak(actorRef, new HasEventListener(paramString));
             } else {
                 return false;
             }

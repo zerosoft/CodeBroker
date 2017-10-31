@@ -99,7 +99,9 @@ public class CreateUser implements org.apache.thrift.TBase<CreateUser, CreateUse
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __NPC_ISSET_ID);
     }
 
-    /** Returns true if field npc is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field npc is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetNpc() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __NPC_ISSET_ID);
     }
@@ -121,7 +123,9 @@ public class CreateUser implements org.apache.thrift.TBase<CreateUser, CreateUse
         this.reBindKey = null;
     }
 
-    /** Returns true if field reBindKey is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field reBindKey is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetReBindKey() {
         return this.reBindKey != null;
     }
@@ -145,7 +149,9 @@ public class CreateUser implements org.apache.thrift.TBase<CreateUser, CreateUse
         this.senderPath = null;
     }
 
-    /** Returns true if field senderPath is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field senderPath is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetSenderPath() {
         return this.senderPath != null;
     }
@@ -200,7 +206,9 @@ public class CreateUser implements org.apache.thrift.TBase<CreateUser, CreateUse
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -383,7 +391,9 @@ public class CreateUser implements org.apache.thrift.TBase<CreateUser, CreateUse
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         NPC((short) 1, "npc"),
         RE_BIND_KEY((short) 2, "reBindKey"),

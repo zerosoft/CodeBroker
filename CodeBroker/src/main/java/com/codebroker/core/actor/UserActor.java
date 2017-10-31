@@ -4,10 +4,6 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import com.codebroker.api.NPCControl;
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.event.AddEventListener;
-import com.codebroker.api.event.event.HasEventListener;
-import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.User;
@@ -20,8 +16,6 @@ import com.message.thrift.actor.usermanager.RemoveUser;
 import org.apache.thrift.TException;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 玩家
@@ -31,8 +25,9 @@ import java.util.Map;
 
 public class UserActor extends AbstractActor {
     private final User user;
-    private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
+
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
+
     private String userId;
     private ActorRef ioSessionRef;
     private NPCControl npcControl;
@@ -84,16 +79,17 @@ public class UserActor extends AbstractActor {
                     ioSessionRef.tell(tbaseMessage, getSelf());
                     // 管理器移除
                     RemoveUser removeUser = new RemoveUser(userId);
-                    byte[] actorMessageWithSubClass = thriftSerializerFactory
-                            .getActorMessageByteArray(Operation.USER_MANAGER_REMOVE_USER, removeUser);
+                    byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_MANAGER_REMOVE_USER, removeUser);
                     userManagerRef.tell(actorMessageWithSubClass, getSelf());
 
                     if (inGrid != null) {
-
+//                        inGrid.tell();
                     }
 
                     if (inArea != null) {
-
+                        LeaveArea leaveArea = new LeaveArea(userId);
+                        actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_USER_LEAVE_AREA, leaveArea);
+                        inArea.tell(actorMessageWithSubClass, getSelf());
                     }
 
                     ContextResolver.getAppListener().handleLogout(user);
@@ -122,8 +118,7 @@ public class UserActor extends AbstractActor {
                 case USER_ENTER_AREA:
                     if (inArea != null) {
                         LeaveArea leaveArea = new LeaveArea(userId);
-                        inArea.tell(thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_USER_LEAVE_AREA,
-                                leaveArea), getSelf());
+                        inArea.tell(thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
                     }
                     inArea = getSender();
                     if (inGrid != null) {
@@ -149,24 +144,14 @@ public class UserActor extends AbstractActor {
 
                     break;
             }
+        }).match(Event.class, msg -> {
+            if (npcControl != null) {
+                npcControl.execute(msg);
+            }
+        }).match(IObject.class, msg -> {
+
         })
-                // 处理分发事件
-                .match(Event.class, msg -> {
-                    if (npcControl != null) {
-                        npcControl.execute(msg);
-                    } else {
-                        dispatchEvent(msg);
-                    }
-                }).match(IObject.class, msg -> {
-                })
-                // 绑定本地事件处理
-                .match(AddEventListener.class, msg -> {
-                    eventListener.put(msg.topic, msg.paramIEventListener);
-                }).match(RemoveEventListener.class, msg -> {
-                    eventListener.remove(msg.topic);
-                }).match(HasEventListener.class, msg -> {
-                    getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-                }).build();
+                .build();
     }
 
     private void handleClientRequest(int requestId, ByteBuffer params) {
@@ -189,20 +174,5 @@ public class UserActor extends AbstractActor {
 
     }
 
-    /**
-     * 处理分发信息
-     *
-     * @param msg
-     */
-    private void dispatchEvent(Event msg) {
-        try {
-            IEventListener iEventListener = eventListener.get(msg.getTopic());
-            if (iEventListener != null) {
-                iEventListener.handleEvent(msg);
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
 
 }

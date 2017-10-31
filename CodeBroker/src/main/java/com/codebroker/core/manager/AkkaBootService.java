@@ -345,6 +345,7 @@ import akka.actor.*;
 import com.codebroker.api.IWorld;
 import com.codebroker.api.manager.IAreaManager;
 import com.codebroker.api.manager.IUserManager;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actor.CodeBrokerSystem;
 import com.codebroker.core.message.CommonMessage;
 import com.codebroker.core.service.BaseCoreService;
@@ -359,9 +360,8 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import static com.codebroker.util.AkkaUtil.*;
 
 /**
  * Akka的启动类
@@ -374,8 +374,10 @@ public class AkkaBootService extends BaseCoreService {
     public static final String DEF_AKKA_CONFIG_NAME = "application.conf";
     private static final String DEF_KEY = "CodeBroker";
     private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
-    public IAreaManager iAreaManager;
-    public IUserManager userManager;
+
+    public IAreaManager iAreaManager = new AreaManager();
+    public IUserManager userManager = new UserManager();
+
     public IWorld world;
     /**
      * The system.
@@ -386,8 +388,6 @@ public class AkkaBootService extends BaseCoreService {
      */
     private Inbox inbox;
     private ManagementService managementService;
-    private Map<String, AbstractActor> tmpActor = new ConcurrentHashMap<String, AbstractActor>();
-    private Map<String, ActorRef> localPath = new HashMap<String, ActorRef>();
 
     @Override
     public void init(Object obj) {
@@ -412,12 +412,25 @@ public class AkkaBootService extends BaseCoreService {
          * 创建CB系统
          */
         ActorRef codeBrokerAkkaSystem = system.actorOf(Props.create(CodeBrokerSystem.class, system), CodeBrokerSystem.IDENTIFY);
-        codeBrokerAkkaSystem.tell(new CommonMessage.Start(), ActorRef.noSender());
+        try {
+            Boolean callBak = getCallBak(codeBrokerAkkaSystem, new CommonMessage.Start());
+            while (callBak) {
+                System.err.println("Wait init");
+                break;
+            }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
+        cacheManager.setLocalPath(CodeBrokerSystem.IDENTIFY, codeBrokerAkkaSystem);
+
+        super.setActive();
     }
 
     public void initActorSystem(File file, String akkaName, String configName) {
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
+
         Config cg = ConfigFactory.parseFile(file);
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
@@ -459,9 +472,6 @@ public class AkkaBootService extends BaseCoreService {
         return inbox;
     }
 
-    public void setInbox(Inbox inbox) {
-        this.inbox = inbox;
-    }
 
     public ManagementService getManagementService() {
         return managementService;
@@ -471,36 +481,14 @@ public class AkkaBootService extends BaseCoreService {
         this.managementService = managementService;
     }
 
-    public ActorRef getLocalPath(String IDENTIFY) {
-        return localPath.get(IDENTIFY);
-    }
 
-    public void setLocalPath(String IDENTIFY, ActorRef actorRef) {
-        localPath.put(IDENTIFY, actorRef);
-    }
-
-    public void putTmpActor(String key, AbstractActor actor) {
-        tmpActor.put(key, actor);
-    }
-
-    public AbstractActor getTmpActor(String key) {
-        return tmpActor.get(key);
-    }
-
-    public IAreaManager getGridLeader() {
+    public IAreaManager getiAreaManager() {
         return iAreaManager;
-    }
-
-    public void setGridLeader(IAreaManager gridLeader) {
-        this.iAreaManager = gridLeader;
     }
 
     public IUserManager getUserManager() {
         return userManager;
     }
 
-    public void setUserManager(IUserManager userManager) {
-        this.userManager = userManager;
-    }
 
 }

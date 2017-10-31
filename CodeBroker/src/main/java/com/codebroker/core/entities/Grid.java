@@ -8,7 +8,7 @@ import com.codebroker.api.event.Event;
 import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.GridActor;
 import com.codebroker.exception.CodeBrokerException;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +22,7 @@ public class Grid extends EventDispatcher implements IGrid {
 
     @Override
     public boolean enterGrid(IUser user) throws Exception {
-        return (boolean) AkkaMediator.getCallBak(getActorRef(), new GridActor.EnterGrid(user));
+        return (boolean) AkkaUtil.getCallBak(getActorRef(), new GridActor.EnterGrid(user));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class Grid extends EventDispatcher implements IGrid {
     @Override
     public void broadCastUsers(Event object, Collection<IUser> users) {
         for (IUser iUser : users) {
-            iUser.dispatchEvent(object);
+//            iUser.dispatchEvent(object);
         }
     }
 
@@ -62,7 +62,7 @@ public class Grid extends EventDispatcher implements IGrid {
     @SuppressWarnings("unchecked")
     @Override
     public List<IUser> getPlayers() throws Exception {
-        return (List<IUser>) AkkaMediator.getCallBak(getActorRef(), new GridActor.GetPlayers());
+        return (List<IUser>) AkkaUtil.getCallBak(getActorRef(), new GridActor.GetPlayers());
     }
 
 }

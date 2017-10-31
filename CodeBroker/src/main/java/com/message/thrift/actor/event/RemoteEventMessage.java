@@ -85,7 +85,9 @@ public class RemoteEventMessage implements org.apache.thrift.TBase<RemoteEventMe
         this.topic = null;
     }
 
-    /** Returns true if field topic is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field topic is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetTopic() {
         return this.topic != null;
     }
@@ -106,20 +108,22 @@ public class RemoteEventMessage implements org.apache.thrift.TBase<RemoteEventMe
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForIobject() {
-        return org.apache.thrift.TBaseHelper.copyBinary(iobject);
-    }
-
     public RemoteEventMessage setIobject(byte[] iobject) {
         this.iobject = iobject == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(iobject.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForIobject() {
+        return org.apache.thrift.TBaseHelper.copyBinary(iobject);
     }
 
     public void unsetIobject() {
         this.iobject = null;
     }
 
-    /** Returns true if field iobject is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field iobject is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetIobject() {
         return this.iobject != null;
     }
@@ -167,7 +171,9 @@ public class RemoteEventMessage implements org.apache.thrift.TBase<RemoteEventMe
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -321,7 +327,9 @@ public class RemoteEventMessage implements org.apache.thrift.TBase<RemoteEventMe
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         TOPIC((short) 1, "topic"),
         IOBJECT((short) 2, "iobject");

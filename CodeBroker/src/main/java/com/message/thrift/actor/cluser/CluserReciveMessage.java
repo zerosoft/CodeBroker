@@ -94,7 +94,9 @@ public class CluserReciveMessage implements org.apache.thrift.TBase<CluserRecive
         this.actorPath = null;
     }
 
-    /** Returns true if field actorPath is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field actorPath is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetActorPath() {
         return this.actorPath != null;
     }
@@ -119,7 +121,9 @@ public class CluserReciveMessage implements org.apache.thrift.TBase<CluserRecive
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __CMD_ISSET_ID);
     }
 
-    /** Returns true if field cmd is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field cmd is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetCmd() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __CMD_ISSET_ID);
     }
@@ -138,20 +142,22 @@ public class CluserReciveMessage implements org.apache.thrift.TBase<CluserRecive
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForMessageRaw() {
-        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
-    }
-
     public CluserReciveMessage setMessageRaw(byte[] messageRaw) {
         this.messageRaw = messageRaw == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(messageRaw.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForMessageRaw() {
+        return org.apache.thrift.TBaseHelper.copyBinary(messageRaw);
     }
 
     public void unsetMessageRaw() {
         this.messageRaw = null;
     }
 
-    /** Returns true if field messageRaw is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field messageRaw is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetMessageRaw() {
         return this.messageRaw != null;
     }
@@ -210,7 +216,9 @@ public class CluserReciveMessage implements org.apache.thrift.TBase<CluserRecive
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -393,7 +401,9 @@ public class CluserReciveMessage implements org.apache.thrift.TBase<CluserRecive
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         ACTOR_PATH((short) 1, "actorPath"),
         CMD((short) 2, "cmd"),

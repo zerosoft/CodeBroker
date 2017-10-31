@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.codebroker.core.entities.User;
 import com.codebroker.protocol.ThriftSerializerFactory;
+import com.codebroker.setting.PrefixConstant;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.session.ReBindUser;
@@ -21,18 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class UserManagerActor extends AbstractActor {
 
     public static final String IDENTIFY = UserManagerActor.class.getSimpleName().toString();
-    public static final String USER_PRFIX = "USER-";
-    public static final String NPC_PRFIX = "NPC-";
+
     private static final AtomicInteger USER_ID = new AtomicInteger(1);
-    private final ActorRef worldRef;
+
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     private Map<String, ActorRef> userRefMap = new TreeMap<String, ActorRef>();
     private Map<String, String> rebindKeyUserMap = new TreeMap<String, String>();
 
-    public UserManagerActor(ActorRef worldRef) {
-        super();
-        this.worldRef = worldRef;
-    }
+
 
     @Override
     public Receive createReceive() {
@@ -74,7 +71,7 @@ public class UserManagerActor extends AbstractActor {
         ActorRef actorOf = null;
         ActorContext context = getContext();
 
-        String userid = USER_PRFIX + id;
+        String userid = PrefixConstant.USER_PRFIX + id;
         user.setUserId(userid);
         UserConnect2Server connect2Server = new UserConnect2Server();
         try {

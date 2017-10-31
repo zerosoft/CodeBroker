@@ -85,7 +85,9 @@ public class UserSendMessage2Net implements org.apache.thrift.TBase<UserSendMess
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __REQUESTID_ISSET_ID);
     }
 
-    /** Returns true if field requestId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field requestId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetRequestId() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __REQUESTID_ISSET_ID);
     }
@@ -104,20 +106,22 @@ public class UserSendMessage2Net implements org.apache.thrift.TBase<UserSendMess
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForValue() {
-        return org.apache.thrift.TBaseHelper.copyBinary(value);
-    }
-
     public UserSendMessage2Net setValue(byte[] value) {
         this.value = value == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(value.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForValue() {
+        return org.apache.thrift.TBaseHelper.copyBinary(value);
     }
 
     public void unsetValue() {
         this.value = null;
     }
 
-    /** Returns true if field value is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field value is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetValue() {
         return this.value != null;
     }
@@ -165,7 +169,9 @@ public class UserSendMessage2Net implements org.apache.thrift.TBase<UserSendMess
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -315,7 +321,9 @@ public class UserSendMessage2Net implements org.apache.thrift.TBase<UserSendMess
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         REQUEST_ID((short) 1, "requestId"),
         VALUE((short) 2, "value");

@@ -86,7 +86,9 @@ public class HandShake implements org.apache.thrift.TBase<HandShake, HandShake._
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
 
-    /** Returns true if field serverId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field serverId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetServerId() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SERVERID_ISSET_ID);
     }
@@ -109,7 +111,9 @@ public class HandShake implements org.apache.thrift.TBase<HandShake, HandShake._
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __SERVERUID_ISSET_ID);
     }
 
-    /** Returns true if field serverUid is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field serverUid is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetServerUid() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __SERVERUID_ISSET_ID);
     }
@@ -151,7 +155,9 @@ public class HandShake implements org.apache.thrift.TBase<HandShake, HandShake._
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -295,7 +301,9 @@ public class HandShake implements org.apache.thrift.TBase<HandShake, HandShake._
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         SERVER_ID((short) 1, "serverId"),
         SERVER_UID((short) 2, "serverUid");

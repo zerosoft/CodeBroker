@@ -4,13 +4,12 @@ package com.codebroker.core.entities;
 import akka.actor.ActorRef;
 import com.codebroker.api.IUser;
 import com.codebroker.api.internal.ByteArrayPacket;
-import com.codebroker.core.EventDispatcher;
-import com.codebroker.core.actor.UserManagerActor;
 import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.data.IObject;
+import com.codebroker.exception.NoActorRefException;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import org.apache.thrift.TException;
@@ -20,9 +19,23 @@ import org.apache.thrift.TException;
  *
  * @author xl
  */
-public class User extends EventDispatcher implements IUser {
+public class User implements IUser {
+
     private final IObject iObject = CObjectLite.newInstance();
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
+
+    private ActorRef actorRef;
+
+    public ActorRef getActorRef() {
+        if (actorRef == null) {
+            throw new NoActorRefException();
+        }
+        return actorRef;
+    }
+
+    public void setActorRef(ActorRef gridRef) {
+        this.actorRef = gridRef;
+    }
 
     public String getUserId() {
         return iObject.getUtfString("userId");
@@ -32,9 +45,6 @@ public class User extends EventDispatcher implements IUser {
         iObject.putUtfString("userId", userId);
     }
 
-    public boolean isNpc() {
-        return getUserId().startsWith(UserManagerActor.NPC_PRFIX);
-    }
 
     @Override
     public void sendMessageToIoSession(int requestId, Object message) {
@@ -67,7 +77,7 @@ public class User extends EventDispatcher implements IUser {
     public boolean isConnected() {
         try {
             byte[] tbaseMessage = thriftSerializerFactory.getOnlySerializerByteArray(Operation.USER_IS_CONNECTED);
-            return AkkaMediator.getCallBak(getActorRef(), tbaseMessage);
+            return AkkaUtil.getCallBak(getActorRef(), tbaseMessage);
         } catch (Exception e) {
             return false;
         }

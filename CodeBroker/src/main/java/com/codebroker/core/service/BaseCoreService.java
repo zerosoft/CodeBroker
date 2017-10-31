@@ -1,13 +1,11 @@
 package com.codebroker.core.service;
 
-import com.codebroker.api.internal.IService;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 基础服务 抽象类
  */
-public abstract class BaseCoreService implements IService {
+public abstract class BaseCoreService implements ICoreService {
 
     private static final AtomicInteger serviceId = new AtomicInteger(0);
     private static final String DEFAULT_NAME = "AnonymousService-";
@@ -46,6 +44,10 @@ public abstract class BaseCoreService implements IService {
 
     public boolean isActive() {
         return this.active;
+    }
+
+    public void setActive() {
+        this.active = true;
     }
 
     public String toString() {

@@ -15,6 +15,8 @@ public class UserEntity {
 
     private int level;
 
+    private String headImg;
+
     private List<String> planes=new ArrayList<>(4);
 
     public String getUserId() {

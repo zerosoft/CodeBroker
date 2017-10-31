@@ -71,7 +71,9 @@ public class LeaveArea implements org.apache.thrift.TBase<LeaveArea, LeaveArea._
         this.userId = null;
     }
 
-    /** Returns true if field userId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field userId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetUserId() {
         return this.userId != null;
     }
@@ -104,7 +106,9 @@ public class LeaveArea implements org.apache.thrift.TBase<LeaveArea, LeaveArea._
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -225,7 +229,9 @@ public class LeaveArea implements org.apache.thrift.TBase<LeaveArea, LeaveArea._
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         USER_ID((short) 1, "userId");
 

@@ -11,7 +11,7 @@ import com.codebroker.core.data.CObject;
 import com.codebroker.core.monitor.MonitorEventType;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,7 +36,7 @@ public class NettyIoSession implements IoSession {
     public NettyIoSession(ChannelHandlerContext ctx) {
         super();
         this.ctx = ctx;
-        ActorSystem actorSystem = AkkaMediator.getActorSystem();
+        ActorSystem actorSystem = AkkaUtil.getActorSystem();
         this.sessionId = NettyServerMonitor.sessionIds.getAndIncrement();
         actorRef = actorSystem.actorOf(Props.create(SessionActor.class, this), (NAME + "_" + sessionId));
     }
@@ -55,7 +55,7 @@ public class NettyIoSession implements IoSession {
             newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
             newInstance.putDouble(MonitorEventType.SESSION_FLOW, ((BaseByteArrayPacket) msg).getRawData().length + 4);
             newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
-            AkkaMediator.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
+            AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
         }
     }
 
@@ -101,7 +101,7 @@ public class NettyIoSession implements IoSession {
                 newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
                 newInstance.putDouble(MonitorEventType.SESSION_FLOW, binary.length);
                 newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
-                AkkaMediator.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
+                AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
             } catch (TException e) {
                 e.printStackTrace();
             }

@@ -125,7 +125,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         this.host = null;
     }
 
-    /** Returns true if field host is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field host is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetHost() {
         return this.host != null;
     }
@@ -149,7 +151,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         this.hostPort = null;
     }
 
-    /** Returns true if field hostPort is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field hostPort is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetHostPort() {
         return this.hostPort != null;
     }
@@ -174,7 +178,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __PORT_ISSET_ID);
     }
 
-    /** Returns true if field port is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field port is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetPort() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __PORT_ISSET_ID);
     }
@@ -196,7 +202,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         this.system = null;
     }
 
-    /** Returns true if field system is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field system is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetSystem() {
         return this.system != null;
     }
@@ -220,7 +228,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         this.protocol = null;
     }
 
-    /** Returns true if field protocol is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field protocol is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetProtocol() {
         return this.protocol != null;
     }
@@ -245,7 +255,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         __isset_bitfield = org.apache.thrift.EncodingUtils.clearBit(__isset_bitfield, __LONGUID_ISSET_ID);
     }
 
-    /** Returns true if field longUid is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field longUid is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetLongUid() {
         return org.apache.thrift.EncodingUtils.testBit(__isset_bitfield, __LONGUID_ISSET_ID);
     }
@@ -331,7 +343,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -607,7 +621,9 @@ public class CluserInitMessage implements org.apache.thrift.TBase<CluserInitMess
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         HOST((short) 1, "host"),
         HOST_PORT((short) 2, "hostPort"),

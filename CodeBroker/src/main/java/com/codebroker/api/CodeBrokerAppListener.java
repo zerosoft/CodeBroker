@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import com.codebroker.api.internal.IService;
+import com.codebroker.exception.AllReadyRegeditException;
 import com.codebroker.exception.NoAuthException;
 
 import java.util.Collection;
@@ -36,6 +37,15 @@ public interface CodeBrokerAppListener extends IService {
     String handleLogin(String name, String parms) throws NoAuthException;
 
     /**
+     * 用户注册到系统
+     *
+     * @param name
+     * @param parms
+     * @return 重连接key
+     */
+    boolean handleRegedit(String name, String parms) throws AllReadyRegeditException;
+
+    /**
      * 用户主动下线
      *
      * @param user
@@ -58,5 +68,5 @@ public interface CodeBrokerAppListener extends IService {
      * @param requestId
      * @param params
      */
-    public void handleClientRequest(IUser user, int requestId, Object params);
+    void handleClientRequest(IUser user, int requestId, Object params);
 }

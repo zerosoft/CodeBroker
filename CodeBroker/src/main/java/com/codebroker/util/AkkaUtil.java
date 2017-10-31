@@ -7,7 +7,7 @@ import akka.actor.Inbox;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.manager.AkkaBootService;
+import com.codebroker.core.service.AkkaBootService;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -17,7 +17,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author xl
  */
-public class AkkaMediator {
+public class AkkaUtil {
     /**
      * 获得通用信箱
      *
@@ -47,6 +47,7 @@ public class AkkaMediator {
         T result = (T) Await.result(future, timeout.duration());
         return result;
     }
+
 
     /**
      * 查找根目录级别Actor

@@ -46,6 +46,12 @@ public class ClientMain {
 	                	jsonObject.put("parm", "6789");
 	                	head=new BaseByteArrayPacket(SystemRequest.USER_LOGIN_JSON.id,jsonObject.toString().getBytes());
 					}
+					if (line.startsWith("0")) {
+						JSONObject jsonObject=new JSONObject();
+						jsonObject.put("name", "345");
+						jsonObject.put("parm", "6789");
+						head=new BaseByteArrayPacket(SystemRequest.USER_LOGIN_REGEDIT.id,jsonObject.toString().getBytes());
+					}
 	                //������Ϸ
 	                else if (line.startsWith("2")) {
 						JSONObject jsonObject=new JSONObject();

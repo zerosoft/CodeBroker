@@ -1,7 +1,6 @@
 package com.codebroker.net.netty.filter;
 
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.util.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -23,13 +22,13 @@ public class ByteArrayPacketCodecDecoder extends ByteToMessageDecoder {
         }
         in.markReaderIndex();
 //        System.out.println(in.order() + "in.readableBytes()" + in.readableBytes());
-        byte[] bs = new byte[in.readableBytes()];
-        in.readBytes(bs);
+//        byte[] bs = new byte[in.readableBytes()];
+//        in.readBytes(bs);
 //        String fullHexDump = ByteUtils.fullHexDump(bs);
 //        System.out.println(fullHexDump);
 //        System.out.println(new String(bs));
 //        in.resetReaderIndex();
-        in.markReaderIndex();
+//        in.markReaderIndex();
 //		byte[] bs=new byte[in.capacity()];
 //		in.readBytes(bs);
 ////		System.out.println(in.readIntLE());

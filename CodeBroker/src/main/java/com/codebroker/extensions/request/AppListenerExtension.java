@@ -450,7 +450,6 @@ public abstract class AppListenerExtension implements CodeBrokerAppListener {
     @Override
     public void handleMessage(Object obj) {
         // TODO Auto-generated method stub
-
     }
 
 }

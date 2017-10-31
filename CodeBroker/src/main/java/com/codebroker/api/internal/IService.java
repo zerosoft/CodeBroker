@@ -355,34 +355,34 @@ public interface IService {
      *
      * @param obj the obj
      */
-    public void init(Object obj);
+    void init(Object obj);
 
     /**
      * 销毁.
      *
      * @param obj the obj
      */
-    public void destroy(Object obj);
+    void destroy(Object obj);
 
     /**
      * 处理消息.
      *
      * @param obj the obj
      */
-    public void handleMessage(Object obj);
+    void handleMessage(Object obj);
 
     /**
      * 获得服务名称.
      *
      * @return the name
      */
-    public String getName();
+    String getName();
 
     /**
      * 设置服务名称.
      *
      * @param name the new name
      */
-    public void setName(String name);
+    void setName(String name);
 
 }

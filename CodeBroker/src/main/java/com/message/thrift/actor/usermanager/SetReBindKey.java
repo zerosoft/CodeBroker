@@ -81,7 +81,9 @@ public class SetReBindKey implements org.apache.thrift.TBase<SetReBindKey, SetRe
         this.reBindKey = null;
     }
 
-    /** Returns true if field reBindKey is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field reBindKey is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetReBindKey() {
         return this.reBindKey != null;
     }
@@ -105,7 +107,9 @@ public class SetReBindKey implements org.apache.thrift.TBase<SetReBindKey, SetRe
         this.userId = null;
     }
 
-    /** Returns true if field userId is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field userId is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetUserId() {
         return this.userId != null;
     }
@@ -149,7 +153,9 @@ public class SetReBindKey implements org.apache.thrift.TBase<SetReBindKey, SetRe
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -303,7 +309,9 @@ public class SetReBindKey implements org.apache.thrift.TBase<SetReBindKey, SetRe
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         RE_BIND_KEY((short) 1, "reBindKey"),
         USER_ID((short) 2, "userId");

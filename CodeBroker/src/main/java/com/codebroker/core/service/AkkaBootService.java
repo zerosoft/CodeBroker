@@ -339,98 +339,156 @@ consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
  */
-package com.codebroker.net.netty;
+package com.codebroker.core.service;
 
-import com.codebroker.core.service.BaseCoreService;
+import akka.actor.*;
+import com.codebroker.api.IWorld;
+import com.codebroker.api.manager.IAreaManager;
+import com.codebroker.api.manager.IUserManager;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actor.CodeBrokerSystem;
+import com.codebroker.core.manager.AreaManager;
+import com.codebroker.core.manager.CacheManager;
+import com.codebroker.core.manager.UserManager;
+import com.codebroker.core.message.CommonMessage;
+import com.codebroker.jmx.ManagementService;
 import com.codebroker.setting.SystemEnvironment;
+import com.codebroker.util.AkkaUtil;
+import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.AdaptiveRecvByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
+
+import java.io.File;
 
 /**
- * NETTY网络服务.
+ * Akka的启动类
  *
  * @author ZERO
  */
-public class NettyServer extends BaseCoreService {
+public class AkkaBootService extends BaseCoreService {
 
-    private static final int D_PORT = 6699;
-    private final int BACKLOG = 1024;
-    Logger logger = LoggerFactory.getLogger(NettyServer.class);
-    int bossGroupNum;
-    int workerGroupNum;
-    int backlog;
-    private ServerBootstrap bootstrap;
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
+    public static final String CONF_NAME = "conf";
+    public static final String DEF_AKKA_CONFIG_NAME = "application.conf";
+    private static final String DEF_KEY = "CodeBroker";
+    private static Logger logger = LoggerFactory.getLogger(AkkaBootService.class);
+
+    public IAreaManager iAreaManager = new AreaManager();
+    public IUserManager userManager = new UserManager();
+
+    public IWorld world;
+    /**
+     * The system.
+     */
+    private ActorSystem system;
+    /**
+     * akka的信箱
+     */
+    private Inbox inbox;
+    private ManagementService managementService;
 
     @Override
-    public void init(Object object) {
-        logger.info("初始化Netty 开始");
-        PropertiesWrapper propertiesWrapper = (PropertiesWrapper) object;
+    public void init(Object obj) {
+        logger.debug("Code Broker Mediator init");
+        File root = new File("");
+        String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
+        logger.debug("conf path:" + searchPath);
+        PropertiesWrapper propertiesWrapper = (PropertiesWrapper) obj;
 
-        int defaultValue = Runtime.getRuntime().availableProcessors() * 2;
+        String property = propertiesWrapper.getProperty(SystemEnvironment.AKKA_FILE_NAME, DEF_AKKA_CONFIG_NAME);
+        String fielPath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
 
-        bossGroupNum = propertiesWrapper.getIntProperty(SystemEnvironment.NETTY_BOSS_GROUP_NUM, defaultValue);
-        workerGroupNum = propertiesWrapper.getIntProperty(SystemEnvironment.NETTY_WORKER_GROUP_NUM, defaultValue);
-        backlog = propertiesWrapper.getIntProperty(SystemEnvironment.NETTY_BACKLOG, BACKLOG);
+        logger.debug("akka conf path:" + fielPath);
+        File config = FileUtil.scanFileByPath(fielPath, property);
 
-        name = propertiesWrapper.getProperty(SystemEnvironment.NETTY_SERVER_NAME, "NETTY_SERVER");
-        int port = propertiesWrapper.getIntProperty(SystemEnvironment.TCP_PROT, D_PORT);
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                bootstrap = new ServerBootstrap();
-                bossGroup = new NioEventLoopGroup(bossGroupNum);
-                workerGroup = new NioEventLoopGroup(workerGroupNum);
-                bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                        .option(ChannelOption.SO_BACKLOG, backlog)
-                        .option(ChannelOption.SO_REUSEADDR, Boolean.valueOf(true))
-                        // .option(ChannelOption.TCP_NODELAY,
-                        // Boolean.valueOf(true))
-                        // .option(ChannelOption.SO_KEEPALIVE,
-                        // Boolean.valueOf(true))
-                        .childOption(ChannelOption.TCP_NODELAY, true).childOption(ChannelOption.SO_KEEPALIVE, true)
-                        .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                        .childOption(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
-                        .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new NettyServerInitializer());
-                ChannelFuture f;
-                try {
-                    f = bootstrap.bind(port).sync();
-                    f.channel().closeFuture().sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME, DEF_KEY);
+        logger.debug("AKKA_NAME:" + akkaName);
+        String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_KEY);
+        logger.debug("configName:" + configName);
+        initActorSystem(config, akkaName, configName);
+        /**
+         * 创建CB系统
+         */
+        ActorRef codeBrokerAkkaSystem = system.actorOf(Props.create(CodeBrokerSystem.class, system), CodeBrokerSystem.IDENTIFY);
+        try {
+            Boolean callBak = AkkaUtil.getCallBak(codeBrokerAkkaSystem, new CommonMessage.Start());
+            while (callBak) {
+                System.err.println("Wait init");
+                break;
             }
-        }, "Netty-Start-Thread");
-        thread.start();
-        logger.info("初始化Netty 线程启动");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
+        cacheManager.setLocalPath(CodeBrokerSystem.IDENTIFY, codeBrokerAkkaSystem);
+
+        super.setActive();
     }
 
+    public void initActorSystem(File file, String akkaName, String configName) {
+        logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
+        Config cg = ConfigFactory.parseFile(file);
+
+        cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
+        Config config = ConfigFactory.load(cg).getConfig(configName);
+        system = ActorSystem.create(akkaName, config);
+        inbox = Inbox.create(system);
+        logger.debug("init Actor System end");
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.avalon.api.internal.IService#destroy(java.lang.Object)
+     */
     @Override
-    public void destroy(Object o) {
-        super.destroy(o);
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+    public void destroy(Object obj) {
+        logger.debug("akkasystem close");
+        Future<Terminated> terminate = system.terminate();
+        while (terminate.isCompleted()) {
+            logger.debug("akkasystem closed");
+        }
+
     }
 
     @Override
     public String getName() {
-        return name;
+        return AkkaBootService.class.getSimpleName();
     }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName().toString();
+    public ActorSystem getSystem() {
+        return system;
     }
+
+    public void setSystem(ActorSystem system) {
+        this.system = system;
+    }
+
+    public Inbox getInbox() {
+        return inbox;
+    }
+
+
+    public ManagementService getManagementService() {
+        return managementService;
+    }
+
+    public void setManagementService(ManagementService managementService) {
+        this.managementService = managementService;
+    }
+
+
+    public IAreaManager getiAreaManager() {
+        return iAreaManager;
+    }
+
+    public IUserManager getUserManager() {
+        return userManager;
+    }
+
 
 }

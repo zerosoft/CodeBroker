@@ -3,17 +3,17 @@ package com.codebroker.core.actor;
 import akka.actor.*;
 import akka.japi.Creator;
 import akka.japi.pf.ReceiveBuilder;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.cluster.ClusterDistributedPub;
 import com.codebroker.core.cluster.ClusterDistributedSub;
 import com.codebroker.core.cluster.ClusterListener;
+import com.codebroker.core.manager.CacheManager;
 import com.codebroker.core.message.CommonMessage;
 import com.codebroker.core.model.CodeDeadLetter;
 import com.codebroker.core.monitor.MonitorManager;
 import com.codebroker.exception.NoInstanceException;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.codebroker.util.LogUtil;
-import com.message.thrift.actor.Operation;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +32,7 @@ public class CodeBrokerSystem extends AbstractActor {
     private static Logger logger = LoggerFactory.getLogger("CodeBrokerSystem");
     private final ActorSystem actorSystem;
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
+
     private ActorRef monitorManager;
     private ActorRef clusterListener;
     private ActorRef world;
@@ -59,31 +60,28 @@ public class CodeBrokerSystem extends AbstractActor {
     }
 
     private void processStart() {
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
         /**
          * 集群监听
          */
-        clusterListener =
-                actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
+        clusterListener = actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
         this.getContext().watch(clusterListener);
-
+        component.setLocalPath(ClusterListener.IDENTIFY, clusterListener);
         /**
          * 错误地址信息
          */
         Props avalonDeadLetterProps = Props.create(CodeDeadLetter.class);
-        deadLetterRef = actorSystem.actorOf(avalonDeadLetterProps);
+        deadLetterRef = actorSystem.actorOf(avalonDeadLetterProps, CodeDeadLetter.IDENTIFY);
         actorSystem.eventStream().subscribe(deadLetterRef, DeadLetter.class);
+
+        component.setLocalPath(CodeDeadLetter.IDENTIFY, deadLetterRef);
         /**
          * 初始化游戏世界
          */
         world = actorSystem.actorOf(Props.create(WorldActor.class), WorldActor.IDENTIFY);
         this.getContext().watch(world);
-        //初始化WORLD
-        try {
-            byte[] tbaseMessage = thriftSerializerFactory.getOnlySerializerByteArray(Operation.WORLD_INITIALIZE);
-            world.tell(tbaseMessage, getSelf());
-        } catch (TException e) {
-            e.printStackTrace();
-        }
+
+        component.setLocalPath(WorldActor.IDENTIFY, world);
 
         logger.info("World Path=" + world.path().toString());
         /**
@@ -93,6 +91,7 @@ public class CodeBrokerSystem extends AbstractActor {
         this.getContext().watch(elkLogger);
         LogUtil.elkLog = elkLogger;
         logger.info("ELKActor Path=" + elkLogger.path().toString());
+        component.setLocalPath(ELKLogActor.IDENTIFY, elkLogger);
         /**
          * 分布式发布Actor
          */
@@ -100,6 +99,7 @@ public class CodeBrokerSystem extends AbstractActor {
         clusterDistributedPub =
                 actorSystem.actorOf(pub, ClusterDistributedPub.IDENTIFY);
         this.getContext().watch(clusterDistributedPub);
+        component.setLocalPath(ClusterDistributedPub.IDENTIFY, clusterDistributedPub);
         /**
          * 分布式订阅 Actor
          */
@@ -107,12 +107,14 @@ public class CodeBrokerSystem extends AbstractActor {
         clusterDistributedSub =
                 actorSystem.actorOf(sub, ClusterDistributedSub.IDENTIFY);
         this.getContext().watch(clusterDistributedSub);
+        component.setLocalPath(ClusterDistributedSub.IDENTIFY, clusterDistributedSub);
         /**
          * 数据相关监听Actor
          */
         Props create = Props.create(MonitorManager.class);
         monitorManager = actorSystem.actorOf(create, MonitorManager.IDENTIFY);
         this.getContext().watch(monitorManager);
+        component.setLocalPath(MonitorManager.IDENTIFY, monitorManager);
     }
 
     @Override
@@ -120,6 +122,7 @@ public class CodeBrokerSystem extends AbstractActor {
         return ReceiveBuilder.create()
                 .match(CommonMessage.Start.class, msg -> {
                     processStart();
+                    getSender().tell(true, getSelf());
                 }).match(CommonMessage.Restart.class, msg -> {
                     processRestart();
                 }).match(CommonMessage.Close.class, msg -> {
@@ -145,18 +148,6 @@ public class CodeBrokerSystem extends AbstractActor {
         return monitorManager;
     }
 
-    public void setMonitorManager(ActorRef monitorManager) {
-        this.monitorManager = monitorManager;
-    }
-
-    public ActorRef getClusterListener() {
-        return clusterListener;
-    }
-
-    public void setClusterListener(ActorRef clusterListener) {
-        this.clusterListener = clusterListener;
-    }
-
     public ActorRef getWorld() {
         return world;
     }
@@ -165,41 +156,6 @@ public class CodeBrokerSystem extends AbstractActor {
         this.world = world;
     }
 
-    public ActorRef getElkLogger() {
-        return elkLogger;
-    }
-
-    public void setElkLogger(ActorRef elkLogger) {
-        this.elkLogger = elkLogger;
-    }
-
-    public ActorRef getClusterDistributedPub() {
-        return clusterDistributedPub;
-    }
-
-    public void setClusterDistributedPub(ActorRef clusterDistributedPub) {
-        this.clusterDistributedPub = clusterDistributedPub;
-    }
-
-    public ActorRef getClusterDistributedSub() {
-        return clusterDistributedSub;
-    }
-
-    public void setClusterDistributedSub(ActorRef clusterDistributedSub) {
-        this.clusterDistributedSub = clusterDistributedSub;
-    }
-
-    public ActorRef getDeadLetterRef() {
-        return deadLetterRef;
-    }
-
-    public void setDeadLetterRef(ActorRef deadLetterRef) {
-        this.deadLetterRef = deadLetterRef;
-    }
-
-    public ActorSystem getActorSystem() {
-        return actorSystem;
-    }
 
     static class selfCreator implements Creator<CodeBrokerSystem> {
 

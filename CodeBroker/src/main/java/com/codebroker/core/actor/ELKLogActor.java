@@ -4,7 +4,7 @@ import akka.actor.AbstractActor;
 import akka.japi.pf.ReceiveBuilder;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.IObject;
-import com.codebroker.redis.RedisService;
+import com.codebroker.core.service.RedisService;
 import redis.clients.jedis.Jedis;
 
 import java.util.MissingResourceException;

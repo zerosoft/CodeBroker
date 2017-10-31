@@ -3,14 +3,13 @@ package com.codebroker.core.actor;
 import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.event.AddEventListener;
-import com.codebroker.api.event.event.HasEventListener;
-import com.codebroker.api.event.event.RemoveEventListener;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.Grid;
+import com.codebroker.core.manager.CacheManager;
+import com.codebroker.core.message.ScheduleTask;
 import com.codebroker.protocol.ThriftSerializerFactory;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
@@ -19,9 +18,11 @@ import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.area.RemoveGrid;
 import com.message.thrift.actor.area.UserEneterArea;
 import org.apache.thrift.TException;
+import scala.concurrent.duration.Duration;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 区域 管理区域中的格子
@@ -34,20 +35,15 @@ public class AreaActor extends AbstractActor {
     public transient static final String AREA_ENTER_USER = "AREA_ENTER_USER";
     public transient static final String AREA_LEAVE_USER = "AREA_LEAVE_USER";
     public transient static final String USER_ID = "USER_ID";
-
-    private final ActorRef worldRef;
-    private final ActorRef userManagerRef;
-    private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
+    private final String areaId;
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     // 用户
-    private Map<String, ActorRef> userMap = new TreeMap<String, ActorRef>();
+//    private Map<String, ActorRef> userMap = new TreeMap<String, ActorRef>();
     // 格子
     private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
 
-    public AreaActor(ActorRef worldRef, ActorRef userManagerRef) {
-        super();
-        this.worldRef = worldRef;
-        this.userManagerRef = userManagerRef;
+    public AreaActor(String areaId) {
+        this.areaId = areaId;
     }
 
     @Override
@@ -96,6 +92,14 @@ public class AreaActor extends AbstractActor {
                             break;
                     }
                 })
+                .match(ScheduleTask.class, msg -> {
+                    Scheduler scheduler = getContext().getSystem().scheduler();
+                    if (msg.isOnce()) {
+                        Cancellable cancellable = scheduler.scheduleOnce(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                    } else {
+                        Cancellable schedule = scheduler.schedule(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), Duration.create(msg.getInterval(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                    }
+                })
                 .match(GetGridById.class, msg -> {
                     getGridById(msg);
                 }).match(GetAllGrids.class, msg -> {
@@ -104,35 +108,7 @@ public class AreaActor extends AbstractActor {
                 .match(Terminated.class, msg -> {
                     String name = msg.actor().path().name();
                 })
-                //处理分发事件
-                .match(Event.class, msg -> {
-                    dispatchEvent(msg);
-                })
-                //绑定本地事件处理
-                .match(AddEventListener.class, msg -> {
-                    eventListener.put(msg.topic, msg.paramIEventListener);
-                }).match(RemoveEventListener.class, msg -> {
-                    eventListener.remove(msg.topic);
-                }).match(HasEventListener.class, msg -> {
-                    getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-                })
                 .build();
-    }
-
-    /**
-     * 处理分发信息
-     *
-     * @param msg
-     */
-    private void dispatchEvent(Event msg) {
-        try {
-            IEventListener iEventListener = eventListener.get(msg.getTopic());
-            if (iEventListener != null) {
-                iEventListener.handleEvent(msg);
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
     }
 
 
@@ -205,10 +181,13 @@ public class AreaActor extends AbstractActor {
      * @param sender
      */
     private void enterArea(String userId, ActorRef sender) {
-        if (userMap.containsKey(userId)) {
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        Map<String, String> areaUserActorRefPath = component.getAreaUserActorRefPath(areaId);
+        if (areaUserActorRefPath.containsKey(userId)) {
             getSender().tell(false, getSelf());
         } else {
-            userMap.put(userId, sender);
+            component.setAreaUserRefPath(areaId, userId, sender);
+//            userMap.put(userId, sender);
             getSender().tell(true, getSelf());
             // 通知user进入所在actor
 
@@ -230,12 +209,6 @@ public class AreaActor extends AbstractActor {
 
             broadCastAllUser(event);
         }
-    }
-
-
-    public static class GetId implements Serializable {
-
-        private static final long serialVersionUID = 3065865091907475834L;
     }
 
 

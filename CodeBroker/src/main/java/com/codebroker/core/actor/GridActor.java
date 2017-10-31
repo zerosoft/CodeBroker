@@ -2,15 +2,20 @@ package com.codebroker.core.actor;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.Cancellable;
+import akka.actor.Scheduler;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEventListener;
 import com.codebroker.api.event.event.AddEventListener;
 import com.codebroker.api.event.event.HasEventListener;
 import com.codebroker.api.event.event.RemoveEventListener;
+import com.codebroker.core.message.ScheduleTask;
+import scala.concurrent.duration.Duration;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 格子Actor对象
@@ -49,6 +54,14 @@ public class GridActor extends AbstractActor {
                     List<IUser> list = new ArrayList<IUser>();
                     list.addAll(values);
                     getSender().tell(list, getSelf());
+                })
+                .match(ScheduleTask.class, msg -> {
+                    Scheduler scheduler = getContext().getSystem().scheduler();
+                    if (msg.isOnce()) {
+                        Cancellable cancellable = scheduler.scheduleOnce(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                    } else {
+                        Cancellable schedule = scheduler.schedule(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), Duration.create(msg.getInterval(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                    }
                 })
                 //处理分发事件
                 .match(Event.class, msg -> {

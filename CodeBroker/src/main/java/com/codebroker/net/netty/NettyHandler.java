@@ -3,7 +3,7 @@ package com.codebroker.net.netty;
 import com.codebroker.core.actor.CodeBrokerSystem;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.monitor.MonitorEventType;
-import com.codebroker.util.AkkaMediator;
+import com.codebroker.util.AkkaUtil;
 import com.codebroker.util.LogUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -24,7 +24,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
         CObject newInstance = CObject.newInstance();
         newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_ONLINE);
-        AkkaMediator.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
+        AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
         LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndIncrement());
     }
 
@@ -46,7 +46,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
         CObject newInstance = CObject.newInstance();
         newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_OUTLINE);
-        AkkaMediator.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
+        AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
         LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndDecrement());
     }
 

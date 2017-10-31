@@ -68,20 +68,22 @@ public class IosessionReciveMessage implements org.apache.thrift.TBase<Iosession
         return this;
     }
 
-    public java.nio.ByteBuffer bufferForMessage() {
-        return org.apache.thrift.TBaseHelper.copyBinary(message);
-    }
-
     public IosessionReciveMessage setMessage(byte[] message) {
         this.message = message == null ? (java.nio.ByteBuffer) null : java.nio.ByteBuffer.wrap(message.clone());
         return this;
+    }
+
+    public java.nio.ByteBuffer bufferForMessage() {
+        return org.apache.thrift.TBaseHelper.copyBinary(message);
     }
 
     public void unsetMessage() {
         this.message = null;
     }
 
-    /** Returns true if field message is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field message is set (has been assigned a value) and false otherwise
+     */
     public boolean isSetMessage() {
         return this.message != null;
     }
@@ -118,7 +120,9 @@ public class IosessionReciveMessage implements org.apache.thrift.TBase<Iosession
         throw new java.lang.IllegalStateException();
     }
 
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    /**
+     * Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise
+     */
     public boolean isSet(_Fields field) {
         if (field == null) {
             throw new java.lang.IllegalArgumentException();
@@ -239,7 +243,9 @@ public class IosessionReciveMessage implements org.apache.thrift.TBase<Iosession
         }
     }
 
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    /**
+     * The set of fields this struct contains, along with convenience methods for finding and manipulating them.
+     */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
         MESSAGE((short) 1, "message");
 

@@ -1,6 +1,5 @@
 package com.codebroker.api;
 
-import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.core.data.IObject;
 
 /**
@@ -8,22 +7,15 @@ import com.codebroker.core.data.IObject;
  *
  * @author xl
  */
-public interface IUser extends IEventDispatcher {
+public interface IUser {
     /**
      * 获得用户id
      *
      * @return
      * @throws Exception
      */
-    public String getUserId();
+    String getUserId();
 
-    /**
-     * 坚持这个用户是不是NPC
-     *
-     * @return
-     * @throws Exception
-     */
-    public boolean isNpc();
 
     /**
      * 发送消息给IO会话
@@ -31,25 +23,25 @@ public interface IUser extends IEventDispatcher {
      * @param requestId
      * @param message
      */
-    public void sendMessageToIoSession(int requestId, Object message);
+    void sendMessageToIoSession(int requestId, Object message);
 
     /**
      * 主动断开链接
      */
-    public void disconnect();
+    void disconnect();
 
     /**
      * 会话是否连通网络
      *
      * @return
      */
-    public boolean isConnected();
+    boolean isConnected();
 
     /**
      * 获取IObject
      *
      * @return
      */
-    public IObject getIObject();
+    IObject getIObject();
 
 }
