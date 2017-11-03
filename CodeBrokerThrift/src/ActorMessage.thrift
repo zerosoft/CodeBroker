@@ -64,6 +64,8 @@ enum Operation{
     WORLD_INITIALIZE;
     //玩家连接到世界
     WORLD_USER_CONNECT_2_WORLD;
+     //玩家连接到世界
+    WORLD_USER_REGEDIT_2_WORLD;
     //玩家尝试从新链接
     WORLD_USER_RECONNECTION_TRY;
 

@@ -9,3 +9,10 @@ struct LeaveArea{
 }
 
 
+struct CreateGrid{
+    1:string gridId;
+}
+
+struct RemoveGrid{
+    1:string gridId;
+}

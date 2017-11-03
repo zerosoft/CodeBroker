@@ -6,6 +6,11 @@ struct UserConnect2World{
     2:string params;
 }
 
+struct UserRegedit2World{
+    1:string name;
+    2:string params;
+}
+
 struct UserReconnectionTry{
     1:string reBindKey;
 }

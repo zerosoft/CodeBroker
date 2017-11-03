@@ -4,6 +4,7 @@ struct UserLogout{}
 
 struct UserConnect2Server{
    1:bool success;
+   2:string bindingkey;
 }
 
 struct UserSendMessage2Net{
@@ -17,4 +18,5 @@ struct IosessionReciveMessage{
 
 struct ReBindUser{
     1:bool success;
+     2:string bindingkey;
 }

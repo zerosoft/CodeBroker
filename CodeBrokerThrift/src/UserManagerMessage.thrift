@@ -14,7 +14,9 @@ struct RemoveUser{
 }
 
 struct CreateUserWithSession{
-    1:string reBindKey;
+     1:string reBindKey;
+     2:string name;
+     3:string parms;
 }
 
 struct SetReBindKey{
