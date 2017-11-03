@@ -18,5 +18,7 @@ public interface IAreaManager {
 
     List<ActorRef> getAllArea();
 
+    List<String> getAllAreaIds();
+
     void removeArea(int loaclAreaId);
 }

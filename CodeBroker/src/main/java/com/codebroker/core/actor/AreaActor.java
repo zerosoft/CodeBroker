@@ -2,7 +2,9 @@ package com.codebroker.core.actor;
 
 import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
+import akka.serialization.Serialization;
 import com.codebroker.api.event.Event;
+import com.codebroker.cache.AreaInfoCache;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.data.CObject;
@@ -11,17 +13,21 @@ import com.codebroker.core.entities.Grid;
 import com.codebroker.core.manager.CacheManager;
 import com.codebroker.core.message.ScheduleTask;
 import com.codebroker.protocol.ThriftSerializerFactory;
+import com.codebroker.util.LogUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.area.CreateGrid;
 import com.message.thrift.actor.area.LeaveArea;
 import com.message.thrift.actor.area.RemoveGrid;
 import com.message.thrift.actor.area.UserEneterArea;
+import com.message.thrift.actor.user.UserLeaveArea;
 import org.apache.thrift.TException;
 import scala.concurrent.duration.Duration;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,12 +41,11 @@ public class AreaActor extends AbstractActor {
     public transient static final String AREA_ENTER_USER = "AREA_ENTER_USER";
     public transient static final String AREA_LEAVE_USER = "AREA_LEAVE_USER";
     public transient static final String USER_ID = "USER_ID";
+
     private final String areaId;
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
-    // 用户
-//    private Map<String, ActorRef> userMap = new TreeMap<String, ActorRef>();
-    // 格子
-    private Map<String, Grid> gridMap = new TreeMap<String, Grid>();
+
+    private List<Cancellable> runTask=new ArrayList<Cancellable>();
 
     public AreaActor(String areaId) {
         this.areaId = areaId;
@@ -55,12 +60,14 @@ public class AreaActor extends AbstractActor {
         for (ActorRef childRef : children) {
             childRef.tell(PoisonPill.getInstance(), getSelf());
         }
-
-        for (ActorRef iUser : userMap.values()) {
-            Event event = new Event();
-            event.setTopic(AREA_CLOSE);
-            iUser.tell(event, getSelf());
+        for (Cancellable cancellable : runTask) {
+            if (!cancellable.isCancelled())
+                cancellable.cancel();
         }
+
+        Event event = new Event();
+        event.setTopic(AREA_CLOSE);
+        broadCastAllUser(event);
     }
 
     @Override
@@ -88,22 +95,20 @@ public class AreaActor extends AbstractActor {
                             RemoveGrid removeGrid = new RemoveGrid();
                             thriftSerializerFactory.deserialize(removeGrid, actorMessage.messageRaw);
                             removeGrid(removeGrid.getGridId());
+                            break;
                         default:
                             break;
                     }
                 })
                 .match(ScheduleTask.class, msg -> {
                     Scheduler scheduler = getContext().getSystem().scheduler();
+                    Cancellable cancellable;
                     if (msg.isOnce()) {
-                        Cancellable cancellable = scheduler.scheduleOnce(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                         cancellable = scheduler.scheduleOnce(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
                     } else {
-                        Cancellable schedule = scheduler.schedule(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), Duration.create(msg.getInterval(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
+                        cancellable = scheduler.schedule(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), Duration.create(msg.getInterval(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
                     }
-                })
-                .match(GetGridById.class, msg -> {
-                    getGridById(msg);
-                }).match(GetAllGrids.class, msg -> {
-                    getAllGrid();
+                    runTask.add(cancellable);
                 })
                 .match(Terminated.class, msg -> {
                     String name = msg.actor().path().name();
@@ -113,56 +118,64 @@ public class AreaActor extends AbstractActor {
 
 
     private void broadCastAllUser(Event object) {
-        Collection<ActorRef> values = userMap.values();
-        for (ActorRef iUser : values) {
-            iUser.tell(object, getSelf());
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        AreaInfoCache areaInfoCache = component.getAreaInfoCache(areaId);
+
+        Map<String, String> userPath = areaInfoCache.getUserPath();
+        for (Map.Entry<String, String> stringStringEntry : userPath.entrySet()) {
+            String value = stringStringEntry.getValue();
+            ActorRef actorRef = ContextResolver.getActorSystem().provider().resolveActorRef(value);
+            actorRef.tell(object, getSelf());
         }
+
     }
 
+    /**
+     * 创建一个格子
+     * @param gridId
+     */
     private void createGrid(String gridId) {
-        if (gridMap.containsKey(gridId)) {
-            getSender().tell(gridMap.get(gridId), getSelf());
-        } else {
-
-            Grid gridProxy = new Grid();
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        AreaInfoCache areaInfoCache = component.getAreaInfoCache(areaId);
+        Map<String, String> gridPath = areaInfoCache.getGridPath();
+        if (!gridPath.containsKey(gridId)) {
             ActorRef actorOf = getContext().actorOf(Props.create(GridActor.class, getSelf()), gridId);
-            gridProxy.setActorRef(actorOf);
-
             getContext().watch(actorOf);
-            getSender().tell(gridProxy, getSelf());
 
-            gridMap.put(gridId, gridProxy);
-
-            ServerEngine.envelope.subscribe(actorOf, getSelf().path().name());
+            gridPath.put(gridId,Serialization.serializedActorPath(actorOf));
+            component.putAreaInfoCache(areaId,areaInfoCache);
         }
     }
 
+    /**
+     * 移除一个格子
+     * @param gridId
+     */
     private void removeGrid(String gridId) {
-        Grid grid2 = gridMap.get(gridId);
-        if (grid2 != null) {
-            ServerEngine.envelope.unsubscribe(grid2.getActorRef());
-            grid2.destory();
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        AreaInfoCache areaInfoCache = component.getAreaInfoCache(areaId);
+        final Map<String, String> gridPath = areaInfoCache.getGridPath();
+        if (gridPath.containsKey(gridId)){
+            gridPath.remove(gridId);
+            component.putAreaInfoCache(areaId,areaInfoCache);
         }
     }
 
-    private void getAllGrid() {
-        Collection<Grid> values = gridMap.values();
-        List<Grid> list = new ArrayList<Grid>();
-        list.addAll(values);
-        getSender().tell(list, getSelf());
-    }
-
-    private void getGridById(GetGridById msg) {
-        Grid grid2 = gridMap.get(msg.gridId);
-        if (grid2 != null) {
-            getSender().tell(grid2, getSelf());
-        }
-    }
 
     private void leaveArea(String userId) {
-        if (userMap.containsKey(userId)) {
-            userMap.remove(userId);
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        AreaInfoCache areaInfoCache = component.getAreaInfoCache(areaId);
+        final Map<String, String> userPath = areaInfoCache.getUserPath();
+        UserLeaveArea leaveArea=new UserLeaveArea();
+        if (userPath.containsKey(userId)) {
+            leaveArea.setUserId(userId);
+            leaveArea.setUserIdIsSet(true);
 
+
+            byte[]   tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_LEAVE_AREA,leaveArea);
+            getSender().tell(tbaseMessage, getSelf());
+
+            component.removeGlobalActorRefPath(userId);
             Event event = new Event();
             event.setTopic(AREA_LEAVE_USER);
             IObject iObject = CObject.newInstance();
@@ -171,6 +184,12 @@ public class AreaActor extends AbstractActor {
 
             // 广播玩家离开
             broadCastAllUser(event);
+        }else{
+            leaveArea.setUserId(userId);
+            leaveArea.setUserIdIsSet(false);
+
+            byte[]   tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_LEAVE_AREA,leaveArea);
+            getSender().tell(tbaseMessage, getSelf());
         }
     }
 
@@ -182,23 +201,24 @@ public class AreaActor extends AbstractActor {
      */
     private void enterArea(String userId, ActorRef sender) {
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        Map<String, String> areaUserActorRefPath = component.getAreaUserActorRefPath(areaId);
-        if (areaUserActorRefPath.containsKey(userId)) {
-            getSender().tell(false, getSelf());
+
+        AreaInfoCache areaInfoCache = component.getAreaInfoCache(areaId);
+        Map<String, String> userPath = areaInfoCache.getUserPath();
+        UserEneterArea userEneterArea=new UserEneterArea();
+        if (userPath.containsKey(userId)) {
+
+            userEneterArea.setUserId(userId);
+            userEneterArea.setUserIdIsSet(false);
+            byte[]   tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_ENTER_AREA,userEneterArea);
+            sender.tell(tbaseMessage, getSelf());
         } else {
-            component.setAreaUserRefPath(areaId, userId, sender);
-//            userMap.put(userId, sender);
-            getSender().tell(true, getSelf());
+            userPath.put(userId, Serialization.serializedActorPath(sender));
+            component.putAreaInfoCache(areaId,areaInfoCache);
             // 通知user进入所在actor
-
-            byte[] tbaseMessage;
-            try {
-                tbaseMessage = thriftSerializerFactory.getOnlySerializerByteArray(Operation.USER_ENTER_AREA);
-                sender.tell(tbaseMessage, getSelf());
-
-            } catch (TException e) {
-                e.printStackTrace();
-            }
+            userEneterArea.setUserId(userId);
+            userEneterArea.setUserIdIsSet(true);
+            byte[]   tbaseMessage = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_ENTER_AREA,userEneterArea);
+            sender.tell(tbaseMessage, getSelf());
 
             Event event = new Event();
             event.setTopic(AREA_ENTER_USER);
@@ -212,27 +232,4 @@ public class AreaActor extends AbstractActor {
     }
 
 
-    public static class GetGridById implements Serializable {
-        private static final long serialVersionUID = -4927817351189923926L;
-        public final String gridId;
-
-        public GetGridById(String gridId) {
-            super();
-            this.gridId = gridId;
-        }
-
-    }
-
-    public static class GetAllGrids implements Serializable {
-
-        private static final long serialVersionUID = -1778022483881100165L;
-
-    }
-
-
-    public static class GetPlayers implements Serializable {
-
-        private static final long serialVersionUID = -1823532488763688181L;
-
-    }
 }

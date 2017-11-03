@@ -34,14 +34,14 @@ public class UserManagerActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(byte[].class, msg -> {
+                .match(byte[].class, (byte[] msg) -> {
                     ActorMessage actorMessage = thriftSerializerFactory.getActorMessage(msg);
                     switch (actorMessage.op) {
                         //创建网络玩家
                         case USER_MANAGER_CREATE_USER_WITH_SESSION:
                             CreateUserWithSession createUserWithSession = new CreateUserWithSession();
                             thriftSerializerFactory.deserialize(createUserWithSession, actorMessage.messageRaw);
-                            createWorldUser(createUserWithSession.reBindKey, getSender());
+                            createWorldUser(createUserWithSession.reBindKey,createUserWithSession.name,createUserWithSession.parms, getSender());
                             break;
                         //移除玩家
                         case USER_MANAGER_REMOVE_USER:
@@ -65,7 +65,7 @@ public class UserManagerActor extends AbstractActor {
                 }).build();
     }
 
-    private void createWorldUser(String reBindKey, ActorRef iosessionRef) {
+    private void createWorldUser(String reBindKey, String name, String parms, ActorRef iosessionRef) {
         int id = USER_ID.incrementAndGet();
         User user = new User();
         ActorRef actorOf = null;
@@ -73,6 +73,8 @@ public class UserManagerActor extends AbstractActor {
 
         String userid = PrefixConstant.USER_PRFIX + id;
         user.setUserId(userid);
+        user.setLoginName(name);
+        user.setLoginParms(parms);
         UserConnect2Server connect2Server = new UserConnect2Server();
         try {
             actorOf = context.actorOf(Props.create(UserActor.class, user, iosessionRef, getSelf()), userid);

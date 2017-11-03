@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import com.codebroker.api.internal.IService;
+import com.codebroker.core.data.IObject;
 import com.codebroker.exception.AllReadyRegeditException;
 import com.codebroker.exception.NoAuthException;
 
@@ -69,4 +70,5 @@ public interface CodeBrokerAppListener extends IService {
      * @param params
      */
     void handleClientRequest(IUser user, int requestId, Object params);
+
 }

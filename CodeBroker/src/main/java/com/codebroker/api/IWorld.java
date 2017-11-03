@@ -12,5 +12,5 @@ public interface IWorld {
      * @param npcId
      * @param control
      */
-    public void createNPC(String npcId, NPCControl control);
+    void createNPC(String npcId, NPCControl control);
 }

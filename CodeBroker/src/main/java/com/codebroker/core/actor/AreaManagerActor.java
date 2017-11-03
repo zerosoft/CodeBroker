@@ -6,6 +6,7 @@ import akka.actor.Props;
 import akka.cluster.pubsub.DistributedPubSub;
 import akka.cluster.pubsub.DistributedPubSubMediator;
 import akka.serialization.Serialization;
+import com.codebroker.cache.AreaInfoCache;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.cluster.ClusterDistributedSub.Subscribe;
@@ -25,9 +26,6 @@ public class AreaManagerActor extends AbstractActor {
 
     ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     ActorRef mediator;
-
-
-
 
     @Override
     public void preStart() throws Exception {
@@ -69,19 +67,24 @@ public class AreaManagerActor extends AbstractActor {
         if (cacheManager.containsAreaKey(loaclGridId)) {
             return;
         } else {
-            ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, CacheManager.getAreaId(loaclGridId)), CacheManager.getAreaId(loaclGridId));
-
+            String areaId = CacheManager.getAreaId(loaclGridId);
+            ActorRef actorOf = getContext().actorOf(Props.create(AreaActor.class, areaId), areaId);
+            AreaInfoCache info=new AreaInfoCache();
+            info.setAreaId(areaId);
+            info.setAreaRef(actorOf);
+            cacheManager.putAreaInfoCache(areaId,info);
             getContext().watch(actorOf);
 
             String identifier = Serialization.serializedActorPath(actorOf);
-            cacheManager.setLocalAreaPath(CacheManager.getAreaId(loaclGridId), identifier);
+            cacheManager.putAreaManagerPath(areaId, identifier);
         }
     }
 
     private void removeAreaById(int loaclAreaId) {
-        String key = "SERVER_" + ServerEngine.serverId + ":AREA_" + loaclAreaId;
+        String key = CacheManager.getAreaId(loaclAreaId);
         CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
-        cacheManager.removeAreaActorRefPath(key);
+        cacheManager.removeAreaManagerPath(key);
+        cacheManager.removeAreaInfoCache(key);
     }
 
 

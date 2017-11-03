@@ -3,6 +3,7 @@ package com.codebroker.core.manager;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.serialization.Serialization;
+import com.codebroker.cache.AreaInfoCache;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.service.BaseCoreService;
@@ -21,9 +22,10 @@ import java.util.Map;
 public class CacheManager extends BaseCoreService {
 
     public static String nameSpace = "RedisCache";
-    public static String areaManagerKey = "AreaManager";
-    public static String ActorPathKey = "ActorPath";
-    public static String AreaActorKey = "AreaActor";
+    public static String AREA_MANAGER_INDEX = "AreaManager";
+    public static String AREA_INFO_INDEX = "AreaInfo";
+    public static String ACTOR_GLOBAL_PATH_INDEX = "ActorPath";
+//    public static String AREA_USER_ACTOR_INDEX = "AreaUserActor";
     boolean redis = false;
 
     public static String getAreaId(int localId) {
@@ -37,30 +39,73 @@ public class CacheManager extends BaseCoreService {
         if (propertiesWrapper.getBooleanProperty("redis", false)) {
             redis = true;
         }
+        //清空之前的数据
         Jedis jedis = getJedis();
-        jedis.del(RedisUtils.createKeyWithNameSpace(ActorPathKey, nameSpace));
+        jedis.del(RedisUtils.createKeyWithNameSpace(ACTOR_GLOBAL_PATH_INDEX, nameSpace));
 
         MapStructure<String> mapStructure = RedisStrutureBuilder.ofMap(jedis, String.class).withNameSpace(nameSpace).build();
-        Map<String, String> stringStringMap = mapStructure.get(areaManagerKey);
-        for (Map.Entry<String, String> entry : stringStringMap.entrySet()
-                ) {
-            jedis.del(RedisUtils.createKeyWithNameSpace(AreaActorKey + ":" + entry.getKey(), nameSpace));
-        }
-        jedis.del(RedisUtils.createKeyWithNameSpace(areaManagerKey, nameSpace));
+        jedis.del(RedisUtils.createKeyWithNameSpace(AREA_MANAGER_INDEX, nameSpace));
         jedis.close();
         super.setActive();
     }
 
-    public ActorRef getLocalPath(String IDENTIFY) {
-        String identifier = getActorRefPath().get(IDENTIFY);
+    public AreaInfoCache getAreaInfoCache(String areaId){
+        Jedis jedis = getJedis();
+        try {
+            final MapStructure<AreaInfoCache> build = RedisStrutureBuilder.ofMap(jedis, AreaInfoCache.class).withNameSpace(nameSpace).build();
+            Map<String, AreaInfoCache> stringAreaInfoCacheMap = build.get(AREA_INFO_INDEX);
+            return stringAreaInfoCacheMap.get(areaId);
+        } finally {
+            jedis.close();
+        }
+    }
+
+    public void removeAreaInfoCache(String areaId){
+        Jedis jedis = getJedis();
+        try {
+            final MapStructure<AreaInfoCache> build = RedisStrutureBuilder.ofMap(jedis, AreaInfoCache.class).withNameSpace(nameSpace).build();
+            Map<String, AreaInfoCache> stringAreaInfoCacheMap = build.get(AREA_INFO_INDEX);
+            stringAreaInfoCacheMap.remove(areaId);
+        } finally {
+            jedis.close();
+        }
+    }
+
+    public void putAreaInfoCache(String areaId, AreaInfoCache info){
+        Jedis jedis = getJedis();
+        try {
+            final MapStructure<AreaInfoCache> build = RedisStrutureBuilder.ofMap(jedis, AreaInfoCache.class).withNameSpace(nameSpace).build();
+            Map<String, AreaInfoCache> stringAreaInfoCacheMap = build.get(AREA_INFO_INDEX);
+            stringAreaInfoCacheMap.put(areaId,info);
+        } finally {
+            jedis.close();
+        }
+    }
+
+    private Jedis getJedis() {
+        RedisService component = ContextResolver.getComponent(RedisService.class);
+        return component.getJedis();
+    }
+
+    /**
+     * 获得全局唯一的Actort
+     * @param IDENTIFY
+     * @return
+     */
+    public ActorRef getActorGlobalPath(String IDENTIFY) {
+        String identifier = getActorGlobalPath().get(IDENTIFY);
         ActorSystem actorSystem = ContextResolver.getActorSystem();
         ActorRef actorRef = actorSystem.provider().resolveActorRef(identifier);
         return actorRef;
     }
 
+    /**
+     * 获得区域列表Actor
+     * @return
+     */
     public List<ActorRef> getAreaLocalPaths() {
         ActorSystem actorSystem = ContextResolver.getActorSystem();
-        Map<String, String> identifier = geAreaActorRefPath();
+        Map<String, String> identifier = geAreaManagerActorPath();
 
         List<ActorRef> result = new ArrayList<>();
         for (Map.Entry<String, String> entry : identifier.entrySet()) {
@@ -70,59 +115,92 @@ public class CacheManager extends BaseCoreService {
         return result;
     }
 
-    public void setAreaUserRefPath(String areaId, String IDENTIFY, ActorRef actorRef) {
+    /**
+     * 获得区域列表Actor
+     * @return
+     */
+    public List<String> getAreaLocalIds() {
+        Map<String, String> identifier = geAreaManagerActorPath();
+        List<String> result = new ArrayList<>();
+        result.addAll(identifier.keySet());
+        return result;
+    }
+
+
+    /**
+     * 放置唯一的
+     * @param IDENTIFY
+     * @param actorRef
+     */
+    public void putActorGlobalPath(String IDENTIFY, ActorRef actorRef) {
         String identifier = Serialization.serializedActorPath(actorRef);
-        setAreaUserActorRefPath(areaId, IDENTIFY, identifier);
+        putActorRefPath(IDENTIFY, identifier);
     }
 
-    public void setLocalPath(String IDENTIFY, ActorRef actorRef) {
-        String identifier = Serialization.serializedActorPath(actorRef);
-        setActorRefPath(IDENTIFY, identifier);
+    public void putAreaManagerPath(String identify, String identifier) {
+        putRedisActorPath(identify, identifier, AREA_MANAGER_INDEX);
     }
 
-    public void setLocalAreaPath(String identify, String identifier) {
-        setRedisActorPath(identify, identifier, areaManagerKey);
+
+    public void removeAreaManagerPath(String key) {
+        removeActorPath(key, AREA_MANAGER_INDEX);
     }
 
-    public void removeAreaActorRefPath(String key) {
-        removeActorPath(key, areaManagerKey);
+    public void removeGlobalActorRefPath(String key) {
+        removeActorPath(key, ACTOR_GLOBAL_PATH_INDEX);
     }
 
-    public void removeActorRefPath(String key) {
-        removeActorPath(key, ActorPathKey);
-    }
-
-    public Map<String, String> getActorRefPath() {
+    public Map<String, String> getActorGlobalPath() {
         if (redis) {
-            Map<String, String> result = getStringStringMap(ActorPathKey);
+            Map<String, String> result = getStringStringMap(ACTOR_GLOBAL_PATH_INDEX);
             return result;
         } else {
             return new HashMap<String, String>();
         }
     }
 
-    public Map<String, String> getAreaUserActorRefPath(String areaId) {
+
+
+    public Map<String, String> geAreaManagerActorPath() {
         if (redis) {
-            Map<String, String> result = getStringStringMap(AreaActorKey + ":" + areaId);
-            return result;
+            return getStringStringMap(AREA_MANAGER_INDEX);
         } else {
             return new HashMap<String, String>();
         }
     }
 
-    public Map<String, String> geAreaActorRefPath() {
-        if (redis) {
-            return getStringStringMap(areaManagerKey);
-        } else {
-            return new HashMap<String, String>();
-        }
+    public boolean containsAreaKey(int localId) {
+        return geAreaManagerActorPath().containsKey(getAreaId(localId));
     }
 
-    private Map<String, String> getStringStringMap(String areaManagerKey) {
+    public ActorRef getAreaLocalPaths(int loaclAreaId) {
+        String areaId = getAreaId(loaclAreaId);
         Jedis jedis = getJedis();
 
         MapStructure<String> mapStructure = RedisStrutureBuilder.ofMap(jedis, String.class).withNameSpace(nameSpace).build();
-        Map<String, String> map = mapStructure.get(areaManagerKey);
+        Map<String, String> map = mapStructure.get(AREA_MANAGER_INDEX);
+        String stringPath = map.get(areaId);
+
+        if (jedis != null) {
+            jedis.close();
+        }
+
+        if (stringPath != null&&!stringPath.trim().equals("")) {
+            ActorSystem actorSystem = ContextResolver.getActorSystem();
+            ActorRef actorRef = actorSystem.provider().resolveActorRef(stringPath);
+            return actorRef;
+        } else {
+            return null;
+        }
+    }
+
+
+
+    private Map<String, String> getStringStringMap(String index) {
+        Jedis jedis = getJedis();
+
+        MapStructure<String> mapStructure = RedisStrutureBuilder.ofMap(jedis, String.class).withNameSpace(nameSpace).build();
+        Map<String, String> map = mapStructure.get(index);
 
         Map<String, String> result = new HashMap<>();
         result.putAll(map);
@@ -133,15 +211,11 @@ public class CacheManager extends BaseCoreService {
         return result;
     }
 
-    private void setActorRefPath(String identify, String identifier) {
-        setRedisActorPath(identify, identifier, ActorPathKey);
+    private void putActorRefPath(String identify, String identifier) {
+        putRedisActorPath(identify, identifier, ACTOR_GLOBAL_PATH_INDEX);
     }
 
-    private void setAreaUserActorRefPath(String prifix, String identify, String identifier) {
-        setRedisActorPath(identify, identifier, AreaActorKey + ":" + prifix);
-    }
-
-    private void setRedisActorPath(String identify, String identifier, String areaManagerKey) {
+    private void putRedisActorPath(String identify, String identifier, String areaManagerKey) {
         Jedis jedis = getJedis();
 
         MapStructure<String> mapStructure = RedisStrutureBuilder.ofMap(jedis, String.class).withNameSpace(nameSpace).build();
@@ -164,35 +238,5 @@ public class CacheManager extends BaseCoreService {
         }
     }
 
-    private Jedis getJedis() {
-        RedisService component = ContextResolver.getComponent(RedisService.class);
-        return component.getJedis();
-    }
 
-    public boolean containsAreaKey(int localId) {
-        return geAreaActorRefPath().containsKey(getAreaId(localId));
-    }
-
-    public ActorRef getAreaLocalPaths(int loaclAreaId) {
-        String areaId = getAreaId(loaclAreaId);
-        Jedis jedis = getJedis();
-
-        MapStructure<String> mapStructure = RedisStrutureBuilder.ofMap(jedis, String.class).withNameSpace(nameSpace).build();
-        Map<String, String> map = mapStructure.get(areaManagerKey);
-        String s = map.get(areaId);
-
-        if (jedis != null) {
-            jedis.close();
-        }
-
-        if (s != null) {
-            ActorSystem actorSystem = ContextResolver.getActorSystem();
-            ActorRef actorRef = actorSystem.provider().resolveActorRef(s);
-            return actorRef;
-        } else {
-            return null;
-        }
-
-
-    }
 }

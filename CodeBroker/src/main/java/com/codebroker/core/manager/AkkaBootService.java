@@ -423,7 +423,7 @@ public class AkkaBootService extends BaseCoreService {
             e.printStackTrace();
         }
         CacheManager cacheManager = ContextResolver.getComponent(CacheManager.class);
-        cacheManager.setLocalPath(CodeBrokerSystem.IDENTIFY, codeBrokerAkkaSystem);
+        cacheManager.putActorGlobalPath(CodeBrokerSystem.IDENTIFY, codeBrokerAkkaSystem);
 
         super.setActive();
     }

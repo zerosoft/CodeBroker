@@ -152,7 +152,7 @@ public class WorldActor extends AbstractActor {
         userManagerRef = getContext().actorOf(Props.create(UserManagerActor.class), UserManagerActor.IDENTIFY);
         getContext().watch(userManagerRef);
 
-        component.setLocalPath(UserManagerActor.IDENTIFY, userManagerRef);
+        component.putActorGlobalPath(UserManagerActor.IDENTIFY, userManagerRef);
         logger.info("UserManager Path= {}", userManagerRef.path().toString());
         /**
          * 用户管理器 akka://CodeBroker/user/WorldActor/NPCManagerActor
@@ -160,14 +160,14 @@ public class WorldActor extends AbstractActor {
         npcManagerRef = getContext().actorOf(Props.create(NPCManagerActor.class), NPCManagerActor.IDENTIFY);
         getContext().watch(npcManagerRef);
 
-        component.setLocalPath(NPCManagerActor.IDENTIFY, npcManagerRef);
+        component.putActorGlobalPath(NPCManagerActor.IDENTIFY, npcManagerRef);
         logger.info("NPCManager Path= {}", userManagerRef.path().toString());
 
         /**
          * 初始化空间管理器 akka://CodeBroker/user/WorldActor/AreaManagerActor
          */
         areaManagerRef = getContext().actorOf(Props.create(AreaManagerActor.class), AreaManagerActor.IDENTIFY);
-        component.setLocalPath(AreaManagerActor.IDENTIFY, areaManagerRef);
+        component.putActorGlobalPath(AreaManagerActor.IDENTIFY, areaManagerRef);
 
         getContext().watch(areaManagerRef);
         logger.info("AreaManager Path= {}", areaManagerRef.path().toString());
@@ -207,7 +207,7 @@ public class WorldActor extends AbstractActor {
         } else {
             handleLogin = "Test1234";
         }
-        CreateUserWithSession createUserWithSession = new CreateUserWithSession(handleLogin);
+        CreateUserWithSession createUserWithSession = new CreateUserWithSession(handleLogin,name,parms);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_MANAGER_CREATE_USER_WITH_SESSION, createUserWithSession);
         userManagerRef.tell(actorMessageWithSubClass, sessionActorRef);
     }
@@ -255,7 +255,7 @@ public class WorldActor extends AbstractActor {
         }
 
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        ActorRef localPath = component.getLocalPath(ClusterDistributedPub.IDENTIFY);
+        ActorRef localPath = component.getActorGlobalPath(ClusterDistributedPub.IDENTIFY);
         localPath.tell("ssss", ActorRef.noSender());
 
         actorRef.tell(msg, getSender());

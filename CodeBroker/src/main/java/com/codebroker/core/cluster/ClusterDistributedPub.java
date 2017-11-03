@@ -28,7 +28,7 @@ public class ClusterDistributedPub extends AbstractActor {
                 // 发布到本地的
                         match(PublicLocalAffinityChannel.class, msg -> {
                     CacheManager component = ContextResolver.getComponent(CacheManager.class);
-                    ActorRef localPath = component.getLocalPath(ClusterDistributedSub.IDENTIFY);
+                    ActorRef localPath = component.getActorGlobalPath(ClusterDistributedSub.IDENTIFY);
                     DistributedPubSubMediator.Send message = new DistributedPubSubMediator.Send(
                             localPath.path().toString(), msg, msg.local);
                     mediator.tell(message, getSelf());

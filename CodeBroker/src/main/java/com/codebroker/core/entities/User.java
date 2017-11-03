@@ -9,7 +9,9 @@ import com.codebroker.core.data.IObject;
 import com.codebroker.exception.NoActorRefException;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.ThriftSerializerFactory;
+import com.codebroker.setting.PrefixConstant;
 import com.codebroker.util.AkkaUtil;
+import com.codebroker.util.LogUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import org.apache.thrift.TException;
@@ -38,11 +40,11 @@ public class User implements IUser {
     }
 
     public String getUserId() {
-        return iObject.getUtfString("userId");
+        return iObject.getUtfString(PrefixConstant.LOGIN_ID);
     }
 
     public void setUserId(String userId) {
-        iObject.putUtfString("userId", userId);
+        iObject.putUtfString(PrefixConstant.LOGIN_ID, userId);
     }
 
 
@@ -58,8 +60,7 @@ public class User implements IUser {
             byte[] bytes = thriftSerializerFactory.getActorMessage(actorMessage);
             getActorRef().tell(bytes, ActorRef.noSender());
         } catch (TException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LogUtil.exceptionPrint(e);
         }
 
     }
@@ -69,7 +70,7 @@ public class User implements IUser {
         try {
             getActorRef().tell(thriftSerializerFactory.getOnlySerializerByteArray(Operation.USER_DISCONNECT), ActorRef.noSender());
         } catch (TException e) {
-            e.printStackTrace();
+            LogUtil.exceptionPrint(e);
         }
     }
 
@@ -79,6 +80,7 @@ public class User implements IUser {
             byte[] tbaseMessage = thriftSerializerFactory.getOnlySerializerByteArray(Operation.USER_IS_CONNECTED);
             return AkkaUtil.getCallBak(getActorRef(), tbaseMessage);
         } catch (Exception e) {
+            LogUtil.exceptionPrint(e);
             return false;
         }
     }
@@ -87,7 +89,7 @@ public class User implements IUser {
         try {
             getActorRef().tell(thriftSerializerFactory.getOnlySerializerByteArray(Operation.USER_RE_BINDUSER_IOSESSION_ACTOR), ActorRef.noSender());
         } catch (TException e) {
-            e.printStackTrace();
+            LogUtil.exceptionPrint(e);
         }
 
     }
@@ -98,4 +100,11 @@ public class User implements IUser {
     }
 
 
+    public void setLoginName(String name) {
+        iObject.putUtfString(PrefixConstant.LOGIN_NAME, name);
+    }
+
+    public void setLoginParms(String parms) {
+        iObject.putUtfString(PrefixConstant.LOGIN_PARMS, parms);
+    }
 }

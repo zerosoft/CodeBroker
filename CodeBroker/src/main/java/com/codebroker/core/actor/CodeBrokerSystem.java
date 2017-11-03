@@ -66,7 +66,7 @@ public class CodeBrokerSystem extends AbstractActor {
          */
         clusterListener = actorSystem.actorOf(Props.create(ClusterListener.class), ClusterListener.IDENTIFY);
         this.getContext().watch(clusterListener);
-        component.setLocalPath(ClusterListener.IDENTIFY, clusterListener);
+        component.putActorGlobalPath(ClusterListener.IDENTIFY, clusterListener);
         /**
          * 错误地址信息
          */
@@ -74,14 +74,14 @@ public class CodeBrokerSystem extends AbstractActor {
         deadLetterRef = actorSystem.actorOf(avalonDeadLetterProps, CodeDeadLetter.IDENTIFY);
         actorSystem.eventStream().subscribe(deadLetterRef, DeadLetter.class);
 
-        component.setLocalPath(CodeDeadLetter.IDENTIFY, deadLetterRef);
+        component.putActorGlobalPath(CodeDeadLetter.IDENTIFY, deadLetterRef);
         /**
          * 初始化游戏世界
          */
         world = actorSystem.actorOf(Props.create(WorldActor.class), WorldActor.IDENTIFY);
         this.getContext().watch(world);
 
-        component.setLocalPath(WorldActor.IDENTIFY, world);
+        component.putActorGlobalPath(WorldActor.IDENTIFY, world);
 
         logger.info("World Path=" + world.path().toString());
         /**
@@ -91,7 +91,7 @@ public class CodeBrokerSystem extends AbstractActor {
         this.getContext().watch(elkLogger);
         LogUtil.elkLog = elkLogger;
         logger.info("ELKActor Path=" + elkLogger.path().toString());
-        component.setLocalPath(ELKLogActor.IDENTIFY, elkLogger);
+        component.putActorGlobalPath(ELKLogActor.IDENTIFY, elkLogger);
         /**
          * 分布式发布Actor
          */
@@ -99,7 +99,7 @@ public class CodeBrokerSystem extends AbstractActor {
         clusterDistributedPub =
                 actorSystem.actorOf(pub, ClusterDistributedPub.IDENTIFY);
         this.getContext().watch(clusterDistributedPub);
-        component.setLocalPath(ClusterDistributedPub.IDENTIFY, clusterDistributedPub);
+        component.putActorGlobalPath(ClusterDistributedPub.IDENTIFY, clusterDistributedPub);
         /**
          * 分布式订阅 Actor
          */
@@ -107,14 +107,14 @@ public class CodeBrokerSystem extends AbstractActor {
         clusterDistributedSub =
                 actorSystem.actorOf(sub, ClusterDistributedSub.IDENTIFY);
         this.getContext().watch(clusterDistributedSub);
-        component.setLocalPath(ClusterDistributedSub.IDENTIFY, clusterDistributedSub);
+        component.putActorGlobalPath(ClusterDistributedSub.IDENTIFY, clusterDistributedSub);
         /**
          * 数据相关监听Actor
          */
         Props create = Props.create(MonitorManager.class);
         monitorManager = actorSystem.actorOf(create, MonitorManager.IDENTIFY);
         this.getContext().watch(monitorManager);
-        component.setLocalPath(MonitorManager.IDENTIFY, monitorManager);
+        component.putActorGlobalPath(MonitorManager.IDENTIFY, monitorManager);
     }
 
     @Override

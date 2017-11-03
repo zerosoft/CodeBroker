@@ -26,7 +26,7 @@ public class UserManager implements IUserManager {
         CreateUser createUser = new CreateUser(npc, UUID.randomUUID().toString(), null);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_MANAGER_CREATE_USER, createUser);
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        ActorRef localPath = component.getActorGlobalPath(AreaManagerActor.IDENTIFY);
         localPath.tell(actorMessageWithSubClass, ActorRef.noSender());
     }
 
@@ -35,7 +35,7 @@ public class UserManager implements IUserManager {
         RemoveUser removeUser = new RemoveUser(userId);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.USER_MANAGER_REMOVE_USER, removeUser);
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        ActorRef localPath = component.getActorGlobalPath(AreaManagerActor.IDENTIFY);
         localPath.tell(actorMessageWithSubClass, ActorRef.noSender());
     }
 

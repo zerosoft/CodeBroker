@@ -6,10 +6,6 @@ import akka.actor.Cancellable;
 import akka.actor.Scheduler;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEventListener;
-import com.codebroker.api.event.event.AddEventListener;
-import com.codebroker.api.event.event.HasEventListener;
-import com.codebroker.api.event.event.RemoveEventListener;
 import com.codebroker.core.message.ScheduleTask;
 import scala.concurrent.duration.Duration;
 
@@ -27,7 +23,6 @@ public class GridActor extends AbstractActor {
      * 父类Actor
      */
     private final ActorRef parentAreaRef;
-    private final Map<String, IEventListener> eventListener = new HashMap<String, IEventListener>();
     private Map<String, IUser> userMap = new TreeMap<String, IUser>();
 
     public GridActor(ActorRef parentAreaRef) {
@@ -63,35 +58,10 @@ public class GridActor extends AbstractActor {
                         Cancellable schedule = scheduler.schedule(Duration.create(msg.getDelay(), TimeUnit.MILLISECONDS), Duration.create(msg.getInterval(), TimeUnit.MILLISECONDS), msg.getTask(), getContext().getSystem().dispatcher());
                     }
                 })
-                //处理分发事件
-                .match(Event.class, msg -> {
-                    dispatchEvent(msg);
-                })
-                // 广播相关
-                .match(AddEventListener.class, msg -> {
-                    eventListener.put(msg.topic, msg.paramIEventListener);
-                }).match(RemoveEventListener.class, msg -> {
-                    eventListener.remove(msg.topic);
-                }).match(HasEventListener.class, msg -> {
-                    getSender().tell(eventListener.containsKey(msg.topic), getSelf());
-                }).build();
+               .build();
     }
 
-    /**
-     * 处理分发信息
-     *
-     * @param msg
-     */
-    private void dispatchEvent(Event msg) {
-        try {
-            IEventListener iEventListener = eventListener.get(msg.getTopic());
-            if (iEventListener != null) {
-                iEventListener.handleEvent(msg);
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
+
 
 
     public static class EnterGrid implements Serializable {

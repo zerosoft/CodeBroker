@@ -1,7 +1,6 @@
 package com.codebroker.api;
 
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEventDispatcher;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  *
  * @author ZERO
  */
-public interface IGrid extends IEventDispatcher {
+public interface IGrid  {
     /**
      * 获取格子ID
      *
@@ -47,7 +46,6 @@ public interface IGrid extends IEventDispatcher {
     /**
      * 对指定组的用户进行广播
      *
-     * @param jsonString
      * @param users
      */
     public void broadCastUsers(Event object, Collection<IUser> users);
@@ -55,7 +53,6 @@ public interface IGrid extends IEventDispatcher {
     /**
      * 广播当前格子中的所有用户
      *
-     * @param jsonString
      */
     public void broadCastAllUser(Event object);
 

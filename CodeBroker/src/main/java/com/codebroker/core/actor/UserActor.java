@@ -5,13 +5,14 @@ import akka.actor.ActorRef;
 import com.codebroker.api.NPCControl;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.User;
 import com.codebroker.protocol.ThriftSerializerFactory;
+import com.codebroker.setting.PrefixConstant;
+import com.codebroker.util.LogUtil;
 import com.message.thrift.actor.ActorMessage;
 import com.message.thrift.actor.Operation;
 import com.message.thrift.actor.area.LeaveArea;
-import com.message.thrift.actor.user.ReciveIosessionMessage;
+import com.message.thrift.actor.user.*;
 import com.message.thrift.actor.usermanager.RemoveUser;
 import org.apache.thrift.TException;
 
@@ -110,48 +111,106 @@ public class UserActor extends AbstractActor {
                     // 从新绑定
                     this.ioSessionRef = getSender();
                     break;
-
                 case USER_GET_IUSER:
                     getSender().tell(user, getSelf());
                     break;
-
                 case USER_ENTER_AREA:
-                    if (inArea != null) {
-                        LeaveArea leaveArea = new LeaveArea(userId);
-                        inArea.tell(thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
+                    UserEnterArea userEneterArea=new UserEnterArea();
+                    thriftSerializerFactory.deserialize(userEneterArea,actorMessage.messageRaw);
+                    if (userEneterArea.isResult()){
+                        if (userEneterArea.getUserId().equals(userId)){
+                            if (inArea != null) {
+                                if (getSender().compareTo(inArea)!=0){
+                                    LeaveArea leaveArea = new LeaveArea(userId);
+                                    inArea.tell(thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_USER_LEAVE_AREA, leaveArea), getSelf());
+
+                                    if (inGrid != null) {
+                                        inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                                    }
+                                    inGrid = null;
+                                }
+                            }
+                            inArea = getSender();
+
+                        }else{
+
+                        }
+                    }else{
+                        if (userEneterArea.getUserId().equals(userId)){
+
+                        }else{
+
+                        }
                     }
-                    inArea = getSender();
-                    if (inGrid != null) {
-                        inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
-                    }
-                    inGrid = null;
                     break;
                 case USER_LEAVE_AREA:
+                    UserLeaveArea userLeaveArea=new UserLeaveArea();
+                    thriftSerializerFactory.deserialize(userLeaveArea,actorMessage.messageRaw);
+                    if (userLeaveArea.isResult()){
+                        if (userLeaveArea.userId.equals(userId)){
+                            if (inArea!=null){
+                                inArea=null;
+                            }
+                            if (inGrid != null) {
+                                inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                            }
+                            inGrid = null;
+                        }else{
 
+                        }
+                    }else{
+                        if (userLeaveArea.userId.equals(userId)){
+
+                        }else{
+
+                        }
+                    }
                     break;
                 case USER_ENTER_GRID:
-                    if (inGrid != null) {
-                        inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                    UserEnterGrid userEnterGrid=new UserEnterGrid();
+                    thriftSerializerFactory.deserialize(userEnterGrid,actorMessage.messageRaw);
+                    if (userEnterGrid.isResult()){
+                        if (userEnterGrid.userId.equals(userId)){
+                            if (inGrid != null) {
+                                inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                            }
+                            inGrid = getSender();
+                        }else{
+
+                        }
+                    }else {
+
                     }
-                    inGrid = getSender();
                     break;
                 case USER_LEAVE_GRID:
-                    if (inGrid != null) {
-                        inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                    UserLeaveGrid userLeaveGrid=new UserLeaveGrid();
+                    thriftSerializerFactory.deserialize(userLeaveGrid,actorMessage.messageRaw);
+                    if (userLeaveGrid.isResult()){
+                        if (userLeaveGrid.userId.equals(userId)){
+                            if (inGrid != null) {
+                                inGrid.tell(new GridActor.LeaveGrid(userId), getSelf());
+                            }
+                            inGrid =null;
+                        }else{
+
+                        }
+                    }else{
+
                     }
                     break;
                 default:
-
                     break;
             }
         }).match(Event.class, msg -> {
-            if (npcControl != null) {
-                npcControl.execute(msg);
-            }
-        }).match(IObject.class, msg -> {
+            if (msg.getTopic().equals(PrefixConstant.NPC_CONTROL_EVENT)) {
+                if (npcControl != null) {
+                    npcControl.execute(msg.getMessage());
+                }
+            } else {
 
-        })
-                .build();
+            }
+
+        }).build();
     }
 
     private void handleClientRequest(int requestId, ByteBuffer params) {
@@ -168,8 +227,7 @@ public class UserActor extends AbstractActor {
             byte[] bs = thriftSerializerFactory.getActorMessage(actorMessage);
             ioSessionRef.tell(bs, getSelf());
         } catch (TException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LogUtil.exceptionPrint(e);
         }
 
     }

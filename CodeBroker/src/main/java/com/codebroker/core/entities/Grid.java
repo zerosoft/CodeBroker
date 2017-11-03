@@ -5,9 +5,9 @@ import akka.actor.PoisonPill;
 import com.codebroker.api.IGrid;
 import com.codebroker.api.IUser;
 import com.codebroker.api.event.Event;
-import com.codebroker.core.EventDispatcher;
 import com.codebroker.core.actor.GridActor;
 import com.codebroker.exception.CodeBrokerException;
+import com.codebroker.exception.NoActorRefException;
 import com.codebroker.util.AkkaUtil;
 
 import java.util.Collection;
@@ -18,7 +18,15 @@ import java.util.List;
  *
  * @author xl
  */
-public class Grid extends EventDispatcher implements IGrid {
+public class Grid implements IGrid {
+    private ActorRef actorRef;
+
+    public ActorRef getActorRef() {
+        if (actorRef == null) {
+            throw new NoActorRefException();
+        }
+        return actorRef;
+    }
 
     @Override
     public boolean enterGrid(IUser user) throws Exception {

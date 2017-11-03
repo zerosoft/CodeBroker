@@ -1,20 +1,20 @@
 package com.codebroker.api;
 
-import com.codebroker.api.event.Event;
+import com.codebroker.core.data.IObject;
 
 public interface NPCControl {
     /**
      * 初始化
      */
-    public void init();
+    void init();
 
     /**
      * 执行
      */
-    public void execute(Event event);
+    void execute(IObject event);
 
     /**
      * 销毁
      */
-    public void destroy();
+    void destroy();
 }

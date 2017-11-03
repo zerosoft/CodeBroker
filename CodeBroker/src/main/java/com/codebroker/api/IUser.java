@@ -9,13 +9,12 @@ import com.codebroker.core.data.IObject;
  */
 public interface IUser {
     /**
-     * 获得用户id
+     * 获得用户id，系统分配
      *
      * @return
      * @throws Exception
      */
     String getUserId();
-
 
     /**
      * 发送消息给IO会话

@@ -28,7 +28,7 @@ public class AreaManager implements IAreaManager {
         CreateArea message = new CreateArea(loaclAreaId);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_CREATE_AREA, message);
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        ActorRef localPath = component.getActorGlobalPath(AreaManagerActor.IDENTIFY);
         AkkaUtil.getInbox().send(localPath, actorMessageWithSubClass);
     }
 
@@ -44,7 +44,7 @@ public class AreaManager implements IAreaManager {
         RemoveArea message = new RemoveArea(loaclAreaId);
         byte[] actorMessageWithSubClass = thriftSerializerFactory.getActorMessageByteArray(Operation.AREA_MANAGER_REMOVE_AREA, message);
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
-        ActorRef localPath = component.getLocalPath(AreaManagerActor.IDENTIFY);
+        ActorRef localPath = component.getActorGlobalPath(AreaManagerActor.IDENTIFY);
         localPath.tell(actorMessageWithSubClass, ActorRef.noSender());
     }
 
@@ -52,6 +52,12 @@ public class AreaManager implements IAreaManager {
     public List<ActorRef> getAllArea() {
         CacheManager component = ContextResolver.getComponent(CacheManager.class);
         return component.getAreaLocalPaths();
+    }
+
+    @Override
+    public List<String> getAllAreaIds() {
+        CacheManager component = ContextResolver.getComponent(CacheManager.class);
+        return component.getAreaLocalIds();
     }
 
 
