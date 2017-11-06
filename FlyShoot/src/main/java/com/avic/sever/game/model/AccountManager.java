@@ -5,7 +5,12 @@ import org.jongo.MongoCollection;
 
 
 public class AccountManager {
-	static class inner{
+    public void updateAccount(Jongo jongo, AccountEntity accountEntity) {
+		MongoCollection collection = jongo.getCollection("AccountEntity");
+		collection.update("{_id:#}", accountEntity.getAccountId()).with(accountEntity);
+    }
+
+    static class inner{
 		public static AccountManager inner=new AccountManager();
 	}
 	

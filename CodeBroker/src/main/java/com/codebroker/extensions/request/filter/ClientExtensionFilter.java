@@ -363,7 +363,7 @@ public abstract class ClientExtensionFilter implements IFilter {
      * (non-Javadoc)
      *
      * @see
-     * com.avalon.extensions.request.filter.IFilter#init(com.avalon.extensions.
+     * com.boot.extensions.request.filter.IFilter#init(com.boot.extensions.
      * request.ClientExtension)
      */
     public void init(AppListenerExtension player) {

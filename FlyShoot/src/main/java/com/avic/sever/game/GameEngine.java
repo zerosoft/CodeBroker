@@ -16,6 +16,7 @@ import com.codebroker.exception.AllReadyRegeditException;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.request.AppListenerExtension;
 import com.codebroker.util.FileUtil;
+import com.codebroker.util.StringUtil;
 
 public class GameEngine extends AppListenerExtension{
 
@@ -79,9 +80,14 @@ public class GameEngine extends AppListenerExtension{
 			areaManager.removeArea(2);
 
 			List<ActorRef> allArea = areaManager.getAllArea();
-			for (ActorRef act :
-					allArea) {
+			for (ActorRef act :	allArea) {
 				System.err.println(act.path());
+			}
+
+			List<String> ids = areaManager.getAllAreaIds();
+			List<String> localAreaId = StringUtil.getLocalAreaId(ids);
+			for (String act : localAreaId) {
+				System.err.println(act);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

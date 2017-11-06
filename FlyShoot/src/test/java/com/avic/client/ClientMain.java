@@ -42,13 +42,13 @@ public class ClientMain {
 	               //���ӷ�����
 	                if (line.startsWith("1")) {
 	                	JSONObject jsonObject=new JSONObject();
-	                	jsonObject.put("name", "345");
+	                	jsonObject.put("name", "3451");
 	                	jsonObject.put("parm", "6789");
 	                	head=new BaseByteArrayPacket(SystemRequest.USER_LOGIN_JSON.id,jsonObject.toString().getBytes());
 					}
 					if (line.startsWith("0")) {
 						JSONObject jsonObject=new JSONObject();
-						jsonObject.put("name", "345");
+						jsonObject.put("name", "3451");
 						jsonObject.put("parm", "6789");
 						head=new BaseByteArrayPacket(SystemRequest.USER_LOGIN_REGEDIT.id,jsonObject.toString().getBytes());
 					}
@@ -91,6 +91,12 @@ public class ClientMain {
 						JSONObject jsonObject=new JSONObject();
 	                	jsonObject.put("msg", split[1]);
 	                	head=new BaseByteArrayPacket(CommandID.WORD_CHAT_SEND,jsonObject.toString().getBytes());	
+					}
+					else if (line.startsWith("9")) {
+						JSONObject jsonObject=new JSONObject();
+						jsonObject.put("name", "飞行员1");
+						jsonObject.put("img", "头像1");
+						head=new BaseByteArrayPacket(CommandID.CREATE_USER,jsonObject.toString().getBytes());
 					}
 	                // Sends the received line to the server.
 	                lastWriteFuture = ch.writeAndFlush(head);

@@ -27,6 +27,8 @@ public class CommandID {
 	public static int ROOM_CHAT_SEND=10;
 	
 	public static int ROOM_CHAT_RECIVE=11;
+
+	public static int CREATE_USER=12;
 	
 	public static void main(String[] args) {
 		Field[] declaredFields = CommandID.class.getDeclaredFields();

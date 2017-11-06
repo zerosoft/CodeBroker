@@ -9,7 +9,6 @@ import com.google.common.base.Optional;
 
 public abstract class AbstractClientRequestHandler implements IClientRequestHandler{
 	private static final Logger logger = LoggerFactory.getLogger(AbstractClientRequestHandler.class);
-	protected String name;
 	protected String userId;
 	/**
 	 * 客户端请求总入口
@@ -34,7 +33,6 @@ public abstract class AbstractClientRequestHandler implements IClientRequestHand
 	 * 处理命令
 	 *
 	 * @param user
-	 * @param params
 	 * @return
 	 * @throws Exception
 	 */
@@ -44,7 +42,6 @@ public abstract class AbstractClientRequestHandler implements IClientRequestHand
 	/**
 	 * 返回数据
 	 *
-	 * @param cmdName
 	 * @param retObj
 	 * @param user
 	 */

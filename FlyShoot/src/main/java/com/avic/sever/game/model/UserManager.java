@@ -34,7 +34,16 @@ public class UserManager {
 			return null;
 		}
 	}
-
+	public boolean createUser(Jongo jongo ,UserEntity userEntity){
+		MongoCollection collection = jongo.getCollection("UserEntity");
+		try {
+			WriteResult insert = collection.insert(userEntity);
+			Object upsertedId = insert.getUpsertedId();
+			return true;
+		} catch (com.mongodb.DuplicateKeyException e) {
+			return false;
+		}
+	}
 
 	public UserEntity createUser(Jongo jongo ,String accountId,String userId){
 		UserEntity entity=new UserEntity();

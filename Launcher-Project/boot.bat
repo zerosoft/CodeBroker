@@ -1,0 +1,1 @@
+java -jar bin/boot.jar conf/boot.properties

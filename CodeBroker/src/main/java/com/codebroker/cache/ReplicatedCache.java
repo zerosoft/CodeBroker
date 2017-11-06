@@ -1,4 +1,4 @@
-package distributed;
+package com.codebroker.cache;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;

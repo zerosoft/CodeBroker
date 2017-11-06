@@ -443,7 +443,7 @@ public class AkkaBootService extends BaseCoreService {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.api.internal.IService#destroy(java.lang.Object)
+     * @see com.boot.api.internal.IService#destroy(java.lang.Object)
      */
     @Override
     public void destroy(Object obj) {

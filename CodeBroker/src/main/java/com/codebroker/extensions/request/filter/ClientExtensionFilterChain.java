@@ -383,8 +383,8 @@ public class ClientExtensionFilterChain implements IFilterChain {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.filter.IFilterChain#addFilter(int,
-     * com.avalon.extensions.request.filter.ClientExtensionFilter)
+     * @see com.boot.extensions.request.filter.IFilterChain#addFilter(int,
+     * com.boot.extensions.request.filter.ClientExtensionFilter)
      */
     public void addFilter(int filterId, ClientExtensionFilter filter) {
         if (filters.contains(filter)) {
@@ -403,7 +403,7 @@ public class ClientExtensionFilterChain implements IFilterChain {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.filter.IFilterChain#remove(int)
+     * @see com.boot.extensions.request.filter.IFilterChain#remove(int)
      */
     public void remove(int filterId) {
         for (Iterator<ClientExtensionFilter> it = filters.iterator(); it.hasNext(); ) {
@@ -420,8 +420,8 @@ public class ClientExtensionFilterChain implements IFilterChain {
      * (non-Javadoc)
      *
      * @see
-     * com.avalon.extensions.request.filter.IFilterChain#runRequestInChain(int,
-     * com.avalon.extensions.request.ClientExtension, java.lang.Object)
+     * com.boot.extensions.request.filter.IFilterChain#runRequestInChain(int,
+     * com.boot.extensions.request.ClientExtension, java.lang.Object)
      */
     public FilterAction runRequestInChain(int requestId, AppListenerExtension player, Object params) {
         FilterAction filterAction = FilterAction.CONTINUE;
@@ -444,7 +444,7 @@ public class ClientExtensionFilterChain implements IFilterChain {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.filter.IFilterChain#size()
+     * @see com.boot.extensions.request.filter.IFilterChain#size()
      */
     public int size() {
         return filters.size();
@@ -453,7 +453,7 @@ public class ClientExtensionFilterChain implements IFilterChain {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.filter.IFilterChain#destroy()
+     * @see com.boot.extensions.request.filter.IFilterChain#destroy()
      */
     public void destroy() {
         ClientExtensionFilter filter;

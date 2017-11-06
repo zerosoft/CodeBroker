@@ -19,6 +19,14 @@ public class UserEntity {
 
     private List<String> planes=new ArrayList<>(4);
 
+    public String getHeadImg() {
+        return headImg;
+    }
+
+    public void setHeadImg(String headImg) {
+        this.headImg = headImg;
+    }
+
     public String getUserId() {
         return userId;
     }

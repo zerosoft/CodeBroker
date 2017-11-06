@@ -28,7 +28,7 @@ public class RemoveRoomRequest extends AbstractClientRequestHandler{
 				jsonObject.put("state", false);
 				return result.toJSONString();
 			}else{
-				if (roomById.getOnwerId().equals(name)) {
+				if (roomById.getOnwerId().equals(userId)) {
 					RoomManager.getInstance().removeRoom(roomid);
 					JSONObject result=new JSONObject();
 					jsonObject.put("state", true);

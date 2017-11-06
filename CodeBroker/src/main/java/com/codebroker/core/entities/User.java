@@ -3,6 +3,7 @@ package com.codebroker.core.entities;
 
 import akka.actor.ActorRef;
 import com.codebroker.api.IUser;
+import com.codebroker.api.event.IEventRequestHandler;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.data.IObject;
@@ -97,6 +98,11 @@ public class User implements IUser {
     @Override
     public IObject getIObject() {
         return iObject;
+    }
+
+    @Override
+    public void setEventLinster(IEventRequestHandler eventLinster) {
+        getActorRef().tell(eventLinster,ActorRef.noSender());
     }
 
 

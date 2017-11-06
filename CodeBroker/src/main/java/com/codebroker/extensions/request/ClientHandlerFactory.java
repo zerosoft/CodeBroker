@@ -366,7 +366,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
+     * @see com.boot.extensions.request.IHandlerFactory#addHandler(int,
      * java.lang.Class)
      */
     public void addHandler(int handlerKey, Class<?> handlerClass) {
@@ -376,7 +376,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.IHandlerFactory#addHandler(int,
+     * @see com.boot.extensions.request.IHandlerFactory#addHandler(int,
      * java.lang.Object)
      */
     public void addHandler(int handlerKey, Object requestHandler) {
@@ -386,7 +386,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.IHandlerFactory#clearAll()
+     * @see com.boot.extensions.request.IHandlerFactory#clearAll()
      */
     public synchronized void clearAll() {
         handlers.clear();
@@ -396,7 +396,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.IHandlerFactory#removeHandler(int)
+     * @see com.boot.extensions.request.IHandlerFactory#removeHandler(int)
      */
     public synchronized void removeHandler(int handlerKey) {
         handlers.remove(handlerKey);
@@ -408,7 +408,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
     /*
      * (non-Javadoc)
      *
-     * @see com.avalon.extensions.request.IHandlerFactory#findHandler(int)
+     * @see com.boot.extensions.request.IHandlerFactory#findHandler(int)
      */
     public Object findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
         Object handler = getHandlerInstance(handlerKey);

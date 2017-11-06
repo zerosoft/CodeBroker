@@ -1,5 +1,6 @@
 package com.codebroker.api;
 
+import com.codebroker.api.event.IEventRequestHandler;
 import com.codebroker.core.data.IObject;
 
 /**
@@ -43,4 +44,9 @@ public interface IUser {
      */
     IObject getIObject();
 
+    /**
+     * 设置事件监听器
+     * @param eventLinster
+     */
+    void setEventLinster(IEventRequestHandler eventLinster);
 }
