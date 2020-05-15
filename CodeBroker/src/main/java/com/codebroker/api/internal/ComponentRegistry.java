@@ -3,7 +3,7 @@ package com.codebroker.api.internal;
 /**
  * 系统组件管理器.
  *
- * @author ZERO
+ *  @author LongJu
  */
 public interface ComponentRegistry extends Iterable<IService> {
 

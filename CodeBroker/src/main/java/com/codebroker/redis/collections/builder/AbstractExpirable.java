@@ -15,7 +15,6 @@ public class AbstractExpirable<T> implements Expirable {
         this.jedis = jedis;
         this.clazz = clazz;
         this.nameSpace = nameSpace;
-
     }
 
     @Override

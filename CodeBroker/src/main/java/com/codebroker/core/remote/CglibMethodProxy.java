@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * cglib代理
  *
- * @author zero
+ * @author LongJu
  */
 public class CglibMethodProxy implements MethodInterceptor {
     // 代理发信息的actor

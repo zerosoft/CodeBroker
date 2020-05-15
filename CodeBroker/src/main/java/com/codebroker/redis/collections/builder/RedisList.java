@@ -103,8 +103,8 @@ public class RedisList<T> extends RedisCollection<T> implements List<T> {
         Objects.requireNonNull(o);
         String value = gson.toJson(o);
         for (int index = size(); index > 0; --index) {
-            String findedValue = jedis.lindex(keyWithNameSpace, (long) index);
-            if (value.equals(findedValue)) {
+            String findValue = jedis.lindex(keyWithNameSpace, (long) index);
+            if (value.equals(findValue)) {
                 return index;
             }
         }

@@ -5,7 +5,7 @@ import com.codebroker.exception.NoServerException;
 /**
  * 远程管理服务
  *
- * @author zero
+ * @author LongJu
  */
 public interface IRemoteActorManager {
     /**

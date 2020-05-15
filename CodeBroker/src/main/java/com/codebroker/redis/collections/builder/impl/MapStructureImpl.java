@@ -16,7 +16,7 @@ public class MapStructureImpl<T> extends AbstractExpirable<T> implements MapStru
 
     @Override
     public Map<String, T> get(String key) {
-        return new RedisMap<T>(jedis, clazz, RedisUtils.createKeyWithNameSpace(key, nameSpace));
+        return new RedisMap(jedis, clazz, RedisUtils.createKeyWithNameSpace(key, nameSpace));
     }
 
     @Override

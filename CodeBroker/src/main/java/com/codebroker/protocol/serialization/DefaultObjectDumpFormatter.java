@@ -1,5 +1,6 @@
 package com.codebroker.protocol.serialization;
 
+
 import java.util.Arrays;
 
 public class DefaultObjectDumpFormatter {

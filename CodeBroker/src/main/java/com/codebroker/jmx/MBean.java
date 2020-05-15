@@ -11,7 +11,7 @@ import java.util.Map;
  * JMX 管理的抽象类
  *
  * @param <T>
- * @author zero
+ * @author LongJu
  */
 public abstract class MBean<T> implements DynamicMBean, MBeanRegistration {
     final T managedObject;
@@ -82,7 +82,7 @@ public abstract class MBean<T> implements DynamicMBean, MBeanRegistration {
         try {
             objectName = new ObjectName(ManagementService.DOMAIN, new Hashtable<String, String>(properties));
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Failed to create an ObjectName", e);
+            throw new IllegalArgumentException("Failed to getInstance an ObjectName", e);
         }
     }
 

@@ -20,7 +20,6 @@ public class ScorePointLong extends AbstractScoresPoint<Long> implements ScoresP
     @Override
     public void initialPoint(String field, Long value) {
         jedis.zadd(keyWithNameSpace, value.doubleValue(), field);
-
     }
 
     @Override

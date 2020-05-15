@@ -20,7 +20,6 @@ public class ScorePointDouble extends AbstractScoresPoint<Double> implements Sco
     @Override
     public void initialPoint(String field, Double value) {
         jedis.zadd(keyWithNameSpace, value, field);
-
     }
 
     @Override

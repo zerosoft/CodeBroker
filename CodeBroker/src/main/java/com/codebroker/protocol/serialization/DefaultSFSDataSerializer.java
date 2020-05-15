@@ -7,8 +7,7 @@ import com.codebroker.api.event.Event;
 import com.codebroker.core.data.*;
 import com.codebroker.exception.CRuntimeException;
 import com.codebroker.exception.CodecException;
-import com.codebroker.protocol.ThriftSerializerFactory;
-import com.message.thrift.actor.event.RemoteEventMessage;
+import com.codebroker.util.KryoSerialization;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     private static final String FIELD_NAME_KEY = "N";
     private static final String FIELD_VALUE_KEY = "V";
 
-    private static ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
     private static DefaultSFSDataSerializer instance = new DefaultSFSDataSerializer();
 
     private static int BUFFER_CHUNK_SIZE = 512;
@@ -50,25 +48,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     public Event binary2Event(byte[] data) {
-        Event event = new Event();
-        RemoteEventMessage eventMessage = thriftSerializerFactory.getEventMessage(data);
-        event.setTopic(eventMessage.topic);
-
-        CObject cObject = CObject.newFromBinaryData(eventMessage.getIobject());
-        event.setMessage(cObject);
-
-        return event;
+        return KryoSerialization.readObjectFromByteArray(data, Event.class);
     }
 
 
     public byte[] Event2binary(Event event) {
-        RemoteEventMessage eventMessage = new RemoteEventMessage();
-
-        eventMessage.setTopic(event.getTopic());
-        eventMessage.setIobject(event.getMessage().toBinary());
-
-        byte[] deserializeEventMessage = thriftSerializerFactory.deserializeEventMessage(eventMessage);
-        return deserializeEventMessage;
+        return KryoSerialization.writeObjectToByteArray(event);
     }
 
 

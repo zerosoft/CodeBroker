@@ -1,7 +1,6 @@
 package com.codebroker.api;
 
 import com.codebroker.api.internal.IService;
-import com.codebroker.core.data.IObject;
 import com.codebroker.exception.AllReadyRegeditException;
 import com.codebroker.exception.NoAuthException;
 
@@ -10,41 +9,25 @@ import java.util.Collection;
 /**
  * 游戏应用登入的入口.
  *
- * @author ZERO
+ * @author LongJu
  */
 public interface CodeBrokerAppListener extends IService {
 
-    /**
-     * 获得当前机器所有用户数量
-     *
-     * @return
-     */
-    int getUserCount();
-
-    /**
-     * 获得当前机器所有用户
-     *
-     * @return
-     */
-    Collection<IUser> getUserList();
-
-    /**
-     * 用户连接到系统
+     /**
+     * 用户连接到系统的验证
      *
      * @param name
-     * @param parms
+     * @param parameter
      * @return 重连接key
      */
-    String handleLogin(String name, String parms) throws NoAuthException;
+    String sessionLoginVerification(String name, String parameter) throws NoAuthException;
 
     /**
-     * 用户注册到系统
-     *
-     * @param name
-     * @param parms
-     * @return 重连接key
+     * 用户登入到系统
+     * @param user
      */
-    boolean handleRegedit(String name, String parms) throws AllReadyRegeditException;
+    void userLogin(IGameUser user);
+
 
     /**
      * 用户主动下线
@@ -52,7 +35,7 @@ public interface CodeBrokerAppListener extends IService {
      * @param user
      * @return
      */
-    boolean handleLogout(IUser user);
+    boolean handleLogout(IGameUser user);
 
     /**
      * 用户网络从新连接
@@ -60,7 +43,7 @@ public interface CodeBrokerAppListener extends IService {
      * @param user
      * @return
      */
-    boolean userReconnection(IUser user);
+    boolean userReconnection(IGameUser user);
 
     /**
      * 处理用户的网络协议
@@ -69,6 +52,6 @@ public interface CodeBrokerAppListener extends IService {
      * @param requestId
      * @param params
      */
-    void handleClientRequest(IUser user, int requestId, Object params);
+    void handleClientRequest(IGameUser user, int requestId, Object params) throws Exception;
 
 }

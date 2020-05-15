@@ -2,7 +2,11 @@ package com.codebroker.api.event;
 
 import com.codebroker.core.data.IObject;
 
-public class Event {
+/**
+ * 事件对象
+ * @author LongJu
+ */
+public class Event implements IEvent {
 
     private String topic;
     private IObject message;

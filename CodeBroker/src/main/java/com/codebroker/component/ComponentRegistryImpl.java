@@ -14,25 +14,19 @@ import java.util.MissingResourceException;
 /**
  * 组件管理器的基本实现.
  *
- * @author ZERO
+ * @author LongJu
  */
 public class ComponentRegistryImpl implements ComponentRegistry {
 
-    /**
-     * The logger.
-     */
-    private Logger logger = LoggerFactory.getLogger("AvalonEngine");
+    private Logger logger = LoggerFactory.getLogger(ComponentRegistryImpl.class.getSimpleName());
 
     /**
      * 存放组件.
      */
     private LinkedHashSet<IService> componentSet;
 
-    /**
-     * Instantiates a new component registry impl.
-     */
     public ComponentRegistryImpl() {
-        logger.debug("ComponentRegistryImpl create");
+        logger.debug("init = ComponentRegistryImpl");
         componentSet = Sets.newLinkedHashSet();
     }
 
@@ -46,8 +40,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         // 目标组件
         Object matchComponent = null;
 
-        for (Object component : componentSet) {
+        for (IService component : componentSet) {
             if (type.isAssignableFrom(component.getClass())) {
+                if (matchComponent != null) {
+                    throw new MissingResourceException("More than one matching component", type.getName(), null);
+                }
+                matchComponent = component;
+            }else if (type.getName()==component.getName()){
                 if (matchComponent != null) {
                     throw new MissingResourceException("More than one matching component", type.getName(), null);
                 }
@@ -62,11 +61,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return type.cast(matchComponent);
     }
 
-    /**
-     * Adds the component.
-     *
-     * @param component the component
-     */
     public void addComponent(IService component) {
         componentSet.add(component);
         logger.debug("Component add component " + component.toString());

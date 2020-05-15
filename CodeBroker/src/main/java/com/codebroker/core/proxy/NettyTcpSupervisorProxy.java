@@ -6,7 +6,7 @@ import com.codebroker.jmx.NettyTcpSupervisorControl;
 /**
  * 传输监听的代理累
  *
- * @author zero
+ * @author LongJu
  */
 public class NettyTcpSupervisorProxy implements NettyTcpSupervisorControl {
 

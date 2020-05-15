@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public interface IRemoteActorMessage extends Serializable {
 
-    public class InvokeRPC implements IRemoteActorMessage {
+    class InvokeRPC implements IRemoteActorMessage {
 
         private static final long serialVersionUID = 1954674398108019155L;
         /**

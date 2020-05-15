@@ -3,7 +3,7 @@ package com.codebroker.api.internal;
 /**
  * 内部上下文.
  *
- * @author ZERO
+ * @author LongJu
  */
 public class InternalContext {
 

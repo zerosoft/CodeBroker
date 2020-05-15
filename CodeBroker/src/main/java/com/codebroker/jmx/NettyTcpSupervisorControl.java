@@ -2,14 +2,14 @@ package com.codebroker.jmx;
 
 public interface NettyTcpSupervisorControl {
 
-    public int onlineSessionNum();
+    int onlineSessionNum();
 
-    public double totalReciveflow();
+    double totalReciveflow();
 
-    public double averageReciveflow();
+    double averageReciveflow();
 
-    public double totalWriteflow();
+    double totalWriteflow();
 
-    public double averageWriteflow();
+    double averageWriteflow();
 
 }

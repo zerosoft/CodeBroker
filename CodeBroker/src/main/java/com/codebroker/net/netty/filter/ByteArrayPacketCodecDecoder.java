@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * 网络数据包解析 |4| |4| |……| 数据包长度 操作码 数据.
  *
- * @author ZERO
+ * @author LongJu
  */
 
 public class ByteArrayPacketCodecDecoder extends ByteToMessageDecoder {
@@ -21,19 +21,7 @@ public class ByteArrayPacketCodecDecoder extends ByteToMessageDecoder {
             return;
         }
         in.markReaderIndex();
-//        System.out.println(in.order() + "in.readableBytes()" + in.readableBytes());
-//        byte[] bs = new byte[in.readableBytes()];
-//        in.readBytes(bs);
-//        String fullHexDump = ByteUtils.fullHexDump(bs);
-//        System.out.println(fullHexDump);
-//        System.out.println(new String(bs));
-//        in.resetReaderIndex();
-//        in.markReaderIndex();
-//		byte[] bs=new byte[in.capacity()];
-//		in.readBytes(bs);
-////		System.out.println(in.readIntLE());
-//		ByteUtils.fullHexDump(bs);
-//		in.resetReaderIndex();
+
         int dataLength = in.readInt();
 //        System.out.println(dataLength + "======");
         if (in.readableBytes() < dataLength) {

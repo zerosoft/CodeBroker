@@ -1,6 +1,7 @@
 package com.codebroker.protocol;
 
 import com.codebroker.api.internal.ByteArrayPacket;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.nio.ByteBuffer;
 
@@ -9,7 +10,7 @@ public class BaseByteArrayPacket implements ByteArrayPacket {
     protected int opcode;
 
     protected byte[] RawData;
-
+    @JsonCreator
     public BaseByteArrayPacket(int opcode, byte[] rawData) {
         super();
         this.opcode = opcode;

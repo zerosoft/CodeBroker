@@ -18,7 +18,6 @@ public class CountStructureBuilder {
 
     CountStructureBuilder(Jedis jedis) {
         this.jedis = jedis;
-
     }
 
     public CountStructureBuilder withNameSpace(String nameSpace) {

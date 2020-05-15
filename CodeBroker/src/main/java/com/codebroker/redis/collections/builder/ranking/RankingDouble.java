@@ -8,11 +8,6 @@ public class RankingDouble implements Ranking<Double> {
 
     private Double point;
 
-    RankingDouble(String key, String value) {
-        this.name = key;
-        this.point = Double.valueOf(value);
-    }
-
     public RankingDouble(String key, Double point) {
         this.name = key;
         this.point = point;

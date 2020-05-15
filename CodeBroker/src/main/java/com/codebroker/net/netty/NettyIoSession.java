@@ -1,61 +1,39 @@
 package com.codebroker.net.netty;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
 import com.codebroker.api.IoSession;
-import com.codebroker.core.actor.CodeBrokerSystem;
-import com.codebroker.core.actor.SessionActor;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.monitor.MonitorEventType;
+import com.codebroker.api.internal.IBindingActor;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.protocol.ThriftSerializerFactory;
-import com.codebroker.util.AkkaUtil;
-import com.message.thrift.actor.ActorMessage;
-import com.message.thrift.actor.Operation;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.thrift.TException;
 
 import java.nio.ByteBuffer;
+
 
 /**
  * 网络和Actor的关联 负责TCP的手法消息
  *
- * @author server
+ * @author LongJu
  */
-public class NettyIoSession implements IoSession {
-
-    public static final String NAME = "NettyIoSession";
+public class NettyIoSession implements IoSession , IBindingActor<ISession> {
 
     final ChannelHandlerContext ctx;
-    final long sessionId;
-    private ThriftSerializerFactory thriftSerializerFactory = new ThriftSerializerFactory();
-    private ActorRef actorRef;
+    public ActorRef<ISession> sessionActorRef = null;
 
     public NettyIoSession(ChannelHandlerContext ctx) {
         super();
         this.ctx = ctx;
-        ActorSystem actorSystem = AkkaUtil.getActorSystem();
-        this.sessionId = NettyServerMonitor.sessionIds.getAndIncrement();
-        actorRef = actorSystem.actorOf(Props.create(SessionActor.class, this), (NAME + "_" + sessionId));
-    }
-
-    public long getSessionId() {
-        return sessionId;
+        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+        actorSystem.tell(new IWorldMessage.SessionOpen(this));
     }
 
     @Override
     public void write(Object msg) {
         if (msg instanceof BaseByteArrayPacket) {
             ctx.writeAndFlush(msg);
-
-            CObject newInstance = CObject.newInstance();
-            newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_WRITE_FLOW);
-            newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
-            newInstance.putDouble(MonitorEventType.SESSION_FLOW, ((BaseByteArrayPacket) msg).getRawData().length + 4);
-            newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
-            AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
         }
     }
 
@@ -69,47 +47,36 @@ public class NettyIoSession implements IoSession {
         if (close) {
             if (ctx != null) {
                 ctx.close();
+                sessionActorRef=null;
             }
         } else {
-            actorRef.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            if (sessionActorRef!=null){
+                sessionActorRef.tell(new ISession.SessionClose(false));
+            }
         }
     }
 
     /**
-     * 发送消息
+     * 读取网络消息并发送给Actor
      *
      * @param msg
      */
-    private void send2SessionActor(Object msg) {
+    public void sessionReadMessage(Object msg) {
         if (msg instanceof BaseByteArrayPacket) {
-            ActorMessage message = new ActorMessage();
 
             byte[] binary = ((BaseByteArrayPacket) msg).toBinary();
             ByteBuffer buffer = ByteBuffer.allocate(binary.length);
             buffer.put(binary);
             buffer.flip();
 
-            message.messageRaw = buffer;
-            message.op = Operation.SESSION_RECIVE_PACKET;
-            byte[] actorMessage;
-            try {
-                actorMessage = thriftSerializerFactory.getActorMessage(message);
-                actorRef.tell(actorMessage, ActorRef.noSender());
-
-                CObject newInstance = CObject.newInstance();
-                newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_RECIVE_FLOW);
-                newInstance.putLong(MonitorEventType.SESSION_ID, sessionId);
-                newInstance.putDouble(MonitorEventType.SESSION_FLOW, binary.length);
-                newInstance.putLong(MonitorEventType.SESSION_TIME, System.currentTimeMillis());
-                AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
-            } catch (TException e) {
-                e.printStackTrace();
-            }
+            sessionActorRef.tell(new ISession.SessionAcceptMessage((BaseByteArrayPacket) msg));
 
         }
     }
 
-    public void processRecvieMessage(Object msg) {
-        send2SessionActor(msg);
+    @Override
+    public boolean bindingActor(ActorRef<ISession> ref) {
+        this.sessionActorRef = ref;
+        return true;
     }
 }

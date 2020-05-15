@@ -69,7 +69,6 @@ abstract class RedisCollection<T> implements Collection<T> {
         throw new UnsupportedOperationException("Use add all instead");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean containsAll(Collection<?> elements) {
         Objects.requireNonNull(elements);
@@ -82,7 +81,6 @@ abstract class RedisCollection<T> implements Collection<T> {
         return containsAll;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean removeAll(Collection<?> elements) {
         Objects.requireNonNull(elements);
@@ -124,11 +122,10 @@ abstract class RedisCollection<T> implements Collection<T> {
         if (!clazz.isInstance(o)) {
             return -1;
         }
-
         String value = gson.toJson(o);
         for (int index = 0; index < size(); index++) {
-            String findedValue = jedis.lindex(keyWithNameSpace, (long) index);
-            if (value.equals(findedValue)) {
+            String findValue = jedis.lindex(keyWithNameSpace, (long) index);
+            if (value.equals(findValue)) {
                 return index;
             }
         }
@@ -159,7 +156,6 @@ abstract class RedisCollection<T> implements Collection<T> {
         return Objects.hashCode(keyWithNameSpace);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

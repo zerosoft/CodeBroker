@@ -88,7 +88,6 @@ public class RedisMap<T> implements Map<String, T> {
     @Override
     public void clear() {
         throw new UnsupportedOperationException("Remove all elements using remove key in MapStructure");
-
     }
 
     @Override
@@ -126,7 +125,6 @@ public class RedisMap<T> implements Map<String, T> {
         return Objects.hashCode(nameSpace);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

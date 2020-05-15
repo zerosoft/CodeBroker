@@ -13,10 +13,6 @@ public class RankingStructureBuilder {
 
     private Jedis jedis;
 
-    RankingStructureBuilder() {
-
-    }
-
     public RankingStructureBuilder(Jedis jedis) {
         this.jedis = jedis;
     }

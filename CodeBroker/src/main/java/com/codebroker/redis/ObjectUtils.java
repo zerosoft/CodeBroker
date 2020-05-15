@@ -5,7 +5,7 @@ import java.io.*;
 /**
  * 套用java原生的序列化
  *
- * @author xl
+ * @author LongJu
  */
 public class ObjectUtils {
 

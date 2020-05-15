@@ -1,16 +1,10 @@
 package com.codebroker.setting;
 
 public enum SystemRequest {
-    SERVER_READY(0),
-    USER_LOGIN_PB(1),
-    USER_LOGOUT(2),
-    USER_DISCONNECT(3),
-    USER_RECONNECTION_TRY(4),
-    USER_RECONNECTION_SUCCESS(5),
+    USER_LOGIN_OR_REGISTER(1),
+    USER_LOGOUT(2);
 
-    USER_LOGIN_JSON(6),
-    USER_LOGIN_REGEDIT(8),
-    USER_JOIN_WORLD(7);
+
 
     public final int id;
 

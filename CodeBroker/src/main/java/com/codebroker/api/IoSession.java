@@ -3,15 +3,9 @@ package com.codebroker.api;
 /**
  * 网络会话.
  *
- * @author ZERO
+ * @author LongJu
  */
 public interface IoSession {
-    /**
-     * 获得Session ID
-     *
-     * @return
-     */
-    long getSessionId();
 
     /**
      * 数据写入.

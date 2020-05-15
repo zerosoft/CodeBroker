@@ -4,14 +4,12 @@ import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
 import com.codebroker.component.ComponentRegistryImpl;
-import com.codebroker.core.eventbus.CodebrokerEnvelope;
-import com.codebroker.core.manager.CacheManager;
-import com.codebroker.core.manager.GeoIPService;
-import com.codebroker.core.manager.JongoDBService;
-import com.codebroker.core.service.AkkaBootService;
-import com.codebroker.core.service.ICoreService;
-import com.codebroker.core.service.NettyNetService;
-import com.codebroker.core.service.RedisService;
+import com.codebroker.component.service.GeoIPComponent;
+import com.codebroker.component.service.AkkaSystemComponent;
+import com.codebroker.api.internal.ICoreService;
+import com.codebroker.component.service.NettyComponent;
+import com.codebroker.component.service.RedisComponent;
+import com.codebroker.component.service.MongoDBComponent;
 import com.codebroker.jmx.InstanceMXBean;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.setting.SystemEnvironment;
@@ -29,29 +27,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
- * 阿瓦隆，引擎入口.
+ * CodeBroker引擎入口.
  *
- * @author ZERO
+ * @author LongJu
  */
 public class ServerEngine implements InstanceMXBean {
 
-    public static CodebrokerEnvelope envelope = new CodebrokerEnvelope();
     public static int serverId;
-    public static String remotePath;
-    public static int gameServerNum;
-    public static int gateServerNum;
-    /**
-     * The name.
-     */
     private static String name;
-    /**
-     * The logger.
-     */
-    private static Logger logger = LoggerFactory.getLogger("AvalonEngine");
+
+    private static Logger logger = LoggerFactory.getLogger("ServerEngine");
     /**
      * 系统服务器组件(集合).
      */
     private final ComponentRegistryImpl systemRegistry;
+    /**
+     * 热更新工具
+     */
     HotSwapClassUtil hotSwapClassUtil;
     /**
      * 应用上下文.
@@ -69,8 +61,8 @@ public class ServerEngine implements InstanceMXBean {
      * @param props the props
      * @throws Exception the exception
      */
-    protected ServerEngine(Props props) throws Exception {
-        logger.debug("create AvalonEngine");
+    protected ServerEngine(Props props){
+        logger.info("init ServerEngine");
         propertiesWrapper = new PropertiesWrapper(props);
 
         ServerEngine.serverId = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, -1);
@@ -78,26 +70,23 @@ public class ServerEngine implements InstanceMXBean {
         systemRegistry = new ComponentRegistryImpl();
         // 应用上下文
         application = new StartupKernelContext(SystemEnvironment.ENGINE_NAME, systemRegistry, propertiesWrapper);
-        logger.debug("AvalonEngine start create application");
+
+        logger.debug("ServerEngine start getInstance application");
 
         createAndStartApplication();
     }
 
-    /**
-     * The main method.
-     *
-     * @param args the arguments
-     * @throws Exception the exception
-     */
+
     public static void main(String[] args) throws Exception {
         File root = new File("");
         logger.info("File path=" + root.getAbsolutePath());
-        File config = null;
+
+        File config;
         if (args.length == 1) {
             config = new File(root.getAbsolutePath() + File.separator + args[0]);
         } else {
             // 确保没有过多的参数
-            config = new File(root.getAbsolutePath() + File.separator + "conf" + File.separator + "app.properties");
+            config = new File(root.getAbsolutePath() + File.separator + "config" + File.separator + "app.properties");
         }
         if (!config.exists()) {
             logger.info("not app.properties int conf");
@@ -112,26 +101,19 @@ public class ServerEngine implements InstanceMXBean {
         new ServerEngine(props);
     }
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    @Override
-    public String getName() {
-        return name;
-    }
+
+
 
     /**
      * 创建并启动应用.
      */
     private void createAndStartApplication() {
         // 服务的启动
-        logger.debug("AvalonEngine start createServices");
+        logger.debug("ServerEngine start createServices");
         // 启动服务
         createServices(name);
         // 创建守护周期任务
-        logger.debug("AvalonEngine start Application");
+        logger.debug("ServerEngine start Application");
 
         FileUtil.printOsEnv();
         // 上层逻辑的启动
@@ -150,32 +132,29 @@ public class ServerEngine implements InstanceMXBean {
          * 注册Redis服务
          */
         if (propertiesWrapper.getBooleanProperty("redis", false)) {
-            System.err.println("reids not need");
-            IService redisService = new RedisService();
+            logger.info("redis component init");
+            IService redisService = new RedisComponent();
             systemRegistry.addComponent(redisService);
+
         }
         if (propertiesWrapper.getBooleanProperty("mongodb", false)) {
-            System.err.println("mongodb not need");
-            IService jongoDBService = new JongoDBService();
-            application.setManager(jongoDBService);
+            System.err.println("mongodb component init");
+            IService mongoDBComponent = new MongoDBComponent();
+            systemRegistry.addComponent(mongoDBComponent);
         }
-        IService geoIPService = new GeoIPService();
-        application.setManager(geoIPService);
-        /**
-         * 缓存服务
-         */
-        IService cacheManager = new CacheManager();
-        systemRegistry.addComponent(cacheManager);
-        // 系统级组件
+        IService geoIPService = new GeoIPComponent();
+        systemRegistry.addComponent(geoIPService);
 
-        IService mediator = new AkkaBootService();
+
         // 如果是网关和单幅模式需要启动网络服务
-        IService netty = new NettyNetService();
-        systemRegistry.addComponent(netty);
+        IService nettyComponent = new NettyComponent();
+        systemRegistry.addComponent(nettyComponent);
+
+        IService akkaSystemComponent = new AkkaSystemComponent();
         // jmx相关启动
         ManagementService managementService = new ManagementService(this);
-        ((AkkaBootService) mediator).setManagementService(managementService);
-        systemRegistry.addComponent(mediator);
+        ((AkkaSystemComponent) akkaSystemComponent).setManagementService(managementService);
+        systemRegistry.addComponent(akkaSystemComponent);
 
 
         InternalContext.setManagerLocator(new ManagerLocatorImpl());
@@ -199,6 +178,7 @@ public class ServerEngine implements InstanceMXBean {
                     ((IService) object).init(propertiesWrapper);
                 } catch (Exception e) {
                     logger.error("Server Components Exception", e);
+                    System.exit(1);
                 }
             }
         }
@@ -208,6 +188,11 @@ public class ServerEngine implements InstanceMXBean {
             if (object instanceof ICoreService) {
                 while (!((ICoreService) object).isActive()) {
                     logger.info("Waiting Service");
+                    try {
+                        Thread.sleep(10000L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 logger.info(((ICoreService) object).getName() + " Start");
             }
@@ -243,20 +228,10 @@ public class ServerEngine implements InstanceMXBean {
         application.setAppListener(listener);
     }
 
-    /**
-     * Gets the system registry.
-     *
-     * @return the system registry
-     */
     public ComponentRegistryImpl getSystemRegistry() {
         return systemRegistry;
     }
 
-    /**
-     * Gets the enable jmx.
-     *
-     * @return the enable jmx
-     */
     public boolean getEnableJMX() {
         return false;
     }
@@ -264,23 +239,20 @@ public class ServerEngine implements InstanceMXBean {
     @Override
     public void stopEngine() {
         logger.info("Close kernel");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("Server shut down");
-                boolean shutDown = true;
-                if (null != listener) {
-                    listener.destroy(1);
-                } else {
-                    shutDown = true;
-                }
-                if (!shutDown) {
-                    logger.info("Server Application not shut down");
-                    return;
-                }
-                for (IService iService : systemRegistry) {
-                    iService.destroy(null);
-                }
+        new Thread(() -> {
+            logger.info("Server shut down");
+            boolean shutDown = true;
+            if (null != listener) {
+                listener.destroy(1);
+            } else {
+                shutDown = true;
+            }
+            if (!shutDown) {
+                logger.info("Server Application not shut down");
+                return;
+            }
+            for (IService iService : systemRegistry) {
+                iService.destroy(null);
             }
         }).start();
     }
@@ -302,4 +274,8 @@ public class ServerEngine implements InstanceMXBean {
         hotSwapClassUtil.reloadMethod(clazz, methodName, context);
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
 }

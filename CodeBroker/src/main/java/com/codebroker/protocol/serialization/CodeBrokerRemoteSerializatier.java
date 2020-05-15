@@ -8,7 +8,7 @@ import com.codebroker.core.data.IObject;
 /**
  * 对象序列化
  *
- * @author zero
+ * @author LongJu
  */
 public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest {
     private final String IObject = "IO";

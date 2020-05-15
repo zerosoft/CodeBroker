@@ -50,7 +50,6 @@ public abstract class AbstractScoresPoint<T extends Number> implements ScoresPoi
         return Objects.hashCode(keyWithNameSpace);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

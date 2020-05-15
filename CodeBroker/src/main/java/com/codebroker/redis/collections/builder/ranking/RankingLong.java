@@ -8,11 +8,6 @@ public class RankingLong implements Ranking<Long> {
 
     private Long point;
 
-    public RankingLong(String key, String value) {
-        this.name = key;
-        this.point = Long.valueOf(value);
-    }
-
     public RankingLong(String key, Long point) {
         this.name = key;
         this.point = point;

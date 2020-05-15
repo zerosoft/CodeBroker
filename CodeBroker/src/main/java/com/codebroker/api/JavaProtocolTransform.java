@@ -7,7 +7,6 @@ public interface JavaProtocolTransform {
 
      void protocolToJavaBean(Message message);
 
-
      Message javaBeanToProtocol();
 
      byte[] getByteArray();
