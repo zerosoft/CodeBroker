@@ -6,6 +6,7 @@ import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -54,13 +55,14 @@ public class NettyComponent extends BaseCoreService {
                 workerGroup = new NioEventLoopGroup(workerGroupNum);
                 bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                         .option(ChannelOption.SO_BACKLOG, backlog)
-                        .option(ChannelOption.SO_REUSEADDR, Boolean.valueOf(true))
+                        .option(ChannelOption.SO_REUSEADDR,true)
                         // .option(ChannelOption.TCP_NODELAY,
                         // Boolean.valueOf(true))
                         // .option(ChannelOption.SO_KEEPALIVE,
                         // Boolean.valueOf(true))
-                        .childOption(ChannelOption.TCP_NODELAY, true).childOption(ChannelOption.SO_KEEPALIVE, true)
-                        .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                        .childOption(ChannelOption.TCP_NODELAY, true)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true)
+                        .childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
                         .childOption(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
                         .handler(new LoggingHandler(LogLevel.INFO)).childHandler(new NettyServerInitializer());
                 ChannelFuture f;

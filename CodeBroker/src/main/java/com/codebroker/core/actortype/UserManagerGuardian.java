@@ -19,22 +19,22 @@ import java.util.Set;
 public class UserManagerGuardian {
 
 	private ActorRef<Receptionist.Listing> listingAdapter;
-	private Set<ActorRef<IUserManager>> serviceInstances=new HashSet();
+	private Set<ActorRef<IUserManager>> serviceInstances = new HashSet();
 	private ActorRef<ISession> self;
 	private ISession.SessionAcceptRequest message;
 
 	public static Behavior<IUserManager> create(ActorRef<ISession> self, ISession.SessionAcceptRequest message) {
-		return Behaviors.setup(context -> new UserManagerGuardian(context,self,message).handle());
+		return Behaviors.setup(context -> new UserManagerGuardian(context, self, message).handle());
 	}
 
 	private UserManagerGuardian(ActorContext<IUserManager> context, ActorRef<ISession> self, ISession.SessionAcceptRequest message) {
-		this.self=self;
-		this.message=message;
+		this.self = self;
+		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
 		this.listingAdapter = context.messageAdapter(Receptionist.Listing.class, IUserManager.AddProcessorReference::new);
 		PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
 		int intProperty = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
-		context.getSystem().receptionist().tell(Receptionist.subscribe(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY+"."+intProperty), listingAdapter));
+		context.getSystem().receptionist().tell(Receptionist.subscribe(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + intProperty), listingAdapter));
 	}
 
 	private Behavior<IUserManager> handle() {
@@ -42,9 +42,9 @@ public class UserManagerGuardian {
 				.onMessage(IUserManager.AddProcessorReference.class, listing -> {
 					PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
 					int intProperty = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
-					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY+"."+intProperty));
+					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + intProperty));
 					for (ActorRef<IUserManager> serviceInstance : serviceInstances) {
-						serviceInstance.tell(new IUserManager.TryBindingUser(self,message.request));
+						serviceInstance.tell(new IUserManager.TryBindingUser(self, message.request));
 					}
 					return Behaviors.stopped();
 				}).build();

@@ -22,7 +22,8 @@ dependencies {
     
 	compile group: 'com.google.protobuf', name: 'protobuf-java', version: '2.5.0'
 	compile 'org.javassist:javassist:3.20.0-GA'
-	compile group: 'io.netty', name: 'netty-all', version: '4.1.9.Final'
+
+	compile group: 'io.netty', name: 'netty-all', version: '4.1.50.Final'
 
 	compile group: 'ch.qos.logback', name: 'logback-classic', version:  logback_version
 	compile group: 'ch.qos.logback', name: 'logback-core',version:  logback_version

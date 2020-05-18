@@ -2,15 +2,13 @@ package com.codebroker.net.netty;
 
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.monitor.MonitorEventType;
-import com.codebroker.util.LogUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *  @author LongJu
@@ -18,9 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyHandler.class);
-
-    public static final String NAME = "NettyHandler";
-    public static AtomicInteger sessionNum = new AtomicInteger(1);
 
     private NettyIoSession nettyIoSession;
 
@@ -31,7 +26,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
         CObject newInstance = CObject.newInstance();
         newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_ONLINE);
-        LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndIncrement());
+        logger.info("ChannelHandlerContext Registered");
     }
 
     @Override
@@ -42,23 +37,20 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         nettyIoSession.sessionReadMessage(msg);
-        LogUtil.snedELKLogMessage(NAME, "Read Message session" );
+        ReferenceCountUtil.release(msg);
+        logger.info("ChannelHandlerContext Read Message session");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
         nettyIoSession.close(false);
-
-        CObject newInstance = CObject.newInstance();
-        newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_OUTLINE);
-//        AkkaUtil.getInbox().send(CodeBrokerSystem.getInstance().getMonitorManager(), newInstance);
-        LogUtil.snedELKLogMessage(NAME, "SESSION NUM " + sessionNum.getAndDecrement());
+        logger.info("ChannelHandlerContext handler Removed");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LogUtil.snedELKLogMessage(NAME, cause.getMessage());
+        logger.error("ChannelHandlerContext handler exceptionCaught",cause);
     }
 
     @Override
@@ -67,12 +59,12 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
             //服务端对应着读事件，当为READER_IDLE时触发
             IdleStateEvent event = (IdleStateEvent)evt;
             if(event.state() == IdleState.READER_IDLE){
-//                logger.debug("不活动的链接 READER_IDLE");
+                logger.debug("不活动的链接 READER_IDLE");
             }else if(event.state() == IdleState.WRITER_IDLE){
-//                logger.debug("不活动的链接 WRITER_IDLE");
+                logger.debug("不活动的链接 WRITER_IDLE");
             }
             else if(event.state() == IdleState.ALL_IDLE){
-//                logger.debug("不活动的链接 ALL_IDLE");
+                logger.debug("不活动的链接 ALL_IDLE");
             }
             else{
                 super.userEventTriggered(ctx,evt);
