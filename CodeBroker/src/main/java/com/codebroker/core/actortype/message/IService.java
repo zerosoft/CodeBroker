@@ -1,14 +1,18 @@
 package com.codebroker.core.actortype.message;
 
-public interface IServiceActor {
-    final class Init implements IServiceActor {
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+public interface IService {
+
+    final class Init implements IService {
         public Object object;
 
         public Init(Object obj) {
             this.object=obj;
         }
     }
-    final class Destroy implements IServiceActor {
+
+    final class Destroy implements IService {
         public Object object;
 
         public Destroy(Object obj) {
@@ -16,9 +20,11 @@ public interface IServiceActor {
         }
     }
 
-    final class HandleMessage implements IServiceActor {
-        public Object object;
 
+    final class HandleMessage implements IService {
+
+        public Object object;
+        @JsonCreator
         public HandleMessage(Object obj) {
             this.object=obj;
         }

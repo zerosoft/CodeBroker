@@ -6,10 +6,9 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.cluster.ClusterEvent;
-import com.codebroker.api.internal.IService;
 import com.codebroker.cluster.ClusterListener;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IServiceActor;
+import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.actortype.message.ISessionManager;
 import com.codebroker.core.actortype.message.IUserManager;
@@ -63,9 +62,9 @@ public class GameWorld extends AbstractBehavior<IWorldMessage> {
     }
 
     private  Behavior<IWorldMessage> createService(IWorldMessage.CreateService m) {
-        ActorRef<IServiceActor> spawn = getContext().spawn(ServiceActor.create(m.name, m.service), m.name, DispatcherSelector.fromConfig("game-service"));
+        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(m.name, m.service), m.name, DispatcherSelector.fromConfig("game-service"));
         ServiceWithActor serviceActor=new ServiceWithActor(m.name,spawn);
-        IService iService = new ServiceWithActorDecorate(serviceActor,m.service).newProxyInstance(m.service.getClass());
+        com.codebroker.api.internal.IService iService = new ServiceWithActorDecorate(serviceActor,m.service).newProxyInstance(m.service.getClass());
         ContextResolver.setManager(iService);
         return Behaviors.same();
     }

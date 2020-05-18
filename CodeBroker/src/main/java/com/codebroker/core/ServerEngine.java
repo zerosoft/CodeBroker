@@ -118,8 +118,8 @@ public class ServerEngine implements InstanceMXBean {
         FileUtil.printOsEnv();
         // 上层逻辑的启动
         startApplication(name);
-
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+        //服务器关闭的钩子
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
     }
 
     /**
@@ -138,10 +138,11 @@ public class ServerEngine implements InstanceMXBean {
 
         }
         if (propertiesWrapper.getBooleanProperty("mongodb", false)) {
-            System.err.println("mongodb component init");
+            logger.info("mongodb component init");
             IService mongoDBComponent = new MongoDBComponent();
             systemRegistry.addComponent(mongoDBComponent);
         }
+
         IService geoIPService = new GeoIPComponent();
         systemRegistry.addComponent(geoIPService);
 

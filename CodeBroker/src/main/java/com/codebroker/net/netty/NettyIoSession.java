@@ -69,7 +69,7 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
             buffer.put(binary);
             buffer.flip();
 
-            sessionActorRef.tell(new ISession.SessionAcceptMessage((BaseByteArrayPacket) msg));
+            sessionActorRef.tell(new ISession.SessionAcceptRequest((BaseByteArrayPacket) msg));
 
         }
     }

@@ -60,7 +60,6 @@ public class GameUser implements IGameUser , IEventHandler {
    }
 
 
-
     public void rebindIoSession(ActorRef actorRef) {
 
     }

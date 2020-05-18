@@ -39,16 +39,16 @@ public class Session extends AbstractBehavior<ISession> {
     @Override
     public Receive<ISession> createReceive() {
         return newReceiveBuilder()
-                .onMessage(ISession.SessionAcceptMessage.class,this::sessionAcceptMessage)
-                .onMessage(ISession.SessionSendMessage.class,this::sessionSendMessage)
+                .onMessage(ISession.SessionAcceptRequest.class,this::sessionAcceptMessage)
+                .onMessage(ISession.SessionWriteResponse.class,this::sessionSendMessage)
                 .onMessage(ISession.SessionBindingUser.class,this::sessionBindingUser)
                 .onMessage(ISession.SessionClose.class,this::sessionClose)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
 
-    private  Behavior<ISession> sessionSendMessage(ISession.SessionSendMessage message) {
-        ioSession.write(message.message);
+    private  Behavior<ISession> sessionSendMessage(ISession.SessionWriteResponse message) {
+        ioSession.write(message.response);
         return Behaviors.same();
     }
 
@@ -84,12 +84,12 @@ public class Session extends AbstractBehavior<ISession> {
     }
 
 
-    private Behavior<ISession> sessionAcceptMessage(ISession.SessionAcceptMessage message) {
-        getContext().getLog().debug("Session accept Message {}",message.message);
+    private Behavior<ISession> sessionAcceptMessage(ISession.SessionAcceptRequest message) {
+        getContext().getLog().debug("Session accept Message {}",message.request);
         if (userActorRef==null){
             getContext().spawnAnonymous(UserManagerGuardian.create(getContext().getSelf(),message));
         }else{
-            userActorRef.tell(new IUser.ReceiveMessageFromSession(message.message));
+            userActorRef.tell(new IUser.ReceiveMessageFromSession(message.request));
         }
         return Behaviors.same();
     }

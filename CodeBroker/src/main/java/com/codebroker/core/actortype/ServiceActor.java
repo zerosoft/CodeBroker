@@ -5,45 +5,44 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.codebroker.api.internal.IService;
-import com.codebroker.core.actortype.message.IServiceActor;
+import com.codebroker.core.actortype.message.IService;
 
-public class ServiceActor extends AbstractBehavior<IServiceActor> {
+public class ServiceActor extends AbstractBehavior<IService> {
 
     private String id;
-    private IService service;
+    private com.codebroker.api.internal.IService service;
 
-    public static Behavior<IServiceActor> create(String id,IService service) {
-        Behavior<IServiceActor> setup = Behaviors.setup(ctx-> new ServiceActor(ctx,id,service));
+    public static Behavior<IService> create(String id, com.codebroker.api.internal.IService service) {
+        Behavior<IService> setup = Behaviors.setup(ctx-> new ServiceActor(ctx,id,service));
         return setup;
     }
 
-    public ServiceActor(ActorContext<IServiceActor> context, String id, IService service) {
+    public ServiceActor(ActorContext<IService> context, String id, com.codebroker.api.internal.IService service) {
         super(context);
         this.id=id;
         this.service=service;
     }
 
     @Override
-    public Receive<IServiceActor> createReceive() {
+    public Receive<IService> createReceive() {
         return newReceiveBuilder()
-                .onMessage(IServiceActor.Init.class,this::init)
-                .onMessage(IServiceActor.Destroy.class,this::destroy)
-                .onMessage(IServiceActor.HandleMessage.class,this::handleMessage)
+                .onMessage(IService.Init.class,this::init)
+                .onMessage(IService.Destroy.class,this::destroy)
+                .onMessage(IService.HandleMessage.class,this::handleMessage)
                 .build();
     }
 
-    private  Behavior<IServiceActor> handleMessage(IServiceActor.HandleMessage message) {
+    private  Behavior<IService> handleMessage(IService.HandleMessage message) {
         service.handleMessage(message.object);
         return Behaviors.same();
     }
 
-    private  Behavior<IServiceActor> destroy(IServiceActor.Destroy destroy) {
+    private  Behavior<IService> destroy(IService.Destroy destroy) {
         service.destroy(destroy.object);
         return Behaviors.stopped();
     }
 
-    private Behavior<IServiceActor> init(IServiceActor.Init message) {
+    private Behavior<IService> init(IService.Init message) {
         service.init(message.object);
         return Behaviors.same();
     }

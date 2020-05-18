@@ -33,7 +33,7 @@ public class ServiceWithActorDecorate implements MethodInterceptor {
 	}
 
 	@Override
-	public Object intercept(Object arg0, Method method, Object[] objects, MethodProxy arg3) throws Throwable {
+	public Object intercept(Object obj, Method method, Object[] objects, MethodProxy arg3) throws Throwable {
 		if (method.getName().equals("hashCode")){
 			return service.hashCode();
 		}else if (method.getName().equals("toString")){

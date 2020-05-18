@@ -10,7 +10,7 @@ final class StartupKernelContext extends KernelContext {
      *
      * @param applicationName   the application name
      * @param systemRegistry    the system registry
-     * @param propertieswrapper the propertieswrapper
+     * @param propertieswrapper the properties wrapper
      */
     public StartupKernelContext(String applicationName, ComponentRegistryImpl systemRegistry,
                                 PropertiesWrapper propertieswrapper) {

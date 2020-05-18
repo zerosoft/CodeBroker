@@ -44,7 +44,7 @@ class KernelContext {
      * @param applicationName   the application name 应用名称
      * @param serviceComponents the service components 系统提供的服务
      * @param managerComponents the manager components 逻辑服务提供
-     * @param propertieswrapper the propertieswrapper
+     * @param propertieswrapper the properties wrapper
      */
     protected KernelContext(String applicationName, ComponentRegistry serviceComponents,
                             ComponentRegistry managerComponents, PropertiesWrapper propertieswrapper) {

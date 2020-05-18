@@ -1,7 +1,7 @@
 package com.codebroker.api;
 
 /**
- * 请求的Hander接口.
+ * 请求的Handler接口.
  *
  * @author LongJu
  */

@@ -39,7 +39,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IUserManager.class, "UserManager."+gameWorldId), context.getSelf()));
+                            .tell(Receptionist.register(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY+"."+gameWorldId), context.getSelf()));
 
                     return new UserManager(context);
                 });

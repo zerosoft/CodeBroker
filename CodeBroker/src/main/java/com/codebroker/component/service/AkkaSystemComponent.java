@@ -67,9 +67,9 @@ public class AkkaSystemComponent extends BaseCoreService {
 
     @Override
     public void destroy(Object obj) {
-       logger.debug("akkasystem close");
+       logger.debug("akka system close");
        system.terminate();
-       logger.debug("akkasystem closed");
+       logger.debug("akka system closed");
     }
 
     @Override

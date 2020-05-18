@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class BaseCoreService implements ICoreService {
 
     private static final AtomicInteger serviceId = new AtomicInteger(0);
-    private static final String DEFAULT_NAME = "AnonymousService-";
+    private static final String DEFAULT_NAME = "Anonymous-Service-";
     protected String name;
     protected volatile boolean active = false;
 

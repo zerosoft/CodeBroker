@@ -27,8 +27,10 @@ public abstract class AppListenerExtension implements CodeBrokerAppListener {
     private String name;
 
     public void destroy(Object obj) {
+        logger.info("AppListenerExtension destroy start");
         handlerFactory.clearAll();
         filterChain.destroy();
+        logger.info("AppListenerExtension destroy end");
     }
 
     public void addRequestHandler(int requestId, Class<?> theClass) {
@@ -62,7 +64,7 @@ public abstract class AppListenerExtension implements CodeBrokerAppListener {
         try {
             IClientRequestHandler handler = (IClientRequestHandler) handlerFactory.findHandler(requestId);
             if (handler == null) {
-                logger.info("hander is no found" + requestId);
+                logger.info("handler is no found" + requestId);
             }
             handler.handleClientRequest(user, params);
         } catch (InstantiationException | IllegalAccessException e) {

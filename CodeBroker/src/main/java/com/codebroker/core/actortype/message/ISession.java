@@ -14,18 +14,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  */
 public interface ISession {
 
-   final class SessionAcceptMessage implements ISession{
-        public BaseByteArrayPacket message;
-        public SessionAcceptMessage(BaseByteArrayPacket message) {
-            this.message = message;
+   final class SessionAcceptRequest implements ISession{
+        public BaseByteArrayPacket request;
+        public SessionAcceptRequest(BaseByteArrayPacket request) {
+            this.request = request;
         }
     }
 
-    final class SessionSendMessage implements ISession{
-        public IPacket message;
+    final class SessionWriteResponse implements ISession{
+        public IPacket response;
         @JsonCreator
-        public SessionSendMessage(IPacket message) {
-            this.message = message;
+        public SessionWriteResponse(IPacket response) {
+            this.response = response;
         }
     }
 

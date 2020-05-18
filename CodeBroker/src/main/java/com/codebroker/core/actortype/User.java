@@ -14,7 +14,6 @@ import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
 import com.codebroker.core.entities.GameUser;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
@@ -67,7 +66,7 @@ public class User extends AbstractBehavior<IUser> {
 
     private Behavior<IUser> sendMessageToSession(IUser.SendMessageToSession message) {
         if (ioSession!=null){
-            ioSession.tell(new ISession.SessionSendMessage(message.message));
+            ioSession.tell(new ISession.SessionWriteResponse(message.message));
         }
         return Behaviors.same();
     }
@@ -109,16 +108,13 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private Behavior<IUser> getMessageFromSession(IUser.ReceiveMessageFromSession message) {
-//       CompletableFuture.supplyAsync(() -> {
-            CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-            try {
-                int opCode = message.message.getOpCode();
-                appListener.handleClientRequest(gameUser, opCode, message.message.getRawData());
-            } catch (Exception e) {
-                getContext().getLog().error("handleClientRequest error ", e);
-            }
-//            return null;
-//        }, ec);
+        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+        try {
+            int opCode = message.message.getOpCode();
+            appListener.handleClientRequest(gameUser, opCode, message.message.getRawData());
+        } catch (Exception e) {
+            getContext().getLog().error("handleClientRequest error ", e);
+        }
         return Behaviors.same();
     }
 }

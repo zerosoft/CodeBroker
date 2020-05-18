@@ -40,7 +40,7 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(ISessionManager.class, "SessionManager."+gameWorldId), context.getSelf()));
+                            .tell(Receptionist.register(ServiceKey.create(ISessionManager.class, SessionManager.IDENTIFY+"."+gameWorldId), context.getSelf()));
                     return new SessionManager(context);
                 });
     }
