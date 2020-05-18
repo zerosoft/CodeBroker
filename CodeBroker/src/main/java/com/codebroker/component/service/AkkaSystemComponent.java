@@ -60,7 +60,7 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         this.system = ActorSystem.create(GameWorld.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
 
-        system.tell(IWorldMessage.StartWorldMessage.NO_INSTANCE);
+        system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
         super.setActive();
     }
 

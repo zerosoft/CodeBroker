@@ -20,12 +20,8 @@ class ManagerLocatorImpl implements ManagerLocator {
 
     @Override
     public void setManager(IService type) {
-        ContextResolver.getActorSystem().tell(new IWorldMessage.CreateService(type.getClass().getName(),type));
-    }
-
-    @Override
-    public ActorSystem<IWorldMessage> getActorSystem() {
-        return ContextResolver.getActorSystem();
+        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+        actorSystem.tell(new IWorldMessage.CreateService(type.getClass().getName(),type));
     }
 
 }

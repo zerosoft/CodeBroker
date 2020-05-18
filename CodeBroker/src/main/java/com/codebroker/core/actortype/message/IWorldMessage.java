@@ -25,23 +25,19 @@ public interface IWorldMessage {
      * 启动游戏世界
      */
     enum StartWorldMessage implements IWorldMessage {
-        NO_INSTANCE;
+        INSTANCE;
     }
     /**
      * 重启游戏世界
      */
-    final class ReStartWorldMessage implements IWorldMessage {
-        public static ReStartWorldMessage getInstance() {
-            return new ReStartWorldMessage();
-        }
+     enum  ReStartWorldMessage implements IWorldMessage {
+        INSTANCE;
     }
     /**
      * 停止游戏世界
      */
-    final class StopWorldMessage implements IWorldMessage {
-        public static StopWorldMessage getInstance() {
-            return new StopWorldMessage();
-        }
+    enum StopWorldMessage implements IWorldMessage {
+        INSTANCE;
     }
 
     class ListingResponse implements IWorldMessage {
