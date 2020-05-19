@@ -1,6 +1,5 @@
 package com.codebroker.core.actortype;
 
-import com.codebroker.api.internal.IService;
 import com.esotericsoftware.reflectasm.MethodAccess;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -8,17 +7,13 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-/**
- * Service的Cglib反射封装
- * @author LongJu
- */
-public class ServiceWithActorDecorate implements MethodInterceptor {
+public class ObjectActorDecorate<T> implements MethodInterceptor {
 
-	IService subject;
-	IService service;
+	T subject;
+	T service;
 	MethodAccess methodAccess;
 
-	public ServiceWithActorDecorate(IService subject, IService service) {
+	public ObjectActorDecorate(T subject, T service) {
 		super();
 		this.subject = subject;
 		this.service = service;
@@ -43,6 +38,4 @@ public class ServiceWithActorDecorate implements MethodInterceptor {
 		}
 		return methodAccess.invoke(subject,method.getName(),objects);
 	}
-
-
 }

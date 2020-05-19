@@ -2,7 +2,7 @@ package com.codebroker.component.service;
 
 import akka.actor.typed.ActorSystem;
 import com.codebroker.component.BaseCoreService;
-import com.codebroker.core.actortype.GameWorld;
+import com.codebroker.core.actortype.GameSystem;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.setting.SystemEnvironment;
@@ -58,7 +58,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config configFile = ConfigFactory.load(cg).getConfig(configName);
 
-        this.system = ActorSystem.create(GameWorld.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
+        this.system = ActorSystem.create(GameSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
 
         system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
         super.setActive();

@@ -60,7 +60,7 @@ public class DemoExtension extends AppListenerExtension {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-//		AllianceService manager = AppContext.getManager(AllianceService.class);
-//		manager.init("hello world");
+		AllianceService manager = AppContext.getManager(AllianceService.class);
+		manager.init("hello world");
 	}
 }

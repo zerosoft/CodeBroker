@@ -1,122 +1,31 @@
 package com.codebroker.core.actortype;
 
-import akka.actor.typed.*;
+import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import akka.cluster.ClusterEvent;
-import com.codebroker.cluster.ClusterListener;
-import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IService;
-import com.codebroker.core.actortype.message.IWorldMessage;
-import com.codebroker.core.actortype.message.ISessionManager;
-import com.codebroker.core.actortype.message.IUserManager;
-import com.codebroker.core.actortype.timer.UserManagerTimer;
+import com.codebroker.core.actortype.message.IGameWorld;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+public class GameWorld extends AbstractBehavior<IGameWorld> {
 
+	private long gameWorldId;
 
-/**
- * 游戏世界Actor
- * @author LongJu
- * @Date 2020/3/25
- */
-public class GameWorld extends AbstractBehavior<IWorldMessage> {
-
-    /**
-     * 游戏世界标识Id
-     */
-    private long gameWorldId;
-
-    public static Behavior<IWorldMessage> create(int id) {
-        Behavior<IWorldMessage> setup = Behaviors.setup(ctx->
-                new GameWorld(ctx,id));
-        return setup;
-    }
+	public static Behavior<IGameWorld> create(int id) {
+		Behavior<IGameWorld> setup =
+				Behaviors.setup(ctx-> new GameWorld(ctx,id));
+		return setup;
+	}
 
 
-    public GameWorld(ActorContext<IWorldMessage> context, int id) {
-        super(context);
-        this.gameWorldId=id;
-    }
+	public GameWorld(ActorContext<IGameWorld> context, int id) {
+		super(context);
+		this.gameWorldId=id;
+	}
 
-    private ActorRef<ISessionManager> sessionManager;
-    private ActorRef<IUserManager> userManager;
-    private ActorRef<UserManagerTimer.Command> userManagerTimer;
-    private ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
-
-
-    @Override
-    public Receive<IWorldMessage> createReceive() {
-        return newReceiveBuilder()
-                .onMessage(IWorldMessage.SessionOpen.class,this::sessionOpen)
-                .onMessage(IWorldMessage.StartWorldMessage.class,this::startGameWorld)
-                .onMessage(IWorldMessage.ReStartWorldMessage.class,this::reStartGameWorld)
-                .onMessage(IWorldMessage.StopWorldMessage.class,this::stopGameWorld)
-                .onMessage(IWorldMessage.CreateService.class,this::createService)
-                .onSignal(PreRestart.class,signal->onRestart())
-                .onSignal(PostStop.class, signal ->onPostStop())
-                .build();
-    }
-
-    private  Behavior<IWorldMessage> createService(IWorldMessage.CreateService m) {
-        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(m.name, m.service), m.name, DispatcherSelector.fromConfig("game-service"));
-        ServiceWithActor serviceActor=new ServiceWithActor(m.name,spawn);
-        com.codebroker.api.internal.IService iService = new ServiceWithActorDecorate(serviceActor,m.service).newProxyInstance(m.service.getClass());
-        ContextResolver.setManager(iService);
-        return Behaviors.same();
-    }
-
-    private Behavior<IWorldMessage> reStartGameWorld(IWorldMessage.ReStartWorldMessage message) {
-        getContext().getSystem().log().info("GameWorld reStart");
-        return Behaviors.same();
-    }
-
-    private Behavior<IWorldMessage> startGameWorld(IWorldMessage.StartWorldMessage message) {
-        getContext().getSystem().log().info("GameWorld start id {}",gameWorldId);
-
-        sessionManager = getContext().spawn(SessionManager.create(gameWorldId), SessionManager.IDENTIFY+"."+gameWorldId);
-        getContext().getSystem().log().info("SessionManager Path {}",sessionManager.path());
-
-        userManager = getContext().spawn(UserManager.create(gameWorldId), UserManager.IDENTIFY+"."+gameWorldId);
-
-        userManagerTimer = getContext().spawn(UserManagerTimer.create(userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
-        getContext().getSystem().log().info("UserManager Path {}",userManager.path());
-
-        clusterDomainEventActorRef = getContext().spawn(ClusterListener.create(), ClusterListener.IDENTIFY+"."+gameWorldId);
-        getContext().getSystem().log().info("clusterDomainEventActorRef Path {}",clusterDomainEventActorRef.path());
-
-        return Behaviors.same();
-    }
-
-    private Behavior<IWorldMessage> onRestart() {
-        getContext().getSystem().log().info("Master Control Program restart");
-        return Behaviors.same();
-    }
-
-    /**
-     * 会在 stopGameWorld 前执行
-     * @return
-     */
-    private Behavior<IWorldMessage> onPostStop() {
-        getContext().getSystem().log().info("Master Control Program stopped");
-        return Behaviors.same();
-    }
-
-    /**
-     * 关闭服务
-     * @param message
-     * @return
-     */
-    private Behavior<IWorldMessage> stopGameWorld(IWorldMessage.StopWorldMessage message) {
-        return Behaviors.stopped(()->getContext().getSystem().log().info("Clean up"));
-    }
-
-    private Behavior<IWorldMessage> sessionOpen(IWorldMessage.SessionOpen message) {
-        getContext().getSystem().log().debug("GameWorld login session");
-        sessionManager.tell(new ISessionManager.SessionOpen(message.ioSession));
-        return Behaviors.same();
-    }
+	@Override
+	public Receive<IGameWorld> createReceive() {
+		return newReceiveBuilder()
+				.build();
+	}
 }

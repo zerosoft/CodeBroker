@@ -36,11 +36,5 @@ public interface IService {
      */
     String getName();
 
-//    /**
-//     * 设置服务名称.
-//     *
-//     * @param name the new name
-//     */
-//    void setName(String name);
 
 }
