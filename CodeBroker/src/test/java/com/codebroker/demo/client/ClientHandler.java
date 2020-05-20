@@ -30,7 +30,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter{
 			byte[] rawData = arrayPacket.getRawData();
 			String text = new String(rawData);
 			System.out.println(text);
-			System.out.println(arrayPacket.getOpCode()+"=="+JSONObject.parse(text));
+//			System.out.println(arrayPacket.getOpCode()+"=="+JSONObject.parse(text));
 		}
 		
 	}

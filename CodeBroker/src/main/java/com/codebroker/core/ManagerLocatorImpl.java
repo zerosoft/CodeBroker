@@ -2,6 +2,7 @@ package com.codebroker.core;
 
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
+import com.codebroker.api.IGameWorld;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.ManagerLocator;
 import com.codebroker.core.actortype.message.IWorldMessage;
@@ -35,6 +36,11 @@ class ManagerLocatorImpl implements ManagerLocator {
         });
         IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
         return reply!=null;
+    }
+
+    @Override
+    public IGameWorld getGameWorld() {
+       return ContextResolver.getGameWorld();
     }
 
 }

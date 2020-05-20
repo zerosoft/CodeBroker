@@ -18,10 +18,5 @@ public class DoSomeThingRequestHandler implements IClientRequestHandler {
 		event.setMessage(CObject.newInstance());
 		user.dispatchEvent(event);
 
-		try {
-			Thread.sleep(5000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 }

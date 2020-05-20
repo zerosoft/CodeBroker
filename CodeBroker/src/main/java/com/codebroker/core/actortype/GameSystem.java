@@ -8,10 +8,7 @@ import akka.actor.typed.javadsl.Receive;
 import akka.cluster.ClusterEvent;
 import com.codebroker.cluster.ClusterListener;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IService;
-import com.codebroker.core.actortype.message.IWorldMessage;
-import com.codebroker.core.actortype.message.ISessionManager;
-import com.codebroker.core.actortype.message.IUserManager;
+import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.actortype.timer.UserManagerTimer;
 
 import java.time.Duration;
@@ -44,6 +41,7 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
     private ActorRef<ISessionManager> sessionManager;
     private ActorRef<IUserManager> userManager;
+    private ActorRef<IGameWorldMessage> gameWorldMessageActorRef;
     private ActorRef<UserManagerTimer.Command> userManagerTimer;
     private ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
 
@@ -88,6 +86,9 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
         clusterDomainEventActorRef = getContext().spawn(ClusterListener.create(), ClusterListener.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("clusterDomainEventActorRef Path {}",clusterDomainEventActorRef.path());
+
+        gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
+        GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY, gameWorldMessageActorRef);
 
         return Behaviors.same();
     }

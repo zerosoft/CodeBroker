@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
@@ -74,8 +75,12 @@ public class User extends AbstractBehavior<IUser> {
     private Behavior<IUser> newGameUserInit(IUser.NewGameUserInit message) {
         //进入游戏的
         gameUser = new GameUser(uid, getContext().getSelf());
-        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-        appListener.userLogin(gameUser);
+
+        getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLoginWorld(gameUser)));
+
+//        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+//        appListener.userLogin(gameUser);
+
         return Behaviors.same();
     }
 
@@ -86,8 +91,10 @@ public class User extends AbstractBehavior<IUser> {
             ioSession = null;
         }
         if (gameUser != null) {
-            CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-            appListener.handleLogout(gameUser);
+            getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLogOutWorld(gameUser)));
+
+//            CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+//            appListener.handleLogout(gameUser);
         }
         return Behaviors.stopped();
     }

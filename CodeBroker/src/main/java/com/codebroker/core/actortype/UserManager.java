@@ -66,7 +66,6 @@ public class UserManager extends AbstractBehavior<IUserManager> {
     }
 
     private Behavior<IUserManager> timeCheck(Object message) {
-        getContext().getSystem().log().debug("Time check");
         if (lostSessionUser.size()>0){
             for (String uid : lostSessionUser.keySet()) {
                 ActorRef<IUser> userActorRef = userMap.get(uid);
@@ -76,6 +75,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
                 }
             }
         }
+        lostSessionUser.clear();
         return Behaviors.same();
     }
 
@@ -88,8 +88,10 @@ public class UserManager extends AbstractBehavior<IUserManager> {
 
     private Behavior<IUserManager> bindingSession(IUserManager.TryBindingUser tryBindingUser) {
         CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-        byte[] message = (byte[]) tryBindingUser.message.getRawData();
+        //TODO 更具需求调整
+        byte[] message = tryBindingUser.message.getRawData();
         JSONObject parse = (JSONObject) JSONObject.parse(new String(message));
+
         String uid = appListener.sessionLoginVerification(parse.getString("name"), parse.getString("parm"));
         if (userMap.containsKey(uid)){
             lostSessionUser.remove(uid);
@@ -103,12 +105,11 @@ public class UserManager extends AbstractBehavior<IUserManager> {
             ActorRef<IUser> spawn = getContext().spawn(User.create(uid,tryBindingUser.ioSession,getContext().getSelf()),User.IDENTIFY+"."+uid,DispatcherSelector.fromConfig("game-logic"));
             //通知Session绑定User
             tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(spawn));
-
             spawn.tell(IUser.NewGameUserInit.INSTANCE);
 
             //加入监听
             getContext().watchWith(spawn,new IUserManager.UserClose(uid));
-            userMap.put(uid,spawn);
+            userMap.put(User.IDENTIFY+"."+uid,spawn);
         }
 
         return Behaviors.same();

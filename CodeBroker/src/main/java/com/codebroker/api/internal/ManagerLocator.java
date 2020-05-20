@@ -1,6 +1,8 @@
 package com.codebroker.api.internal;
 
 
+import com.codebroker.api.IGameWorld;
+
 /**
  * 外层API调用核心.
  *
@@ -17,4 +19,5 @@ public interface ManagerLocator {
      */
     boolean setManager(IService type);
 
+	IGameWorld getGameWorld();
 }

@@ -53,4 +53,6 @@ public interface IUserManager {
     enum  TimeCheck implements IUserManager{
         INSTANCE;
     }
+
+
 }

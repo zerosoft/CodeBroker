@@ -20,14 +20,14 @@ public class UserManagerGuardian {
 
 	private ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IUserManager>> serviceInstances = new HashSet();
-	private ActorRef<ISession> self;
-	private ISession.SessionAcceptRequest message;
+	private ActorRef self;
+	private IUserManager message;
 
-	public static Behavior<IUserManager> create(ActorRef<ISession> self, ISession.SessionAcceptRequest message) {
+	public static Behavior<IUserManager> create(ActorRef self, IUserManager message) {
 		return Behaviors.setup(context -> new UserManagerGuardian(context, self, message).handle());
 	}
 
-	private UserManagerGuardian(ActorContext<IUserManager> context, ActorRef<ISession> self, ISession.SessionAcceptRequest message) {
+	private UserManagerGuardian(ActorContext<IUserManager> context, ActorRef<ISession> self, IUserManager message) {
 		this.self = self;
 		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
@@ -44,7 +44,7 @@ public class UserManagerGuardian {
 					int intProperty = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
 					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + intProperty));
 					for (ActorRef<IUserManager> serviceInstance : serviceInstances) {
-						serviceInstance.tell(new IUserManager.TryBindingUser(self, message.request));
+						serviceInstance.tell(message);
 					}
 					return Behaviors.stopped();
 				}).build();

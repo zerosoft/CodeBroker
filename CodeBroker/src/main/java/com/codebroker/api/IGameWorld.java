@@ -1,8 +1,10 @@
 package com.codebroker.api;
 
 
+import java.util.Optional;
+
 public interface IGameWorld {
 
-	IGameUser findIGameUserById(String id);
+	Optional<IGameUser> findIGameUserById(String id);
 
 }

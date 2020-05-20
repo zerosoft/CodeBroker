@@ -27,7 +27,9 @@ public final class AppContext {
         InternalContext.getManagerLocator().setManager(service);
     }
 
-
+    public static IGameWorld getGameWorld(){
+        return InternalContext.getManagerLocator().getGameWorld();
+    }
 
 
 }
