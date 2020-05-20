@@ -55,11 +55,6 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
 		AppContext.setManager(new AllianceService());
-		try {
-			Thread.sleep(2000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");
 	}

@@ -15,6 +15,6 @@ public interface ManagerLocator {
      *
      * @param type the new manager
      */
-    void setManager(IService type);
+    boolean setManager(IService type);
 
 }

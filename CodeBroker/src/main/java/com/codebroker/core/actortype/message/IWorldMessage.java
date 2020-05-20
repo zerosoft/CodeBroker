@@ -1,5 +1,6 @@
 package com.codebroker.core.actortype.message;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.api.internal.IBindingActor;
 import com.codebroker.api.internal.IService;
@@ -42,20 +43,30 @@ public interface IWorldMessage {
 
     class ListingResponse implements IWorldMessage {
         final Receptionist.Listing listing;
-
         public ListingResponse(Receptionist.Listing listing) {
             this.listing = listing;
         }
     }
 
+    /**
+     * 创建service消息，同步等待创建
+     */
     class CreateService implements IWorldMessage{
 
         public String name;
         public IService service;
+        public ActorRef<Reply> replyTo;
 
-        public CreateService(String name,IService service ) {
+        public CreateService(String name,IService service,ActorRef<Reply> replyTo) {
             this.service = service;
             this.name = name;
+            this.replyTo=replyTo;
         }
+    }
+
+    interface Reply {}
+
+    enum ReplyCreateService implements Reply{
+        INSTANCE;
     }
 }
