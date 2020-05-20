@@ -4,6 +4,7 @@ import akka.actor.typed.ActorSystem;
 import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.internal.IService;
+import com.codebroker.core.actortype.GameWorld;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.util.PropertiesWrapper;
 
@@ -14,6 +15,7 @@ import com.codebroker.util.PropertiesWrapper;
 public final class ContextResolver {
 
     private static KernelContext context;
+    private static IGameWorld gameWorld;
 
     private ContextResolver() {
     }
@@ -52,6 +54,10 @@ public final class ContextResolver {
 
 
     public static IGameWorld getGameWorld() {
-        return null;
+        return gameWorld;
+    }
+
+    public static void setGameWorld(IGameWorld gameWorld) {
+        ContextResolver.gameWorld = gameWorld;
     }
 }

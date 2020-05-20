@@ -90,6 +90,8 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
         gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
         GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY, gameWorldMessageActorRef);
 
+        ContextResolver.setGameWorld(gameWorldWithActor);
+
         return Behaviors.same();
     }
 

@@ -1,9 +1,13 @@
 package com.codebroker.demo.request;
 
+import com.codebroker.api.AppContext;
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.IGameWorld;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.data.CObject;
+
+import java.util.Optional;
 
 public class DoSomeThingRequestHandler implements IClientRequestHandler {
 	@Override
@@ -18,5 +22,11 @@ public class DoSomeThingRequestHandler implements IClientRequestHandler {
 		event.setMessage(CObject.newInstance());
 		user.dispatchEvent(event);
 
+		IGameWorld gameWorld = AppContext.getGameWorld();
+		Optional<IGameUser> iGameUserById = gameWorld.findIGameUserById("3451");
+		if (iGameUserById.isPresent()){
+			getClientRequestLogger().info("get it {}",iGameUserById.get().getUserId());
+		}
 	}
 }
+
