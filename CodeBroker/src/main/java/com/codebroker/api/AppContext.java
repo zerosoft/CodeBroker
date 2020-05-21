@@ -2,7 +2,10 @@ package com.codebroker.api;
 
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.exception.ManagerNotFoundException;
+import com.codebroker.setting.SystemEnvironment;
+import com.codebroker.util.PropertiesWrapper;
 
 
 /**
@@ -31,5 +34,8 @@ public final class AppContext {
         return InternalContext.getManagerLocator().getGameWorld();
     }
 
-
+    public static int getServerId(){
+        PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
+       return propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
+    }
 }

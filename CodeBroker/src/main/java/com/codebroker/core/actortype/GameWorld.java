@@ -15,8 +15,6 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-import static javafx.scene.input.KeyCode.T;
-
 public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 
 	public static final String IDENTIFY = GameWorld.class.getSimpleName();
@@ -47,7 +45,19 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 				.onMessage(IGameWorldMessage.findIGameUserByIdMessage.class,this::findGameUserById)
 				.onMessage(IGameWorldMessage.UserLoginWorld.class,this::userLoginWorld)
 				.onMessage(IGameWorldMessage.UserLogOutWorld.class,this::logoutWorld)
+				.onMessage(IGameWorldMessage.SendAllOnlineUserMessage.class,this::sendAllOnlineUserMessage)
+				.onMessage(IGameWorldMessage.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
 				.build();
+	}
+
+	private Behavior<IGameWorldMessage> sendAllOnlineUserEvent(IGameWorldMessage.SendAllOnlineUserEvent message) {
+		userMap.values().forEach(gameUser -> gameUser.dispatchEvent(message.event));
+		return Behaviors.same();
+	}
+
+	private Behavior<IGameWorldMessage> sendAllOnlineUserMessage(IGameWorldMessage.SendAllOnlineUserMessage message) {
+		userMap.values().forEach(gameUser -> gameUser.sendMessageToIoSession(message.requestId,message.message));
+		return Behaviors.same();
 	}
 
 	private  Behavior<IGameWorldMessage> logoutWorld(IGameWorldMessage.UserLogOutWorld message) {

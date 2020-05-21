@@ -5,21 +5,35 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.actor.typed.receptionist.Receptionist;
+import akka.actor.typed.receptionist.ServiceKey;
+import com.codebroker.api.AppContext;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.ISessionManager;
+import com.codebroker.setting.SystemEnvironment;
+import com.codebroker.util.PropertiesWrapper;
 
 public class ServiceActor extends AbstractBehavior<IService> {
 
-    private String id;
+    private String name;
     private com.codebroker.api.internal.IService service;
 
-    public static Behavior<IService> create(String id, com.codebroker.api.internal.IService service) {
-        Behavior<IService> setup = Behaviors.setup(ctx-> new ServiceActor(ctx,id,service));
-        return setup;
+    public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service) {
+        return Behaviors.setup(
+                context -> {
+                    int serverId = AppContext.getServerId();
+                    context
+                            .getSystem()
+                            .receptionist()
+                            .tell(Receptionist.register(ServiceKey.create(IService.class, name+"."+serverId), context.getSelf()));
+                    return new ServiceActor(context,name,service);
+                });
     }
 
-    public ServiceActor(ActorContext<IService> context, String id, com.codebroker.api.internal.IService service) {
+    public ServiceActor(ActorContext<IService> context, String name, com.codebroker.api.internal.IService service) {
         super(context);
-        this.id=id;
+        this.name=name;
         this.service=service;
     }
 

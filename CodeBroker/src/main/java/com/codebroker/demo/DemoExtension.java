@@ -5,6 +5,7 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.demo.request.DoSomeThingRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
+import com.codebroker.demo.service.ChatService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
@@ -55,7 +56,13 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
 		AppContext.setManager(new AllianceService());
+
+		AppContext.setManager(new ChatService());
+
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");
+
+		ChatService chatService = AppContext.getManager(ChatService.class);
+		chatService.init("hello world oo");
 	}
 }

@@ -4,6 +4,7 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.event.IEvent;
 import com.codebroker.core.entities.GameUser;
 
 public interface IGameWorldMessage {
@@ -61,6 +62,22 @@ public interface IGameWorldMessage {
 
 		public UserLogOutWorld(GameUser gameUser) {
 			this.gameUser = gameUser;
+		}
+	}
+
+	class SendAllOnlineUserMessage implements IGameWorldMessage {
+		public final int requestId;
+		public final Object message;
+		public SendAllOnlineUserMessage(int requestId, Object message) {
+			this.requestId=requestId;
+			this.message=message;
+		}
+	}
+
+	class SendAllOnlineUserEvent implements IGameWorldMessage {
+		public final IEvent event;
+		public SendAllOnlineUserEvent(IEvent event) {
+			this.event=event;
 		}
 	}
 }

@@ -6,6 +6,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
+import com.codebroker.api.AppContext;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.setting.SystemEnvironment;
@@ -31,17 +32,15 @@ public class GameWorldGuardian {
 		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
 		this.listingAdapter = context.messageAdapter(Receptionist.Listing.class, IGameWorldMessage.AddProcessorReference::new);
-		PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
-		int intProperty = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
-		context.getSystem().receptionist().tell(Receptionist.subscribe(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY + "." + intProperty), listingAdapter));
+		int serverId = AppContext.getServerId();
+		context.getSystem().receptionist().tell(Receptionist.subscribe(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY + "." + serverId), listingAdapter));
 	}
 
 	private Behavior<IGameWorldMessage> handle() {
 		return Behaviors.receive(IGameWorldMessage.class)
 				.onMessage(IGameWorldMessage.AddProcessorReference.class, listing -> {
-					PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
-					int intProperty = propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
-					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY + "." + intProperty));
+					int serverId = AppContext.getServerId();
+					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY + "." + serverId));
 					for (ActorRef<IGameWorldMessage> serviceInstance : serviceInstances) {
 						serviceInstance.tell(message);
 					}

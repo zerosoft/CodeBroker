@@ -4,6 +4,8 @@ import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
+import com.codebroker.api.event.IEvent;
+import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 
@@ -38,5 +40,20 @@ public class GameWorldWithActor implements IGameWorld {
 			}
 		});
 		return Optional.ofNullable(handle.toCompletableFuture().join());
+	}
+
+	@Override
+	public boolean createGlobalService(IService service) {
+		return false;
+	}
+
+	@Override
+	public void sendAllOnlineUserMessage(int requestId, Object message) {
+		gameWorldActorRef.tell(new IGameWorldMessage.SendAllOnlineUserMessage(requestId,message));
+	}
+
+	@Override
+	public void sendAllOnlineUserEvent(IEvent event) {
+		gameWorldActorRef.tell(new IGameWorldMessage.SendAllOnlineUserEvent(event));
 	}
 }
