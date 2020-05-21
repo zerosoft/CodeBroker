@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.event.Event;
+import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.*;
 import com.codebroker.exception.CRuntimeException;
 import com.codebroker.exception.CodecException;
@@ -47,12 +48,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         return 255 & b;
     }
 
-    public Event binary2Event(byte[] data) {
-        return KryoSerialization.readObjectFromByteArray(data, Event.class);
+    public Object binary2Event(byte[] data) {
+        return KryoSerialization.readObjectFromByteArray(data, Object.class);
     }
 
 
-    public byte[] Event2binary(Event event) {
+    public byte[] Event2binary(Object event) {
         return KryoSerialization.writeObjectToByteArray(event);
     }
 
@@ -1144,4 +1145,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         return JSON.toJSONString(map);
     }
 
+    public byte[] handleMessage2binary(IService.HandleMessage object) {
+        return object.object.toBinary();
+    }
+
+    public IService.HandleMessage binary2HandleMessage(byte[] bs) {
+        CObject cObject = CObject.newFromBinaryData(bs);
+        return new IService.HandleMessage(cObject);
+    }
 }

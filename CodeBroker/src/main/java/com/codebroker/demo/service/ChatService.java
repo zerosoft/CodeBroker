@@ -1,6 +1,7 @@
 package com.codebroker.demo.service;
 
 import com.codebroker.api.internal.IService;
+import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,8 @@ public class ChatService implements IService {
     }
 
     @Override
-    public void handleMessage(Object obj) {
-        System.out.println("Get message "+obj);
+    public void handleMessage(IObject obj) {
+        System.out.println("Get message "+obj.getDump());
     }
 
     @Override

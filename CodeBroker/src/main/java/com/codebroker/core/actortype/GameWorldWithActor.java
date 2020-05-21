@@ -9,6 +9,7 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.data.IObject;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public void sendMessageToService(String serviceName, Object object) {
+	public void sendMessageToService(String serviceName, IObject object) {
 		gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
 	}
 

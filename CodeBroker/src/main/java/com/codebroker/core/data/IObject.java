@@ -1,117 +1,129 @@
 package com.codebroker.core.data;
 
+import com.codebroker.api.internal.ByteArrayPacket;
+import com.codebroker.protocol.BaseByteArrayPacket;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
-
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CObject.class, name = "CObject"),
+        @JsonSubTypes.Type(value = CObjectLite.class, name = "CObjectLite")
+})
 public interface IObject {
 
-    public boolean isNull(String key);
+     boolean isNull(String key);
 
-    public boolean containsKey(String key);
+     boolean containsKey(String key);
 
-    public boolean removeElement(String key);
+     boolean removeElement(String key);
 
-    public Set<String> getKeys();
+     Set<String> getKeys();
 
-    public int size();
+     int size();
 
-    public Iterator<Entry<String, DataWrapper>> iterator();
+     Iterator<Entry<String, DataWrapper>> iterator();
 
-    public byte[] toBinary();
+     byte[] toBinary();
 
-    public String toJson();
+     String toJson();
 
-    public String getDump();
+     String getDump();
 
-    public String getDump(boolean flag);
+     String getDump(boolean flag);
 
-    public String getHexDump();
+     String getHexDump();
 
-    public DataWrapper get(String key);
+     DataWrapper get(String key);
 
-    public Boolean getBool(String key);
+     Boolean getBool(String key);
 
-    public Byte getByte(String key);
+     Byte getByte(String key);
 
-    public Integer getUnsignedByte(String key);
+     Integer getUnsignedByte(String key);
 
-    public Short getShort(String key);
+     Short getShort(String key);
 
-    public Integer getInt(String key);
+     Integer getInt(String key);
 
-    public Long getLong(String key);
+     Long getLong(String key);
 
-    public Float getFloat(String key);
+     Float getFloat(String key);
 
-    public Double getDouble(String key);
+     Double getDouble(String key);
 
-    public String getUtfString(String key);
+     String getUtfString(String key);
 
-    public Collection<Boolean> getBoolArray(String key);
+     Collection<Boolean> getBoolArray(String key);
 
-    public byte[] getByteArray(String key);
+     byte[] getByteArray(String key);
 
-    public Collection<Integer> getUnsignedByteArray(String key);
+     Collection<Integer> getUnsignedByteArray(String key);
 
-    public Collection<Short> getShortArray(String key);
+     Collection<Short> getShortArray(String key);
 
-    public Collection<Integer> getIntArray(String key);
+     Collection<Integer> getIntArray(String key);
 
-    public Collection<Long> getLongArray(String key);
+     Collection<Long> getLongArray(String key);
 
-    public Collection<Float> getFloatArray(String key);
+     Collection<Float> getFloatArray(String key);
 
-    public Collection<Double> getDoubleArray(String key);
+     Collection<Double> getDoubleArray(String key);
 
-    public Collection<String> getUtfStringArray(String key);
+     Collection<String> getUtfStringArray(String key);
 
-    public IArray getSFSArray(String key);
+     IArray getSFSArray(String key);
 
-    public IObject getSFSObject(String key);
+     IObject getSFSObject(String key);
 
-    public Object getClass(String key);
+     Object getClass(String key);
 
-    public void putNull(String key);
+     void putNull(String key);
 
-    public void putBool(String key, boolean value);
+     void putBool(String key, boolean value);
 
-    public void putByte(String key, byte value);
+     void putByte(String key, byte value);
 
-    public void putShort(String key, short word);
+     void putShort(String key, short word);
 
-    public void putInt(String key, int value);
+     void putInt(String key, int value);
 
-    public void putLong(String key, long value);
+     void putLong(String key, long value);
 
-    public void putFloat(String key, float value);
+     void putFloat(String key, float value);
 
-    public void putDouble(String key, double value);
+     void putDouble(String key, double value);
 
-    public void putUtfString(String key, String value);
+     void putUtfString(String key, String value);
 
-    public void putBoolArray(String key, Collection<Boolean> collection);
+     void putBoolArray(String key, Collection<Boolean> collection);
 
-    public void putByteArray(String key, byte[] bytes);
+     void putByteArray(String key, byte[] bytes);
 
-    public void putShortArray(String key, Collection<Short> collection);
+     void putShortArray(String key, Collection<Short> collection);
 
-    public void putIntArray(String key, Collection<Integer> collection);
+     void putIntArray(String key, Collection<Integer> collection);
 
-    public void putLongArray(String key, Collection<Long> collection);
+     void putLongArray(String key, Collection<Long> collection);
 
-    public void putFloatArray(String key, Collection<Float> collection);
+     void putFloatArray(String key, Collection<Float> collection);
 
-    public void putDoubleArray(String key, Collection<Double> collection);
+     void putDoubleArray(String key, Collection<Double> collection);
 
-    public void putUtfStringArray(String s, Collection<String> collection);
+     void putUtfStringArray(String s, Collection<String> collection);
 
-    public void putSFSArray(String key, IArray isfsarray);
+     void putSFSArray(String key, IArray isfsarray);
 
-    public void putSFSObject(String key, IObject isfsobject);
+     void putSFSObject(String key, IObject isfsobject);
 
-    public void putClass(String key, Object obj);
+     void putClass(String key, Object obj);
 
-    public void put(String key, DataWrapper sfsdatawrapper);
+     void put(String key, DataWrapper sfsdatawrapper);
 }

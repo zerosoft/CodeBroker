@@ -4,6 +4,7 @@ import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IHandlerFactory;
 import com.codebroker.api.IGameUser;
+import com.codebroker.core.data.IObject;
 import com.codebroker.extensions.request.ClientExtensionFilterChain;
 import com.codebroker.extensions.request.ClientHandlerFactory;
 import com.codebroker.extensions.request.filter.ClientExtensionFilter;
@@ -91,7 +92,8 @@ public abstract class AppListenerExtension implements CodeBrokerAppListener {
     }
 
     @Override
-    public void handleMessage(Object obj) {
+    public void handleMessage(IObject obj) {
+
     }
 
 }

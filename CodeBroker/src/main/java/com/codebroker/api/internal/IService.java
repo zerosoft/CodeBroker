@@ -1,6 +1,8 @@
 package com.codebroker.api.internal;
 
 
+import com.codebroker.core.data.IObject;
+
 /**
  * 系统级组件服务.
  *
@@ -27,7 +29,7 @@ public interface IService {
      *
      * @param obj the obj
      */
-    void handleMessage(Object obj);
+    void handleMessage(IObject obj);
 
     /**
      * 获得服务名称.

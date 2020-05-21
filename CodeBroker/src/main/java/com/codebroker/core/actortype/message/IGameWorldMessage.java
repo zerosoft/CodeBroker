@@ -5,7 +5,9 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
+import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 public interface IGameWorldMessage {
 	/**
@@ -83,9 +85,11 @@ public interface IGameWorldMessage {
 
 	class SendMessageToService implements IGameWorldMessage {
 		public final String serviceName;
-		public final Object object;
 
-		public SendMessageToService(String serviceName,Object object) {
+		public final IObject object;
+
+		@JsonCreator
+		public SendMessageToService(String serviceName, IObject object) {
 			this.serviceName=serviceName;
 			this.object=object;
 		}

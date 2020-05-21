@@ -1,6 +1,7 @@
 package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.receptionist.Receptionist;
+import com.codebroker.core.data.IObject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public interface IService {
@@ -23,10 +24,8 @@ public interface IService {
 
 
     final class HandleMessage implements IService {
-
-        public Object object;
-        @JsonCreator
-        public HandleMessage(Object obj) {
+        public IObject object;
+        public HandleMessage(IObject obj) {
             this.object=obj;
         }
     }

@@ -3,6 +3,7 @@ package com.codebroker.api;
 
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
+import com.codebroker.core.data.IObject;
 
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public interface IGameWorld {
 	 */
 	boolean createGlobalService(String serviceName,IService service);
 
-	void sendMessageToService(String serviceName,Object object);
+	void sendMessageToService(String serviceName, IObject object);
 	/**
 	 * 对所有在线玩家发送消息
 	 * @param requestId

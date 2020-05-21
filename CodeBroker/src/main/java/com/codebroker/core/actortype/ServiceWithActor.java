@@ -2,6 +2,7 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.ActorRef;
 import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.data.IObject;
 
 public class ServiceWithActor implements com.codebroker.api.internal.IService {
 
@@ -24,7 +25,7 @@ public class ServiceWithActor implements com.codebroker.api.internal.IService {
     }
 
     @Override
-    public void handleMessage(Object obj) {
+    public void handleMessage(IObject obj) {
         actorActorRef.tell(new IService.HandleMessage(obj));
     }
 

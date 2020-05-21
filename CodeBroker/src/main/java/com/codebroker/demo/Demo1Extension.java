@@ -13,14 +13,13 @@ import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.App;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DemoExtension extends AppListenerExtension {
+public class Demo1Extension extends AppListenerExtension {
 
-	private Logger logger= LoggerFactory.getLogger(DemoExtension.class);
+	private Logger logger= LoggerFactory.getLogger(Demo1Extension.class);
 
 	private Map<String,String> userMap=new HashMap<>();
 	//在线用户列表
@@ -63,7 +62,6 @@ public class DemoExtension extends AppListenerExtension {
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");
 
-		boolean chatService = AppContext.getGameWorld().createGlobalService("ChatService", new ChatService());
 
 		try {
 			Thread.sleep(5000L);

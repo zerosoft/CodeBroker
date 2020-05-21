@@ -1,6 +1,7 @@
 package com.codebroker.component;
 
 import com.codebroker.api.internal.ICoreService;
+import com.codebroker.core.data.IObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +31,7 @@ public abstract class BaseCoreService implements ICoreService {
     }
 
     @Override
-    public void handleMessage(Object obj) {
+    public void handleMessage(IObject obj) {
         throw new UnsupportedOperationException("This method should be overridden by the child class!");
     }
 
