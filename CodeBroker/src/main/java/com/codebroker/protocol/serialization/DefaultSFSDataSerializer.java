@@ -24,6 +24,8 @@ import java.util.concurrent.*;
 
 public class DefaultSFSDataSerializer implements IDataSerializer {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private static final long serialVersionUID = -6749126348064423022L;
 
     private static final String CLASS_MARKER_KEY = "$C";
@@ -35,7 +37,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     private static DefaultSFSDataSerializer instance = new DefaultSFSDataSerializer();
 
     private static int BUFFER_CHUNK_SIZE = 512;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     private DefaultSFSDataSerializer() {
     }
@@ -48,25 +50,15 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         return 255 & b;
     }
 
-    public Object binary2Event(byte[] data) {
-        return KryoSerialization.readObjectFromByteArray(data, Object.class);
-    }
-
-
-    public byte[] Event2binary(Object event) {
-        return KryoSerialization.writeObjectToByteArray(event);
-    }
-
 
     public IArray binary2array(byte[] data) {
         if (data.length < 3) {
-            throw new IllegalStateException(
-                    "Can\'t decode an AVAArray. Byte data is insufficient. Size: " + data.length + " bytes");
+            throw new IllegalStateException("Can\'t decode an Code Broker Array. Byte data is insufficient. Size: " + data.length + " bytes");
         } else {
             ByteBuffer buffer = ByteBuffer.allocate(data.length);
             buffer.put(data);
             buffer.flip();
-            return this.decodeSFSArray((ByteBuffer) buffer);
+            return this.decodeSFSArray(buffer);
         }
     }
 
@@ -74,26 +66,23 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         CArray sfsArray = CArray.newInstance();
         byte headerBuffer = buffer.get();
         if (headerBuffer != DataType.ARRAY.typeID) {
-            throw new IllegalStateException(
-                    "Invalid DataType. Expected: " + DataType.ARRAY.typeID + ", found: " + headerBuffer);
+            throw new IllegalStateException("Invalid DataType. Expected: " + DataType.ARRAY.typeID + ", found: " + headerBuffer);
         } else {
             short size = buffer.getShort();
             if (size < 0) {
-                throw new IllegalStateException("Can\'t decode AVAArray. Size is negative = " + size);
+                throw new IllegalStateException("Can\'t decode Code Broker Array. Size is negative = " + size);
             } else {
                 try {
                     for (int codecError = 0; codecError < size; ++codecError) {
                         DataWrapper decodedObject = this.decodeObject(buffer);
                         if (decodedObject == null) {
-                            throw new IllegalStateException("Could not decode AVAArray item at index: " + codecError);
+                            throw new IllegalStateException("Could not decode Code Broker Array item at index: " + codecError);
                         }
-
                         sfsArray.add(decodedObject);
                     }
-
                     return sfsArray;
-                } catch (CodecException var7) {
-                    throw new IllegalArgumentException(var7.getMessage());
+                } catch (CodecException e) {
+                    throw new IllegalArgumentException(e.getMessage());
                 }
             }
         }
@@ -102,12 +91,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     public IObject binary2object(byte[] data) {
         if (data.length < 3) {
             throw new IllegalStateException(
-                    "Can\'t decode an AVAObject. Byte data is insufficient. Size: " + data.length + " bytes");
+                    "Can\'t decode an Code Broker Object. Byte data is insufficient. Size: " + data.length + " bytes");
         } else {
             ByteBuffer buffer = ByteBuffer.allocate(data.length);
             buffer.put(data);
             buffer.flip();
-            return this.decodeSFSObject((ByteBuffer) buffer);
+            return this.decodeSFSObject(buffer);
         }
     }
 
@@ -120,13 +109,13 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         } else {
             short size = buffer.getShort();
             if (size < 0) {
-                throw new IllegalStateException("Can\'t decode AVAObject. Size is negative = " + size);
+                throw new IllegalStateException("Can\'t decode Code Broker Object. Size is negative = " + size);
             } else {
                 try {
                     for (int codecError = 0; codecError < size; ++codecError) {
                         short keySize = buffer.getShort();
                         if (keySize < 0 || keySize > 255) {
-                            throw new IllegalStateException("Invalid AVAObject key length. Found = " + keySize);
+                            throw new IllegalStateException("Invalid Code Broker Object key length. Found = " + keySize);
                         }
 
                         byte[] keyData = new byte[keySize];
@@ -151,24 +140,23 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     public IArray json2array(String jsonStr) {
         if (jsonStr.length() < 2) {
             throw new IllegalStateException(
-                    "Can\'t decode AVAObject. JSON String is too short. Len: " + jsonStr.length());
+                    "Can\'t decode Code Broker Object. JSON String is too short. Len: " + jsonStr.length());
         } else {
             JSONArray jsa = JSONArray.parseArray(jsonStr);
-            return this.decodeSFSArray((JSONArray) jsa);
+            return this.decodeSFSArray(jsa);
         }
     }
 
     private IArray decodeSFSArray(JSONArray jsa) {
         CArrayLite sfsArray = CArrayLite.newInstance();
-        Iterator<Object> iter = jsa.iterator();
+        Iterator<Object> iterator = jsa.iterator();
 
-        while (iter.hasNext()) {
-            Object value = iter.next();
+        while (iterator.hasNext()) {
+            Object value = iterator.next();
             DataWrapper decodedObject = this.decodeJsonObject(value);
             if (decodedObject == null) {
                 throw new IllegalStateException("(json2sfarray) Could not decode value for object: " + value);
             }
-
             sfsArray.add(decodedObject);
         }
 
@@ -178,26 +166,26 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     public IObject json2object(String jsonStr) {
         if (jsonStr.length() < 2) {
             throw new IllegalStateException(
-                    "Can\'t decode AVAObject. JSON String is too short. Len: " + jsonStr.length());
+                    "Can\'t decode Code Broker Object. JSON String is too short. Len: " + jsonStr.length());
         } else {
             JSONObject jso = JSONObject.parseObject(jsonStr);
-            return this.decodeSFSObject((JSONObject) jso);
+            return this.decodeSFSObject(jso);
         }
     }
 
     private IObject decodeSFSObject(JSONObject jso) {
         CObject sfsObject = CObjectLite.newInstance();
-        Iterator<String> var4 = jso.keySet().iterator();
+        Iterator<String> iterator = jso.keySet().iterator();
 
-        while (var4.hasNext()) {
-            Object key = var4.next();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
             Object value = jso.get(key);
             DataWrapper decodedObject = this.decodeJsonObject(value);
             if (decodedObject == null) {
                 throw new IllegalStateException("(json2sfsobj) Could not decode value for key: " + key);
             }
 
-            sfsObject.put((String) key, decodedObject);
+            sfsObject.put(key, decodedObject);
         }
 
         return sfsObject;
@@ -216,13 +204,13 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
             return new DataWrapper(DataType.UTF_STRING, o);
         } else if (o instanceof JSONObject) {
             JSONObject jso = (JSONObject) o;
-            return jso.isEmpty() ? new DataWrapper(DataType.NULL, (Object) null)
-                    : new DataWrapper(DataType.OBJECT, this.decodeSFSObject((JSONObject) jso));
+            return jso.isEmpty() ? new DataWrapper(DataType.NULL, null)
+                    : new DataWrapper(DataType.OBJECT, this.decodeSFSObject(jso));
         } else if (o instanceof JSONArray) {
-            return new DataWrapper(DataType.ARRAY, this.decodeSFSArray((JSONArray) ((JSONArray) o)));
+            return new DataWrapper(DataType.ARRAY, this.decodeSFSArray(((JSONArray) o)));
         } else {
             throw new IllegalArgumentException(
-                    String.format("Unrecognized DataType while converting JSONObject 2 AVAObject. Object: %s, Type: %s",
+                    String.format("Unrecognized DataType while converting JSONObject 2 Code Broker Object. Object: %s, Type: %s",
                             new Object[]{o, o == null ? "null" : o.getClass()}));
         }
     }
@@ -268,7 +256,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         for (Iterator<DataWrapper> iter = array.iterator();
              iter.hasNext();
              buffer = this.encodeObject(buffer, wrapper.getTypeId(), pos)) {
-            wrapper = (DataWrapper) iter.next();
+            wrapper = iter.next();
             pos = wrapper.getObject();
         }
 
@@ -280,18 +268,18 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     public void flattenObject(Map<String, Object> map, CObject sfsObj) {
-        Iterator<Entry<String, DataWrapper>> it = sfsObj.iterator();
+        Iterator<Entry<String, DataWrapper>> iterator = sfsObj.iterator();
 
-        while (it.hasNext()) {
-            Entry<String, DataWrapper> entry = it.next();
+        while (iterator.hasNext()) {
+            Entry<String, DataWrapper> entry = iterator.next();
             String key = entry.getKey();
             DataWrapper value = entry.getValue();
             if (value.getTypeId() == DataType.OBJECT) {
-                HashMap<String, Object> newList = new HashMap<String, Object>();
+                HashMap<String, Object> newList = new HashMap<>();
                 map.put(key, newList);
                 this.flattenObject(newList, (CObject) value.getObject());
             } else if (value.getTypeId() == DataType.ARRAY) {
-                ArrayList<Object> newList1 = new ArrayList<Object>();
+                ArrayList<Object> newList1 = new ArrayList<>();
                 map.put(key, newList1);
                 this.flattenArray(newList1, (CArray) value.getObject());
             } else {
@@ -302,18 +290,18 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     public void flattenArray(List<Object> array, CArray sfsArray) {
-        Iterator<DataWrapper> it = sfsArray.iterator();
+        Iterator<DataWrapper> iterator = sfsArray.iterator();
 
-        while (it.hasNext()) {
-            DataWrapper value = (DataWrapper) it.next();
+        while (iterator.hasNext()) {
+            DataWrapper value = iterator.next();
             if (value.getTypeId() == DataType.OBJECT) {
-                HashMap<String, Object> newList = new HashMap<String, Object>();
+                HashMap<String, Object> newList = new HashMap<>();
                 array.add(newList);
                 this.flattenObject(newList, (CObject) value.getObject());
             } else if (value.getTypeId() == DataType.ARRAY) {
-                ArrayList<Object> newList1 = new ArrayList<Object>();
-                array.add(newList1);
-                this.flattenArray(newList1, (CArray) value.getObject());
+                ArrayList<Object> objectArrayList = new ArrayList<>();
+                array.add(objectArrayList);
+                this.flattenArray(objectArrayList, (CArray) value.getObject());
             } else {
                 array.add(value.getObject());
             }
@@ -322,7 +310,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     private DataWrapper decodeObject(ByteBuffer buffer) throws CodecException {
-        DataWrapper decodedObject = null;
+        DataWrapper decodedObject;
         byte headerByte = buffer.get();
         if (headerByte == DataType.NULL.typeID) {
             decodedObject = this.binDecode_NULL(buffer);
@@ -360,19 +348,19 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
             decodedObject = this.binDecode_UTF_STRING_ARRAY(buffer);
         } else if (headerByte == DataType.ARRAY.typeID) {
             buffer.position(buffer.position() - 1);
-            decodedObject = new DataWrapper(DataType.ARRAY, this.decodeSFSArray((ByteBuffer) buffer));
+            decodedObject = new DataWrapper(DataType.ARRAY, this.decodeSFSArray(buffer));
         } else {
             if (headerByte != DataType.OBJECT.typeID) {
                 throw new CodecException("Unknow DataType ID: " + headerByte);
             }
 
             buffer.position(buffer.position() - 1);
-            IObject sfsObj = this.decodeSFSObject((ByteBuffer) buffer);
+            IObject iObject = this.decodeSFSObject(buffer);
             DataType type = DataType.OBJECT;
-            Object finalSfsObj = sfsObj;
-            if (sfsObj.containsKey(CLASS_MARKER_KEY) && sfsObj.containsKey(CLASS_FIELDS_KEY)) {
+            Object finalSfsObj = iObject;
+            if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)) {
                 type = DataType.CLASS;
-                finalSfsObj = this.cbo2pojo(sfsObj);
+                finalSfsObj = this.cbo2pojo(iObject);
             }
 
             decodedObject = new DataWrapper(type, finalSfsObj);
@@ -381,7 +369,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         return decodedObject;
     }
 
-    @SuppressWarnings("unchecked")
     private ByteBuffer encodeObject(ByteBuffer buffer, DataType typeId, Object object) {
         switch (typeId) {
             case NULL:
@@ -452,7 +439,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     private DataWrapper binDecode_NULL(ByteBuffer buffer) {
-        return new DataWrapper(DataType.NULL, (Object) null);
+        return new DataWrapper(DataType.NULL, null);
     }
 
     private DataWrapper binDecode_BOOL(ByteBuffer buffer) throws CodecException {
@@ -546,7 +533,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
     private DataWrapper binDecode_SHORT_ARRAY(ByteBuffer buffer) throws CodecException {
         short arraySize = this.getTypeArraySize(buffer);
-        ArrayList<Short> array = new ArrayList<Short>();
+        ArrayList<Short> array = new ArrayList<>();
 
         for (int j = 0; j < arraySize; ++j) {
             short shortValue = buffer.getShort();
@@ -694,10 +681,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + value.size());
         buf.put((byte) DataType.BOOL_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator var5 = value.iterator();
+        Iterator<Boolean> iterator = value.iterator();
 
-        while (var5.hasNext()) {
-            boolean b = ((Boolean) var5.next()).booleanValue();
+        while (iterator.hasNext()) {
+            boolean b = iterator.next();
             buf.put((byte) (b ? 1 : 0));
         }
 
@@ -716,10 +703,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + 2 * value.size());
         buf.put((byte) DataType.SHORT_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator var5 = value.iterator();
+        Iterator<Short> iterator = value.iterator();
 
-        while (var5.hasNext()) {
-            short item = ((Short) var5.next()).shortValue();
+        while (iterator.hasNext()) {
+            short item = iterator.next();
             buf.putShort(item);
         }
 
@@ -730,10 +717,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
         buf.put((byte) DataType.INT_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator<Integer> var5 = value.iterator();
+        Iterator<Integer> iterator = value.iterator();
 
-        while (var5.hasNext()) {
-            int item = ((Integer) var5.next()).intValue();
+        while (iterator.hasNext()) {
+            int item = iterator.next();
             buf.putInt(item);
         }
 
@@ -744,13 +731,12 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
         buf.put((byte) DataType.LONG_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator<Long> var6 = value.iterator();
+        Iterator<Long> iterator = value.iterator();
 
-        while (var6.hasNext()) {
-            long item = ((Long) var6.next()).longValue();
+        while (iterator.hasNext()) {
+            long item = iterator.next();
             buf.putLong(item);
         }
-
         return this.addData(buffer, buf.array());
     }
 
@@ -758,10 +744,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + 4 * value.size());
         buf.put((byte) DataType.FLOAT_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator<Float> var5 = value.iterator();
 
-        while (var5.hasNext()) {
-            float item = ((Float) var5.next()).floatValue();
+        Iterator<Float> iterator = value.iterator();
+        while (iterator.hasNext()) {
+            float item = iterator.next();
             buf.putFloat(item);
         }
 
@@ -772,10 +758,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         ByteBuffer buf = ByteBuffer.allocate(3 + 8 * value.size());
         buf.put((byte) DataType.DOUBLE_ARRAY.typeID);
         buf.putShort((short) value.size());
-        Iterator<Double> var6 = value.iterator();
+        Iterator<Double> iterator = value.iterator();
 
-        while (var6.hasNext()) {
-            double item = ((Double) var6.next()).doubleValue();
+        while (iterator.hasNext()) {
+            double item = (iterator.next()).doubleValue();
             buf.putDouble(item);
         }
 
@@ -789,7 +775,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
         byte[] binStr;
         for (Iterator<String> binItem = value.iterator(); binItem.hasNext(); stringDataLen += 2 + binStr.length) {
-            String buf = (String) binItem.next();
+            String buf = binItem.next();
             binStr = buf.getBytes();
             binStrings[count++] = binStr;
         }
@@ -843,8 +829,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         }
     }
 
-    private void convertPojo(Object pojo, IObject sfsObj)
-            throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException {
+    private void convertPojo(Object pojo, IObject sfsObj) throws IllegalArgumentException {
         Class pojoClazz = pojo.getClass();
         String classFullName = pojoClazz.getCanonicalName();
         if (classFullName == null) {
@@ -856,17 +841,17 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
             CArray fieldList = CArray.newInstance();
             sfsObj.putUtfString(CLASS_MARKER_KEY, classFullName);
             sfsObj.putSFSArray(CLASS_FIELDS_KEY, fieldList);
-            Field[] var9;
-            int var8 = (var9 = pojoClazz.getDeclaredFields()).length;
+            Field[] fields;
+            int length = (fields = pojoClazz.getDeclaredFields()).length;
 
-            for (int var7 = 0; var7 < var8; ++var7) {
-                Field field = var9[var7];
+            for (int i = 0; i < length; ++i) {
+                Field field = fields[i];
 
                 try {
                     int err = field.getModifiers();
                     if (!Modifier.isTransient(err) && !Modifier.isStatic(err)) {
                         String fieldName = field.getName();
-                        Object fieldValue = null;
+                        Object fieldValue;
                         if (Modifier.isPublic(err)) {
                             fieldValue = field.get(pojo);
                         } else {
@@ -878,10 +863,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
                         fieldDescriptor.put(FIELD_VALUE_KEY, this.wrapPojoField(fieldValue));
                         fieldList.addSFSObject(fieldDescriptor);
                     }
-                } catch (Exception var14) {
+                } catch (Exception e) {
                     this.logger.info("-- No public getter -- Serializer skipping private field: " + field.getName()
                             + ", from class: " + pojoClazz);
-                    var14.printStackTrace();
+                    e.printStackTrace();
                 }
             }
 
@@ -889,10 +874,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     private Object readValueFromGetter(String fieldName, String type, Object pojo) throws Exception {
-        Object value = null;
+        Object value;
         boolean isBool = type.equalsIgnoreCase("boolean");
-        String getterName = isBool ? "is" + StringUtils.capitalize(fieldName)
-                : "get" + StringUtils.capitalize(fieldName);
+        String getterName = isBool ? "is" + StringUtils.capitalize(fieldName) : "get" + StringUtils.capitalize(fieldName);
         Method getterMethod = pojo.getClass().getMethod(getterName, new Class[0]);
         value = getterMethod.invoke(pojo, new Object[0]);
         return value;
@@ -900,7 +884,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
     private DataWrapper wrapPojoField(Object value) {
         if (value == null) {
-            return new DataWrapper(DataType.NULL, (Object) null);
+            return new DataWrapper(DataType.NULL, null);
         } else {
             DataWrapper wrapper = null;
             if (value instanceof Boolean) {
@@ -928,7 +912,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
             } else if (value instanceof SerializableType) {
                 wrapper = new DataWrapper(DataType.OBJECT, this.pojo2cbo(value));
             }
-
             return wrapper;
         }
     }
@@ -975,7 +958,7 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     }
 
     public Object cbo2pojo(IObject sfsObj) {
-        Object pojo = null;
+        Object pojo;
         if (!sfsObj.containsKey(CLASS_MARKER_KEY) && !sfsObj.containsKey(CLASS_FIELDS_KEY)) {
             throw new CRuntimeException("The AVAObject passed does not represent any serialized class.");
         } else {
@@ -996,9 +979,9 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         }
     }
 
-    private void convertSFSObject(IArray fieldList, Object pojo) throws Exception {
-        for (int j = 0; j < fieldList.size(); ++j) {
-            IObject fieldDescriptor = fieldList.getObject(j);
+    private void convertSFSObject(IArray iArray, Object pojo) throws Exception {
+        for (int j = 0; j < iArray.size(); ++j) {
+            IObject fieldDescriptor = iArray.getObject(j);
             String fieldName = fieldDescriptor.getUtfString(FIELD_NAME_KEY);
             Object fieldValue = this.unwrapPojoField(fieldDescriptor.get(FIELD_VALUE_KEY));
             this.setObjectField(pojo, fieldName, fieldValue);
@@ -1006,7 +989,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private void setObjectField(Object pojo, String fieldName, Object fieldValue) throws Exception {
         Class<?> pojoClass = pojo.getClass();
         Field field = pojoClass.getDeclaredField(fieldName);
@@ -1033,7 +1015,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
                 if (fieldClass1.equals("ArrayList") || fieldClass1.equals("List")) {
                     fieldValue = new ArrayList(collection);
                 }
-
                 if (fieldClass1.equals("CopyOnWriteArrayList")) {
                     fieldValue = new CopyOnWriteArrayList(collection);
                 } else if (fieldClass1.equals("LinkedList")) {
@@ -1084,7 +1065,6 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
     private void writeValueFromSetter(Field field, Object pojo, Object fieldValue) throws Exception {
         String setterName = "set" + StringUtils.capitalize(field.getName());
-
         try {
             Method setterMethod = pojo.getClass().getMethod(setterName, new Class[]{field.getType()});
             setterMethod.invoke(pojo, new Object[]{fieldValue});
@@ -1107,16 +1087,15 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
         } else if (type == DataType.CLASS) {
             obj = wrapper.getObject();
         }
-
         return obj;
     }
 
     private Object rebuildArray(IArray sfsArray) {
-        ArrayList<Object> collection = new ArrayList<Object>();
-        Iterator<DataWrapper> iter = sfsArray.iterator();
+        ArrayList<Object> collection = new ArrayList<>();
+        Iterator<DataWrapper> iterator = sfsArray.iterator();
 
-        while (iter.hasNext()) {
-            Object item = this.unwrapPojoField((DataWrapper) iter.next());
+        while (iterator.hasNext()) {
+            Object item = this.unwrapPojoField(iterator.next());
             collection.add(item);
         }
 
@@ -1125,10 +1104,10 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
 
     private Object rebuildMap(IObject sfsObj) {
         HashMap map = new HashMap();
-        Iterator var4 = sfsObj.getKeys().iterator();
+        Iterator iterator = sfsObj.getKeys().iterator();
 
-        while (var4.hasNext()) {
-            String key = (String) var4.next();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
             DataWrapper wrapper = sfsObj.get(key);
             map.put(key, this.unwrapPojoField(wrapper));
         }
@@ -1143,6 +1122,14 @@ public class DefaultSFSDataSerializer implements IDataSerializer {
     @Override
     public String object2json(Map map) {
         return JSON.toJSONString(map);
+    }
+
+    public Object binary2Event(byte[] data) {
+        return KryoSerialization.readObjectFromByteArray(data, Object.class);
+    }
+
+    public byte[] Event2binary(Object event) {
+        return KryoSerialization.writeObjectToByteArray(event);
     }
 
     public byte[] handleMessage2binary(IService.HandleMessage object) {
