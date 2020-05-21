@@ -64,6 +64,22 @@ public interface IWorldMessage {
         }
     }
 
+    /**
+     * 创建service消息，同步等待创建
+     */
+    class createGlobalService implements IWorldMessage{
+
+        public String name;
+        public IService service;
+        public ActorRef<Reply> replyTo;
+
+        public createGlobalService(String name, IService service, ActorRef<Reply> replyTo) {
+            this.service = service;
+            this.name = name;
+            this.replyTo=replyTo;
+        }
+    }
+
     interface Reply {}
 
     enum ReplyCreateService implements Reply{

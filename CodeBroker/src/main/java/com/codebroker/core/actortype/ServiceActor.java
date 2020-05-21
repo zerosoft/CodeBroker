@@ -17,16 +17,21 @@ import com.codebroker.util.PropertiesWrapper;
 public class ServiceActor extends AbstractBehavior<IService> {
 
     private String name;
+
     private com.codebroker.api.internal.IService service;
 
     public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service) {
+        return create(name,service,false);
+    }
+
+    public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service,boolean noServerId) {
         return Behaviors.setup(
                 context -> {
                     int serverId = AppContext.getServerId();
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IService.class, name+"."+serverId), context.getSelf()));
+                            .tell(Receptionist.register(ServiceKey.create(IService.class, noServerId?name:name+"."+serverId), context.getSelf()));
                     return new ServiceActor(context,name,service);
                 });
     }

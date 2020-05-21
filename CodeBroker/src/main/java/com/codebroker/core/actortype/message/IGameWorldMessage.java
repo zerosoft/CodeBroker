@@ -80,4 +80,14 @@ public interface IGameWorldMessage {
 			this.event=event;
 		}
 	}
+
+	class SendMessageToService implements IGameWorldMessage {
+		public final String serviceName;
+		public final Object object;
+
+		public SendMessageToService(String serviceName,Object object) {
+			this.serviceName=serviceName;
+			this.object=object;
+		}
+	}
 }

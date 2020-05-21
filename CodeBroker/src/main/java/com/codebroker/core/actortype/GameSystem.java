@@ -54,17 +54,27 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
                 .onMessage(IWorldMessage.ReStartWorldMessage.class,this::reStartGameWorld)
                 .onMessage(IWorldMessage.StopWorldMessage.class,this::stopGameWorld)
                 .onMessage(IWorldMessage.CreateService.class,this::createService)
+                .onMessage(IWorldMessage.createGlobalService.class,this::createGlobalService)
                 .onSignal(PreRestart.class,signal->onRestart())
                 .onSignal(PostStop.class, signal ->onPostStop())
                 .build();
     }
 
-    private Behavior<IWorldMessage> createService(IWorldMessage.CreateService m) {
-        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(m.name, m.service), m.name, DispatcherSelector.fromConfig("game-service"));
-        ServiceWithActor serviceActor=new ServiceWithActor(m.name,spawn);
-        com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, m.service).newProxyInstance(m.service.getClass());
+    private Behavior<IWorldMessage> createService(IWorldMessage.CreateService message) {
+        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
+        return getiWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
+    }
+
+    private Behavior<IWorldMessage> createGlobalService(IWorldMessage.createGlobalService message) {
+        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
+        return getiWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
+    }
+
+    private Behavior<IWorldMessage> getiWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IWorldMessage.Reply> replyTo) {
+        ServiceWithActor serviceActor=new ServiceWithActor(name,spawn);
+        com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
         ContextResolver.setManager(iService);
-        m.replyTo.tell(IWorldMessage.ReplyCreateService.INSTANCE);
+        replyTo.tell(IWorldMessage.ReplyCreateService.INSTANCE);
         return Behaviors.same();
     }
 

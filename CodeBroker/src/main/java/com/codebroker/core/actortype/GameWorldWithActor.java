@@ -8,6 +8,7 @@ import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
+import com.codebroker.core.actortype.message.IWorldMessage;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -43,8 +44,23 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public boolean createGlobalService(IService service) {
-		return false;
+	public boolean createGlobalService(String serviceName, IService service) {
+		ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+		CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(actorSystem,
+				replyActorRef -> new IWorldMessage.createGlobalService(serviceName, service,replyActorRef),
+				Duration.ofMillis(500),
+				actorSystem.scheduler());
+		CompletionStage<IWorldMessage.Reply> exceptionally = ask.exceptionally(throwable -> {
+			throwable.printStackTrace();
+			return null;
+		});
+		IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
+		return reply!=null;
+	}
+
+	@Override
+	public void sendMessageToService(String serviceName, Object object) {
+		gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
 	}
 
 	@Override

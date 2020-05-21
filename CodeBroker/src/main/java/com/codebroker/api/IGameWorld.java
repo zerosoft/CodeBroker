@@ -20,7 +20,9 @@ public interface IGameWorld {
 	 * @param service
 	 * @return
 	 */
-	boolean createGlobalService(IService service);
+	boolean createGlobalService(String serviceName,IService service);
+
+	void sendMessageToService(String serviceName,Object object);
 	/**
 	 * 对所有在线玩家发送消息
 	 * @param requestId

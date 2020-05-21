@@ -11,6 +11,7 @@ import com.codebroker.api.CodeBrokerAppListener;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
+import com.codebroker.core.actortype.message.IService;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -47,7 +48,14 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 				.onMessage(IGameWorldMessage.UserLogOutWorld.class,this::logoutWorld)
 				.onMessage(IGameWorldMessage.SendAllOnlineUserMessage.class,this::sendAllOnlineUserMessage)
 				.onMessage(IGameWorldMessage.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
+				.onMessage(IGameWorldMessage.SendMessageToService.class,this::sendMessageToService)
 				.build();
+	}
+
+	private  Behavior<IGameWorldMessage> sendMessageToService(IGameWorldMessage.SendMessageToService message) {
+		IService.HandleMessage handleMessage = new IService.HandleMessage(message.object);
+		getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
+		return Behaviors.same();
 	}
 
 	private Behavior<IGameWorldMessage> sendAllOnlineUserEvent(IGameWorldMessage.SendAllOnlineUserEvent message) {

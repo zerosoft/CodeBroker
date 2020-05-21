@@ -20,7 +20,9 @@ public class AllianceService implements IService {
 
     @Override
     public void handleMessage(Object obj) {
-
+        if (obj instanceof String){
+            System.out.println("O +"+obj);
+        }
     }
 
     @Override

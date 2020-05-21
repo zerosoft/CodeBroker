@@ -1,5 +1,6 @@
 package com.codebroker.core.actortype.message;
 
+import akka.actor.typed.receptionist.Receptionist;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public interface IService {
@@ -27,6 +28,15 @@ public interface IService {
         @JsonCreator
         public HandleMessage(Object obj) {
             this.object=obj;
+        }
+    }
+
+    final class AddProcessorReference implements IService {
+
+        public Receptionist.Listing listing;
+
+        public AddProcessorReference(Receptionist.Listing listing) {
+            this.listing = listing;
         }
     }
 }
