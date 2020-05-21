@@ -20,12 +20,12 @@ public class ChatService implements IService {
 
     @Override
     public void handleMessage(Object obj) {
-
+        System.out.println("Get message "+obj);
     }
 
     @Override
     public String getName() {
-        return "Alliance";
+        return "ChatService";
     }
 
 

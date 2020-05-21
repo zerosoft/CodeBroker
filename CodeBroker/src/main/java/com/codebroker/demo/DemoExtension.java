@@ -62,7 +62,13 @@ public class DemoExtension extends AppListenerExtension {
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");
 
-		ChatService chatService = AppContext.getManager(ChatService.class);
-		chatService.init("hello world oo");
+//		boolean chatService = AppContext.getGameWorld().createGlobalService("ChatService", new ChatService());
+		
+		try {
+			Thread.sleep(5000L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		AppContext.getGameWorld().sendMessageToService("ChatService","Hello");
 	}
 }
