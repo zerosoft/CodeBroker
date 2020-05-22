@@ -15,7 +15,7 @@ public class CArray implements IArray {
     private List<DataWrapper> dataHolder;
 
     public CArray() {
-        this.dataHolder = new ArrayList<DataWrapper>();
+        this.dataHolder = new ArrayList<>();
         this.serializer = DefaultIDataSerializer.getInstance();
     }
 
