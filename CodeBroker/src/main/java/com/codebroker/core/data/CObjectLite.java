@@ -27,7 +27,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<Boolean> getBoolArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }
@@ -40,7 +40,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<Short> getShortArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }
@@ -53,7 +53,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<Integer> getIntArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }
@@ -66,7 +66,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<Float> getFloatArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<Double> getDoubleArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }
@@ -92,7 +92,7 @@ public final class CObjectLite extends CObject {
     }
 
     public Collection<String> getUtfStringArray(String key) {
-        IArray arr = getSFSArray(key);
+        IArray arr = getIArray(key);
         if (arr == null) {
             return null;
         }

@@ -1,7 +1,6 @@
 package com.codebroker.protocol.serialization;
 
 import akka.serialization.SerializerWithStringManifest;
-import com.codebroker.api.event.Event;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.IArray;
 import com.codebroker.core.data.IObject;
@@ -16,7 +15,7 @@ public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest 
     private final String IArray = "IA";
     private final String HANDLE_MESSAGE = "HandleMessage";
     private final String KRYO = "KRYO";
-    DefaultSFSDataSerializer s = DefaultSFSDataSerializer.getInstance();
+    DefaultIDataSerializer s = DefaultIDataSerializer.getInstance();
 
     @Override
     public Object fromBinary(byte[] bs, String string) {

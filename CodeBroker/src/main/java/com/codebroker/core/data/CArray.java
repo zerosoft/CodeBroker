@@ -1,7 +1,7 @@
 package com.codebroker.core.data;
 
 import com.codebroker.protocol.serialization.DefaultObjectDumpFormatter;
-import com.codebroker.protocol.serialization.DefaultSFSDataSerializer;
+import com.codebroker.protocol.serialization.DefaultIDataSerializer;
 import com.codebroker.protocol.serialization.IDataSerializer;
 import com.codebroker.util.ByteUtils;
 
@@ -16,15 +16,15 @@ public class CArray implements IArray {
 
     public CArray() {
         this.dataHolder = new ArrayList<DataWrapper>();
-        this.serializer = DefaultSFSDataSerializer.getInstance();
+        this.serializer = DefaultIDataSerializer.getInstance();
     }
 
     public static CArray newFromBinaryData(byte[] bytes) {
-        return ((CArray) DefaultSFSDataSerializer.getInstance().binary2array(bytes));
+        return ((CArray) DefaultIDataSerializer.getInstance().binary2array(bytes));
     }
 
     public static CArray newFromJsonData(String jsonStr) {
-        return ((CArray) DefaultSFSDataSerializer.getInstance().json2array(jsonStr));
+        return ((CArray) DefaultIDataSerializer.getInstance().json2array(jsonStr));
     }
 
     public static CArray newInstance() {
@@ -85,7 +85,7 @@ public class CArray implements IArray {
     }
 
     public String toJson() {
-        return DefaultSFSDataSerializer.getInstance().array2json(flatten());
+        return DefaultIDataSerializer.getInstance().array2json(flatten());
     }
 
     public boolean isNull(int index) {
@@ -114,7 +114,7 @@ public class CArray implements IArray {
     public Integer getUnsignedByte(int index) {
         DataWrapper wrapper = (DataWrapper) this.dataHolder.get(index);
         return ((wrapper != null) ? Integer.valueOf(
-                DefaultSFSDataSerializer.getInstance().getUnsignedByte(((Byte) wrapper.getObject()).byteValue()))
+                DefaultIDataSerializer.getInstance().getUnsignedByte(((Byte) wrapper.getObject()).byteValue()))
                 : null);
     }
 
@@ -166,7 +166,7 @@ public class CArray implements IArray {
             return null;
         }
 
-        DefaultSFSDataSerializer serializer = DefaultSFSDataSerializer.getInstance();
+        DefaultIDataSerializer serializer = DefaultIDataSerializer.getInstance();
         Collection<Integer> intCollection = new ArrayList<Integer>();
 
         for (byte b : (byte[]) wrapper.getObject()) {
@@ -364,7 +364,7 @@ public class CArray implements IArray {
 
     private List<Object> flatten() {
         List<Object> list = new ArrayList<Object>();
-        DefaultSFSDataSerializer.getInstance().flattenArray(list, this);
+        DefaultIDataSerializer.getInstance().flattenArray(list, this);
         return list;
     }
 }

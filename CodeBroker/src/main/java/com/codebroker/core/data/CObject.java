@@ -1,7 +1,7 @@
 package com.codebroker.core.data;
 
 import com.codebroker.protocol.serialization.DefaultObjectDumpFormatter;
-import com.codebroker.protocol.serialization.DefaultSFSDataSerializer;
+import com.codebroker.protocol.serialization.DefaultIDataSerializer;
 import com.codebroker.protocol.serialization.IDataSerializer;
 import com.codebroker.util.ByteUtils;
 
@@ -16,19 +16,19 @@ public class CObject implements IObject {
 
     public CObject() {
         dataHolder = new ConcurrentHashMap<String, DataWrapper>();
-        serializer = DefaultSFSDataSerializer.getInstance();
+        serializer = DefaultIDataSerializer.getInstance();
     }
 
     public static CObject newFromObject(Object o) {
-        return (CObject) DefaultSFSDataSerializer.getInstance().pojo2cbo(o);
+        return (CObject) DefaultIDataSerializer.getInstance().pojo2cbo(o);
     }
 
     public static CObject newFromBinaryData(byte bytes[]) {
-        return (CObject) DefaultSFSDataSerializer.getInstance().binary2object(bytes);
+        return (CObject) DefaultIDataSerializer.getInstance().binary2object(bytes);
     }
 
     public static IObject newFromJsonData(String jsonStr) {
-        return DefaultSFSDataSerializer.getInstance().json2object(jsonStr);
+        return DefaultIDataSerializer.getInstance().json2object(jsonStr);
     }
 
     public static CObject newInstance() {
@@ -228,7 +228,7 @@ public class CObject implements IObject {
         }
     }
 
-    public IArray getSFSArray(String key) {
+    public IArray getIArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
             return null;
@@ -237,7 +237,7 @@ public class CObject implements IObject {
         }
     }
 
-    public IObject getSFSObject(String key) {
+    public IObject getIObject(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null)
             return null;
@@ -270,7 +270,7 @@ public class CObject implements IObject {
             return null;
         } else {
             return Integer.valueOf(
-                    DefaultSFSDataSerializer.getInstance().getUnsignedByte(((Byte) o.getObject()).byteValue()));
+                    DefaultIDataSerializer.getInstance().getUnsignedByte(((Byte) o.getObject()).byteValue()));
         }
     }
 
@@ -279,7 +279,7 @@ public class CObject implements IObject {
         if (o == null) {
             return null;
         }
-        DefaultSFSDataSerializer serializer = DefaultSFSDataSerializer.getInstance();
+        DefaultIDataSerializer serializer = DefaultIDataSerializer.getInstance();
         Collection<Integer> intCollection = new ArrayList<Integer>();
         byte raw[];
         int j = (raw = (byte[]) o.getObject()).length;
@@ -371,12 +371,12 @@ public class CObject implements IObject {
         dataHolder.put(key, new DataWrapper(DataType.NULL, null));
     }
 
-    public void putSFSArray(String key, IArray value) {
-        putObj(key, value, DataType.ARRAY);
+    public void putIArray(String key, IArray iArray) {
+        putObj(key, iArray, DataType.ARRAY);
     }
 
-    public void putSFSObject(String key, IObject value) {
-        putObj(key, value, DataType.OBJECT);
+    public void putIObject(String key, IObject iObject) {
+        putObj(key, iObject, DataType.OBJECT);
     }
 
     public void putShort(String key, short value) {
@@ -395,8 +395,8 @@ public class CObject implements IObject {
         putObj(key, value, DataType.UTF_STRING_ARRAY);
     }
 
-    public void put(String key, DataWrapper wrappedObject) {
-        putObj(key, wrappedObject, null);
+    public void put(String key, DataWrapper wrapper) {
+        putObj(key, wrapper, null);
     }
 
     public void putClass(String key, Object o) {
@@ -423,7 +423,7 @@ public class CObject implements IObject {
 
     private Map<String, Object> flatten() {
         Map<String, Object> map = new HashMap<String, Object>();
-        DefaultSFSDataSerializer.getInstance().flattenObject(map, this);
+        DefaultIDataSerializer.getInstance().flattenObject(map, this);
         return map;
     }
 

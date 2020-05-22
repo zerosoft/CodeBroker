@@ -1,22 +1,11 @@
 package com.codebroker.core.data;
 
-import com.codebroker.api.internal.ByteArrayPacket;
-import com.codebroker.protocol.BaseByteArrayPacket;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type"
-)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = CObject.class, name = "CObject"),
-        @JsonSubTypes.Type(value = CObjectLite.class, name = "CObjectLite")
-})
+
 public interface IObject {
 
      boolean isNull(String key);
@@ -79,9 +68,9 @@ public interface IObject {
 
      Collection<String> getUtfStringArray(String key);
 
-     IArray getSFSArray(String key);
+     IArray getIArray(String key);
 
-     IObject getSFSObject(String key);
+     IObject getIObject(String key);
 
      Object getClass(String key);
 
@@ -119,11 +108,11 @@ public interface IObject {
 
      void putUtfStringArray(String s, Collection<String> collection);
 
-     void putSFSArray(String key, IArray isfsarray);
+     void putIArray(String key, IArray iArray);
 
-     void putSFSObject(String key, IObject isfsobject);
+     void putIObject(String key, IObject iObject);
 
      void putClass(String key, Object obj);
 
-     void put(String key, DataWrapper sfsdatawrapper);
+     void put(String key, DataWrapper wrapper);
 }
