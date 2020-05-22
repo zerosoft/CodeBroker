@@ -31,7 +31,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<Boolean> data = new ArrayList<Boolean>();
+        List<Boolean> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getBool(i));
         }
@@ -44,7 +44,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<Short> data = new ArrayList<Short>();
+        List<Short> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getShort(i));
         }
@@ -57,7 +57,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<Integer> data = new ArrayList<Integer>();
+        List<Integer> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getInt(i));
         }
@@ -70,7 +70,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<Float> data = new ArrayList<Float>();
+        List<Float> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getFloat(i));
         }
@@ -83,7 +83,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<Double> data = new ArrayList<Double>();
+        List<Double> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getDouble(i));
         }
@@ -96,7 +96,7 @@ public final class CObjectLite extends CObject {
         if (arr == null) {
             return null;
         }
-        List<String> data = new ArrayList<String>();
+        List<String> data = new ArrayList<>();
         for (int i = 0; i < arr.size(); i++) {
             data.add(arr.getUtfString(i));
         }

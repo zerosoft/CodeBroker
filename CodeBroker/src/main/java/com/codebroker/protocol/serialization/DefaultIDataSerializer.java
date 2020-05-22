@@ -860,7 +860,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
                         CObject fieldDescriptor = CObject.newInstance();
                         fieldDescriptor.putUtfString(FIELD_NAME_KEY, fieldName);
                         fieldDescriptor.put(FIELD_VALUE_KEY, this.wrapPojoField(fieldValue));
-                        fieldList.addSFSObject(fieldDescriptor);
+                        fieldList.addIObject(fieldDescriptor);
                     }
                 } catch (Exception e) {
                     this.logger.info("-- No public getter -- Serializer skipping private field: " + field.getName()

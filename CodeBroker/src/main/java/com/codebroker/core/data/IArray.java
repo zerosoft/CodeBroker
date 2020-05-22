@@ -5,109 +5,109 @@ import java.util.Iterator;
 
 public interface IArray {
 
-    public boolean contains(Object paramObject);
+     boolean contains(Object paramObject);
 
-    public Iterator<DataWrapper> iterator();
+     Iterator<DataWrapper> iterator();
 
-    public Object getElementAt(int paramInt);
+     Object getElementAt(int index);
 
-    public void removeElementAt(int paramInt);
+     void removeElementAt(int index);
 
-    public int size();
+     int size();
 
-    public byte[] toBinary();
+     byte[] toBinary();
 
-    public String toJson();
+     String toJson();
 
-    public String getHexDump();
+     String getHexDump();
 
-    public String getDump();
+     String getDump();
 
-    public String getDump(boolean paramBoolean);
+     String getDump(boolean paramBoolean);
 
-    public void addNull();
+     void addNull();
 
-    public void addBool(boolean paramBoolean);
+     void addBool(boolean paramBoolean);
 
-    public void addByte(byte paramByte);
+     void addByte(byte paramByte);
 
-    public void addShort(short paramShort);
+     void addShort(short paramShort);
 
-    public void addInt(int paramInt);
+     void addInt(int paramInt);
 
-    public void addLong(long paramLong);
+     void addLong(long paramLong);
 
-    public void addFloat(float paramFloat);
+     void addFloat(float paramFloat);
 
-    public void addDouble(double paramDouble);
+     void addDouble(double paramDouble);
 
-    public void addUtfString(String paramString);
+     void addUtfString(String paramString);
 
-    public void addBoolArray(Collection<Boolean> paramCollection);
+     void addBoolArray(Collection<Boolean> booleanCollection);
 
-    public void addByteArray(byte[] paramArrayOfByte);
+     void addByteArray(byte[] bytes);
 
-    public void addShortArray(Collection<Short> paramCollection);
+     void addShortArray(Collection<Short> shortCollection);
 
-    public void addIntArray(Collection<Integer> paramCollection);
+     void addIntArray(Collection<Integer> integerCollection);
 
-    public void addLongArray(Collection<Long> paramCollection);
+     void addLongArray(Collection<Long> longCollection);
 
-    public void addFloatArray(Collection<Float> paramCollection);
+     void addFloatArray(Collection<Float> floatCollection);
 
-    public void addDoubleArray(Collection<Double> paramCollection);
+     void addDoubleArray(Collection<Double> doubleCollection);
 
-    public void addUtfStringArray(Collection<String> paramCollection);
+     void addUtfStringArray(Collection<String> stringCollection);
 
-    public void addSFSArray(IArray paramISFSArray);
+     void addIArray(IArray iArray);
 
-    public void addSFSObject(IObject paramISFSObject);
+     void addIObject(IObject iObject);
 
-    public void addClass(Object paramObject);
+     void addClass(Object paramObject);
 
-    public void add(DataWrapper paramSFSDataWrapper);
+     void add(DataWrapper dataWrapper);
 
-    public boolean isNull(int paramInt);
+     boolean isNull(int index);
 
-    public Boolean getBool(int paramInt);
+     Boolean getBool(int index);
 
-    public Byte getByte(int paramInt);
+     Byte getByte(int index);
 
-    public Integer getUnsignedByte(int paramInt);
+     Integer getUnsignedByte(int index);
 
-    public Short getShort(int paramInt);
+     Short getShort(int index);
 
-    public Integer getInt(int paramInt);
+     Integer getInt(int index);
 
-    public Long getLong(int paramInt);
+     Long getLong(int index);
 
-    public Float getFloat(int paramInt);
+     Float getFloat(int index);
 
-    public Double getDouble(int paramInt);
+     Double getDouble(int index);
 
-    public String getUtfString(int paramInt);
+     String getUtfString(int index);
 
-    public Collection<Boolean> getBoolArray(int paramInt);
+     Collection<Boolean> getBoolArray(int index);
 
-    public byte[] getByteArray(int paramInt);
+     byte[] getByteArray(int index);
 
-    public Collection<Integer> getUnsignedByteArray(int paramInt);
+     Collection<Integer> getUnsignedByteArray(int index);
 
-    public Collection<Short> getShortArray(int paramInt);
+     Collection<Short> getShortArray(int index);
 
-    public Collection<Integer> getIntArray(int paramInt);
+     Collection<Integer> getIntArray(int index);
 
-    public Collection<Long> getLongArray(int paramInt);
+     Collection<Long> getLongArray(int index);
 
-    public Collection<Float> getFloatArray(int paramInt);
+     Collection<Float> getFloatArray(int index);
 
-    public Collection<Double> getDoubleArray(int paramInt);
+     Collection<Double> getDoubleArray(int index);
 
-    public Collection<String> getUtfStringArray(int paramInt);
+     Collection<String> getUtfStringArray(int index);
 
-    public Object getClass(int paramInt);
+     Object getClass(int index);
 
-    public IArray getArray(int paramInt);
+     IArray getArray(int index);
 
-    public IObject getObject(int paramInt);
+     IObject getObject(int index);
 }

@@ -25,7 +25,7 @@ public enum DataType {
 
     public final int typeID;
 
-    private DataType(int typeID) {
+    DataType(int typeID) {
         this.typeID = typeID;
     }
 

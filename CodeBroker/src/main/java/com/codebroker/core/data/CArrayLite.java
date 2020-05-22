@@ -29,7 +29,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<Boolean> data = new ArrayList<Boolean>();
+            ArrayList<Boolean> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(arr.getBool(i));
@@ -44,7 +44,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<Short> data = new ArrayList<Short>();
+            ArrayList<Short> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(Short.valueOf(arr.getInt(i).shortValue()));
@@ -59,7 +59,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<Integer> data = new ArrayList<Integer>();
+            ArrayList<Integer> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(arr.getInt(i));
@@ -74,7 +74,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<Float> data = new ArrayList<Float>();
+            ArrayList<Float> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(Float.valueOf(arr.getDouble(i).floatValue()));
@@ -89,7 +89,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<Double> data = new ArrayList<Double>();
+            ArrayList<Double> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(arr.getDouble(i));
@@ -104,7 +104,7 @@ public class CArrayLite extends CArray {
         if (arr == null) {
             return null;
         } else {
-            ArrayList<String> data = new ArrayList<String>();
+            ArrayList<String> data = new ArrayList<>();
 
             for (int i = 0; i < arr.size(); ++i) {
                 data.add(arr.getUtfString(i));
