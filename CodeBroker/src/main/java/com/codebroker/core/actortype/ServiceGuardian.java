@@ -38,7 +38,6 @@ public class ServiceGuardian {
 	private Behavior<IService> handle() {
 		return Behaviors.receive(IService.class)
 				.onMessage(IService.AddProcessorReference.class, listing -> {
-					int serverId = AppContext.getServerId();
 					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IService.class, serviceName));
 					for (ActorRef<IService> serviceInstance : serviceInstances) {
 						serviceInstance.tell(message);

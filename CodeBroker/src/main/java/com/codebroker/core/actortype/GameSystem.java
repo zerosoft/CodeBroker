@@ -74,7 +74,7 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
         ServiceWithActor serviceActor=new ServiceWithActor(name,spawn);
         com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
         ContextResolver.setManager(iService);
-        replyTo.tell(IWorldMessage.ReplyCreateService.INSTANCE);
+        replyTo.tell(new IWorldMessage.ReplyCreateService(spawn));
         return Behaviors.same();
     }
 

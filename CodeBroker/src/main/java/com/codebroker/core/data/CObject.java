@@ -11,11 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CObject implements IObject {
 
-    private Map<String, DataWrapper> dataHolder = null;
-    private IDataSerializer serializer = null;
+    private Map<String, DataWrapper> dataHolder;
+    private IDataSerializer serializer;
 
     public CObject() {
-        dataHolder = new ConcurrentHashMap<String, DataWrapper>();
+        dataHolder = new ConcurrentHashMap<>();
         serializer = DefaultIDataSerializer.getInstance();
     }
 
@@ -62,7 +62,7 @@ public class CObject implements IObject {
 
     public String getDump() {
         if (size() == 0) {
-            return "[ Empty AVAObject ]";
+            return "[ Empty IObject ]";
         } else {
             return DefaultObjectDumpFormatter.prettyPrintDump(dump());
         }
@@ -79,8 +79,8 @@ public class CObject implements IObject {
     private String dump() {
         StringBuilder buffer = new StringBuilder();
         buffer.append('{');
-        for (Iterator<String> iterator1 = getKeys().iterator(); iterator1.hasNext(); buffer.append(';')) {
-            String key = (String) iterator1.next();
+        for (Iterator<String> iterator = getKeys().iterator(); iterator.hasNext(); buffer.append(';')) {
+            String key = iterator.next();
             DataWrapper wrapper = get(key);
             buffer.append("(").append(wrapper.getTypeId().toString().toLowerCase()).append(") ").append(key)
                     .append(": ");
@@ -123,7 +123,7 @@ public class CObject implements IObject {
             return (Boolean) o.getObject();
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Boolean> getBoolArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -160,7 +160,7 @@ public class CObject implements IObject {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Double> getDoubleArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -178,7 +178,7 @@ public class CObject implements IObject {
             return (Float) o.getObject();
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Float> getFloatArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null)
@@ -195,7 +195,7 @@ public class CObject implements IObject {
             return (Integer) o.getObject();
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Integer> getIntArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -218,7 +218,7 @@ public class CObject implements IObject {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Long> getLongArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -254,7 +254,7 @@ public class CObject implements IObject {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public Collection<Short> getShortArray(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -280,7 +280,7 @@ public class CObject implements IObject {
             return null;
         }
         DefaultIDataSerializer serializer = DefaultIDataSerializer.getInstance();
-        Collection<Integer> intCollection = new ArrayList<Integer>();
+        Collection<Integer> intCollection = new ArrayList<>();
         byte raw[];
         int j = (raw = (byte[]) o.getObject()).length;
         for (int i = 0; i < j; i++) {
@@ -422,7 +422,7 @@ public class CObject implements IObject {
     }
 
     private Map<String, Object> flatten() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         DefaultIDataSerializer.getInstance().flattenObject(map, this);
         return map;
     }

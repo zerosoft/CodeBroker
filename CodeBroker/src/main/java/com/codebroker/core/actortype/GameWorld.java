@@ -21,6 +21,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	public static final String IDENTIFY = GameWorld.class.getSimpleName();
 
 	private long gameWorldId;
+	
 	Map<String, IGameUser> userMap= Maps.newTreeMap();
 
 	public static Behavior<IGameWorldMessage> create(long id) {

@@ -10,14 +10,17 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.data.IObject;
+import com.google.common.collect.Maps;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 public class GameWorldWithActor implements IGameWorld {
 
 	private ActorRef<IGameWorldMessage> gameWorldActorRef;
+	private Map<String,ActorRef<com.codebroker.core.actortype.message.IService>> localService= Maps.newTreeMap();
 	private String name;
 
 	public GameWorldWithActor(String name, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
@@ -51,7 +54,11 @@ public class GameWorldWithActor implements IGameWorld {
 				replyActorRef -> new IWorldMessage.createGlobalService(serviceName, service,replyActorRef),
 				Duration.ofMillis(500),
 				actorSystem.scheduler());
-		CompletionStage<IWorldMessage.Reply> exceptionally = ask.exceptionally(throwable -> {
+		CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
+			if (reply instanceof IWorldMessage.ReplyCreateService) {
+				localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
+			}
+		}).exceptionally(throwable -> {
 			throwable.printStackTrace();
 			return null;
 		});
@@ -61,7 +68,15 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public void sendMessageToService(String serviceName, IObject object) {
-		gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
+		/**
+		 * 如果是当前系统创建则使用当前系统的
+		 */
+		if (localService.containsKey(serviceName)){
+			localService.get(serviceName).tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+		}else {
+			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
+		}
+
 	}
 
 	@Override
