@@ -58,7 +58,7 @@ public class DemoExtension extends AppListenerExtension {
 
 		AppContext.setManager(new AllianceService());
 
-		AppContext.setManager(new ChatService());
+//		AppContext.setManager(new ChatService());
 
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");

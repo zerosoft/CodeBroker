@@ -8,6 +8,7 @@ import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
 import com.codebroker.demo.service.ChatService;
 import com.codebroker.demo.userevent.DoSameEvent;
+import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
@@ -35,6 +36,7 @@ public class Demo1Extension extends AppListenerExtension {
 	public void userLogin(IGameUser user) {
 		logger.info("User Login parameter {}",user.getUserId());
 		user.addEventListener("login", new DoSameEvent());
+		user.addEventListener("login Chat back", new LoginBackSameEvent());
 	}
 
 
@@ -57,7 +59,7 @@ public class Demo1Extension extends AppListenerExtension {
 
 		AppContext.setManager(new AllianceService());
 
-		AppContext.setManager(new ChatService());
+//		AppContext.setManager(new ChatService());
 
 		AllianceService manager = AppContext.getManager(AllianceService.class);
 		manager.init("hello world");

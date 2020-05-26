@@ -34,4 +34,7 @@ public class ServiceWithActor implements com.codebroker.api.internal.IService {
         return name;
     }
 
+    public ActorRef<IService> getActorActorRef() {
+        return actorActorRef;
+    }
 }

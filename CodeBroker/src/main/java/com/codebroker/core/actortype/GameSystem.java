@@ -62,15 +62,15 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
     private Behavior<IWorldMessage> createService(IWorldMessage.CreateService message) {
         ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
-        return getiWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
+        return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
     private Behavior<IWorldMessage> createGlobalService(IWorldMessage.createGlobalService message) {
         ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
-        return getiWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
+        return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
-    private Behavior<IWorldMessage> getiWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IWorldMessage.Reply> replyTo) {
+    private Behavior<IWorldMessage> getWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IWorldMessage.Reply> replyTo) {
         ServiceWithActor serviceActor=new ServiceWithActor(name,spawn);
         com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
         ContextResolver.setManager(iService);

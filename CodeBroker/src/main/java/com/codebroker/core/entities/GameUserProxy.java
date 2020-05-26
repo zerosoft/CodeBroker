@@ -16,22 +16,20 @@ import com.codebroker.protocol.SerializableType;
  *
  * @author LongJu
  */
-public class GameUserProxy implements IGameUser , IEventHandler, SerializableType {
+public class GameUserProxy implements IGameUser, IEventHandler, SerializableType {
 
     private ActorRef<IUser> actorRef;
 
-    public ActorRef<IUser> getActorRef() {
-        return actorRef;
-    }
+    private String uid;
 
-    public GameUserProxy(ActorRef<IUser> spawn) {
+    public GameUserProxy(String uid,ActorRef<IUser> spawn) {
+        this.uid=uid;
         this.actorRef=spawn;
     }
 
     public String getUserId() {
-        return "uid";
+        return uid;
     }
-
 
     @Override
     public void sendMessageToIoSession(int requestId, Object message) {
@@ -77,11 +75,5 @@ public class GameUserProxy implements IGameUser , IEventHandler, SerializableTyp
 
     @Override
     public void handlerEvent(IEvent event) {
-//        Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
-//        if (listeners != null && listeners.size() > 0){
-//            for (IGameUserEventListener listenerObj : listeners){
-//                listenerObj.handleEvent(this,event);
-//            }
-//        }
     }
 }

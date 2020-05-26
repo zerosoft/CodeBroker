@@ -45,7 +45,7 @@ public class ByteUtils {
             chrLine.append(currChar);
             if (++count == bytesPerLine) {
                 count = 0;
-                sb.append(((CharSequence) (hexLine))).append(TAB).append(((CharSequence) (chrLine))).append(NEW_LINE);
+                sb.append(((hexLine))).append(TAB).append(((chrLine))).append(NEW_LINE);
                 hexLine.delete(0, hexLine.length());
                 chrLine.delete(0, chrLine.length());
             }
@@ -56,7 +56,7 @@ public class ByteUtils {
                 chrLine.append(" ");
             }
 
-            sb.append(((CharSequence) (hexLine))).append(TAB).append(((CharSequence) (chrLine))).append(NEW_LINE);
+            sb.append(((hexLine))).append(TAB).append(((chrLine))).append(NEW_LINE);
         }
         return sb.toString();
     }

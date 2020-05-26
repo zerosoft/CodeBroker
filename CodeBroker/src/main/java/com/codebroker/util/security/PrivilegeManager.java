@@ -1,22 +1,22 @@
 package com.codebroker.util.security;
 
 public interface PrivilegeManager {
-    public boolean isActive();
+    boolean isActive();
 
-    public void setActive(boolean paramBoolean);
+    void setActive(boolean paramBoolean);
 
-    public void setPermissionProfile(PermissionProfile paramPermissionProfile);
+    void setPermissionProfile(PermissionProfile paramPermissionProfile);
 
-    public void removePermissionProfile(short paramShort);
+    void removePermissionProfile(short paramShort);
 
-    public void removePermissionProfile(String paramString);
+    void removePermissionProfile(String paramString);
 
-    public boolean containsPermissionProfile(short paramShort);
+    boolean containsPermissionProfile(short paramShort);
 
-    public boolean containsPermissionProfile(String paramString);
+    boolean containsPermissionProfile(String paramString);
 
-    public PermissionProfile getPermissionProfile(short paramShort);
+    PermissionProfile getPermissionProfile(short paramShort);
 
-    public PermissionProfile getPermissionProfile(String paramString);
+    PermissionProfile getPermissionProfile(String paramString);
 
 }

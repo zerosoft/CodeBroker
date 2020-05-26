@@ -2,13 +2,14 @@ package com.codebroker.api.internal;
 
 
 import com.codebroker.core.data.IObject;
+import com.codebroker.protocol.SerializableType;
 
 /**
  * 系统级组件服务.
  *
  * @author LongJu
  */
-public interface IService {
+public interface IService extends SerializableType {
 
     /**
      * 初始化.

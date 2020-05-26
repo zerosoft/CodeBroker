@@ -7,7 +7,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.ServiceWithActor;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.data.*;
@@ -32,6 +34,7 @@ import java.util.concurrent.*;
 
 public class DefaultIDataSerializer implements IDataSerializer {
 
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final long serialVersionUID = -6749126348064423022L;
@@ -39,11 +42,15 @@ public class DefaultIDataSerializer implements IDataSerializer {
     private static final String CLASS_MARKER_KEY = "$C";
     private static final String CLASS_FIELDS_KEY = "$F";
     private static final String CLASS_ACTOR_KEY = "$A";
+    private static final String CLASS_ACTOR_SERVICE_KEY = "$S";
 
+    public static final String CLASS_NAME = "$cn";
+    public static final String CLASS_VALUE = "cv";
 
     private static final String FIELD_NAME_KEY = "N";
     private static final String FIELD_VALUE_KEY = "V";
     private static final String ACTOR_VALUE_KEY = "P";
+    private static final String ACTOR_SERVICE_VALUE_KEY = "sp";
 
     private static DefaultIDataSerializer instance = new DefaultIDataSerializer();
 
@@ -238,8 +245,8 @@ public class DefaultIDataSerializer implements IDataSerializer {
         DataWrapper wrapper;
         Object dataObj;
         for (Iterator<String> result = keys.iterator();
-             result.hasNext();
-             buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj)) {
+            result.hasNext();
+            buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj)) {
             String pos = result.next();
             wrapper = object.get(pos);
             dataObj = wrapper.getObject();
@@ -853,9 +860,16 @@ public class DefaultIDataSerializer implements IDataSerializer {
             GameUser gameUser= (GameUser) pojo;
             ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
             String serializationFormat = ActorRefResolver.get(actorSystem).toSerializationFormat(gameUser.getActorRef());
-            iObject.putUtfString(CLASS_ACTOR_KEY, classFullName);
+            iObject.putUtfString(CLASS_ACTOR_KEY, gameUser.getUserId());
             iObject.putUtfString(ACTOR_VALUE_KEY, serializationFormat);
         }
+//        else if (pojo instanceof IService){
+//            ServiceWithActor serviceWithActor= (ServiceWithActor) ContextResolver.getManager(pojo.getClass());
+//            ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+//            String serializationFormat = ActorRefResolver.get(actorSystem).toSerializationFormat(serviceWithActor.getActorActorRef());
+//            iObject.putUtfString(CLASS_ACTOR_SERVICE_KEY, serviceWithActor.getName());
+//            iObject.putUtfString(CLASS_ACTOR_SERVICE_KEY, serializationFormat);
+//        }
         else {
             CArray fieldList = CArray.newInstance();
             iObject.putUtfString(CLASS_MARKER_KEY, classFullName);
@@ -979,16 +993,25 @@ public class DefaultIDataSerializer implements IDataSerializer {
     public Object cbo2pojo(IObject iObject) {
         Object pojo;
         if (!iObject.containsKey(CLASS_MARKER_KEY) && !iObject.containsKey(CLASS_FIELDS_KEY)
-                &&!iObject.containsKey(CLASS_ACTOR_KEY) && !iObject.containsKey(ACTOR_VALUE_KEY)) {
+                &&!iObject.containsKey(CLASS_ACTOR_KEY) && !iObject.containsKey(ACTOR_VALUE_KEY)
+//                &&!iObject.containsKey(CLASS_ACTOR_SERVICE_KEY) && !iObject.containsKey(ACTOR_SERVICE_VALUE_KEY)
+        ) {
             throw new CRuntimeException("The IObject passed does not represent any serialized class.");
         } else {
             try {
                 if (iObject.containsKey(CLASS_ACTOR_KEY)){
                     ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
                     ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
-                    GameUserProxy gameUserProxy=new GameUserProxy(objectActorRef);
+                    GameUserProxy gameUserProxy=new GameUserProxy(iObject.getUtfString(CLASS_ACTOR_KEY),objectActorRef);
                     return gameUserProxy;
-                }else {
+                }
+//                else if (iObject.containsKey(CLASS_ACTOR_SERVICE_KEY)){
+//                    ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+//                    ActorRef<com.codebroker.core.actortype.message.IService> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_SERVICE_VALUE_KEY));
+//                    ServiceWithActor serviceWithActor=new ServiceWithActor(iObject.getUtfString(CLASS_ACTOR_SERVICE_KEY),objectActorRef);
+//                    return serviceWithActor;
+//                }
+                else {
                     String e = iObject.getUtfString(CLASS_MARKER_KEY);
                     Class theClass = Class.forName(e);
                     pojo = theClass.newInstance();
@@ -1151,30 +1174,22 @@ public class DefaultIDataSerializer implements IDataSerializer {
         return JSON.toJSONString(map);
     }
 
-    public Object binary2Event(byte[] data) {
+    public Object binary2obj(byte[] data) {
         CObject cObject = CObject.newFromBinaryData(data);
         try {
-            Class<?> cl = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString("cl"));
-            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray("cv"), cl);
+            Class<?> cl = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString(CLASS_NAME));
+            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray(CLASS_VALUE), cl);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public byte[] Event2binary(Object event) {
+    public byte[] obj2binary(Object event) {
         CObject cObject = CObject.newInstance();
-        cObject.putUtfString("cl",event.getClass().getName());
-        cObject.putByteArray("cv",KryoSerialization.writeObjectToByteArray(event));
+        cObject.putUtfString(CLASS_NAME,event.getClass().getName());
+        cObject.putByteArray(CLASS_VALUE,KryoSerialization.writeObjectToByteArray(event));
         return cObject.toBinary();
     }
 
-//    public byte[] handleMessage2binary(IService.HandleMessage object) {
-//        return object.object.toBinary();
-//    }
-//
-//    public IService.HandleMessage binary2HandleMessage(byte[] bs) {
-//        CObject cObject = CObject.newFromBinaryData(bs);
-//        return new IService.HandleMessage(cObject);
-//    }
 }

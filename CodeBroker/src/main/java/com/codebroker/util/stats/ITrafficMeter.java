@@ -9,23 +9,23 @@ import java.util.List;
  */
 public interface ITrafficMeter {
 
-    public int getMonitoredHours();
+    int getMonitoredHours();
 
-    public int getSamplingRateMinutes();
+    int getSamplingRateMinutes();
 
-    public int getTrafficAverage();
+    int getTrafficAverage();
 
-    public int getTrafficAverage(int previousHours);
+    int getTrafficAverage(int previousHours);
 
-    public int getMaxTraffic();
+    int getMaxTraffic();
 
-    public int getMinTraffic();
+    int getMinTraffic();
 
-    public List<Integer> getDataPoints();
+    List<Integer> getDataPoints();
 
-    public List<Integer> getDataPoints(int howManyPoints);
+    List<Integer> getDataPoints(int howManyPoints);
 
-    public long getLastUpdateMillis();
+    long getLastUpdateMillis();
 
-    public void onTick();
+    void onTick();
 }

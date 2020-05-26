@@ -28,7 +28,9 @@ public class ChatService implements IService {
         IGameUser iGame = (IGameUser) obj.getClass("IGame");
         Event event=new Event();
         event.setTopic("login Chat back");
-        event.setMessage(CObject.newInstance());
+        CObject message = CObject.newInstance();
+        message.putClass("self",this);
+        event.setMessage(message);
         iGame.dispatchEvent(event);
     }
 
