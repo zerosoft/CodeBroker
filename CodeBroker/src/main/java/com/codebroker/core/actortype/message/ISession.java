@@ -4,6 +4,7 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**

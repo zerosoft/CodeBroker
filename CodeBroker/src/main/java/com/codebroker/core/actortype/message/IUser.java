@@ -1,9 +1,9 @@
 package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
-import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
+import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IUser {
+public interface IUser{
 
 	final class ReceiveMessageFromSession implements IUser{
 		public IPacket message;

@@ -10,18 +10,13 @@ import com.codebroker.api.internal.IEventHandler;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;
-import com.google.common.collect.Maps;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 操作代理对象
  *
  * @author LongJu
  */
-public class GameUser implements IGameUser , IEventHandler, SerializableType {
+public class GameUserProxy implements IGameUser , IEventHandler, SerializableType {
 
     private ActorRef<IUser> actorRef;
 
@@ -29,17 +24,12 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
         return actorRef;
     }
 
-    private String uid;
-    private Map<String, Set<IGameUserEventListener>> eventListenerMap= Maps.newTreeMap();
-
-
-    public GameUser(String uid, ActorRef<IUser> spawn) {
-        this.uid=uid;
+    public GameUserProxy(ActorRef<IUser> spawn) {
         this.actorRef=spawn;
     }
 
     public String getUserId() {
-        return uid;
+        return "uid";
     }
 
 
@@ -71,28 +61,14 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
 
     public void addEventListener(String eventType, IGameUserEventListener listener) {
-        Set<IGameUserEventListener> listeners = eventListenerMap.get(eventType);
-        if (listeners == null) {
-            listeners = new CopyOnWriteArraySet<>();
-            this.eventListenerMap.put(eventType, listeners);
-        }
-        listeners.add(listener);
     }
 
     public boolean hasEventListener(String eventType) {
-        boolean found = false;
-        Set<IGameUserEventListener> listeners = this.eventListenerMap.get(eventType);
-        if (listeners != null && listeners.size() > 0){
-            found = true;
-        }
-        return found;
+        return false;
     }
 
     public void removeEventListener(String eventType, IGameUserEventListener listener) {
-        Set<IGameUserEventListener> listeners = this.eventListenerMap.get(eventType);
-        if (listeners != null){
-            listeners.remove(listener);
-        }
+
     }
 
     public void dispatchEvent(IEvent event) {
@@ -101,11 +77,11 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     @Override
     public void handlerEvent(IEvent event) {
-        Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
-        if (listeners != null && listeners.size() > 0){
-            for (IGameUserEventListener listenerObj : listeners){
-                listenerObj.handleEvent(this,event);
-            }
-        }
+//        Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
+//        if (listeners != null && listeners.size() > 0){
+//            for (IGameUserEventListener listenerObj : listeners){
+//                listenerObj.handleEvent(this,event);
+//            }
+//        }
     }
 }

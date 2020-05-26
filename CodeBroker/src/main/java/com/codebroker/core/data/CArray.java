@@ -2,7 +2,7 @@ package com.codebroker.core.data;
 
 import com.codebroker.protocol.serialization.DefaultObjectDumpFormatter;
 import com.codebroker.protocol.serialization.DefaultIDataSerializer;
-import com.codebroker.protocol.serialization.IDataSerializer;
+import com.codebroker.protocol.IDataSerializer;
 import com.codebroker.util.ByteUtils;
 
 import java.util.ArrayList;

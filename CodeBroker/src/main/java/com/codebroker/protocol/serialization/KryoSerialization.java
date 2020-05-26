@@ -1,5 +1,9 @@
-package com.codebroker.util;
+package com.codebroker.protocol.serialization;
 
+import com.codebroker.core.data.CArray;
+import com.codebroker.core.data.CArrayLite;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.CObjectLite;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -21,29 +25,31 @@ public class KryoSerialization {
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     //每个线程的 Kryo 实例
-    private static final ThreadLocal<Kryo> kryoLocal = new ThreadLocal<Kryo>() {
-        @Override
-        protected Kryo initialValue() {
-            Kryo kryo = new Kryo();
+    private static final ThreadLocal<Kryo> kryoLocal = ThreadLocal.withInitial(() -> {
+        Kryo kryo = new Kryo();
 
-            /**
-             * 不要轻易改变这里的配置！更改之后，序列化的格式就会发生变化，
-             * 上线的同时就必须清除 Redis 里的所有缓存，
-             * 否则那些缓存再回来反序列化的时候，就会报错
-             */
-            //支持对象循环引用（否则会栈溢出）
-            kryo.setReferences(true); //默认值就是 true，添加此行的目的是为了提醒维护者，不要改变这个配置
+        /**
+         * 不要轻易改变这里的配置！更改之后，序列化的格式就会发生变化，
+         * 上线的同时就必须清除 Redis 里的所有缓存，
+         * 否则那些缓存再回来反序列化的时候，就会报错
+         */
+        //支持对象循环引用（否则会栈溢出）
+        kryo.setReferences(true); //默认值就是 true，添加此行的目的是为了提醒维护者，不要改变这个配置
 
-            //不强制要求注册类（注册行为无法保证多个 JVM 内同一个类的注册编号相同；而且业务系统中大量的 Class 也难以一一注册）
-            kryo.setRegistrationRequired(false); //默认值就是 false，添加此行的目的是为了提醒维护者，不要改变这个配置
+        kryo.register(CObject.class,IObjectSerializer.getInstance());
+        kryo.register(CObjectLite.class,IObjectSerializer.getInstance());
 
-            //Fix the NPE bug when deserializing Collections.
-            ((Kryo.DefaultInstantiatorStrategy) kryo.getInstantiatorStrategy())
-                    .setFallbackInstantiatorStrategy(new StdInstantiatorStrategy());
+        kryo.register(CArray.class,IArraySerializer.getInstance());
+        kryo.register(CArrayLite.class,IArraySerializer.getInstance());
 
-            return kryo;
-        }
-    };
+        //不强制要求注册类（注册行为无法保证多个 JVM 内同一个类的注册编号相同；而且业务系统中大量的 Class 也难以一一注册）
+        kryo.setRegistrationRequired(false); //默认值就是 false，添加此行的目的是为了提醒维护者，不要改变这个配置
+
+        //Fix the NPE bug when de serializing Collections.
+        ((Kryo.DefaultInstantiatorStrategy) kryo.getInstantiatorStrategy()).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy());
+
+        return kryo;
+    });
 
     /**
      * 获得当前线程的 Kryo 实例
@@ -101,7 +107,6 @@ public class KryoSerialization {
      * @param <T>       原对象的类型
      * @return 原对象
      */
-    @SuppressWarnings("unchecked")
     public static <T> T readFromByteArray(byte[] byteArray) {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
         Input input = new Input(byteArrayInputStream);
@@ -173,7 +178,6 @@ public class KryoSerialization {
      * @param <T>       原对象的类型
      * @return 原对象
      */
-    @SuppressWarnings("unchecked")
     public static <T> T readObjectFromByteArray(byte[] byteArray, Class<T> clazz) {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
         Input input = new Input(byteArrayInputStream);

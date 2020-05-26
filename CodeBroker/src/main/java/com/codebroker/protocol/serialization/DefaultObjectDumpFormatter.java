@@ -32,7 +32,7 @@ public class DefaultObjectDumpFormatter {
         }
 
         if (indentPos != 0)
-            throw new IllegalStateException("Argh! The indentPos is not == 0. TOKENS ARE NOT BALANCED!");
+            throw new IllegalStateException("what! The indentPos is not == 0. TOKENS ARE NOT BALANCED!");
         else
             return buf.toString();
     }

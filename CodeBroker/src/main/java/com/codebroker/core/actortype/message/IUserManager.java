@@ -2,8 +2,8 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
-import com.codebroker.api.internal.IPacket;
 import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.protocol.SerializableType;
 
 /**
  * description
@@ -11,7 +11,7 @@ import com.codebroker.protocol.BaseByteArrayPacket;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IUserManager {
+public interface IUserManager  {
     /**
      * 添加处理器参考
      */

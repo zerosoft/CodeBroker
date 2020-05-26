@@ -1,7 +1,9 @@
 package com.codebroker.protocol.serialization;
 
+import akka.actor.ExtendedActorSystem;
+import akka.actor.typed.ActorRefResolver;
+import akka.actor.typed.javadsl.Adapter;
 import akka.serialization.SerializerWithStringManifest;
-import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.IArray;
 import com.codebroker.core.data.IObject;
 
@@ -11,11 +13,20 @@ import com.codebroker.core.data.IObject;
  * @author LongJu
  */
 public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest {
+
     private final String IObject = "IO";
     private final String IArray = "IA";
-    private final String HANDLE_MESSAGE = "HandleMessage";
+
     private final String KRYO = "KRYO";
     DefaultIDataSerializer s = DefaultIDataSerializer.getInstance();
+
+    final ExtendedActorSystem system;
+    final ActorRefResolver actorRefResolver;
+
+    public CodeBrokerRemoteSerializatier(ExtendedActorSystem system){
+        this.system = system;
+        actorRefResolver = ActorRefResolver.get(Adapter.toTyped(system));
+    }
 
     @Override
     public Object fromBinary(byte[] bs, String string) {
@@ -23,10 +34,9 @@ public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest 
             return s.binary2object(bs);
         } else if (string.equals(IArray)) {
             return s.binary2array(bs);
-        } else if (string.equals(HANDLE_MESSAGE)) {
-            return s.binary2HandleMessage(bs);
+        } else {
+            return s.binary2Event(bs);
         }
-        return null;
     }
 
     @Override
@@ -40,8 +50,6 @@ public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest 
             return IObject;
         } else if (object instanceof IArray) {
             return IArray;
-        } else if (object instanceof IService.HandleMessage){
-            return HANDLE_MESSAGE;
         }
         else  {
             return KRYO;
@@ -55,15 +63,9 @@ public class CodeBrokerRemoteSerializatier extends SerializerWithStringManifest 
         } else if (object instanceof IArray) {
             return s.array2binary((IArray) object);
         }
-        else if (object instanceof IService.HandleMessage) {
-            return s.handleMessage2binary((IService.HandleMessage) object);
-        }
         else {
             return s.Event2binary(object);
         }
-//        else {
-//            throw new IllegalArgumentException("Unknown type: " + object);
-//        }
     }
 
 

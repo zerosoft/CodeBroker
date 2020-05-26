@@ -1,6 +1,7 @@
 package com.codebroker.core.actortype.message;
 
 import com.codebroker.api.internal.IBindingActor;
+import com.codebroker.protocol.SerializableType;
 
 /**
  * description

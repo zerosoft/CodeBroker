@@ -1,4 +1,4 @@
-package com.codebroker.protocol.serialization;
+package com.codebroker.protocol;
 
 import com.codebroker.core.data.IArray;
 import com.codebroker.core.data.IObject;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDataSerializer extends Serializable {
+
     byte[] object2binary(IObject iObject);
 
     byte[] array2binary(IArray var1);

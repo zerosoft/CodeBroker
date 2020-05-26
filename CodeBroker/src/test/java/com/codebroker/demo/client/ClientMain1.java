@@ -26,7 +26,7 @@ public class ClientMain1 {
 					.handler(new ClientInitializer());
 
 			// Start the connection attempt.
-			Channel ch = b.connect(HOST, 22334).sync().channel();
+			Channel ch = b.connect(HOST, 22335).sync().channel();
 
 			// Read commands from the stdin.
 			ChannelFuture lastWriteFuture = null;
@@ -40,7 +40,7 @@ public class ClientMain1 {
 				//登入或者注册
 				if (line.startsWith(String.valueOf(SystemRequest.USER_LOGIN_OR_REGISTER.id))) {
 					JSONObject jsonObject=new JSONObject();
-					jsonObject.put("name", "3451");
+					jsonObject.put("name", "3452");
 					jsonObject.put("parm", "6789");
 					head=new BaseByteArrayPacket(SystemRequest.USER_LOGIN_OR_REGISTER.id,jsonObject.toString().getBytes());
 				}

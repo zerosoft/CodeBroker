@@ -7,6 +7,7 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
+import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public interface IGameWorldMessage {

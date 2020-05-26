@@ -17,16 +17,21 @@ public class DoSomeThingRequestHandler implements IClientRequestHandler {
 
 		user.sendMessageToIoSession(101,"hello world".getBytes());
 
-		Event event=new Event();
-		event.setTopic("login");
-		event.setMessage(CObject.newInstance());
-		user.dispatchEvent(event);
+//		Event event=new Event();
+//		event.setTopic("login");
+//		event.setMessage(CObject.newInstance());
+//		user.dispatchEvent(event);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
 		Optional<IGameUser> iGameUserById = gameWorld.findIGameUserById("3451");
 		if (iGameUserById.isPresent()){
 			getClientRequestLogger().info("get it {}",iGameUserById.get().getUserId());
 		}
+
+		CObject object = CObject.newInstance();
+		object.putUtfString("message","hello");
+		object.putClass("IGame",user);
+		AppContext.getGameWorld().sendMessageToService("ChatService", object);
 	}
 }
 

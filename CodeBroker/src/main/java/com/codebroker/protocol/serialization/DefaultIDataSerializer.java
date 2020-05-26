@@ -1,13 +1,22 @@
 package com.codebroker.protocol.serialization;
 
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorRefResolver;
+import akka.actor.typed.ActorSystem;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.codebroker.core.actortype.message.IService;
+import com.codebroker.api.IGameUser;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.data.*;
+import com.codebroker.core.entities.GameUser;
+import com.codebroker.core.entities.GameUserProxy;
 import com.codebroker.exception.CRuntimeException;
 import com.codebroker.exception.CodecException;
-import com.codebroker.util.KryoSerialization;
+import com.codebroker.protocol.IDataSerializer;
+import com.codebroker.protocol.SerializableType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +38,12 @@ public class DefaultIDataSerializer implements IDataSerializer {
 
     private static final String CLASS_MARKER_KEY = "$C";
     private static final String CLASS_FIELDS_KEY = "$F";
+    private static final String CLASS_ACTOR_KEY = "$A";
+
 
     private static final String FIELD_NAME_KEY = "N";
     private static final String FIELD_VALUE_KEY = "V";
+    private static final String ACTOR_VALUE_KEY = "P";
 
     private static DefaultIDataSerializer instance = new DefaultIDataSerializer();
 
@@ -203,8 +215,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
             return new DataWrapper(DataType.UTF_STRING, o);
         } else if (o instanceof JSONObject) {
             JSONObject jso = (JSONObject) o;
-            return jso.isEmpty() ? new DataWrapper(DataType.NULL, null)
-                    : new DataWrapper(DataType.OBJECT, this.decodeIObject(jso));
+            return jso.isEmpty() ? new DataWrapper(DataType.NULL, null) : new DataWrapper(DataType.OBJECT, this.decodeIObject(jso));
         } else if (o instanceof JSONArray) {
             return new DataWrapper(DataType.ARRAY, this.decodeIArray(((JSONArray) o)));
         } else {
@@ -357,7 +368,9 @@ public class DefaultIDataSerializer implements IDataSerializer {
             IObject iObject = this.decodeIObject(buffer);
             DataType type = DataType.OBJECT;
             Object iObject1 = iObject;
-            if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)) {
+            if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)||
+                    iObject.containsKey(CLASS_ACTOR_KEY) && iObject.containsKey(ACTOR_VALUE_KEY)
+            ) {
                 type = DataType.CLASS;
                 iObject1 = this.cbo2pojo(iObject);
             }
@@ -836,7 +849,14 @@ public class DefaultIDataSerializer implements IDataSerializer {
         } else if (!(pojo instanceof SerializableType)) {
             throw new IllegalStateException("Cannot serialize object: " + pojo + ", type: " + classFullName
                     + " -- It doesn\'t implement the Serializable Type interface");
-        } else {
+        }else if (pojo instanceof IGameUser){
+            GameUser gameUser= (GameUser) pojo;
+            ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+            String serializationFormat = ActorRefResolver.get(actorSystem).toSerializationFormat(gameUser.getActorRef());
+            iObject.putUtfString(CLASS_ACTOR_KEY, classFullName);
+            iObject.putUtfString(ACTOR_VALUE_KEY, serializationFormat);
+        }
+        else {
             CArray fieldList = CArray.newInstance();
             iObject.putUtfString(CLASS_MARKER_KEY, classFullName);
             iObject.putIArray(CLASS_FIELDS_KEY, fieldList);
@@ -941,7 +961,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
     }
 
     private IObject unrollMap(Map map) {
-        CObject sfsObj = CObject.newInstance();
+        CObject cObject = CObject.newInstance();
         Set entries = map.entrySet();
         Iterator iter = entries.iterator();
 
@@ -949,28 +969,36 @@ public class DefaultIDataSerializer implements IDataSerializer {
             Entry item = (Entry) iter.next();
             Object key = item.getKey();
             if (key instanceof String) {
-                sfsObj.put((String) key, this.wrapPojoField(item.getValue()));
+                cObject.put((String) key, this.wrapPojoField(item.getValue()));
             }
         }
 
-        return sfsObj;
+        return cObject;
     }
 
-    public Object cbo2pojo(IObject sfsObj) {
+    public Object cbo2pojo(IObject iObject) {
         Object pojo;
-        if (!sfsObj.containsKey(CLASS_MARKER_KEY) && !sfsObj.containsKey(CLASS_FIELDS_KEY)) {
-            throw new CRuntimeException("The AVAObject passed does not represent any serialized class.");
+        if (!iObject.containsKey(CLASS_MARKER_KEY) && !iObject.containsKey(CLASS_FIELDS_KEY)
+                &&!iObject.containsKey(CLASS_ACTOR_KEY) && !iObject.containsKey(ACTOR_VALUE_KEY)) {
+            throw new CRuntimeException("The IObject passed does not represent any serialized class.");
         } else {
             try {
-                String e = sfsObj.getUtfString(CLASS_MARKER_KEY);
-                Class theClass = Class.forName(e);
-                pojo = theClass.newInstance();
-                if (!(pojo instanceof SerializableType)) {
-                    throw new IllegalStateException("Cannot deserialize object: " + pojo + ", type: " + e
-                            + " -- It doesn\'t implement the SerializableSFSType interface");
-                } else {
-                    this.convertSFSObject(sfsObj.getIArray(CLASS_FIELDS_KEY), pojo);
-                    return pojo;
+                if (iObject.containsKey(CLASS_ACTOR_KEY)){
+                    ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+                    ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
+                    GameUserProxy gameUserProxy=new GameUserProxy(objectActorRef);
+                    return gameUserProxy;
+                }else {
+                    String e = iObject.getUtfString(CLASS_MARKER_KEY);
+                    Class theClass = Class.forName(e);
+                    pojo = theClass.newInstance();
+                    if (!(pojo instanceof SerializableType)) {
+                        throw new IllegalStateException("Cannot deserialize object: " + pojo + ", type: " + e
+                                + " -- It doesn\'t implement the SerializableSFSType interface");
+                    } else {
+                        this.convertSFSObject(iObject.getIArray(CLASS_FIELDS_KEY), pojo);
+                        return pojo;
+                    }
                 }
             } catch (Exception var5) {
                 throw new CRuntimeException(var5);
@@ -998,7 +1026,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
             if (isArray) {
                 if (!(fieldValue instanceof Collection)) {
                     throw new CRuntimeException(
-                            "Problem during AVAObject => POJO conversion. Found array field in POJO: " + fieldName
+                            "Problem during IObject => POJO conversion. Found array field in POJO: " + fieldName
                                     + ", but data is not a Collection!");
                 }
 
@@ -1124,19 +1152,29 @@ public class DefaultIDataSerializer implements IDataSerializer {
     }
 
     public Object binary2Event(byte[] data) {
-        return KryoSerialization.readObjectFromByteArray(data, Object.class);
+        CObject cObject = CObject.newFromBinaryData(data);
+        try {
+            Class<?> cl = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString("cl"));
+            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray("cv"), cl);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public byte[] Event2binary(Object event) {
-        return KryoSerialization.writeObjectToByteArray(event);
+        CObject cObject = CObject.newInstance();
+        cObject.putUtfString("cl",event.getClass().getName());
+        cObject.putByteArray("cv",KryoSerialization.writeObjectToByteArray(event));
+        return cObject.toBinary();
     }
 
-    public byte[] handleMessage2binary(IService.HandleMessage object) {
-        return object.object.toBinary();
-    }
-
-    public IService.HandleMessage binary2HandleMessage(byte[] bs) {
-        CObject cObject = CObject.newFromBinaryData(bs);
-        return new IService.HandleMessage(cObject);
-    }
+//    public byte[] handleMessage2binary(IService.HandleMessage object) {
+//        return object.object.toBinary();
+//    }
+//
+//    public IService.HandleMessage binary2HandleMessage(byte[] bs) {
+//        CObject cObject = CObject.newFromBinaryData(bs);
+//        return new IService.HandleMessage(cObject);
+//    }
 }

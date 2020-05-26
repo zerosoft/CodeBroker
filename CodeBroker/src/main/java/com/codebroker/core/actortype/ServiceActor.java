@@ -52,7 +52,12 @@ public class ServiceActor extends AbstractBehavior<IService> {
     }
 
     private  Behavior<IService> handleMessage(IService.HandleMessage message) {
-        service.handleMessage(message.object);
+        try {
+            service.handleMessage(message.object);
+        }catch (RuntimeException e){
+
+        }
+
         return Behaviors.same();
     }
 
