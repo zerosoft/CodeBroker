@@ -31,7 +31,7 @@ dependencies {
 
 	compile group: 'commons-io', name: 'commons-io', version: '2.5'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.32'
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.71'
 	// https://mvnrepository.com/artifact/com.google.guava/guava
 	compile group: 'com.google.guava', name: 'guava', version: '29.0-jre'
 
