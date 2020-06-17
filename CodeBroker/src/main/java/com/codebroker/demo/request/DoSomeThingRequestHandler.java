@@ -6,12 +6,13 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.data.CObject;
+import com.codebroker.protobuf.Login_C;
 
 import java.util.Optional;
 
-public class DoSomeThingRequestHandler implements IClientRequestHandler {
+public class DoSomeThingRequestHandler implements IClientRequestHandler<Login_C> {
 	@Override
-	public void handleClientRequest(IGameUser user, Object message) {
+	public void handleClientRequest(IGameUser user, Login_C message) {
 		String userId = user.getUserId();
 		getClientRequestLogger().info("User Id {}",userId);
 

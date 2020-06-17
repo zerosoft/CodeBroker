@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author LongJu
  */
-public interface IClientRequestHandler {
+public interface IClientRequestHandler<T> {
 
     default Logger getClientRequestLogger(){
         return LoggerFactory.getLogger(IClientRequestHandler.class);
     }
 
-    void handleClientRequest(IGameUser user, Object message);
+    void handleClientRequest(IGameUser user, T message);
 
 }
