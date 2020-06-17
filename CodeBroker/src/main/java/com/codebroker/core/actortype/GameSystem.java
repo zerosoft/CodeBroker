@@ -1,18 +1,20 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.*;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
+import akka.actor.typed.javadsl.*;
 import akka.cluster.ClusterEvent;
+import akka.cluster.ddata.PNCounter;
+import akka.cluster.ddata.SelfUniqueAddress;
+import akka.cluster.ddata.typed.javadsl.DistributedData;
 import com.codebroker.cluster.ClusterListener;
+import com.codebroker.cluster.ReplicatedCache;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.actortype.timer.UserManagerTimer;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -99,6 +101,19 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
         gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
         GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY, gameWorldMessageActorRef);
+
+
+        SelfUniqueAddress selfUniqueAddress = DistributedData.get(getContext().getSystem()).selfUniqueAddress();
+
+        ActorRef<ReplicatedCache.Command> replicatedCache = getContext().spawn(ReplicatedCache.create(), "ReplicatedCache");
+        replicatedCache.tell(new ReplicatedCache.PutInCache("v","232"));
+
+
+
+        getContext().getSystem().log().info("");
+        //        PNCounter pnCounter = PNCounter.create();
+//        PNCounter increment = pnCounter.increment(selfUniqueAddress, 1);
+//        getContext().getSystem().log().info("PNCounter=",increment.value());
 
         ContextResolver.setGameWorld(gameWorldWithActor);
 

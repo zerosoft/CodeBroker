@@ -1,0 +1,1 @@
+ .\protoc.exe --proto_path=. --java_out=. ./*.proto
