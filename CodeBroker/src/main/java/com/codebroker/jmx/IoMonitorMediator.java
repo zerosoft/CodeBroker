@@ -1,5 +1,8 @@
 package com.codebroker.jmx;
 
+import com.codebroker.jmx.annotations.ManagedAnnotation;
+import com.codebroker.jmx.annotations.ManagedDescription;
+
 @ManagedDescription("IoMonitorControl")
 public class IoMonitorMediator extends MBean<IoMonitorControl> {
 

@@ -1,5 +1,8 @@
 package com.codebroker.jmx;
 
+import com.codebroker.jmx.annotations.ManagedAnnotation;
+import com.codebroker.jmx.annotations.ManagedDescription;
+
 import javax.management.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;

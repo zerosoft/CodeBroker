@@ -1,5 +1,8 @@
 package com.codebroker.jmx;
 
+import com.codebroker.jmx.annotations.ManagedAnnotation;
+import com.codebroker.jmx.annotations.ManagedDescription;
+
 public class NettyTcpSupervisorMediator extends MBean<NettyTcpSupervisorControl> {
 
     private NettyTcpSupervisorControl managedObject;

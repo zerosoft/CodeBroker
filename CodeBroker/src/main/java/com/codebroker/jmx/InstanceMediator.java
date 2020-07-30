@@ -2,6 +2,8 @@ package com.codebroker.jmx;
 
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.proxy.NettyTcpSupervisorProxy;
+import com.codebroker.jmx.annotations.ManagedAnnotation;
+import com.codebroker.jmx.annotations.ManagedDescription;
 import com.codebroker.net.IoMonitorImpl;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;

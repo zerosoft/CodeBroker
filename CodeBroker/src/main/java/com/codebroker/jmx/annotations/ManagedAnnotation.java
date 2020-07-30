@@ -1,4 +1,4 @@
-package com.codebroker.jmx;
+package com.codebroker.jmx.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
