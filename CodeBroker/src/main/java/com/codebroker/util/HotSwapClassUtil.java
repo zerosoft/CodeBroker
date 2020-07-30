@@ -74,7 +74,7 @@ public class HotSwapClassUtil {
         BufferedInputStream fileInputStream = null;
         while (entries.hasMoreElements()) {
             try {
-                JarEntry jarEntry = (JarEntry) entries.nextElement();
+                JarEntry jarEntry = entries.nextElement();
                 if (jarEntry.isDirectory()) {
                     continue;
                 }

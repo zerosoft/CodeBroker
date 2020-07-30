@@ -14,6 +14,7 @@ import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
 import com.codebroker.core.entities.GameUser;
+import com.codebroker.pool.GameUserPool;
 
 import java.util.concurrent.Executor;
 
@@ -74,9 +75,9 @@ public class User extends AbstractBehavior<IUser> {
 
     private Behavior<IUser> newGameUserInit(IUser.NewGameUserInit message) {
         //进入游戏的
-        gameUser = new GameUser(uid, getContext().getSelf());
+        this.gameUser = GameUserPool.getGameUser(uid,getContext().getSelf());
 
-        getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLoginWorld(gameUser)));
+        getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLoginWorld(this.gameUser)));
 
 //        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
 //        appListener.userLogin(gameUser);

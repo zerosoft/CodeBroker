@@ -1,0 +1,12 @@
+syntax="proto3";
+
+option java_package = "com.com.codebroker.demo.item";
+option java_multiple_files = true;
+
+import "LoginMessage.proto";
+
+
+message ItemBean {
+     int32 itemId 	= 1;
+     int32 itemCount	= 2;
+}

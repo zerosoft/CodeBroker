@@ -23,7 +23,9 @@ public interface IGameWorldMessage {
 		}
 	}
 
-
+	/**
+	 * 通过ID查找角色
+	 */
 	final class findIGameUserByIdMessage implements IGameWorldMessage {
 
 		public final String id;
@@ -38,6 +40,9 @@ public interface IGameWorldMessage {
 	interface Reply {
 	}
 
+	/**
+	 * 查找角色的信息返回
+	 */
 	class FindGameUser implements Reply {
 
 		public final IGameUser gameUser;
@@ -51,6 +56,9 @@ public interface IGameWorldMessage {
 		INSTANCE;
 	}
 
+	/**
+	 * 角色登入到世界
+	 */
 	class UserLoginWorld implements IGameWorldMessage {
 
 		public final IGameUser gameUser;
@@ -59,7 +67,9 @@ public interface IGameWorldMessage {
 			this.gameUser = gameUser;
 		}
 	}
-
+	/**
+	 * 角色离开到世界
+	 */
 	class UserLogOutWorld implements IGameWorldMessage {
 		public final IGameUser gameUser;
 
@@ -77,6 +87,9 @@ public interface IGameWorldMessage {
 		}
 	}
 
+	/**
+	 * 给所有在线的玩家发事件
+	 */
 	class SendAllOnlineUserEvent implements IGameWorldMessage {
 		public final IEvent event;
 		public SendAllOnlineUserEvent(IEvent event) {
@@ -84,6 +97,9 @@ public interface IGameWorldMessage {
 		}
 	}
 
+	/**
+	 * 消息发送给服务
+	 */
 	class SendMessageToService implements IGameWorldMessage {
 		public final String serviceName;
 

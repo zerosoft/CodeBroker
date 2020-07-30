@@ -26,8 +26,8 @@ public final class AppContext {
         }
     }
 
-    public static void setManager(IService service) {
-        InternalContext.getManagerLocator().setManager(service);
+    public static boolean setManager(IService service) {
+        return InternalContext.getManagerLocator().setManager(service);
     }
 
     /**

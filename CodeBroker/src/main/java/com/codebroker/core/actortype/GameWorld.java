@@ -12,6 +12,8 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.entities.GameUser;
+import com.codebroker.pool.GameUserPool;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -74,8 +76,9 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 		userMap.remove(message.gameUser.getUserId());
 
 		CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-		appListener.handleLogout(message.gameUser);
-
+		if (appListener.handleLogout(message.gameUser)){
+			GameUserPool.returnGameUser((GameUser) message.gameUser);
+		}
 		return Behaviors.same();
 	}
 

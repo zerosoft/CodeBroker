@@ -23,6 +23,11 @@ public interface IGameWorld {
 	 */
 	boolean createGlobalService(String serviceName,IService service);
 
+	/**
+	 * 发送事件到服务
+	 * @param serviceName 服务名称
+	 * @param object 事件对象
+	 */
 	void sendMessageToService(String serviceName, IObject object);
 	/**
 	 * 对所有在线玩家发送消息

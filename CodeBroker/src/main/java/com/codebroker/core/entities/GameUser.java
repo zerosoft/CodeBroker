@@ -32,10 +32,28 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     private String uid;
     private Map<String, Set<IGameUserEventListener>> eventListenerMap= Maps.newTreeMap();
 
+    public void clean(){
+        uid=null;
+        actorRef=null;
+        eventListenerMap.clear();
+    }
 
     public GameUser(String uid, ActorRef<IUser> spawn) {
         this.uid=uid;
         this.actorRef=spawn;
+    }
+
+
+    public void setActorRef(ActorRef<IUser> actorRef) {
+        this.actorRef = actorRef;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getUserId() {

@@ -26,14 +26,14 @@ private static final long serialVersionUID = 0L;
     serverName_ = "";
   }
 
-  @Override
+  @java.lang.Override
   @SuppressWarnings({"unused"})
-  protected Object newInstance(
+  protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
     return new Login_C1();
   }
 
-  @Override
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
     return this.unknownFields;
@@ -44,7 +44,7 @@ private static final long serialVersionUID = 0L;
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     if (extensionRegistry == null) {
-      throw new NullPointerException();
+      throw new java.lang.NullPointerException();
     }
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -62,7 +62,7 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             openId_ = s;
             break;
@@ -73,29 +73,29 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 34: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             version_ = s;
             break;
           }
           case 42: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             deviceId_ = s;
             break;
           }
           case 50: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             serverName_ = s;
             break;
           }
           case 66: {
-            Login_C.Builder subBuilder = null;
+            com.codebroker.protobuf.Login_C.Builder subBuilder = null;
             if (ccc_ != null) {
               subBuilder = ccc_.toBuilder();
             }
-            ccc_ = input.readMessage(Login_C.parser(), extensionRegistry);
+            ccc_ = input.readMessage(com.codebroker.protobuf.Login_C.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(ccc_);
               ccc_ = subBuilder.buildPartial();
@@ -124,15 +124,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return ClientMessage1.internal_static_Login_C1_descriptor;
+    return com.codebroker.protobuf.ClientMessage1.internal_static_Login_C1_descriptor;
   }
 
-  @Override
-  protected FieldAccessorTable
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return ClientMessage1.internal_static_Login_C1_fieldAccessorTable
+    return com.codebroker.protobuf.ClientMessage1.internal_static_Login_C1_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            Login_C1.class, Builder.class);
+            com.codebroker.protobuf.Login_C1.class, com.codebroker.protobuf.Login_C1.Builder.class);
   }
 
   public static final int PROTOID_FIELD_NUMBER = 1;
@@ -141,26 +141,26 @@ private static final long serialVersionUID = 0L;
    * <code>int32 protoId = 1;</code>
    * @return The protoId.
    */
-  @Override
+  @java.lang.Override
   public int getProtoId() {
     return protoId_;
   }
 
   public static final int OPENID_FIELD_NUMBER = 2;
-  private volatile Object openId_;
+  private volatile java.lang.Object openId_;
   /**
    * <code>string openId = 2;</code>
    * @return The openId.
    */
-  @Override
-  public String getOpenId() {
-    Object ref = openId_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getOpenId() {
+    java.lang.Object ref = openId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       openId_ = s;
       return s;
     }
@@ -169,14 +169,14 @@ private static final long serialVersionUID = 0L;
    * <code>string openId = 2;</code>
    * @return The bytes for openId.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getOpenIdBytes() {
-    Object ref = openId_;
-    if (ref instanceof String) {
+    java.lang.Object ref = openId_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       openId_ = b;
       return b;
     } else {
@@ -190,26 +190,26 @@ private static final long serialVersionUID = 0L;
    * <code>int64 uid = 3;</code>
    * @return The uid.
    */
-  @Override
+  @java.lang.Override
   public long getUid() {
     return uid_;
   }
 
   public static final int VERSION_FIELD_NUMBER = 4;
-  private volatile Object version_;
+  private volatile java.lang.Object version_;
   /**
    * <code>string version = 4;</code>
    * @return The version.
    */
-  @Override
-  public String getVersion() {
-    Object ref = version_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getVersion() {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       version_ = s;
       return s;
     }
@@ -218,14 +218,14 @@ private static final long serialVersionUID = 0L;
    * <code>string version = 4;</code>
    * @return The bytes for version.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getVersionBytes() {
-    Object ref = version_;
-    if (ref instanceof String) {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       version_ = b;
       return b;
     } else {
@@ -234,20 +234,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DEVICEID_FIELD_NUMBER = 5;
-  private volatile Object deviceId_;
+  private volatile java.lang.Object deviceId_;
   /**
    * <code>string deviceId = 5;</code>
    * @return The deviceId.
    */
-  @Override
-  public String getDeviceId() {
-    Object ref = deviceId_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getDeviceId() {
+    java.lang.Object ref = deviceId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       deviceId_ = s;
       return s;
     }
@@ -256,14 +256,14 @@ private static final long serialVersionUID = 0L;
    * <code>string deviceId = 5;</code>
    * @return The bytes for deviceId.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getDeviceIdBytes() {
-    Object ref = deviceId_;
-    if (ref instanceof String) {
+    java.lang.Object ref = deviceId_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       deviceId_ = b;
       return b;
     } else {
@@ -272,20 +272,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SERVERNAME_FIELD_NUMBER = 6;
-  private volatile Object serverName_;
+  private volatile java.lang.Object serverName_;
   /**
    * <code>string serverName = 6;</code>
    * @return The serverName.
    */
-  @Override
-  public String getServerName() {
-    Object ref = serverName_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getServerName() {
+    java.lang.Object ref = serverName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       serverName_ = s;
       return s;
     }
@@ -294,14 +294,14 @@ private static final long serialVersionUID = 0L;
    * <code>string serverName = 6;</code>
    * @return The bytes for serverName.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getServerNameBytes() {
-    Object ref = serverName_;
-    if (ref instanceof String) {
+    java.lang.Object ref = serverName_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       serverName_ = b;
       return b;
     } else {
@@ -310,12 +310,12 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CCC_FIELD_NUMBER = 8;
-  private Login_C ccc_;
+  private com.codebroker.protobuf.Login_C ccc_;
   /**
    * <code>.Login_C ccc = 8;</code>
    * @return Whether the ccc field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasCcc() {
     return ccc_ != null;
   }
@@ -323,20 +323,20 @@ private static final long serialVersionUID = 0L;
    * <code>.Login_C ccc = 8;</code>
    * @return The ccc.
    */
-  @Override
-  public Login_C getCcc() {
-    return ccc_ == null ? Login_C.getDefaultInstance() : ccc_;
+  @java.lang.Override
+  public com.codebroker.protobuf.Login_C getCcc() {
+    return ccc_ == null ? com.codebroker.protobuf.Login_C.getDefaultInstance() : ccc_;
   }
   /**
    * <code>.Login_C ccc = 8;</code>
    */
-  @Override
+  @java.lang.Override
   public com.codebroker.protobuf.Login_COrBuilder getCccOrBuilder() {
     return getCcc();
   }
 
   private byte memoizedIsInitialized = -1;
-  @Override
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -346,7 +346,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (protoId_ != 0) {
@@ -373,7 +373,7 @@ private static final long serialVersionUID = 0L;
     unknownFields.writeTo(output);
   }
 
-  @Override
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -408,15 +408,15 @@ private static final long serialVersionUID = 0L;
     return size;
   }
 
-  @Override
-  public boolean equals(final Object obj) {
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof Login_C1)) {
+    if (!(obj instanceof com.codebroker.protobuf.Login_C1)) {
       return super.equals(obj);
     }
-    Login_C1 other = (Login_C1) obj;
+    com.codebroker.protobuf.Login_C1 other = (com.codebroker.protobuf.Login_C1) obj;
 
     if (getProtoId()
         != other.getProtoId()) return false;
@@ -439,7 +439,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public int hashCode() {
     if (memoizedHashCode != 0) {
       return memoizedHashCode;
@@ -468,69 +468,69 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Login_C1 parseFrom(byte[] data)
+  public static com.codebroker.protobuf.Login_C1 parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Login_C1 parseFrom(java.io.InputStream input)
+  public static com.codebroker.protobuf.Login_C1 parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Login_C1 parseDelimitedFrom(java.io.InputStream input)
+  public static com.codebroker.protobuf.Login_C1 parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static Login_C1 parseDelimitedFrom(
+  public static com.codebroker.protobuf.Login_C1 parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Login_C1 parseFrom(
+  public static com.codebroker.protobuf.Login_C1 parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -538,23 +538,23 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  @Override
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(Login_C1 prototype) {
+  public static Builder newBuilder(com.codebroker.protobuf.Login_C1 prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
-  @Override
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
   }
 
-  @Override
+  @java.lang.Override
   protected Builder newBuilderForType(
-      BuilderParent parent) {
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
     Builder builder = new Builder(parent);
     return builder;
   }
@@ -571,15 +571,15 @@ private static final long serialVersionUID = 0L;
       com.codebroker.protobuf.Login_C1OrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ClientMessage1.internal_static_Login_C1_descriptor;
+      return com.codebroker.protobuf.ClientMessage1.internal_static_Login_C1_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ClientMessage1.internal_static_Login_C1_fieldAccessorTable
+      return com.codebroker.protobuf.ClientMessage1.internal_static_Login_C1_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              Login_C1.class, Builder.class);
+              com.codebroker.protobuf.Login_C1.class, com.codebroker.protobuf.Login_C1.Builder.class);
     }
 
     // Construct using com.codebroker.protobuf.Login_C1.newBuilder()
@@ -588,7 +588,7 @@ private static final long serialVersionUID = 0L;
     }
 
     private Builder(
-        BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
       maybeForceBuilderInitialization();
     }
@@ -597,7 +597,7 @@ private static final long serialVersionUID = 0L;
               .alwaysUseFieldBuilders) {
       }
     }
-    @Override
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       protoId_ = 0;
@@ -621,29 +621,29 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return ClientMessage1.internal_static_Login_C1_descriptor;
+      return com.codebroker.protobuf.ClientMessage1.internal_static_Login_C1_descriptor;
     }
 
-    @Override
-    public Login_C1 getDefaultInstanceForType() {
-      return Login_C1.getDefaultInstance();
+    @java.lang.Override
+    public com.codebroker.protobuf.Login_C1 getDefaultInstanceForType() {
+      return com.codebroker.protobuf.Login_C1.getDefaultInstance();
     }
 
-    @Override
-    public Login_C1 build() {
-      Login_C1 result = buildPartial();
+    @java.lang.Override
+    public com.codebroker.protobuf.Login_C1 build() {
+      com.codebroker.protobuf.Login_C1 result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
       return result;
     }
 
-    @Override
-    public Login_C1 buildPartial() {
-      Login_C1 result = new Login_C1(this);
+    @java.lang.Override
+    public com.codebroker.protobuf.Login_C1 buildPartial() {
+      com.codebroker.protobuf.Login_C1 result = new com.codebroker.protobuf.Login_C1(this);
       result.protoId_ = protoId_;
       result.openId_ = openId_;
       result.uid_ = uid_;
@@ -659,50 +659,50 @@ private static final long serialVersionUID = 0L;
       return result;
     }
 
-    @Override
+    @java.lang.Override
     public Builder clone() {
       return super.clone();
     }
-    @Override
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.setField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
       return super.clearField(field);
     }
-    @Override
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
       return super.clearOneof(oneof);
     }
-    @Override
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
+        int index, java.lang.Object value) {
       return super.setRepeatedField(field, index, value);
     }
-    @Override
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.addRepeatedField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof Login_C1) {
-        return mergeFrom((Login_C1)other);
+      if (other instanceof com.codebroker.protobuf.Login_C1) {
+        return mergeFrom((com.codebroker.protobuf.Login_C1)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(Login_C1 other) {
-      if (other == Login_C1.getDefaultInstance()) return this;
+    public Builder mergeFrom(com.codebroker.protobuf.Login_C1 other) {
+      if (other == com.codebroker.protobuf.Login_C1.getDefaultInstance()) return this;
       if (other.getProtoId() != 0) {
         setProtoId(other.getProtoId());
       }
@@ -733,21 +733,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Login_C1 parsedMessage = null;
+      com.codebroker.protobuf.Login_C1 parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (Login_C1) e.getUnfinishedMessage();
+        parsedMessage = (com.codebroker.protobuf.Login_C1) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -762,7 +762,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 protoId = 1;</code>
      * @return The protoId.
      */
-    @Override
+    @java.lang.Override
     public int getProtoId() {
       return protoId_;
     }
@@ -788,21 +788,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object openId_ = "";
+    private java.lang.Object openId_ = "";
     /**
      * <code>string openId = 2;</code>
      * @return The openId.
      */
-    public String getOpenId() {
-      Object ref = openId_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getOpenId() {
+      java.lang.Object ref = openId_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         openId_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -811,11 +811,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getOpenIdBytes() {
-      Object ref = openId_;
+      java.lang.Object ref = openId_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         openId_ = b;
         return b;
       } else {
@@ -828,7 +828,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setOpenId(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -869,7 +869,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 uid = 3;</code>
      * @return The uid.
      */
-    @Override
+    @java.lang.Override
     public long getUid() {
       return uid_;
     }
@@ -895,21 +895,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object version_ = "";
+    private java.lang.Object version_ = "";
     /**
      * <code>string version = 4;</code>
      * @return The version.
      */
-    public String getVersion() {
-      Object ref = version_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         version_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -918,11 +918,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getVersionBytes() {
-      Object ref = version_;
+      java.lang.Object ref = version_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         version_ = b;
         return b;
       } else {
@@ -935,7 +935,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setVersion(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -971,21 +971,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object deviceId_ = "";
+    private java.lang.Object deviceId_ = "";
     /**
      * <code>string deviceId = 5;</code>
      * @return The deviceId.
      */
-    public String getDeviceId() {
-      Object ref = deviceId_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getDeviceId() {
+      java.lang.Object ref = deviceId_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         deviceId_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -994,11 +994,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getDeviceIdBytes() {
-      Object ref = deviceId_;
+      java.lang.Object ref = deviceId_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         deviceId_ = b;
         return b;
       } else {
@@ -1011,7 +1011,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setDeviceId(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1047,21 +1047,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object serverName_ = "";
+    private java.lang.Object serverName_ = "";
     /**
      * <code>string serverName = 6;</code>
      * @return The serverName.
      */
-    public String getServerName() {
-      Object ref = serverName_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getServerName() {
+      java.lang.Object ref = serverName_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         serverName_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1070,11 +1070,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getServerNameBytes() {
-      Object ref = serverName_;
+      java.lang.Object ref = serverName_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         serverName_ = b;
         return b;
       } else {
@@ -1087,7 +1087,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setServerName(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1123,9 +1123,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Login_C ccc_;
+    private com.codebroker.protobuf.Login_C ccc_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        Login_C, Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder> cccBuilder_;
+        com.codebroker.protobuf.Login_C, com.codebroker.protobuf.Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder> cccBuilder_;
     /**
      * <code>.Login_C ccc = 8;</code>
      * @return Whether the ccc field is set.
@@ -1137,9 +1137,9 @@ private static final long serialVersionUID = 0L;
      * <code>.Login_C ccc = 8;</code>
      * @return The ccc.
      */
-    public Login_C getCcc() {
+    public com.codebroker.protobuf.Login_C getCcc() {
       if (cccBuilder_ == null) {
-        return ccc_ == null ? Login_C.getDefaultInstance() : ccc_;
+        return ccc_ == null ? com.codebroker.protobuf.Login_C.getDefaultInstance() : ccc_;
       } else {
         return cccBuilder_.getMessage();
       }
@@ -1147,7 +1147,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.Login_C ccc = 8;</code>
      */
-    public Builder setCcc(Login_C value) {
+    public Builder setCcc(com.codebroker.protobuf.Login_C value) {
       if (cccBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1164,7 +1164,7 @@ private static final long serialVersionUID = 0L;
      * <code>.Login_C ccc = 8;</code>
      */
     public Builder setCcc(
-        Login_C.Builder builderForValue) {
+        com.codebroker.protobuf.Login_C.Builder builderForValue) {
       if (cccBuilder_ == null) {
         ccc_ = builderForValue.build();
         onChanged();
@@ -1177,11 +1177,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.Login_C ccc = 8;</code>
      */
-    public Builder mergeCcc(Login_C value) {
+    public Builder mergeCcc(com.codebroker.protobuf.Login_C value) {
       if (cccBuilder_ == null) {
         if (ccc_ != null) {
           ccc_ =
-            Login_C.newBuilder(ccc_).mergeFrom(value).buildPartial();
+            com.codebroker.protobuf.Login_C.newBuilder(ccc_).mergeFrom(value).buildPartial();
         } else {
           ccc_ = value;
         }
@@ -1209,7 +1209,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.Login_C ccc = 8;</code>
      */
-    public Login_C.Builder getCccBuilder() {
+    public com.codebroker.protobuf.Login_C.Builder getCccBuilder() {
       
       onChanged();
       return getCccFieldBuilder().getBuilder();
@@ -1222,18 +1222,18 @@ private static final long serialVersionUID = 0L;
         return cccBuilder_.getMessageOrBuilder();
       } else {
         return ccc_ == null ?
-            Login_C.getDefaultInstance() : ccc_;
+            com.codebroker.protobuf.Login_C.getDefaultInstance() : ccc_;
       }
     }
     /**
      * <code>.Login_C ccc = 8;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        Login_C, Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder>
+        com.codebroker.protobuf.Login_C, com.codebroker.protobuf.Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder> 
         getCccFieldBuilder() {
       if (cccBuilder_ == null) {
         cccBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            Login_C, Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder>(
+            com.codebroker.protobuf.Login_C, com.codebroker.protobuf.Login_C.Builder, com.codebroker.protobuf.Login_COrBuilder>(
                 getCcc(),
                 getParentForChildren(),
                 isClean());
@@ -1241,13 +1241,13 @@ private static final long serialVersionUID = 0L;
       }
       return cccBuilder_;
     }
-    @Override
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.setUnknownFields(unknownFields);
     }
 
-    @Override
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.mergeUnknownFields(unknownFields);
@@ -1258,18 +1258,18 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:Login_C1)
-  private static final Login_C1 DEFAULT_INSTANCE;
+  private static final com.codebroker.protobuf.Login_C1 DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new Login_C1();
+    DEFAULT_INSTANCE = new com.codebroker.protobuf.Login_C1();
   }
 
-  public static Login_C1 getDefaultInstance() {
+  public static com.codebroker.protobuf.Login_C1 getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
   private static final com.google.protobuf.Parser<Login_C1>
       PARSER = new com.google.protobuf.AbstractParser<Login_C1>() {
-    @Override
+    @java.lang.Override
     public Login_C1 parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1282,13 +1282,13 @@ private static final long serialVersionUID = 0L;
     return PARSER;
   }
 
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Parser<Login_C1> getParserForType() {
     return PARSER;
   }
 
-  @Override
-  public Login_C1 getDefaultInstanceForType() {
+  @java.lang.Override
+  public com.codebroker.protobuf.Login_C1 getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

@@ -17,7 +17,7 @@ public interface Login_COrBuilder extends
    * <code>string openId = 2;</code>
    * @return The openId.
    */
-  String getOpenId();
+  java.lang.String getOpenId();
   /**
    * <code>string openId = 2;</code>
    * @return The bytes for openId.
@@ -35,7 +35,7 @@ public interface Login_COrBuilder extends
    * <code>string version = 4;</code>
    * @return The version.
    */
-  String getVersion();
+  java.lang.String getVersion();
   /**
    * <code>string version = 4;</code>
    * @return The bytes for version.
@@ -47,7 +47,7 @@ public interface Login_COrBuilder extends
    * <code>string deviceId = 5;</code>
    * @return The deviceId.
    */
-  String getDeviceId();
+  java.lang.String getDeviceId();
   /**
    * <code>string deviceId = 5;</code>
    * @return The bytes for deviceId.
@@ -59,7 +59,7 @@ public interface Login_COrBuilder extends
    * <code>string serverName = 6;</code>
    * @return The serverName.
    */
-  String getServerName();
+  java.lang.String getServerName();
   /**
    * <code>string serverName = 6;</code>
    * @return The bytes for serverName.

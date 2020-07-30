@@ -1,22 +1,19 @@
 syntax="proto3";
 
-option java_package = "com.codebroker.protobuf";
+option java_package = "com.com.codebroker.demo.common.login";
 option java_multiple_files = true;
 
-import "ClientMessage.proto";
-
 //91 登陆
-message Login_C1 {
+message LoginRequest {
      int32 protoId = 1;
      string openId = 2;
      int64 uid = 3;
      string version = 4;
      string deviceId = 5;
      string serverName = 6;
-     Login_C ccc =8;
 }
 
 //92 登陆
-message Login_S1 {
-    int32 protoId = 1;
+message LoginResponse {
+     int32 protoId = 1;
 }

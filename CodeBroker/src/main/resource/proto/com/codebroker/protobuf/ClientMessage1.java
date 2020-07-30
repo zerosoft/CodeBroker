@@ -32,7 +32,7 @@ public final class ClientMessage1 {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    String[] descriptorData = {
+    java.lang.String[] descriptorData = {
       "\n\024ClientMessage1.proto\032\023ClientMessage.pr" +
       "oto\"\206\001\n\010Login_C1\022\017\n\007protoId\030\001 \001(\005\022\016\n\006ope" +
       "nId\030\002 \001(\t\022\013\n\003uid\030\003 \001(\003\022\017\n\007version\030\004 \001(\t\022" +
@@ -44,21 +44,21 @@ public final class ClientMessage1 {
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          ClientMessage.getDescriptor(),
+          com.codebroker.protobuf.ClientMessage.getDescriptor(),
         });
     internal_static_Login_C1_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_Login_C1_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Login_C1_descriptor,
-        new String[] { "ProtoId", "OpenId", "Uid", "Version", "DeviceId", "ServerName", "Ccc", });
+        new java.lang.String[] { "ProtoId", "OpenId", "Uid", "Version", "DeviceId", "ServerName", "Ccc", });
     internal_static_Login_S1_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_Login_S1_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Login_S1_descriptor,
-        new String[] { "ProtoId", });
-    ClientMessage.getDescriptor();
+        new java.lang.String[] { "ProtoId", });
+    com.codebroker.protobuf.ClientMessage.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

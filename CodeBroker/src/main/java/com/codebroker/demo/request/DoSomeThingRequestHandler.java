@@ -13,6 +13,9 @@ import java.util.Optional;
 public class DoSomeThingRequestHandler implements IClientRequestHandler<Login_C> {
 	@Override
 	public void handleClientRequest(IGameUser user, Login_C message) {
+		message.getDeviceId();
+		message.getOpenId();
+
 		String userId = user.getUserId();
 		getClientRequestLogger().info("User Id {}",userId);
 
