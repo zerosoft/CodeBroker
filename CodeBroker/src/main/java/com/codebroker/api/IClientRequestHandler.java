@@ -10,11 +10,19 @@ import org.slf4j.LoggerFactory;
  * @author LongJu
  */
 public interface IClientRequestHandler<T> {
-
+    /**
+     * 获得默认的日志
+     * @return
+     */
     default Logger getClientRequestLogger(){
         return LoggerFactory.getLogger(IClientRequestHandler.class);
     }
 
+    /**
+     * 处理客户的请求
+     * @param user 游戏用户
+     * @param message 网络消息
+     */
     void handleClientRequest(IGameUser user, T message);
 
 }
