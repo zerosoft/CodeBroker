@@ -12,7 +12,7 @@ public class NettyTcpSupervisorProxy implements NettyTcpSupervisorControl {
 
     private int sessionNum;
 
-    private double totalReciveFLow;
+    private double totalRedFLow;
     private double totalWriteFLow;
 
 
@@ -37,11 +37,11 @@ public class NettyTcpSupervisorProxy implements NettyTcpSupervisorControl {
 
     @Override
     public double totalReciveflow() {
-        return totalReciveFLow;
+        return totalRedFLow;
     }
 
     public void addSessionReciveFlow(Long sessionId, Double flow, Long time) {
-        totalReciveFLow += flow;
+        totalRedFLow += flow;
     }
 
     public void addSessionWriteFlow(Long sessionId, Double flow, Long time) {
@@ -50,7 +50,7 @@ public class NettyTcpSupervisorProxy implements NettyTcpSupervisorControl {
 
     @Override
     public double averageReciveflow() {
-        return totalReciveFLow / sessionNum;
+        return totalRedFLow / sessionNum;
 
     }
 

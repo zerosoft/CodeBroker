@@ -15,6 +15,13 @@ public interface IoSession {
     void write(Object msg);
 
     /**
+     * 数据是否写出
+     * @param msg
+     * @param flush
+     */
+    void write(Object msg,boolean flush);
+
+    /**
      * 连接是否正常.
      */
     boolean isConnection();

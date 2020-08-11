@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 
 
 /**
- * 网络和Actor的关联 负责TCP的手法消息
+ * 网络和Actor的关联 负责TCP的收发消息
  *
  * @author LongJu
  */
@@ -35,6 +35,18 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
         if (msg instanceof BaseByteArrayPacket) {
             ctx.writeAndFlush(msg);
         }
+    }
+
+    @Override
+    public void write(Object msg, boolean flush) {
+        if (flush){
+            if (msg instanceof BaseByteArrayPacket) {
+                ctx.writeAndFlush(msg);
+            }
+        }else {
+            ctx.write(msg);
+        }
+
     }
 
     @Override
