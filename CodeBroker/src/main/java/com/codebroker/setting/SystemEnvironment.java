@@ -48,6 +48,6 @@ public class SystemEnvironment {
 
 
     public static final String TCP_PORT = APP_ROOT + ".netty.tcp.port";
-
+    public static final String HTTP_PORT = APP_ROOT +".http.port";
 
 }

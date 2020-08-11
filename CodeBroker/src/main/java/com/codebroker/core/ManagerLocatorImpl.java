@@ -26,7 +26,8 @@ class ManagerLocatorImpl implements ManagerLocator {
     @Override
     public boolean setManager(IService type) {
         ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-        CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(actorSystem,
+        CompletionStage<IWorldMessage.Reply> ask = AskPattern
+                .ask(actorSystem,
                 replyActorRef -> new IWorldMessage.CreateService(type.getClass().getName(), type,replyActorRef),
                 Duration.ofMillis(500),
                 actorSystem.scheduler());
