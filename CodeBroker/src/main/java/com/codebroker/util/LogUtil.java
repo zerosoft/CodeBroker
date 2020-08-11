@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public class LogUtil {
     public static ActorRef elkLog = null;
     static boolean consolePrint = true;
-    private static Logger avalonEngineLogger = LoggerFactory.getLogger("AvalonEngine");
+    private static Logger codeBrokerEngineLogger = LoggerFactory.getLogger("Engine");
     private static Logger exceptionLogger = LoggerFactory.getLogger("Exception");
 
     public static void enableConsole(boolean enable) {
@@ -17,8 +17,8 @@ public class LogUtil {
     }
 
     public static void debugLog(String debugInfo) {
-        if (avalonEngineLogger.isDebugEnabled()) {
-            avalonEngineLogger.debug(debugInfo);
+        if (codeBrokerEngineLogger.isDebugEnabled()) {
+            codeBrokerEngineLogger.debug(debugInfo);
         }
     }
 
@@ -36,7 +36,7 @@ public class LogUtil {
     }
 
     public static synchronized void logPrintln(String msg) {
-        avalonEngineLogger.info(msg);
+        codeBrokerEngineLogger.info(msg);
         if (consolePrint) {
             System.out.println(msg);
         }

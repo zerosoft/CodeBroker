@@ -1,6 +1,9 @@
 apply plugin: 'java'
 
 repositories {
+	maven {
+		url "http://maven.aliyun.com/nexus/content/groups/public"
+	}
 	mavenCentral()
 }
 
@@ -29,6 +32,10 @@ dependencies {
 	compile group: 'ch.qos.logback', name: 'logback-classic', version:  logback_version
 	compile group: 'ch.qos.logback', name: 'logback-core',version:  logback_version
 	compile group: 'ch.qos.logback', name: 'logback-access',version:  logback_version
+
+	compile group: 'biz.paluch.logging', name: 'logstash-gelf', version: '1.14.1'
+
+
 
 	compile group: 'commons-io', name: 'commons-io', version: '2.5'
 

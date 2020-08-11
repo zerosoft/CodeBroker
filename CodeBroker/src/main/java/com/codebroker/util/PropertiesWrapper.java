@@ -14,16 +14,9 @@ import java.util.List;
  */
 public class PropertiesWrapper {
 
-    /**
-     * The properties.
-     */
+
     private final Props properties;
 
-    /**
-     * Instantiates a new properties wrapper.
-     *
-     * @param properties the properties
-     */
     public PropertiesWrapper(Props properties) {
         if (properties == null) {
             throw new NullPointerException("The argument must not be null");
@@ -31,68 +24,32 @@ public class PropertiesWrapper {
         this.properties = properties;
     }
 
-    /**
-     * Check null.
-     *
-     * @param variableName the variable name
-     * @param value        the value
-     */
+
     public static void checkNull(String variableName, Object value) {
         if (value == null) {
             throw new NullPointerException("The value of " + variableName + " must not be null");
         }
     }
 
-    /**
-     * Gets the properties.
-     *
-     * @return the properties
-     */
     public Props getProperties() {
         return properties;
     }
 
-    /**
-     * Gets the property.
-     *
-     * @param name the name
-     * @return the property
-     */
+
     public String getProperty(String name) {
         return properties.getValue(name);
     }
 
-    /**
-     * Gets the property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @return the property
-     */
     public String getProperty(String name, String defaultValue) {
         String value = properties.getValue(name);
         return value == null ? defaultValue : value;
     }
 
-    /**
-     * Gets the boolean property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @return the boolean property
-     */
     public boolean getBooleanProperty(String name, boolean defaultValue) {
         String value = properties.getValue(name);
         return value == null ? defaultValue : Boolean.valueOf(value);
     }
 
-    /**
-     * Gets the int property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @return the int property
-     */
     public int getIntProperty(String name, int defaultValue) {
         String value = properties.getValue(name);
         if (value == null) {
@@ -106,12 +63,6 @@ public class PropertiesWrapper {
         }
     }
 
-    /**
-     * Gets the required int property.
-     *
-     * @param name the name
-     * @return the required int property
-     */
     public int getRequiredIntProperty(String name) {
         String value = properties.getValue(name);
         if (value == null) {
@@ -125,15 +76,7 @@ public class PropertiesWrapper {
         }
     }
 
-    /**
-     * Gets the int property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @param min          the min
-     * @param max          the max
-     * @return the int property
-     */
+
     public int getIntProperty(String name, int defaultValue, int min, int max) {
         if (min > max) {
             throw new IllegalArgumentException("The min must not be greater than the max");
@@ -151,14 +94,6 @@ public class PropertiesWrapper {
         return result;
     }
 
-    /**
-     * Gets the required int property.
-     *
-     * @param name the name
-     * @param min  the min
-     * @param max  the max
-     * @return the required int property
-     */
     public int getRequiredIntProperty(String name, int min, int max) {
         if (min > max) {
             throw new IllegalArgumentException("The min must not be greater than the max");
@@ -174,13 +109,6 @@ public class PropertiesWrapper {
         return result;
     }
 
-    /**
-     * Gets the long property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @return the long property
-     */
     public long getLongProperty(String name, long defaultValue) {
         String value = properties.getValue(name);
         if (value == null) {
@@ -194,15 +122,6 @@ public class PropertiesWrapper {
         }
     }
 
-    /**
-     * Gets the long property.
-     *
-     * @param name         the name
-     * @param defaultValue the default value
-     * @param min          the min
-     * @param max          the max
-     * @return the long property
-     */
     public long getLongProperty(String name, long defaultValue, long min, long max) {
         if (min > max) {
             throw new IllegalArgumentException("The min must not be greater than the max");
@@ -220,16 +139,6 @@ public class PropertiesWrapper {
         return result;
     }
 
-    /**
-     * Gets the class instance property.
-     *
-     * @param <T>        the generic type
-     * @param name       the name
-     * @param type       the type
-     * @param paramTypes the param types
-     * @param args       the args
-     * @return the class instance property
-     */
     public <T> T getClassInstanceProperty(String name, Class<T> type, Class<?>[] paramTypes, Object... args) {
         String className = properties.getValue(name);
         if (className == null) {
@@ -238,18 +147,6 @@ public class PropertiesWrapper {
         return getClassInstance(name, className, type, paramTypes, args);
     }
 
-    /**
-     * Gets the class instance property.
-     *
-     * @param <T>          the generic type
-     * @param name         the name
-     * @param defaultClass the default class
-     * @param type         the type
-     * @param paramTypes   the param types
-     * @param args         the args
-     * @return the class instance property
-     */
-    @SuppressWarnings("unchecked")
     public <T> T getClassInstanceProperty(String name, String defaultClass, Class<T> type, Class<?>[] paramTypes,
                                           Object... args) {
         Object instance = getClassInstanceProperty(name, type, paramTypes, args);
@@ -263,17 +160,6 @@ public class PropertiesWrapper {
         return getClassInstance(name, defaultClass, type, paramTypes, args);
     }
 
-    /**
-     * Gets the class instance.
-     *
-     * @param <T>        the generic type
-     * @param name       the name
-     * @param className  the class name
-     * @param type       the type
-     * @param paramTypes the param types
-     * @param args       the args
-     * @return the class instance
-     */
     private <T> T getClassInstance(String name, String className, Class<T> type, Class<?>[] paramTypes,
                                    Object... args) {
         if (className == null) {
@@ -313,12 +199,6 @@ public class PropertiesWrapper {
         }
     }
 
-    /**
-     * Gets the property text.
-     *
-     * @param name the name
-     * @return the property text
-     */
     private String getPropertyText(String name) {
         return name != null ? ", specified by the property: " + name + "," : "";
     }
@@ -369,15 +249,6 @@ public class PropertiesWrapper {
         return list;
     }
 
-    /**
-     * Gets the enum list property.
-     *
-     * @param <T>            the generic type
-     * @param name           the name
-     * @param enumType       the enum type
-     * @param defaultElement the default element
-     * @return the enum list property
-     */
     public <T extends Enum<T>> List<T> getEnumListProperty(String name, Class<T> enumType, T defaultElement) {
         checkNull("modeName", name);
         checkNull("enumType", enumType);
@@ -406,12 +277,6 @@ public class PropertiesWrapper {
         return list;
     }
 
-    /**
-     * Gets the class list property.
-     *
-     * @param name the name
-     * @return the class list property
-     */
     public List<Class<?>> getClassListProperty(String name) {
         checkNull("modeName", name);
 
