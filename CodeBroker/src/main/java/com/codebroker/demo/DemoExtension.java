@@ -2,6 +2,8 @@ package com.codebroker.demo;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.internal.IClassLoader;
+import com.codebroker.api.internal.JarLoader;
 import com.codebroker.core.data.CObject;
 import com.codebroker.demo.request.DoSomeThingRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
@@ -30,28 +32,28 @@ import java.util.Map;
 
 public class DemoExtension extends AppListenerExtension {
 
-	private Logger logger= LoggerFactory.getLogger(DemoExtension.class);
+	private Logger logger = LoggerFactory.getLogger(DemoExtension.class);
 
-	private Map<String,String> userMap=new HashMap<>();
+	private Map<String, String> userMap = new HashMap<>();
 	//在线用户列表
-	private Map<String,IGameUser> onlineUsers= Maps.newConcurrentMap();
+	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
 
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
-		logger.info("handle login name {} parameter {}",name,parameter);
+		logger.info("handle login name {} parameter {}", name, parameter);
 		return name;
 	}
 
 	@Override
 	public void userLogin(IGameUser user) {
-		logger.info("User Login parameter {}",user.getUserId());
+		logger.info("User Login parameter {}", user.getUserId());
 		user.addEventListener("login", new DoSameEvent());
 	}
 
 
 	@Override
 	public boolean handleLogout(IGameUser user) {
-		logger.info("User LogOut parameter {}",user.getUserId());
+		logger.info("User LogOut parameter {}", user.getUserId());
 		return false;
 	}
 
@@ -81,48 +83,7 @@ public class DemoExtension extends AppListenerExtension {
 			e.printStackTrace();
 		}
 		CObject object = CObject.newInstance();
-		object.putUtfString("message","hello");
+		object.putUtfString("message", "hello");
 		AppContext.getGameWorld().sendMessageToService("ChatService", object);
-
-		Thread t=new Thread(()->{
-			while (true){
-				FindFile ff = new FindFile()
-						.recursive(true)
-						.includeDirs(true)
-						.searchPath("E:\\github\\AvalonNew\\Demo1\\build\\libs");
-				List<File> all = ff.findAll();
-				URL[] classpath=new URL[all.size()];
-				for (int i = 0; i < all.size(); i++) {
-					try {
-						classpath[i]=all.get(i).toURI().toURL();
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
-				}
-				ExtendedURLClassLoader extendedURLClassLoader=new ExtendedURLClassLoader(classpath,ClassLoader.getSystemClassLoader(),true);
-				try {
-					Class<?> aClass = extendedURLClassLoader.loadClass("com.game.server.main");
-					Object o = aClass.newInstance();
-					MethodUtils.invokeExactMethod(o,"sayHelloWorld");
-					System.out.println(o);
-					Thread.sleep(10000L);
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-		);
-		t.start();
 	}
 }
