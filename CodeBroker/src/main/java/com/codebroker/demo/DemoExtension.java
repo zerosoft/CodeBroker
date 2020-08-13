@@ -68,8 +68,10 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
-		AppContext.setManager(new AllianceService());
+		boolean setManager = AppContext.setManager(new AllianceService());
 
+
+		System.out.println(setManager);
 //		AppContext.setManager(new ChatService());
 
 		AllianceService manager = AppContext.getManager(AllianceService.class);

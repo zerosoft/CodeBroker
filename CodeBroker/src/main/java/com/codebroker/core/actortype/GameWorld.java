@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
@@ -75,7 +75,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 
 		userMap.remove(message.gameUser.getUserId());
 
-		CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+		AppListener appListener = ContextResolver.getAppListener();
 		if (appListener.handleLogout(message.gameUser)){
 			GameUserPool.returnGameUser((GameUser) message.gameUser);
 		}
@@ -85,7 +85,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	private Behavior<IGameWorldMessage> userLoginWorld(IGameWorldMessage.UserLoginWorld message) {
 		userMap.put(message.gameUser.getUserId(),message.gameUser);
 
-		CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+		AppListener appListener = ContextResolver.getAppListener();
 		appListener.userLogin(message.gameUser);
 
 		return Behaviors.same();

@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.ISession;
@@ -116,7 +116,7 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private Behavior<IUser> getMessageFromSession(IUser.ReceiveMessageFromSession message) {
-        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+        AppListener appListener = ContextResolver.getAppListener();
         try {
             int opCode = message.message.getOpCode();
             appListener.handleClientRequest(gameUser, opCode, message.message.getRawData());

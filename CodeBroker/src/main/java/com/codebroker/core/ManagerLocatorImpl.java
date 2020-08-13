@@ -29,7 +29,7 @@ class ManagerLocatorImpl implements ManagerLocator {
         CompletionStage<IWorldMessage.Reply> ask = AskPattern
                 .ask(actorSystem,
                 replyActorRef -> new IWorldMessage.CreateService(type.getClass().getName(), type,replyActorRef),
-                Duration.ofMillis(500),
+                Duration.ofSeconds(1),
                 actorSystem.scheduler());
         CompletionStage<IWorldMessage.Reply> exceptionally = ask.exceptionally(throwable -> {
             throwable.printStackTrace();

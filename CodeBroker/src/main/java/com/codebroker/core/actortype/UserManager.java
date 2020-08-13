@@ -1,7 +1,6 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorRefResolver;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.DispatcherSelector;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -11,7 +10,7 @@ import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
 import com.alibaba.fastjson.JSONObject;
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
@@ -87,7 +86,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
 
 
     private Behavior<IUserManager> bindingSession(IUserManager.TryBindingUser tryBindingUser) {
-        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
+        AppListener appListener = ContextResolver.getAppListener();
         //TODO 更具需求调整
         byte[] message = tryBindingUser.message.getRawData();
         JSONObject parse = (JSONObject) JSONObject.parse(new String(message));

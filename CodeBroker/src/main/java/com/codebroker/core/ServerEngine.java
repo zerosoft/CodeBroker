@@ -1,6 +1,6 @@
 package com.codebroker.core;
 
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.InternalContext;
 import com.codebroker.component.ComponentRegistryImpl;
@@ -19,7 +19,6 @@ import com.codebroker.util.PropertiesWrapper;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
-import jodd.util.cl.ExtendedURLClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public class ServerEngine implements InstanceMXBean {
     /**
      * 应用逻辑.
      */
-    private CodeBrokerAppListener listener;
+    private AppListener listener;
     private PropertiesWrapper propertiesWrapper;
 
     /**
@@ -225,8 +224,9 @@ public class ServerEngine implements InstanceMXBean {
      * @param appName the app name
      */
     private void startApplication(String appName) {
+
         // 启动上层逻辑应用
-        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, CodeBrokerAppListener.class, new Class[]{});
+        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, AppListener.class, new Class[]{});
         listener.init(propertiesWrapper);
         application.setAppListener(listener);
     }

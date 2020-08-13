@@ -1,6 +1,6 @@
 package com.codebroker.extensions;
 
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IHandlerFactory;
 import com.codebroker.api.IGameUser;
@@ -13,14 +13,12 @@ import com.codebroker.extensions.request.filter.IFilterChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
 /**
  * 请求拓展接口.
  *
  * @author LongJu
  */
-public abstract class AppListenerExtension implements CodeBrokerAppListener {
+public abstract class AppListenerExtension implements AppListener {
 
     private final IHandlerFactory handlerFactory = new ClientHandlerFactory();
     private final IFilterChain filterChain = new ClientExtensionFilterChain(this);

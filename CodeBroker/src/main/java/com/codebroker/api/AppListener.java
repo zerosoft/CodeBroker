@@ -11,7 +11,7 @@ import java.util.Collection;
  *
  * @author LongJu
  */
-public interface CodeBrokerAppListener extends IService {
+public interface AppListener extends IService {
 
      /**
      * 用户连接到系统的验证

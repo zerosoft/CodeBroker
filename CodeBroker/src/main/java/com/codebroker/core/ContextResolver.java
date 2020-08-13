@@ -1,10 +1,9 @@
 package com.codebroker.core;
 
 import akka.actor.typed.ActorSystem;
-import com.codebroker.api.CodeBrokerAppListener;
+import com.codebroker.api.AppListener;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.internal.IService;
-import com.codebroker.core.actortype.GameWorld;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.util.PropertiesWrapper;
 
@@ -24,7 +23,7 @@ public final class ContextResolver {
         return context.getPropertiesWrapper();
     }
 
-    public static CodeBrokerAppListener getAppListener() {
+    public static AppListener getAppListener() {
         return context.getAppListener();
     }
 

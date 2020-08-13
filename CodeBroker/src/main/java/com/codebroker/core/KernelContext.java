@@ -1,8 +1,7 @@
 package com.codebroker.core;
 
 import akka.actor.typed.ActorSystem;
-import com.codebroker.api.CodeBrokerAppListener;
-import com.codebroker.api.IGameWorld;
+import com.codebroker.api.AppListener;
 import com.codebroker.api.internal.ComponentRegistry;
 import com.codebroker.api.internal.IService;
 import com.codebroker.component.ComponentRegistryImpl;
@@ -32,7 +31,7 @@ class KernelContext {
 
     private final String applicationName;
 
-    private CodeBrokerAppListener appListener;
+    private AppListener appListener;
 
 
     KernelContext(KernelContext context) {
@@ -68,11 +67,11 @@ class KernelContext {
     }
 
 
-    public CodeBrokerAppListener getAppListener() {
+    public AppListener getAppListener() {
         return appListener;
     }
 
-    public void setAppListener(CodeBrokerAppListener appListener) {
+    public void setAppListener(AppListener appListener) {
         this.appListener = appListener;
     }
 
