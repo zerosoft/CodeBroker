@@ -16,4 +16,9 @@ public interface ComponentRegistry extends Iterable<IService> {
      */
     <T> T getComponent(Class<T> type);
 
+    /**
+     * 移除组件
+     * @param type
+     */
+    void removeComponent(Class type);
 }

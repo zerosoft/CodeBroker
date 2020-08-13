@@ -61,6 +61,19 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return type.cast(matchComponent);
     }
 
+    @Override
+    public void removeComponent(Class type) {
+        for (IService component : componentSet) {
+            if (type.isAssignableFrom(component.getClass())) {
+                componentSet.remove(component);
+                return;
+            }else if (type.getName()==component.getName()){
+                componentSet.remove(component);
+                return;
+            }
+        }
+    }
+
     public void addComponent(IService component) {
         componentSet.add(component);
         logger.debug("Component add component " + component.toString());

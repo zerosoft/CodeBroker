@@ -14,8 +14,8 @@ tasks.withType(JavaCompile) {
 }
 
 def akka_version = '2.6.8'
-def logback_version='1.2.3'
-def akka_http_version='10.2.0'
+def logback_version = '1.2.3'
+def akka_http_version = '10.2.0'
 
 dependencies {
 	compile fileTree(dir: 'lib', include: '*.jar')

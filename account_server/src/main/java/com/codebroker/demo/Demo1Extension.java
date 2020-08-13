@@ -6,7 +6,6 @@ import com.codebroker.core.data.CObject;
 import com.codebroker.demo.request.DoSomeThingRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
-import com.codebroker.demo.service.ChatService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;

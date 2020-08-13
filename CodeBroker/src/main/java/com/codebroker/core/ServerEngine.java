@@ -1,12 +1,10 @@
 package com.codebroker.core;
 
 import com.codebroker.api.AppListener;
-import com.codebroker.api.internal.IService;
-import com.codebroker.api.internal.InternalContext;
+import com.codebroker.api.internal.*;
 import com.codebroker.component.ComponentRegistryImpl;
 import com.codebroker.component.service.GeoIPComponent;
 import com.codebroker.component.service.AkkaSystemComponent;
-import com.codebroker.api.internal.ICoreService;
 import com.codebroker.component.service.NettyComponent;
 import com.codebroker.component.service.RedisComponent;
 import com.codebroker.component.service.MongoDBComponent;
@@ -16,15 +14,18 @@ import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.FileUtil;
 import com.codebroker.util.HotSwapClassUtil;
 import com.codebroker.util.PropertiesWrapper;
+import com.esotericsoftware.reflectasm.MethodAccess;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
+import org.apache.tools.ant.taskdefs.Classloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * CodeBroker引擎入口.
@@ -45,6 +46,7 @@ public class ServerEngine implements InstanceMXBean {
      * 热更新工具
      */
     HotSwapClassUtil hotSwapClassUtil;
+	ClassLoader iClassLoader;
     /**
      * 应用上下文.
      */
@@ -191,7 +193,7 @@ public class ServerEngine implements InstanceMXBean {
                 while (!((ICoreService) object).isActive()) {
                     logger.info("Waiting Service");
                     try {
-                        Thread.sleep(10000L);
+                        Thread.sleep(TimeUnit.SECONDS.toSeconds(1L));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -215,7 +217,12 @@ public class ServerEngine implements InstanceMXBean {
         // logger.error("Hot Swap Util error", e);
         // }
         // }
-
+        try {
+			JarLoader jarLoader = new JarLoader();
+			iClassLoader = jarLoader.loadClasses(new String[]{"D:\\Users\\Documents\\github\\CodeBrokerGit\\account_server\\build\\libs"}, ClassLoader.getSystemClassLoader());
+		} catch (Exception e) {
+            logger.error("ClassLoader error",e);
+        }
     }
 
     /**
@@ -226,9 +233,19 @@ public class ServerEngine implements InstanceMXBean {
     private void startApplication(String appName) {
 
         // 启动上层逻辑应用
-        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, AppListener.class, new Class[]{});
-        listener.init(propertiesWrapper);
-        application.setAppListener(listener);
+//        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, AppListener.class, new Class[]{});
+
+        try {
+            Class<?> aClass = iClassLoader.loadClass(propertiesWrapper.getProperty(SystemEnvironment.APP_LISTENER));
+            Object o = aClass.newInstance();
+            MethodAccess.get(aClass).invoke(o,"init",propertiesWrapper);
+            application.setAppListener((AppListener) o);
+        } catch (InstantiationException | ClassNotFoundException |IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+//        listener.init(propertiesWrapper);
+//        application.setAppListener(listener);
     }
 
     public ComponentRegistryImpl getSystemRegistry() {

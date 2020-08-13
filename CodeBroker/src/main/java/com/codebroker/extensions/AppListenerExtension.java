@@ -91,7 +91,7 @@ public abstract class AppListenerExtension implements AppListener {
 
     @Override
     public void handleMessage(IObject obj) {
-
+        logger.info(obj.toString());
     }
 
 }
