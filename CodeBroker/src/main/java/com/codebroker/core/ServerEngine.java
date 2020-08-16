@@ -219,7 +219,7 @@ public class ServerEngine implements InstanceMXBean {
         // }
         try {
 			JarLoader jarLoader = new JarLoader();
-			iClassLoader = jarLoader.loadClasses(new String[]{"D:\\Users\\Documents\\github\\CodeBrokerGit\\account_server\\build\\libs"}, ClassLoader.getSystemClassLoader());
+			iClassLoader = jarLoader.loadClasses(new String[]{"E:\\github\\CodeBroker\\account_server\\build\\libs"}, ClassLoader.getSystemClassLoader());
 		} catch (Exception e) {
             logger.error("ClassLoader error",e);
         }

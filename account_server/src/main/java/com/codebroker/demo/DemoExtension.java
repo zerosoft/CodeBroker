@@ -55,14 +55,15 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
-		boolean setManager = AppContext.setManager(new AllianceService());
+//		boolean setManager = AppContext.setManager(new AllianceService());
 
+		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
 
-		System.out.println(setManager);
+//		System.out.println(setManager);
 //		AppContext.setManager(new ChatService());
 
-		AllianceService manager = AppContext.getManager(AllianceService.class);
-		manager.init("hello world");
+//		AllianceService manager = AppContext.getManager(AllianceService.class);
+//		manager.init("hello world");
 
 		boolean chatService = AppContext.getGameWorld().createGlobalService("ChatService", new ChatService());
 
@@ -73,6 +74,6 @@ public class DemoExtension extends AppListenerExtension {
 		}
 		CObject object = CObject.newInstance();
 		object.putUtfString("message", "hello");
-		AppContext.getGameWorld().sendMessageToService("ChatService", object);
+		AppContext.getGameWorld().sendMessageToService("AllianceService", object);
 	}
 }

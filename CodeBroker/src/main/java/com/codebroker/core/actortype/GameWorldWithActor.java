@@ -2,10 +2,17 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
+import akka.cluster.sharding.typed.ShardingEnvelope;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
+import akka.cluster.sharding.typed.javadsl.Entity;
+import akka.cluster.sharding.typed.javadsl.EntityRef;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
+import com.codebroker.api.annotation.IServerType;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
+import com.codebroker.cluster.base.Counter;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IWorldMessage;
@@ -21,6 +28,7 @@ public class GameWorldWithActor implements IGameWorld {
 
 	private ActorRef<IGameWorldMessage> gameWorldActorRef;
 	private Map<String,ActorRef<com.codebroker.core.actortype.message.IService>> localService= Maps.newTreeMap();
+	private Map<String,ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> localClusterService= Maps.newTreeMap();
 	private String name;
 
 	public GameWorldWithActor(String name, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
@@ -67,13 +75,43 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
+	public IService getClusterService(String serviceName, IService service) {
+		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
+
+
+		//获得集群
+		ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+		ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
+
+		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
+
+		ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+				clusterSharding.init(Entity.of(typeKey, ctx -> {
+					String ctxEntityId = ctx.getEntityId();
+					Behavior<com.codebroker.core.actortype.message.IService> commandBehavior = ClusterServiceActor.create(serviceName,service);
+					return commandBehavior;
+				}));
+
+		ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
+		com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+
+		localClusterService.put(serviceName,shardRegion);
+
+		return iService;
+	}
+
+	@Override
 	public void sendMessageToService(String serviceName, IObject object) {
 		/**
 		 * 如果是当前系统创建则使用当前系统的
 		 */
 		if (localService.containsKey(serviceName)){
 			localService.get(serviceName).tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
-		}else {
+		}else if (localClusterService.containsKey(serviceName)){
+			ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope = new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+			localClusterService.get(serviceName).tell(shardingEnvelope);
+		}
+		else {
 			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
 		}
 

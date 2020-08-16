@@ -28,7 +28,7 @@ public class ObjectActorDecorate<T> implements MethodInterceptor {
 	}
 
 	@Override
-	public Object intercept(Object obj, Method method, Object[] objects, MethodProxy arg3) throws Throwable {
+	public Object intercept(Object obj, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 		if (method.getName().equals("hashCode")){
 			return service.hashCode();
 		}else if (method.getName().equals("toString")){

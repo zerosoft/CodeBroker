@@ -75,6 +75,19 @@ public interface IWorldMessage {
             this.replyTo = replyTo;
         }
     }
+    class createClusterService implements IWorldMessage {
+
+        public String name;
+        public com.codebroker.api.internal.IService service;
+        public ActorRef<Reply> replyTo;
+
+        public createClusterService(String name, com.codebroker.api.internal.IService service, ActorRef<Reply> replyTo) {
+            this.service = service;
+            this.name = name;
+            this.replyTo = replyTo;
+        }
+    }
+
 
     interface Reply {
     }

@@ -6,8 +6,15 @@ import akka.cluster.ClusterEvent;
 import akka.cluster.ddata.PNCounter;
 import akka.cluster.ddata.SelfUniqueAddress;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
+import akka.cluster.sharding.external.ExternalShardAllocation;
+import akka.cluster.sharding.external.javadsl.ExternalShardAllocationClient;
+import akka.cluster.sharding.typed.ShardingEnvelope;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
+import akka.cluster.sharding.typed.javadsl.Entity;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import com.codebroker.cluster.ClusterListener;
 import com.codebroker.cluster.ReplicatedCache;
+import com.codebroker.cluster.base.Counter;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.actortype.timer.UserManagerTimer;
@@ -57,6 +64,7 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
                 .onMessage(IWorldMessage.StopWorldMessage.class,this::stopGameWorld)
                 .onMessage(IWorldMessage.CreateService.class,this::createService)
                 .onMessage(IWorldMessage.createGlobalService.class,this::createGlobalService)
+                .onMessage(IWorldMessage.createClusterService.class,this::createClusterService)
                 .onSignal(PreRestart.class,signal->onRestart())
                 .onSignal(PostStop.class, signal ->onPostStop())
                 .build();
@@ -65,6 +73,26 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
     private Behavior<IWorldMessage> createService(IWorldMessage.CreateService message) {
         ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
         return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
+    }
+
+    private Behavior<IWorldMessage> createClusterService(IWorldMessage.createClusterService message) {
+        ClusterSharding clusterSharding = ClusterSharding.get(getContext().getSystem());
+        EntityTypeKey<IService> typeKey = EntityTypeKey.create(IService.class, message.name);
+
+        ActorRef<ShardingEnvelope<IService>> shardRegion =
+                clusterSharding.init(Entity.of(typeKey, ctx -> {
+                    String ctxEntityId = ctx.getEntityId();
+                    Behavior<IService> commandBehavior = ClusterServiceActor.create(message.name, message.service);
+                    return commandBehavior;
+                }));
+        ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(message.name,clusterSharding);
+        com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor,  message.service).newProxyInstance(message.service.getClass());
+        ContextResolver.setManager(iService);
+//        message.replyTo.tell(new IWorldMessage.ReplyCreateService(shardRegion));
+//        shardRegion.
+
+        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
+        return Behaviors.same();
     }
 
     private Behavior<IWorldMessage> createGlobalService(IWorldMessage.createGlobalService message) {

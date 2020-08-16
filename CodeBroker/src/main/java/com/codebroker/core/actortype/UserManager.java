@@ -9,12 +9,13 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import com.alibaba.fastjson.JSONObject;
 import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,9 +90,10 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         AppListener appListener = ContextResolver.getAppListener();
         //TODO 更具需求调整
         byte[] message = tryBindingUser.message.getRawData();
-        JSONObject parse = (JSONObject) JSONObject.parse(new String(message));
+        Gson gson=new Gson();
+        JsonObject jsonElement = gson.fromJson(new String(message), JsonObject.class);
 
-        String uid = appListener.sessionLoginVerification(parse.getString("name"), parse.getString("parm"));
+        String uid = appListener.sessionLoginVerification(jsonElement.get("name").getAsString(), jsonElement.get("parm").getAsString());
         if (userMap.containsKey(uid)){
             lostSessionUser.remove(uid);
 

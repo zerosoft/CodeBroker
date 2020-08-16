@@ -7,36 +7,26 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import com.codebroker.api.AppContext;
-import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IService;
-import com.codebroker.core.actortype.message.ISessionManager;
-import com.codebroker.setting.SystemEnvironment;
-import com.codebroker.util.PropertiesWrapper;
 
-public class ServiceActor extends AbstractBehavior<IService> {
+public class ClusterServiceActor extends AbstractBehavior<IService> {
 
     private String name;
 
     private com.codebroker.api.internal.IService service;
 
     public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service) {
-        return create(name,service,false);
-    }
-
-    public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service,boolean noServerId) {
         return Behaviors.setup(
                 context -> {
-                    int serverId = AppContext.getServerId();
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IService.class, noServerId?name:name+"."+serverId), context.getSelf()));
-                    return new ServiceActor(context,name,service);
+                            .tell(Receptionist.register(ServiceKey.create(IService.class, name), context.getSelf()));
+                    return new ClusterServiceActor(context,name,service);
                 });
     }
 
-    public ServiceActor(ActorContext<IService> context, String name, com.codebroker.api.internal.IService service) {
+    public ClusterServiceActor(ActorContext<IService> context, String name, com.codebroker.api.internal.IService service) {
         super(context);
         this.name=name;
         this.service=service;

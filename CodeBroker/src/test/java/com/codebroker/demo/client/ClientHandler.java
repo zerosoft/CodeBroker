@@ -1,6 +1,5 @@
 package com.codebroker.demo.client;
 
-import com.alibaba.fastjson.JSONObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 
 import io.netty.channel.ChannelHandlerContext;

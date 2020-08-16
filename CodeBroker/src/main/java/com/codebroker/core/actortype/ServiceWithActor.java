@@ -4,6 +4,9 @@ import akka.actor.typed.ActorRef;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.IObject;
 
+/**
+ * Seveice 通过 Akka的actor 执行任务
+ */
 public class ServiceWithActor implements com.codebroker.api.internal.IService {
 
     private ActorRef<IService> actorActorRef;

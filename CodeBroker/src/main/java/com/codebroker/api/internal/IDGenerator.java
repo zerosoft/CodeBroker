@@ -1,4 +1,6 @@
 package com.codebroker.api.internal;
 
-public interface IDGenerator {
+public interface IDGenerator<T extends Number> {
+
+    T generateID();
 }

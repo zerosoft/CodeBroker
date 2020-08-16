@@ -1,8 +1,23 @@
 package com.codebroker.component.service;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
+import akka.actor.typed.Behavior;
+import akka.actor.typed.SupervisorStrategy;
+import akka.actor.typed.javadsl.Behaviors;
+import akka.cluster.sharding.external.ExternalShardAllocation;
+import akka.cluster.sharding.external.javadsl.ExternalShardAllocationClient;
+import akka.cluster.sharding.typed.ShardingEnvelope;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
+import akka.cluster.sharding.typed.javadsl.Entity;
+import akka.cluster.sharding.typed.javadsl.EntityRef;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
+import akka.cluster.typed.ClusterSingleton;
+import akka.cluster.typed.SingletonActor;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.ServerBinding;
+import com.codebroker.cluster.base.Counter;
+import com.codebroker.cluster.base.HelloWorldService;
 import com.codebroker.component.BaseCoreService;
 import com.codebroker.core.actortype.GameSystem;
 import com.codebroker.core.actortype.message.IWorldMessage;
@@ -18,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -81,6 +97,46 @@ public class AkkaSystemComponent extends BaseCoreService {
 //        binding
 //                .thenCompose(ServerBinding::unbind) // trigger unbinding from the port
 //                .thenAccept(unbound -> system.terminate()); // and shutdown when done
+        //集群单节点
+//        ClusterSingleton singleton = ClusterSingleton.get(system);
+        // Start if needed and provide a proxy to a named singleton
+//        ActorRef<Counter.Command> proxy =
+//                singleton.init(SingletonActor.of(Counter.create("11"), "GlobalCounter"));
+
+        //监督策略的单节点
+//        ClusterSingleton singleton = ClusterSingleton.get(system);
+//        ActorRef<Counter.Command> proxy =
+//                singleton.init(
+//                        SingletonActor.of(
+//                                Behaviors.supervise(Counter.create(""))
+//                                        .onFailure(
+//                                                SupervisorStrategy.restartWithBackoff(
+//                                                        Duration.ofSeconds(1), Duration.ofSeconds(10), 0.2)),
+//                                "GlobalCounter"));
+//
+//        proxy.tell(Counter.Increment.INSTANCE);
+
+        ExternalShardAllocationClient counter = ExternalShardAllocation.get(system).getClient("Counter");
+
+        ClusterSharding clusterSharding = ClusterSharding.get(system);
+        EntityTypeKey<Counter.Command> typeKey = EntityTypeKey.create(Counter.Command.class, "Counter");
+
+        ActorRef<ShardingEnvelope<Counter.Command>> shardRegion =clusterSharding.init(Entity.of(typeKey, ctx -> {
+            String ctxEntityId = ctx.getEntityId();
+            Behavior<Counter.Command> commandBehavior = Counter.create(ctxEntityId);
+            return commandBehavior;
+        }));
+
+        System.out.println(shardRegion.path().toSerializationFormat());
+//        EntityRef<Counter.Command> counterOne = clusterSharding.entityRefFor(typeKey, "counter-1");
+//        counterOne.tell(Counter.Increment.INSTANCE);
+
+        shardRegion.tell(new ShardingEnvelope<>("counter-1", Counter.Increment.INSTANCE));
+        shardRegion.tell(new ShardingEnvelope<>("counter-2", Counter.Increment.INSTANCE));
+//
+//
+//        HelloWorldService helloWorldService = new HelloWorldService(system);
+//        helloWorldService.sayHello("123","2323");
 
         system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
         super.setActive();

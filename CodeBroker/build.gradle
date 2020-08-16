@@ -51,7 +51,7 @@ dependencies {
 	compile group: 'com.typesafe.akka', name: 'akka-serialization-jackson_2.13', version: akka_version
 	compile group: 'com.typesafe.akka', name: 'akka-cluster-typed_2.13', version: akka_version
 	compile group: 'com.typesafe.akka', name: 'akka-cluster-sharding-typed_2.13', version: akka_version
-
+	compile group: 'com.typesafe.akka', name: "akka-persistence-typed_2.13", version: akka_version
 
 	testCompile group: 'com.typesafe.akka', name: 'akka-actor-testkit-typed_2.13', version: akka_version
 
