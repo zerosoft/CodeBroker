@@ -25,9 +25,15 @@ public interface IWorldMessage {
     /**
      * 启动游戏世界
      */
-    enum StartWorldMessage implements IWorldMessage {
-        INSTANCE;
+    class StartWorldMessage implements IWorldMessage {
+        public final ActorRef<Reply> replyTo;
+
+        public StartWorldMessage(ActorRef<Reply> replyTo) {
+            this.replyTo = replyTo;
+        }
     }
+
+
 
     /**
      * 重启游戏世界
@@ -98,5 +104,9 @@ public interface IWorldMessage {
         public ReplyCreateService(ActorRef<IService> serviceActorRef) {
             this.serviceActorRef = serviceActorRef;
         }
+    }
+
+    final class StartWorldFinish implements Reply {
+
     }
 }

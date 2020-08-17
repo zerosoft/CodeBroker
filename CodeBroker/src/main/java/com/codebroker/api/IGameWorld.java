@@ -24,13 +24,6 @@ public interface IGameWorld {
 	boolean createGlobalService(String serviceName,IService service);
 
 	/**
-	 * 创建一个集群服务
-	 * @param serviceName
-	 * @param service
-	 * @return
-	 */
-	IService getClusterService(String serviceName,IService service);
-	/**
 	 * 发送事件到服务
 	 * @param serviceName 服务名称
 	 * @param object 事件对象

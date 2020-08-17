@@ -1,10 +1,11 @@
 package com.codebroker.demo.service;
 
+import com.codebroker.api.annotation.IServerType;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+@IServerType(cluster = true)
 public class AllianceService implements IService {
 
     private Logger logger= LoggerFactory.getLogger(AllianceService.class);

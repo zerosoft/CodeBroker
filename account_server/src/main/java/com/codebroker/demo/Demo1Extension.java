@@ -2,10 +2,12 @@ package com.codebroker.demo;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.IGameWorld;
 import com.codebroker.core.data.CObject;
 import com.codebroker.demo.request.DoSomeThingRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
+import com.codebroker.demo.service.ChatService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;
@@ -56,13 +58,18 @@ public class Demo1Extension extends AppListenerExtension {
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
-		AppContext.setManager(new AllianceService());
+		IGameWorld gameWorld = AppContext.getGameWorld();
+		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
 
+//		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
+
+//		System.out.println(setManager);
 //		AppContext.setManager(new ChatService());
 
-		AllianceService manager = AppContext.getManager(AllianceService.class);
-		manager.init("hello world");
+//		AllianceService manager = AppContext.getManager(AllianceService.class);
+//		manager.init("hello world");
 
+		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
 
 		try {
 			Thread.sleep(5000L);
@@ -70,8 +77,8 @@ public class Demo1Extension extends AppListenerExtension {
 			e.printStackTrace();
 		}
 		CObject object = CObject.newInstance();
-		object.putUtfString("message","hello");
-		AppContext.getGameWorld().sendMessageToService("ChatService", object);
+		object.putUtfString("message", "hello");
+		gameWorld.sendMessageToService("AllianceService", object);
 	}
 
 	@Override

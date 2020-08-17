@@ -57,48 +57,70 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public boolean createGlobalService(String serviceName, IService service) {
-		ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-		CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(actorSystem,
-				replyActorRef -> new IWorldMessage.createGlobalService(serviceName, service,replyActorRef),
-				Duration.ofMillis(500),
-				actorSystem.scheduler());
-		CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
-			if (reply instanceof IWorldMessage.ReplyCreateService) {
-				localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
-			}
-		}).exceptionally(throwable -> {
-			throwable.printStackTrace();
-			return null;
-		});
-		IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
-		return reply!=null;
-	}
-
-	@Override
-	public IService getClusterService(String serviceName, IService service) {
 		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
+		if (annotation!=null){
+			ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+			ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
 
+			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
 
-		//获得集群
-		ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-		ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
+			ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+					clusterSharding.init(Entity.of(typeKey, ctx -> {
+						String ctxEntityId = ctx.getEntityId();
+						Behavior<com.codebroker.core.actortype.message.IService> commandBehavior = ClusterServiceActor.create(serviceName,service);
+						return commandBehavior;
+					}));
 
-		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
+			ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
+			com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
-		ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
-				clusterSharding.init(Entity.of(typeKey, ctx -> {
-					String ctxEntityId = ctx.getEntityId();
-					Behavior<com.codebroker.core.actortype.message.IService> commandBehavior = ClusterServiceActor.create(serviceName,service);
-					return commandBehavior;
-				}));
+			localClusterService.put(serviceName,shardRegion);
+			return true;
+		}else {
+			ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+			CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(actorSystem,
+					replyActorRef -> new IWorldMessage.createGlobalService(serviceName, service,replyActorRef),
+					Duration.ofMillis(500),
+					actorSystem.scheduler());
+			CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
+				if (reply instanceof IWorldMessage.ReplyCreateService) {
+					localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
+				}
+			}).exceptionally(throwable -> {
+				throwable.printStackTrace();
+				return null;
+			});
+			IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
+			return reply!=null;
+		}
 
-		ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
-		com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
-
-		localClusterService.put(serviceName,shardRegion);
-
-		return iService;
 	}
+
+//	@Override
+//	public IService getClusterService(String serviceName, IService service) {
+//		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
+//
+//
+//		//获得集群
+//		ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+//		ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
+//
+//		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
+//
+//		ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+//				clusterSharding.init(Entity.of(typeKey, ctx -> {
+//					String ctxEntityId = ctx.getEntityId();
+//					Behavior<com.codebroker.core.actortype.message.IService> commandBehavior = ClusterServiceActor.create(serviceName,service);
+//					return commandBehavior;
+//				}));
+//
+//		ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
+//		com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+//
+//		localClusterService.put(serviceName,shardRegion);
+//
+//		return iService;
+//	}
 
 	@Override
 	public void sendMessageToService(String serviceName, IObject object) {

@@ -18,6 +18,12 @@ public final class AppContext {
     private AppContext() {
     }
 
+    /**
+     * 获取当前JVM的服务
+     * @param type
+     * @param <T>
+     * @return
+     */
     public static <T> T getManager(Class<T> type) {
         try {
             return InternalContext.getManagerLocator().getManager(type);
@@ -26,6 +32,11 @@ public final class AppContext {
         }
     }
 
+    /**
+     * 设置当前JVM的服务
+     * @param service
+     * @return
+     */
     public static boolean setManager(IService service) {
         return InternalContext.getManagerLocator().setManager(service);
     }

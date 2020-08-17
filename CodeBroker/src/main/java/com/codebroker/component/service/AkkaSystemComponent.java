@@ -4,6 +4,7 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.SupervisorStrategy;
+import akka.actor.typed.javadsl.AskPattern;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.sharding.external.ExternalShardAllocation;
 import akka.cluster.sharding.external.javadsl.ExternalShardAllocationClient;
@@ -19,6 +20,7 @@ import akka.http.javadsl.ServerBinding;
 import com.codebroker.cluster.base.Counter;
 import com.codebroker.cluster.base.HelloWorldService;
 import com.codebroker.component.BaseCoreService;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.GameSystem;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.jmx.ManagementService;
@@ -116,30 +118,39 @@ public class AkkaSystemComponent extends BaseCoreService {
 //
 //        proxy.tell(Counter.Increment.INSTANCE);
 
-        ExternalShardAllocationClient counter = ExternalShardAllocation.get(system).getClient("Counter");
-
-        ClusterSharding clusterSharding = ClusterSharding.get(system);
-        EntityTypeKey<Counter.Command> typeKey = EntityTypeKey.create(Counter.Command.class, "Counter");
-
-        ActorRef<ShardingEnvelope<Counter.Command>> shardRegion =clusterSharding.init(Entity.of(typeKey, ctx -> {
-            String ctxEntityId = ctx.getEntityId();
-            Behavior<Counter.Command> commandBehavior = Counter.create(ctxEntityId);
-            return commandBehavior;
-        }));
-
-        System.out.println(shardRegion.path().toSerializationFormat());
-//        EntityRef<Counter.Command> counterOne = clusterSharding.entityRefFor(typeKey, "counter-1");
-//        counterOne.tell(Counter.Increment.INSTANCE);
-
-        shardRegion.tell(new ShardingEnvelope<>("counter-1", Counter.Increment.INSTANCE));
-        shardRegion.tell(new ShardingEnvelope<>("counter-2", Counter.Increment.INSTANCE));
+//        ExternalShardAllocationClient counter = ExternalShardAllocation.get(system).getClient("Counter");
+//
+//        ClusterSharding clusterSharding = ClusterSharding.get(system);
+//        EntityTypeKey<Counter.Command> typeKey = EntityTypeKey.create(Counter.Command.class, "Counter");
+//
+//        ActorRef<ShardingEnvelope<Counter.Command>> shardRegion =clusterSharding.init(Entity.of(typeKey, ctx -> {
+//            String ctxEntityId = ctx.getEntityId();
+//            Behavior<Counter.Command> commandBehavior = Counter.create(ctxEntityId);
+//            return commandBehavior;
+//        }));
+//
+//        System.out.println(shardRegion.path().toSerializationFormat());
+////        EntityRef<Counter.Command> counterOne = clusterSharding.entityRefFor(typeKey, "counter-1");
+////        counterOne.tell(Counter.Increment.INSTANCE);
+//
+//        shardRegion.tell(new ShardingEnvelope<>("counter-1", Counter.Increment.INSTANCE));
+//        shardRegion.tell(new ShardingEnvelope<>("counter-2", Counter.Increment.INSTANCE));
 //
 //
 //        HelloWorldService helloWorldService = new HelloWorldService(system);
 //        helloWorldService.sayHello("123","2323");
+        CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(system,
+                replyActorRef ->new IWorldMessage.StartWorldMessage(replyActorRef),
+                Duration.ofMillis(500),
+                system.scheduler());
+        CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
+            super.setActive();
+        }).exceptionally(throwable -> {
+            throwable.printStackTrace();
+            return null;
+        });
+//        system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
 
-        system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
-        super.setActive();
     }
 
 
