@@ -25,6 +25,7 @@ import com.codebroker.core.actortype.GameSystem;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.net.http.HttpDirectives;
+import com.codebroker.net.http.HttpServer;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
@@ -37,7 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
-
+import akka.management.javadsl.AkkaManagement;
 /**
  * Akka的启动类
  *
@@ -83,17 +84,20 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         this.system = ActorSystem.create(GameSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
 
+        AkkaManagement.get(system.classicSystem()).start();
+        HttpServer.start(system);
+
         int http_prot = propertiesWrapper.getIntProperty(SystemEnvironment.HTTP_PORT, 0);
 
         if (http_prot>0){
-            final Http http = Http.get(system);
-
-            //In order to access all directives we need an instance where the routes are define.
-            HttpDirectives app = new HttpDirectives();
-
-            final CompletionStage<ServerBinding> binding =
-                    http.newServerAt("0.0.0.0", http_prot)
-                            .bind(app.createRoute());
+//            final Http http = Http.get(system);
+//
+//            //In order to access all directives we need an instance where the routes are define.
+//            HttpDirectives app = new HttpDirectives();
+//
+//            final CompletionStage<ServerBinding> binding =
+//                    http.newServerAt("0.0.0.0", http_prot)
+//                            .bind(app.createRoute());
         }
 
 //        binding

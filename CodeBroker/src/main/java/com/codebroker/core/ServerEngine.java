@@ -191,9 +191,9 @@ public class ServerEngine implements InstanceMXBean {
         for (Object object : application.serviceComponents) {
             if (object instanceof ICoreService) {
                 while (!((ICoreService) object).isActive()) {
-                    logger.info("Waiting Service");
+                    logger.info("Waiting Service {}",((ICoreService) object).getName());
                     try {
-                        Thread.sleep(TimeUnit.SECONDS.toSeconds(1L));
+                        Thread.sleep(TimeUnit.SECONDS.toMillis(1L));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

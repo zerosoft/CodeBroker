@@ -3,26 +3,16 @@ package com.codebroker.core.actortype;
 import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
 import akka.cluster.ClusterEvent;
-import akka.cluster.ddata.PNCounter;
 import akka.cluster.ddata.SelfUniqueAddress;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.sharding.external.ExternalShardAllocation;
-import akka.cluster.sharding.external.javadsl.ExternalShardAllocationClient;
-import akka.cluster.sharding.typed.ShardingEnvelope;
-import akka.cluster.sharding.typed.javadsl.ClusterSharding;
-import akka.cluster.sharding.typed.javadsl.Entity;
-import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
-import com.codebroker.api.annotation.IServerType;
-import com.codebroker.cluster.ClusterListener;
+import com.codebroker.cluster.ClusterListenerActor;
 import com.codebroker.cluster.ReplicatedCache;
-import com.codebroker.cluster.base.Counter;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.actortype.timer.UserManagerTimer;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -125,7 +115,7 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
         userManagerTimer = getContext().spawn(UserManagerTimer.create(userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
         getContext().getSystem().log().info("UserManager Path {}",userManager.path());
 
-        clusterDomainEventActorRef = getContext().spawn(ClusterListener.create(), ClusterListener.IDENTIFY+"."+gameWorldId);
+        clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("clusterDomainEventActorRef Path {}",clusterDomainEventActorRef.path());
 
         gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
