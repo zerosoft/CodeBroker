@@ -94,10 +94,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-//task copyJars(type:Copy) {
-//
-//  from configurations.runtime
-//
-//  into 'build/lib'
-//
-//}
+task copyJars(type:Copy) {
+  from configurations.runtime
+  into 'build/lib'
+}
