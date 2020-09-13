@@ -3,6 +3,7 @@ package com.codebroker.demo;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
+import com.codebroker.core.ServerEngine;
 import com.codebroker.core.data.CObject;
 import com.codebroker.demo.request.DoSomeThingRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
@@ -13,9 +14,11 @@ import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,6 +79,38 @@ public class Demo1Extension extends AppListenerExtension {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+		Thread thread=new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true){
+					Class<?> aClass = null;
+					try {
+						aClass =Demo1Extension.class.getClassLoader().loadClass("com.codebroker.demo.HelloWOrld");
+//						aClass = ServerEngine.getiClassLoader().loadClass("com.codebroker.demo.HelloWOrld");
+						MethodUtils.invokeExactMethod(aClass.newInstance(),"vs");
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					} catch (InstantiationException e) {
+						e.printStackTrace();
+					} catch (NoSuchMethodException exception) {
+						exception.printStackTrace();
+					} catch (InvocationTargetException e) {
+						e.printStackTrace();
+					}
+
+					try {
+						Thread.sleep(1000L);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		thread.start();
+
 		CObject object = CObject.newInstance();
 		object.putUtfString("message", "hello");
 		gameWorld.sendMessageToService("AllianceService", object);

@@ -18,6 +18,11 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.tools.ant.taskdefs.Classloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +51,7 @@ public class ServerEngine implements InstanceMXBean {
      * 热更新工具
      */
     HotSwapClassUtil hotSwapClassUtil;
-	ClassLoader iClassLoader;
+	static ClassLoader iClassLoader;
     /**
      * 应用上下文.
      */
@@ -217,9 +222,48 @@ public class ServerEngine implements InstanceMXBean {
         // logger.error("Hot Swap Util error", e);
         // }
         // }
+        String path = "E:\\github\\CodeBroker\\account_server\\build\\libs";
+        FileAlterationObserver fileAlterationObserver=new FileAlterationObserver(path,
+                FileFilterUtils.and(
+                FileFilterUtils.fileFileFilter(),
+                FileFilterUtils.suffixFileFilter(".jar")),  //过滤文件格式
+                null);
+        FileAlterationObserver observer = new FileAlterationObserver(path);
+
+        long interval = TimeUnit.SECONDS.toMillis(5);
+        observer.addListener(new FileAlterationListenerAdaptor() {
+
+
+            @Override
+            public void onFileChange(File file) {
+                logger.info("File change");
+                try {
+                    listener.destroy(null);
+
+
+                    JarLoader jarLoader = new JarLoader();
+                    iClassLoader = jarLoader.loadClasses(new String[]{path}, iClassLoader);
+
+                } catch (Exception e) {
+                    logger.error("ClassLoader error",e);
+                }
+            }
+
+
+        }); //设置文件变化监听器
+        //创建文件变化监听器
+        FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
+        // 开始监控
+        try {
+            monitor.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         try {
 			JarLoader jarLoader = new JarLoader();
-			iClassLoader = jarLoader.loadClasses(new String[]{"E:\\github\\CodeBroker\\account_server\\build\\libs"}, ClassLoader.getSystemClassLoader());
+
+            iClassLoader = jarLoader.loadClasses(new String[]{path}, ClassLoader.getSystemClassLoader());
 		} catch (Exception e) {
             logger.error("ClassLoader error",e);
         }
@@ -297,5 +341,9 @@ public class ServerEngine implements InstanceMXBean {
     @Override
     public String getName() {
         return name;
+    }
+
+    public static ClassLoader getiClassLoader() {
+        return iClassLoader;
     }
 }
