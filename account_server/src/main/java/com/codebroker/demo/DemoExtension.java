@@ -56,8 +56,8 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
-		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+//		IGameWorld gameWorld = AppContext.getGameWorld();
+//		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
 
 //		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
 
@@ -67,15 +67,11 @@ public class DemoExtension extends AppListenerExtension {
 //		AllianceService manager = AppContext.getManager(AllianceService.class);
 //		manager.init("hello world");
 
-		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
-
-		try {
-			Thread.sleep(5000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
+		new HelloWOrld().vs();
+//		new HelloWOrld().vs();
 		CObject object = CObject.newInstance();
 		object.putUtfString("message", "hello");
-		gameWorld.sendMessageToService("AllianceService", object);
+//		gameWorld.sendMessageToService("AllianceService", object);
 	}
 }

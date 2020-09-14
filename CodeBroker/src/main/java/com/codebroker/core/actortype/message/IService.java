@@ -3,6 +3,9 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.core.data.IObject;
 
+/**
+ * 服务规则消息
+ */
 public interface IService{
 
     final class Init implements IService {

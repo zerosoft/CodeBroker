@@ -18,18 +18,18 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.apache.tools.ant.taskdefs.Classloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,15 +51,14 @@ public class ServerEngine implements InstanceMXBean {
      * 热更新工具
      */
     HotSwapClassUtil hotSwapClassUtil;
-	static ClassLoader iClassLoader;
+	ClassLoader iClassLoader;
     /**
      * 应用上下文.
      */
-    private KernelContext application;
+    private KernelContext kernelContext;
     /**
      * 应用逻辑.
      */
-    private AppListener listener;
     private PropertiesWrapper propertiesWrapper;
 
     /**
@@ -76,7 +75,7 @@ public class ServerEngine implements InstanceMXBean {
         // 组件管理器
         systemRegistry = new ComponentRegistryImpl();
         // 应用上下文
-        application = new StartupKernelContext(SystemEnvironment.ENGINE_NAME, systemRegistry, propertiesWrapper);
+        kernelContext = new StartupKernelContext(SystemEnvironment.ENGINE_NAME, systemRegistry, propertiesWrapper);
 
         logger.debug("ServerEngine start getInstance application");
 
@@ -118,14 +117,13 @@ public class ServerEngine implements InstanceMXBean {
         // 服务的启动
         logger.debug("ServerEngine start createServices");
         // 启动服务
-        createServices(name);
+        createServices();
         // 创建守护周期任务
         logger.debug("ServerEngine start Application");
 
-
         FileUtil.printOsEnv();
         // 上层逻辑的启动
-        startApplication(name);
+        startApplication();
         //服务器关闭的钩子
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
     }
@@ -133,9 +131,8 @@ public class ServerEngine implements InstanceMXBean {
     /**
      * 创建对上层逻辑的服务.
      *
-     * @param appName the app name
      */
-    private void createServices(String appName) {
+    private void createServices() {
         /**
          * 注册Redis服务
          */
@@ -167,10 +164,10 @@ public class ServerEngine implements InstanceMXBean {
 
 
         InternalContext.setManagerLocator(new ManagerLocatorImpl());
-        application = new KernelContext(application);
-        ContextResolver.setTaskState(application);
+        kernelContext = new KernelContext(kernelContext);
+        ContextResolver.setTaskState(kernelContext);
 
-        for (Object object : application.serviceComponents) {
+        for (Object object : kernelContext.serviceComponents) {
             if (object instanceof IService) {
                 try {
                     ((IService) object).init(propertiesWrapper);
@@ -181,7 +178,7 @@ public class ServerEngine implements InstanceMXBean {
         }
 
         // 相关组件初始化
-        for (Object object : application.managerComponents) {
+        for (Object object : kernelContext.managerComponents) {
             if (object instanceof IService) {
                 try {
                     ((IService) object).init(propertiesWrapper);
@@ -193,7 +190,7 @@ public class ServerEngine implements InstanceMXBean {
         }
 
 
-        for (Object object : application.serviceComponents) {
+        for (Object object : kernelContext.serviceComponents) {
             if (object instanceof ICoreService) {
                 while (!((ICoreService) object).isActive()) {
                     logger.info("Waiting Service {}",((ICoreService) object).getName());
@@ -222,74 +219,68 @@ public class ServerEngine implements InstanceMXBean {
         // logger.error("Hot Swap Util error", e);
         // }
         // }
-        String path = "E:\\github\\CodeBroker\\account_server\\build\\libs";
-        FileAlterationObserver fileAlterationObserver=new FileAlterationObserver(path,
-                FileFilterUtils.and(
-                FileFilterUtils.fileFileFilter(),
-                FileFilterUtils.suffixFileFilter(".jar")),  //过滤文件格式
-                null);
-        FileAlterationObserver observer = new FileAlterationObserver(path);
+        String path =propertiesWrapper.getProperty(SystemEnvironment.APP_JAR_PATH);
 
-        long interval = TimeUnit.SECONDS.toMillis(5);
-        observer.addListener(new FileAlterationListenerAdaptor() {
+        List<ReloadMode> reloadMode =propertiesWrapper.getEnumListProperty(SystemEnvironment.APP_JAR_RELOAD,ReloadMode.class,ReloadMode.NONE);
+        if (reloadMode.get(0)==ReloadMode.AUTO){
+            FileAlterationObserver observer = new FileAlterationObserver(path);
+            long interval = TimeUnit.SECONDS.toMillis(5);
+            observer.addListener(new FileAlterationListenerAdaptor() {
 
+                @Override
+                public void onFileChange(File file) {
+                    logger.info("File change");
+                    try {
+                        //旧的关闭
+                        kernelContext.getAppListener().destroy(null);
+                        //启动新的
+                        JarLoader jarLoader = new JarLoader();
+                        iClassLoader = jarLoader.loadClasses(new String[]{path},  ClassLoader.getSystemClassLoader());
+                        startApplication();
 
-            @Override
-            public void onFileChange(File file) {
-                logger.info("File change");
-                try {
-                    listener.destroy(null);
-
-
-                    JarLoader jarLoader = new JarLoader();
-                    iClassLoader = jarLoader.loadClasses(new String[]{path}, iClassLoader);
-
-                } catch (Exception e) {
-                    logger.error("ClassLoader error",e);
+                    } catch (Exception e) {
+                        logger.error("ClassLoader error",e);
+                    }
                 }
+
+
+            }); //设置文件变化监听器
+            //创建文件变化监听器
+            FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
+            // 开始监控
+            try {
+                monitor.start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }else if (reloadMode.get(0)==ReloadMode.NONE){
 
-
-        }); //设置文件变化监听器
-        //创建文件变化监听器
-        FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
-        // 开始监控
-        try {
-            monitor.start();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         try {
 			JarLoader jarLoader = new JarLoader();
-
             iClassLoader = jarLoader.loadClasses(new String[]{path}, ClassLoader.getSystemClassLoader());
 		} catch (Exception e) {
             logger.error("ClassLoader error",e);
+            System.exit(1);
         }
     }
 
     /**
      * 启动逻辑层.
      *
-     * @param appName the app name
      */
-    private void startApplication(String appName) {
-
+    private void startApplication() {
         // 启动上层逻辑应用
-//        listener = (propertiesWrapper).getClassInstanceProperty(SystemEnvironment.APP_LISTENER, AppListener.class, new Class[]{});
-
         try {
             Class<?> aClass = iClassLoader.loadClass(propertiesWrapper.getProperty(SystemEnvironment.APP_LISTENER));
             Object o = aClass.newInstance();
             MethodAccess.get(aClass).invoke(o,"init",propertiesWrapper);
-            application.setAppListener((AppListener) o);
+            kernelContext.setAppListener((AppListener) o);
         } catch (InstantiationException | ClassNotFoundException |IllegalAccessException e) {
-            e.printStackTrace();
+          logger.error("Start Error",e);
+          System.exit(1);
         }
-
-//        listener.init(propertiesWrapper);
-//        application.setAppListener(listener);
     }
 
     public ComponentRegistryImpl getSystemRegistry() {
@@ -306,8 +297,8 @@ public class ServerEngine implements InstanceMXBean {
         new Thread(() -> {
             logger.info("Server shut down");
             boolean shutDown = true;
-            if (null != listener) {
-                listener.destroy(1);
+            if (null != kernelContext.getAppListener()) {
+                kernelContext.getAppListener().destroy(1);
             } else {
                 shutDown = true;
             }
@@ -343,7 +334,4 @@ public class ServerEngine implements InstanceMXBean {
         return name;
     }
 
-    public static ClassLoader getiClassLoader() {
-        return iClassLoader;
-    }
 }

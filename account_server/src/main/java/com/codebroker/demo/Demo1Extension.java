@@ -62,7 +62,7 @@ public class Demo1Extension extends AppListenerExtension {
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+//		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
 
 //		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
 
@@ -72,7 +72,7 @@ public class Demo1Extension extends AppListenerExtension {
 //		AllianceService manager = AppContext.getManager(AllianceService.class);
 //		manager.init("hello world");
 
-		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
+//		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
 
 		try {
 			Thread.sleep(5000L);
@@ -80,36 +80,6 @@ public class Demo1Extension extends AppListenerExtension {
 			e.printStackTrace();
 		}
 
-		Thread thread=new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true){
-					Class<?> aClass = null;
-					try {
-						aClass =Demo1Extension.class.getClassLoader().loadClass("com.codebroker.demo.HelloWOrld");
-//						aClass = ServerEngine.getiClassLoader().loadClass("com.codebroker.demo.HelloWOrld");
-						MethodUtils.invokeExactMethod(aClass.newInstance(),"vs");
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					} catch (InstantiationException e) {
-						e.printStackTrace();
-					} catch (NoSuchMethodException exception) {
-						exception.printStackTrace();
-					} catch (InvocationTargetException e) {
-						e.printStackTrace();
-					}
-
-					try {
-						Thread.sleep(1000L);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		thread.start();
 
 		CObject object = CObject.newInstance();
 		object.putUtfString("message", "hello");
