@@ -51,6 +51,7 @@ public class ServerEngine implements InstanceMXBean {
      * 热更新工具
      */
     HotSwapClassUtil hotSwapClassUtil;
+
 	ClassLoader iClassLoader;
     /**
      * 应用上下文.
@@ -106,8 +107,6 @@ public class ServerEngine implements InstanceMXBean {
         // 启动核心
         new ServerEngine(props);
     }
-
-
 
 
     /**
@@ -177,19 +176,6 @@ public class ServerEngine implements InstanceMXBean {
             }
         }
 
-        // 相关组件初始化
-        for (Object object : kernelContext.managerComponents) {
-            if (object instanceof IService) {
-                try {
-                    ((IService) object).init(propertiesWrapper);
-                } catch (Exception e) {
-                    logger.error("Server Components Exception", e);
-                    System.exit(1);
-                }
-            }
-        }
-
-
         for (Object object : kernelContext.serviceComponents) {
             if (object instanceof ICoreService) {
                 while (!((ICoreService) object).isActive()) {
@@ -226,13 +212,25 @@ public class ServerEngine implements InstanceMXBean {
             FileAlterationObserver observer = new FileAlterationObserver(path);
             long interval = TimeUnit.SECONDS.toMillis(5);
             observer.addListener(new FileAlterationListenerAdaptor() {
-
-                @Override
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @Override
                 public void onFileChange(File file) {
                     logger.info("File change");
                     try {
                         //旧的关闭
                         kernelContext.getAppListener().destroy(null);
+                        // 相关组件初始化
+                        for (Object object : kernelContext.managerComponents) {
+                            if (object instanceof IService) {
+                                try {
+                                    ((IService) object).destroy(propertiesWrapper);
+                                    ((IService) object).init(propertiesWrapper);
+                                } catch (Exception e) {
+                                    logger.error("Server Components Exception", e);
+                                    System.exit(1);
+                                }
+                            }
+                        }
+
                         //启动新的
                         JarLoader jarLoader = new JarLoader();
                         iClassLoader = jarLoader.loadClasses(new String[]{path},  ClassLoader.getSystemClassLoader());
@@ -242,8 +240,6 @@ public class ServerEngine implements InstanceMXBean {
                         logger.error("ClassLoader error",e);
                     }
                 }
-
-
             }); //设置文件变化监听器
             //创建文件变化监听器
             FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
@@ -281,14 +277,6 @@ public class ServerEngine implements InstanceMXBean {
           logger.error("Start Error",e);
           System.exit(1);
         }
-    }
-
-    public ComponentRegistryImpl getSystemRegistry() {
-        return systemRegistry;
-    }
-
-    public boolean getEnableJMX() {
-        return false;
     }
 
     @Override

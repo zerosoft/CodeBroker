@@ -55,7 +55,6 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
                 .onMessage(IWorldMessage.StopWorldMessage.class,this::stopGameWorld)
                 .onMessage(IWorldMessage.CreateService.class,this::createService)
                 .onMessage(IWorldMessage.createGlobalService.class,this::createGlobalService)
-//                .onMessage(IWorldMessage.createClusterService.class,this::createClusterService)
                 .onSignal(PreRestart.class,signal->onRestart())
                 .onSignal(PostStop.class, signal ->onPostStop())
                 .build();
@@ -65,26 +64,6 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
             ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
             return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
-
-//    private Behavior<IWorldMessage> createClusterService(IWorldMessage.createClusterService message) {
-//        ClusterSharding clusterSharding = ClusterSharding.get(getContext().getSystem());
-//        EntityTypeKey<IService> typeKey = EntityTypeKey.create(IService.class, message.name);
-//
-//        ActorRef<ShardingEnvelope<IService>> shardRegion =
-//                clusterSharding.init(Entity.of(typeKey, ctx -> {
-//                    String ctxEntityId = ctx.getEntityId();
-//                    Behavior<IService> commandBehavior = ClusterServiceActor.create(message.name, message.service);
-//                    return commandBehavior;
-//                }));
-//        ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(message.name,clusterSharding);
-//        com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor,  message.service).newProxyInstance(message.service.getClass());
-//        ContextResolver.setManager(iService);
-////        message.replyTo.tell(new IWorldMessage.ReplyCreateService(shardRegion));
-////        shardRegion.
-//
-////        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
-//        return Behaviors.same();
-//    }
 
     private Behavior<IWorldMessage> createGlobalService(IWorldMessage.createGlobalService message) {
         ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));

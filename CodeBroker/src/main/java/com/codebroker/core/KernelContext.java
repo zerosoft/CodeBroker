@@ -21,7 +21,7 @@ class KernelContext {
 
     protected final PropertiesWrapper propertieswrapper;
     /**
-     * 逻辑组件
+     * 逻辑组件（业务层组件）
      */
     protected final ComponentRegistry managerComponents;
     /**

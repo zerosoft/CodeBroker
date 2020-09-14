@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import scala.Option;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -25,6 +26,7 @@ import java.util.stream.StreamSupport;
 import static akka.http.javadsl.server.Directives.*;
 
 public class HttpServer {
+  public static final String RESOURCE = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\";
   private final ActorSystem<?> actorSystem;
 
   public static void start(ActorSystem<?> actorSystem) {
@@ -50,11 +52,13 @@ public class HttpServer {
 
   private Route route() {
     return concat(
-            path("", () -> getFromResource("dashboard.html", ContentTypes.TEXT_HTML_UTF8)),
-            path("dashboard.html", () -> getFromResource("dashboard.html", ContentTypes.TEXT_HTML_UTF8)),
-            path("dashboard.js", () -> getFromResource("dashboard.js", ContentTypes.APPLICATION_JSON)),
-            path("p5.js", () -> getFromResource("p5.js", ContentTypes.APPLICATION_JSON)),
-            path("favicon.ico", () -> getFromResource("favicon.ico", MediaTypes.IMAGE_X_ICON.toContentType())),
+            path("", () -> getFromFile(new File(RESOURCE + "dashboard.html")
+                    , ContentTypes.TEXT_HTML_UTF8)),
+            path("dashboard.html", () -> getFromFile(new File(RESOURCE + "dashboard.html"), ContentTypes.TEXT_HTML_UTF8)),
+            path("dashboard.js", () ->
+                    getFromFile(new File(RESOURCE + "dashboard.js"), ContentTypes.APPLICATION_JSON)),
+            path("p5.js", () -> getFromFile(new File(RESOURCE + "p5.js"), ContentTypes.APPLICATION_JSON)),
+            path("favicon.ico", () -> getFromFile(new File(RESOURCE + "favicon.ico"), MediaTypes.IMAGE_X_ICON.toContentType())),
             path("cluster-state", this::clusterState)
     );
   }
