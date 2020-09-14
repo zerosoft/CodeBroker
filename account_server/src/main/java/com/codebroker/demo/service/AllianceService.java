@@ -17,7 +17,7 @@ public class AllianceService implements IService {
 
     @Override
     public void destroy(Object obj) {
-
+        logger.info("destroy Alliance "+obj);
     }
 
     @Override

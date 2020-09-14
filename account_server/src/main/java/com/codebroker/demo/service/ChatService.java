@@ -19,7 +19,7 @@ public class ChatService implements IService {
 
     @Override
     public void destroy(Object obj) {
-
+        logger.info("destroy chat "+obj);
     }
 
     @Override

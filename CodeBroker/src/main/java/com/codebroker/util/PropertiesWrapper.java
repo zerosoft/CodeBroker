@@ -256,6 +256,7 @@ public class PropertiesWrapper {
         List<T> list = new ArrayList<T>();
         String value = properties.getValue(name);
         if (value == null) {
+            list.add(defaultElement);
             return list;
         }
 

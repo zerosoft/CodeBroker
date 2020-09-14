@@ -20,6 +20,7 @@ public class SystemEnvironment {
     public static final String APP_LISTENER = APP_ROOT + ".app.listener";
     public static final String APP_JAR_PATH = APP_ROOT + ".app.jar.path";
     public static final String APP_JAR_RELOAD = APP_ROOT + ".app.jar.reload";
+    public static final String APP_JAR_RELOAD_SECOND = APP_ROOT + ".app.jar.reload.second";
     public static final String AKKA_NAME = APP_ROOT + ".akka.name";
     /**
      * 热加载配置

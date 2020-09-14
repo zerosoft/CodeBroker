@@ -57,12 +57,12 @@ public class Demo1Extension extends AppListenerExtension {
 
 	@Override
 	public void init(Object obj) {
-		logger.info("Init");
+		logger.info("Init 123");
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-//		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
 
 //		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
 

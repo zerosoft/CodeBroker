@@ -130,4 +130,13 @@ public class GameWorldWithActor implements IGameWorld {
 	public void sendAllOnlineUserEvent(IEvent event) {
 		gameWorldActorRef.tell(new IGameWorldMessage.SendAllOnlineUserEvent(event));
 	}
+
+	@Override
+	public void restart() {
+		com.codebroker.core.actortype.message.IService.Destroy destroy = new com.codebroker.core.actortype.message.IService.Destroy("");
+		localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));
+		for (Map.Entry<String, ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> stringActorRefEntry : localClusterService.entrySet()) {
+			stringActorRefEntry.getValue().tell(new ShardingEnvelope<>(stringActorRefEntry.getKey(), destroy));
+		}
+	}
 }

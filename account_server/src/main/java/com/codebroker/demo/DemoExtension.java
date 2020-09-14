@@ -56,13 +56,13 @@ public class DemoExtension extends AppListenerExtension {
 		addRequestHandler(100, DoSomeThingRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
-//		IGameWorld gameWorld = AppContext.getGameWorld();
-//		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+		IGameWorld gameWorld = AppContext.getGameWorld();
+		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
 
 //		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
 
 //		System.out.println(setManager);
-//		AppContext.setManager(new ChatService());
+		AppContext.setManager(new ChatService());
 
 //		AllianceService manager = AppContext.getManager(AllianceService.class);
 //		manager.init("hello world");

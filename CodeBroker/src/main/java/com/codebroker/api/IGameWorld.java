@@ -41,4 +41,6 @@ public interface IGameWorld {
 	 * @param event
 	 */
 	void sendAllOnlineUserEvent(IEvent event);
+
+	void restart();
 }
