@@ -144,14 +144,12 @@ public class AkkaSystemComponent extends BaseCoreService {
                 replyActorRef ->new IWorldMessage.StartWorldMessage(replyActorRef),
                 Duration.ofMillis(500),
                 system.scheduler());
-        CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
+        ask.whenComplete((reply, throwable) -> {
             super.setActive();
         }).exceptionally(throwable -> {
             throwable.printStackTrace();
             return null;
         });
-//        system.tell(IWorldMessage.StartWorldMessage.INSTANCE);
-
     }
 
 
@@ -169,10 +167,6 @@ public class AkkaSystemComponent extends BaseCoreService {
 
     public ActorSystem<IWorldMessage> getSystem() {
         return system;
-    }
-
-    public ManagementService getManagementService() {
-        return managementService;
     }
 
     public void setManagementService(ManagementService managementService) {

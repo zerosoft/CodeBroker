@@ -1,10 +1,7 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
+import akka.actor.typed.javadsl.*;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
 import com.codebroker.api.AppListener;
@@ -12,11 +9,14 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 import com.google.common.collect.Maps;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 
 public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 
@@ -58,6 +58,10 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	private  Behavior<IGameWorldMessage> sendMessageToService(IGameWorldMessage.SendMessageToService message) {
 		IService.HandleMessage handleMessage = new IService.HandleMessage(message.object);
 		getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
+
+
+
+
 		return Behaviors.same();
 	}
 

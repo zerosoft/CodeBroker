@@ -6,7 +6,16 @@ repositories {
 	}
 	mavenCentral()
 }
-
+sourceSets {
+	main {
+		java {
+			srcDir 'src/java'
+		}
+		resources {
+			srcDir 'src/resources'
+		}
+	}
+}
 sourceCompatibility = 1.8
 
 tasks.withType(JavaCompile) {
@@ -48,6 +57,9 @@ dependencies {
 	compile group: 'com.typesafe.akka', name: 'akka-cluster-typed_2.13', version: akka_version
 	compile group: 'com.typesafe.akka', name: 'akka-cluster-sharding-typed_2.13', version: akka_version
 	compile group: 'com.typesafe.akka', name: "akka-persistence-typed_2.13", version: akka_version
+	testCompile group: 'com.typesafe.akka', name: 'akka-testkit_2.13', version: akka_version
+	// https://mvnrepository.com/artifact/org.scalatestplus/scalatestplus-junit
+	testCompile group: 'org.scalatestplus', name: 'scalatestplus-junit_2.13', version: '1.0.0-M2'
 
 	//Akka Management
 	compile group: 'com.lightbend.akka.management', name: 'akka-management_2.13', version: '1.0.8'
