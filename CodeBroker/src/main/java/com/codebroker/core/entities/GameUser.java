@@ -2,18 +2,26 @@ package com.codebroker.core.entities;
 
 
 import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.internal.IEventHandler;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;
 import com.google.common.collect.Maps;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -70,6 +78,20 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, ((String) message).getBytes());
             actorRef.tell(new IUser.SendMessageToSession(byteArrayPacket));
         }
+    }
+
+    @Override
+    public Optional<IObject> sendMessageToISession(String serviceName, IObject message) {
+
+        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+        CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
+                replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
+                Duration.ofMillis(3),
+                actorSystem.scheduler());
+        CompletionStage<IUser.Reply> exceptionally = ask.exceptionally(Throwable::printStackTrace);
+        IUser.IObjectReply reply = (IUser.IObjectReply) exceptionally.toCompletableFuture().join();
+
+        return Optional.of(reply.message);
     }
 
     @Override

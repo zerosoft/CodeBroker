@@ -3,6 +3,7 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
+import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
@@ -28,6 +29,20 @@ public interface IUser{
 			this.message = message;
 		}
 	}
+
+	final class SendMessageToIService implements IUser{
+
+		public final String serviceName;
+		public final IObject message;
+		public final ActorRef<IUser.Reply> replyTo;
+
+		public SendMessageToIService(String serviceName,IObject message,ActorRef<IUser.Reply> replyTo) {
+			this.serviceName=serviceName;
+			this.message = message;
+			this.replyTo=replyTo;
+		}
+	}
+
 
 	enum SessionClose implements IUser{
 		INSTANCE;
@@ -58,6 +73,17 @@ public interface IUser{
 		public IEvent event;
 		public LogicEvent(IEvent event) {
 			this.event=event;
+		}
+	}
+
+	interface Reply {
+	}
+
+	final class IObjectReply implements Reply{
+		public final IObject message;
+
+		public IObjectReply(IObject message) {
+			this.message = message;
 		}
 	}
 }

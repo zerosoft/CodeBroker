@@ -9,10 +9,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IGameWorldMessage;
-import com.codebroker.core.actortype.message.ISession;
-import com.codebroker.core.actortype.message.IUser;
-import com.codebroker.core.actortype.message.IUserManager;
+import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 
@@ -57,8 +54,15 @@ public class User extends AbstractBehavior<IUser> {
                 .onMessage(IUser.Disconnect.class, this::disconnect)
                 .onMessage(IUser.NewGameUserInit.class, this::newGameUserInit)
                 .onMessage(IUser.SendMessageToSession.class, this::sendMessageToSession)
+                .onMessage(IUser.SendMessageToIService.class, this::sendMessageToIService)
                 .onMessage(IUser.LogicEvent.class, this::handlerLogicEvent)
                 .build();
+    }
+
+    private Behavior<IUser> sendMessageToIService(IUser.SendMessageToIService message) {
+        IService.HandleUserMessage handleMessage = new IService.HandleUserMessage(getContext().getSelf(),message.message);
+        getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
+        return Behaviors.same();
     }
 
     private Behavior<IUser> handlerLogicEvent(IUser.LogicEvent message) {

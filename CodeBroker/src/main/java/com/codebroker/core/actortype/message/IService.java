@@ -1,5 +1,6 @@
 package com.codebroker.core.actortype.message;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.core.data.IObject;
 
@@ -29,6 +30,16 @@ public interface IService{
         public IObject object;
         public HandleMessage(IObject obj) {
             this.object=obj;
+        }
+    }
+
+    final class HandleUserMessage implements IService {
+        public final ActorRef<IUser> Reply;
+        public final IObject object;
+
+        public HandleUserMessage(ActorRef<IUser> reply, IObject object) {
+            Reply = reply;
+            this.object = object;
         }
     }
 

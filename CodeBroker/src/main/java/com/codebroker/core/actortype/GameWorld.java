@@ -58,10 +58,6 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	private  Behavior<IGameWorldMessage> sendMessageToService(IGameWorldMessage.SendMessageToService message) {
 		IService.HandleMessage handleMessage = new IService.HandleMessage(message.object);
 		getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
-
-
-
-
 		return Behaviors.same();
 	}
 

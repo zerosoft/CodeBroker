@@ -1,6 +1,9 @@
 package com.codebroker.api;
 
 import com.codebroker.api.event.IEventDispatcher;
+import com.codebroker.core.data.IObject;
+
+import java.util.Optional;
 
 /**
  * 用户操作接口
@@ -23,6 +26,7 @@ public interface IGameUser extends IEventDispatcher {
      */
     void sendMessageToIoSession(int requestId, Object message);
 
+    Optional<IObject> sendMessageToISession(String serviceName, IObject message);
     /**
      * 主动断开链接
      */
