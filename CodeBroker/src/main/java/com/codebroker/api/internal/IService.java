@@ -32,6 +32,9 @@ public interface IService extends SerializableType {
      */
     void handleMessage(IObject obj);
 
+    default IObject handleBackMessage(IObject obj){
+        return null;
+    }
     /**
      * 获得服务名称.
      *

@@ -57,9 +57,7 @@ public class GameUserProxy implements IGameUser, IEventHandler, SerializableType
                 replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
                 Duration.ofMillis(3),
                 ContextResolver.getActorSystem().scheduler());
-        CompletionStage<IUser.Reply> exceptionally = ask.exceptionally(Throwable::printStackTrace);
-        IUser.IObjectReply reply = (IUser.IObjectReply) exceptionally.toCompletableFuture().join();
-
+        IUser.IObjectReply reply = (IUser.IObjectReply) ask.toCompletableFuture().join();
         return Optional.of(reply.message);
     }
 

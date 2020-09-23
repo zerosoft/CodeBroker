@@ -1,18 +1,20 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.DispatcherSelector;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
+import akka.actor.typed.javadsl.*;
+import akka.pattern.StatusReply;
 import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
+import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
@@ -60,8 +62,31 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private Behavior<IUser> sendMessageToIService(IUser.SendMessageToIService message) {
-        IService.HandleUserMessage handleMessage = new IService.HandleUserMessage(getContext().getSelf(),message.message);
-        getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
+        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+
+        if (ActorPathService.localService.containsKey(message.serviceName)) {
+            CompletionStage<IService.Reply> ask = AskPattern.askWithStatus(
+                    ActorPathService.localService.get(message.serviceName),
+                    replyActorRef -> new IService.HandleUserMessage(message.message, replyActorRef),
+                    Duration.ofMillis(3),
+                    actorSystem.scheduler());
+            ask.whenComplete((reply, throwable) -> {
+                if (reply instanceof IService.HandleUserMessageBack) {
+                    message.replyTo.tell(new IUser.IObjectReply(((IService.HandleUserMessageBack) reply).object));
+                }
+            }).exceptionally(throwable -> {
+                throwable.printStackTrace();
+                return null;
+            });
+            ask.whenComplete(
+                    (reply, failure) -> {
+                        if (reply instanceof IService.HandleUserMessageBack) {
+                            message.replyTo.tell(new IUser.IObjectReply(((IService.HandleUserMessageBack) reply).object));
+                        } else if (failure instanceof StatusReply.ErrorMessage) {
+                            message.replyTo.tell(new IUser.IObjectReply(CObjectLite.newInstance()));
+                        }
+                    });
+        }
         return Behaviors.same();
     }
 
@@ -81,10 +106,7 @@ public class User extends AbstractBehavior<IUser> {
         //进入游戏的
         this.gameUser = GameUserPool.getGameUser(uid,getContext().getSelf());
 
-        getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLoginWorld(this.gameUser)));
-
-//        CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-//        appListener.userLogin(gameUser);
+        getContext().spawnAnonymous(GameWorldGuardian.create(new IGameWorldMessage.UserLoginWorld(this.gameUser)));
 
         return Behaviors.same();
     }
@@ -96,10 +118,7 @@ public class User extends AbstractBehavior<IUser> {
             ioSession = null;
         }
         if (gameUser != null) {
-            getContext().spawnAnonymous(GameWorldGuardian.create(getContext().getSelf(),new IGameWorldMessage.UserLogOutWorld(gameUser)));
-
-//            CodeBrokerAppListener appListener = ContextResolver.getAppListener();
-//            appListener.handleLogout(gameUser);
+            getContext().spawnAnonymous(GameWorldGuardian.create(new IGameWorldMessage.UserLogOutWorld(gameUser)));
         }
         return Behaviors.stopped();
     }

@@ -17,15 +17,13 @@ public class GameWorldGuardian {
 	private ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IGameWorldMessage>> serviceInstances = new HashSet();
 
-	private ActorRef sender;
 	private IGameWorldMessage message;
 
-	public static Behavior<IGameWorldMessage> create(ActorRef sender,  IGameWorldMessage message) {
-		return Behaviors.setup(context -> new GameWorldGuardian(context, sender, message).handle());
+	public static Behavior<IGameWorldMessage> create(IGameWorldMessage message) {
+		return Behaviors.setup(context -> new GameWorldGuardian(context, message).handle());
 	}
 
-	private GameWorldGuardian(ActorContext<IGameWorldMessage> context, ActorRef sender, IGameWorldMessage message) {
-		this.sender = sender;
+	private GameWorldGuardian(ActorContext<IGameWorldMessage> context, IGameWorldMessage message) {
 		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
 		this.listingAdapter = context.messageAdapter(Receptionist.Listing.class, IGameWorldMessage.AddProcessorReference::new);
@@ -37,13 +35,13 @@ public class GameWorldGuardian {
 		return Behaviors.receive(IGameWorldMessage.class)
 				.onMessage(IGameWorldMessage.AddProcessorReference.class, listing -> {
 					int serverId = AppContext.getServerId();
-					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY + "." + serverId));
+					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IGameWorldMessage.class,
+							GameWorld.IDENTIFY + "." + serverId));
 					for (ActorRef<IGameWorldMessage> serviceInstance : serviceInstances) {
 						serviceInstance.tell(message);
 					}
 					return Behaviors.stopped();
 				}).build();
 	}
-
 
 }

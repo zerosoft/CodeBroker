@@ -44,6 +44,11 @@ public class ClusterServiceWithActor implements com.codebroker.api.internal.ISer
     }
 
     @Override
+    public IObject handleBackMessage(IObject obj) {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return name;
     }

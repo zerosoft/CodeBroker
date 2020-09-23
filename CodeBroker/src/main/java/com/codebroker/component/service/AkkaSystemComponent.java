@@ -1,25 +1,9 @@
 package com.codebroker.component.service;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.SupervisorStrategy;
 import akka.actor.typed.javadsl.AskPattern;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.cluster.sharding.external.ExternalShardAllocation;
-import akka.cluster.sharding.external.javadsl.ExternalShardAllocationClient;
-import akka.cluster.sharding.typed.ShardingEnvelope;
-import akka.cluster.sharding.typed.javadsl.ClusterSharding;
-import akka.cluster.sharding.typed.javadsl.Entity;
-import akka.cluster.sharding.typed.javadsl.EntityRef;
-import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
-import akka.cluster.typed.ClusterSingleton;
-import akka.cluster.typed.SingletonActor;
-import akka.http.javadsl.Http;
-import akka.http.javadsl.ServerBinding;
-import com.codebroker.cluster.base.Counter;
 import com.codebroker.component.BaseCoreService;
-import com.codebroker.core.actortype.GameSystem;
+import com.codebroker.core.actortype.GameRootSystem;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.net.http.HttpServer;
@@ -32,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 import akka.management.javadsl.AkkaManagement;
@@ -79,7 +62,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config configFile = ConfigFactory.load(cg).getConfig(configName);
 
-        this.system = ActorSystem.create(GameSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
+        this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
 
         AkkaManagement.get(system.classicSystem()).start();
         HttpServer.start(system);

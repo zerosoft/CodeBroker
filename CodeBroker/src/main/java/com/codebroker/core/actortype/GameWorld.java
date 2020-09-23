@@ -23,7 +23,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	public static final String IDENTIFY = GameWorld.class.getSimpleName();
 
 	private long gameWorldId;
-	
+
 	Map<String, IGameUser> userMap= Maps.newTreeMap();
 
 	public static Behavior<IGameWorldMessage> create(long id) {
@@ -57,7 +57,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 
 	private  Behavior<IGameWorldMessage> sendMessageToService(IGameWorldMessage.SendMessageToService message) {
 		IService.HandleMessage handleMessage = new IService.HandleMessage(message.object);
-		getContext().spawnAnonymous(ServiceGuardian.create(getContext().getSelf(),message.serviceName,handleMessage));
+		getContext().spawnAnonymous(ServiceGuardian.create(message.serviceName,handleMessage));
 		return Behaviors.same();
 	}
 

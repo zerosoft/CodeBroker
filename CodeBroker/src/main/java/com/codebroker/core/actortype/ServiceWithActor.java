@@ -33,6 +33,11 @@ public class ServiceWithActor implements com.codebroker.api.internal.IService {
     }
 
     @Override
+    public IObject handleBackMessage(IObject obj) {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return name;
     }

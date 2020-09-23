@@ -2,8 +2,8 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
+import akka.pattern.StatusReply;
 import com.codebroker.core.data.IObject;
-
 /**
  * 服务规则消息
  */
@@ -33,11 +33,23 @@ public interface IService{
         }
     }
 
+
+    interface Reply {
+    }
+
+    final class HandleUserMessageBack implements Reply{
+        public final IObject object;
+        public HandleUserMessageBack(IObject iObject) {
+            this.object=iObject;
+        }
+    }
+
     final class HandleUserMessage implements IService {
-        public final ActorRef<IUser> Reply;
+
+        public final ActorRef<StatusReply<IService.Reply>> Reply;
         public final IObject object;
 
-        public HandleUserMessage(ActorRef<IUser> reply, IObject object) {
+        public HandleUserMessage(IObject object,ActorRef<StatusReply<IService.Reply>> reply) {
             Reply = reply;
             this.object = object;
         }

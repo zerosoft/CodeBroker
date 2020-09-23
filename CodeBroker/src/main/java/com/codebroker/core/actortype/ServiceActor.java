@@ -7,10 +7,13 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
+import akka.pattern.StatusReply;
 import com.codebroker.api.AppContext;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.actortype.message.ISessionManager;
+import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.data.IObject;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
 
@@ -48,7 +51,18 @@ public class ServiceActor extends AbstractBehavior<IService> {
                 .onMessage(IService.Init.class,this::init)
                 .onMessage(IService.Destroy.class,this::destroy)
                 .onMessage(IService.HandleMessage.class,this::handleMessage)
+                .onMessage(IService.HandleUserMessage.class,this::handleUserMessage)
                 .build();
+    }
+
+    private  Behavior<IService> handleUserMessage(IService.HandleUserMessage message) {
+        try {
+            IObject iObject = service.handleBackMessage(message.object);
+            message.Reply.tell(StatusReply.success(new IService.HandleUserMessageBack(iObject)));
+        }catch (RuntimeException e){
+            message.Reply.tell(StatusReply.error(e));
+        }
+        return Behaviors.same();
     }
 
     private  Behavior<IService> handleMessage(IService.HandleMessage message) {

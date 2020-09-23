@@ -10,6 +10,7 @@ import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.internal.IEventHandler;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.data.IObject;
@@ -82,15 +83,12 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     @Override
     public Optional<IObject> sendMessageToISession(String serviceName, IObject message) {
-
         ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
         CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
                 replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
                 Duration.ofMillis(3),
                 actorSystem.scheduler());
-        CompletionStage<IUser.Reply> exceptionally = ask.exceptionally(Throwable::printStackTrace);
-        IUser.IObjectReply reply = (IUser.IObjectReply) exceptionally.toCompletableFuture().join();
-
+        IUser.IObjectReply reply = (IUser.IObjectReply) ask.toCompletableFuture().join();
         return Optional.of(reply.message);
     }
 

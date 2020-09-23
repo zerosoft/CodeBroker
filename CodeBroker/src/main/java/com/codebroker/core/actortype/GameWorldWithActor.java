@@ -31,8 +31,8 @@ public class GameWorldWithActor implements IGameWorld {
 
 	public static final int TIME_OUT_MILLIS = 500;
 	private ActorRef<IGameWorldMessage> gameWorldActorRef;
-	private Map<String,ActorRef<com.codebroker.core.actortype.message.IService>> localService= Maps.newTreeMap();
-	private Map<String,ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> localClusterService= Maps.newTreeMap();
+
+
 	private String name;
 
 	public GameWorldWithActor(String name, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
@@ -81,7 +81,7 @@ public class GameWorldWithActor implements IGameWorld {
 //			com.codebroker.api.internal.IService iService =
 			new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
-			localClusterService.put(serviceName,shardRegion);
+			ActorPathService.localClusterService.put(serviceName,shardRegion);
 			return true;
 		}else {
 			ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
@@ -91,7 +91,7 @@ public class GameWorldWithActor implements IGameWorld {
 					actorSystem.scheduler());
 			CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
 				if (reply instanceof IWorldMessage.ReplyCreateService) {
-					localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
+					ActorPathService.localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
 				}
 			}).exceptionally(throwable -> {
 				throwable.printStackTrace();
@@ -109,11 +109,11 @@ public class GameWorldWithActor implements IGameWorld {
 		/**
 		 * 如果是当前系统创建则使用当前系统的
 		 */
-		if (localService.containsKey(serviceName)){
-			localService.get(serviceName).tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
-		}else if (localClusterService.containsKey(serviceName)){
+		if (ActorPathService.localService.containsKey(serviceName)){
+			ActorPathService.localService.get(serviceName).tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+		}else if (ActorPathService.localClusterService.containsKey(serviceName)){
 			ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope = new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.HandleMessage(object));
-			localClusterService.get(serviceName).tell(shardingEnvelope);
+			ActorPathService.localClusterService.get(serviceName).tell(shardingEnvelope);
 		}
 		else {
 			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
@@ -134,8 +134,8 @@ public class GameWorldWithActor implements IGameWorld {
 	@Override
 	public void restart() {
 		com.codebroker.core.actortype.message.IService.Destroy destroy = new com.codebroker.core.actortype.message.IService.Destroy("");
-		localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));
-		for (Map.Entry<String, ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> stringActorRefEntry : localClusterService.entrySet()) {
+		ActorPathService.localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));
+		for (Map.Entry<String, ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> stringActorRefEntry : ActorPathService.localClusterService.entrySet()) {
 			stringActorRefEntry.getValue().tell(new ShardingEnvelope<>(stringActorRefEntry.getKey(), destroy));
 		}
 	}

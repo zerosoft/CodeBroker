@@ -16,11 +16,11 @@ import java.time.temporal.ChronoUnit;
 
 
 /**
- * 游戏世界Actor
+ * 游戏世界顶级GameRootSystem
  * @author LongJu
  * @Date 2020/3/25
  */
-public class GameSystem extends AbstractBehavior<IWorldMessage> {
+public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
 
     /**
      * 游戏世界标识Id
@@ -29,21 +29,16 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
     public static Behavior<IWorldMessage> create(int id) {
         Behavior<IWorldMessage> setup =
-                Behaviors.setup(ctx-> new GameSystem(ctx,id));
+                Behaviors.setup(ctx-> new GameRootSystem(ctx,id));
         return setup;
     }
 
 
-    public GameSystem(ActorContext<IWorldMessage> context, int id) {
+    public GameRootSystem(ActorContext<IWorldMessage> context, int id) {
         super(context);
         this.gameWorldId=id;
     }
 
-    private ActorRef<ISessionManager> sessionManager;
-    private ActorRef<IUserManager> userManager;
-    private ActorRef<IGameWorldMessage> gameWorldMessageActorRef;
-    private ActorRef<UserManagerTimer.Command> userManagerTimer;
-    private ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
 
 
     @Override
@@ -86,20 +81,19 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
     private Behavior<IWorldMessage> startGameWorld(IWorldMessage.StartWorldMessage message) {
         getContext().getSystem().log().info("GameWorld start id {}",gameWorldId);
 
-        sessionManager = getContext().spawn(SessionManager.create(gameWorldId), SessionManager.IDENTIFY+"."+gameWorldId);
-        getContext().getSystem().log().info("SessionManager Path {}",sessionManager.path());
+        ActorPathService.sessionManager = getContext().spawn(SessionManager.create(gameWorldId), SessionManager.IDENTIFY+"."+gameWorldId);
+        getContext().getSystem().log().info("SessionManager Path {}", ActorPathService.sessionManager.path());
 
-        userManager = getContext().spawn(UserManager.create(gameWorldId), UserManager.IDENTIFY+"."+gameWorldId);
+        ActorPathService.gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
+        GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY,  ActorPathService.gameWorldMessageActorRef);
 
-        userManagerTimer = getContext().spawn(UserManagerTimer.create(userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
-        getContext().getSystem().log().info("UserManager Path {}",userManager.path());
+        ActorPathService.userManager = getContext().spawn(UserManager.create(gameWorldId), UserManager.IDENTIFY+"."+gameWorldId);
 
-        clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
-        getContext().getSystem().log().info("clusterDomainEventActorRef Path {}",clusterDomainEventActorRef.path());
+        ActorPathService.userManagerTimer = getContext().spawn(UserManagerTimer.create( ActorPathService.userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
+        getContext().getSystem().log().info("UserManager Path {}", ActorPathService.userManager.path());
 
-        gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
-        GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY, gameWorldMessageActorRef);
-
+        ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
+        getContext().getSystem().log().info("clusterDomainEventActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());
 
         SelfUniqueAddress selfUniqueAddress = DistributedData.get(getContext().getSystem()).selfUniqueAddress();
 
@@ -143,7 +137,7 @@ public class GameSystem extends AbstractBehavior<IWorldMessage> {
 
     private Behavior<IWorldMessage> sessionOpen(IWorldMessage.SessionOpen message) {
         getContext().getSystem().log().debug("GameWorld login session");
-        sessionManager.tell(new ISessionManager.SessionOpen(message.ioSession));
+        ActorPathService.sessionManager.tell(new ISessionManager.SessionOpen(message.ioSession));
         return Behaviors.same();
     }
 }
