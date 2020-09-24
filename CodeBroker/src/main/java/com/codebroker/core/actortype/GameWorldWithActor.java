@@ -5,19 +5,16 @@ import akka.actor.typed.javadsl.*;
 import akka.cluster.sharding.typed.ShardingEnvelope;
 import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.Entity;
-import akka.cluster.sharding.typed.javadsl.EntityRef;
 import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.annotation.IServerType;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
-import com.codebroker.cluster.base.Counter;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.IObject;
-import com.google.common.collect.Maps;
 
 import java.time.Duration;
 import java.util.Map;
@@ -63,7 +60,7 @@ public class GameWorldWithActor implements IGameWorld {
 	public boolean createGlobalService(String serviceName, IService service) {
 		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
 		if (annotation!=null){
-			ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 			ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
 
 			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
@@ -84,20 +81,20 @@ public class GameWorldWithActor implements IGameWorld {
 			ActorPathService.localClusterService.put(serviceName,shardRegion);
 			return true;
 		}else {
-			ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-			CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(actorSystem,
-					replyActorRef -> new IWorldMessage.createGlobalService(serviceName, service,replyActorRef),
+			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+			CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(actorSystem,
+					replyActorRef -> new IGameRootSystemMessage.createGlobalService(serviceName, service,replyActorRef),
 					Duration.ofMillis(TIME_OUT_MILLIS),
 					actorSystem.scheduler());
-			CompletionStage<IWorldMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
-				if (reply instanceof IWorldMessage.ReplyCreateService) {
-					ActorPathService.localService.put(serviceName, ((IWorldMessage.ReplyCreateService) reply).serviceActorRef);
+			CompletionStage<IGameRootSystemMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
+				if (reply instanceof IGameRootSystemMessage.ReplyCreateService) {
+					ActorPathService.localService.put(serviceName, ((IGameRootSystemMessage.ReplyCreateService) reply).serviceActorRef);
 				}
 			}).exceptionally(throwable -> {
 				throwable.printStackTrace();
 				return null;
 			});
-			IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
+			IGameRootSystemMessage.Reply reply = exceptionally.toCompletableFuture().join();
 			return reply!=null;
 		}
 

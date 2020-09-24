@@ -2,7 +2,6 @@ package com.codebroker.core.entities;
 
 
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
@@ -11,7 +10,6 @@ import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.internal.IEventHandler;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IUser;
-import com.codebroker.core.actortype.message.IWorldMessage;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;

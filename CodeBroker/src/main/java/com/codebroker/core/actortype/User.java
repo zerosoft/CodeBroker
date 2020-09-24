@@ -62,7 +62,7 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private Behavior<IUser> sendMessageToIService(IUser.SendMessageToIService message) {
-        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
         if (ActorPathService.localService.containsKey(message.serviceName)) {
             CompletionStage<IService.Reply> ask = AskPattern.askWithStatus(

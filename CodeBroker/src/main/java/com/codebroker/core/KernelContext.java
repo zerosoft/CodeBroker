@@ -5,7 +5,7 @@ import com.codebroker.api.AppListener;
 import com.codebroker.api.internal.ComponentRegistry;
 import com.codebroker.api.internal.IService;
 import com.codebroker.component.ComponentRegistryImpl;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.component.service.AkkaSystemComponent;
 import com.codebroker.exception.ManagerNotFoundException;
 import com.codebroker.util.PropertiesWrapper;
@@ -87,7 +87,7 @@ class KernelContext {
         ((ComponentRegistryImpl) managerComponents).addComponent(type);
     }
 
-    public ActorSystem<IWorldMessage> getActorSystem() {
+    public ActorSystem<IGameRootSystemMessage> getActorSystem() {
         AkkaSystemComponent component = getComponent(AkkaSystemComponent.class);
         return component.getSystem();
     }

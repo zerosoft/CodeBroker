@@ -4,7 +4,7 @@ import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.component.BaseCoreService;
 import com.codebroker.core.actortype.GameRootSystem;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.net.http.HttpServer;
 import com.codebroker.setting.SystemEnvironment;
@@ -31,7 +31,7 @@ public class AkkaSystemComponent extends BaseCoreService {
     private static final String DEF_KEY = "CodeBroker";
     private static Logger logger = LoggerFactory.getLogger(AkkaSystemComponent.class);
 
-    private ActorSystem<IWorldMessage> system;
+    private ActorSystem<IGameRootSystemMessage> system;
 
     private ManagementService managementService;
 
@@ -123,8 +123,8 @@ public class AkkaSystemComponent extends BaseCoreService {
 //
 //        HelloWorldService helloWorldService = new HelloWorldService(system);
 //        helloWorldService.sayHello("123","2323");
-        CompletionStage<IWorldMessage.Reply> ask = AskPattern.ask(system,
-                replyActorRef ->new IWorldMessage.StartWorldMessage(replyActorRef),
+        CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(system,
+                replyActorRef ->new IGameRootSystemMessage.StartGameRootSystemMessage(replyActorRef),
                 Duration.ofMillis(500),
                 system.scheduler());
         ask.whenComplete((reply, throwable) -> {
@@ -148,7 +148,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         return AkkaSystemComponent.class.getSimpleName();
     }
 
-    public ActorSystem<IWorldMessage> getSystem() {
+    public ActorSystem<IGameRootSystemMessage> getSystem() {
         return system;
     }
 

@@ -2,7 +2,6 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import com.codebroker.api.internal.IBindingActor;
-import com.codebroker.protocol.SerializableType;
 
 /**
  * 游戏世界 相关通讯协议
@@ -10,11 +9,11 @@ import com.codebroker.protocol.SerializableType;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IWorldMessage {
+public interface IGameRootSystemMessage {
     /**
      * 会话登入
      */
-    final class SessionOpen implements IWorldMessage {
+    final class SessionOpen implements IGameRootSystemMessage {
         public IBindingActor<ISession> ioSession;
 
         public SessionOpen(IBindingActor<ISession> ioSession) {
@@ -25,10 +24,10 @@ public interface IWorldMessage {
     /**
      * 启动游戏世界
      */
-    class StartWorldMessage implements IWorldMessage {
+    class StartGameRootSystemMessage implements IGameRootSystemMessage {
         public final ActorRef<Reply> replyTo;
 
-        public StartWorldMessage(ActorRef<Reply> replyTo) {
+        public StartGameRootSystemMessage(ActorRef<Reply> replyTo) {
             this.replyTo = replyTo;
         }
     }
@@ -38,14 +37,14 @@ public interface IWorldMessage {
     /**
      * 重启游戏世界
      */
-    enum ReStartWorldMessage implements IWorldMessage {
+    enum ReStartGameRootSystemMessage implements IGameRootSystemMessage {
         INSTANCE;
     }
 
     /**
      * 停止游戏世界
      */
-    enum StopWorldMessage implements IWorldMessage {
+    enum StopGameRootSystemMessage implements IGameRootSystemMessage {
         INSTANCE;
     }
 
@@ -53,7 +52,7 @@ public interface IWorldMessage {
     /**
      * 创建service消息，同步等待创建
      */
-    class CreateService implements IWorldMessage {
+    class CreateService implements IGameRootSystemMessage {
 
         public String name;
         public com.codebroker.api.internal.IService service;
@@ -69,7 +68,7 @@ public interface IWorldMessage {
     /**
      * 创建service消息，同步等待创建
      */
-    class createGlobalService implements IWorldMessage {
+    class createGlobalService implements IGameRootSystemMessage {
 
         public String name;
         public com.codebroker.api.internal.IService service;
@@ -81,7 +80,7 @@ public interface IWorldMessage {
             this.replyTo = replyTo;
         }
     }
-    class createClusterService implements IWorldMessage {
+    class createClusterService implements IGameRootSystemMessage {
 
         public String name;
         public com.codebroker.api.internal.IService service;

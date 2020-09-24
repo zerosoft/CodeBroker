@@ -6,7 +6,7 @@ import akka.actor.typed.ActorSystem;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IUser;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.*;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.core.entities.GameUserProxy;
@@ -855,7 +855,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
                     + " -- It doesn\'t implement the Serializable Type interface");
         } else if (pojo instanceof IGameUser) {
             GameUser gameUser = (GameUser) pojo;
-            ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
             String serializationFormat = ActorRefResolver.get(actorSystem).toSerializationFormat(gameUser.getActorRef());
             iObject.putUtfString(CLASS_ACTOR_KEY, gameUser.getUserId());
             iObject.putUtfString(ACTOR_VALUE_KEY, serializationFormat);
@@ -988,7 +988,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
         } else {
             try {
                 if (iObject.containsKey(CLASS_ACTOR_KEY)) {
-                    ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
+                    ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
                     ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
                     GameUserProxy gameUserProxy = new GameUserProxy(iObject.getUtfString(CLASS_ACTOR_KEY), objectActorRef);
                     return gameUserProxy;

@@ -2,7 +2,6 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
-import akka.cluster.ClusterEvent;
 import akka.cluster.ddata.SelfUniqueAddress;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import com.codebroker.cluster.ClusterListenerActor;
@@ -20,21 +19,21 @@ import java.time.temporal.ChronoUnit;
  * @author LongJu
  * @Date 2020/3/25
  */
-public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
+public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
 
     /**
      * 游戏世界标识Id
      */
     private long gameWorldId;
 
-    public static Behavior<IWorldMessage> create(int id) {
-        Behavior<IWorldMessage> setup =
+    public static Behavior<IGameRootSystemMessage> create(int id) {
+        Behavior<IGameRootSystemMessage> setup =
                 Behaviors.setup(ctx-> new GameRootSystem(ctx,id));
         return setup;
     }
 
 
-    public GameRootSystem(ActorContext<IWorldMessage> context, int id) {
+    public GameRootSystem(ActorContext<IGameRootSystemMessage> context, int id) {
         super(context);
         this.gameWorldId=id;
     }
@@ -42,43 +41,43 @@ public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
 
 
     @Override
-    public Receive<IWorldMessage> createReceive() {
+    public Receive<IGameRootSystemMessage> createReceive() {
         return newReceiveBuilder()
-                .onMessage(IWorldMessage.SessionOpen.class,this::sessionOpen)
-                .onMessage(IWorldMessage.StartWorldMessage.class,this::startGameWorld)
-                .onMessage(IWorldMessage.ReStartWorldMessage.class,this::reStartGameWorld)
-                .onMessage(IWorldMessage.StopWorldMessage.class,this::stopGameWorld)
-                .onMessage(IWorldMessage.CreateService.class,this::createService)
-                .onMessage(IWorldMessage.createGlobalService.class,this::createGlobalService)
+                .onMessage(IGameRootSystemMessage.SessionOpen.class,this::sessionOpen)
+                .onMessage(IGameRootSystemMessage.StartGameRootSystemMessage.class,this::startGameWorld)
+                .onMessage(IGameRootSystemMessage.ReStartGameRootSystemMessage.class,this::reStartGameWorld)
+                .onMessage(IGameRootSystemMessage.StopGameRootSystemMessage.class,this::stopGameWorld)
+                .onMessage(IGameRootSystemMessage.CreateService.class,this::createService)
+                .onMessage(IGameRootSystemMessage.createGlobalService.class,this::createGlobalService)
                 .onSignal(PreRestart.class,signal->onRestart())
                 .onSignal(PostStop.class, signal ->onPostStop())
                 .build();
     }
 
-    private Behavior<IWorldMessage> createService(IWorldMessage.CreateService message) {
+    private Behavior<IGameRootSystemMessage> createService(IGameRootSystemMessage.CreateService message) {
             ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
             return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
-    private Behavior<IWorldMessage> createGlobalService(IWorldMessage.createGlobalService message) {
+    private Behavior<IGameRootSystemMessage> createGlobalService(IGameRootSystemMessage.createGlobalService message) {
         ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
         return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
-    private Behavior<IWorldMessage> getWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IWorldMessage.Reply> replyTo) {
+    private Behavior<IGameRootSystemMessage> getWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IGameRootSystemMessage.Reply> replyTo) {
         ServiceWithActor serviceActor=new ServiceWithActor(name,spawn);
         com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
         ContextResolver.setManager(iService);
-        replyTo.tell(new IWorldMessage.ReplyCreateService(spawn));
+        replyTo.tell(new IGameRootSystemMessage.ReplyCreateService(spawn));
         return Behaviors.same();
     }
 
-    private Behavior<IWorldMessage> reStartGameWorld(IWorldMessage.ReStartWorldMessage message) {
+    private Behavior<IGameRootSystemMessage> reStartGameWorld(IGameRootSystemMessage.ReStartGameRootSystemMessage message) {
         getContext().getSystem().log().info("GameWorld reStart");
         return Behaviors.same();
     }
 
-    private Behavior<IWorldMessage> startGameWorld(IWorldMessage.StartWorldMessage message) {
+    private Behavior<IGameRootSystemMessage> startGameWorld(IGameRootSystemMessage.StartGameRootSystemMessage message) {
         getContext().getSystem().log().info("GameWorld start id {}",gameWorldId);
 
         ActorPathService.sessionManager = getContext().spawn(SessionManager.create(gameWorldId), SessionManager.IDENTIFY+"."+gameWorldId);
@@ -108,11 +107,11 @@ public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
 //        getContext().getSystem().log().info("PNCounter=",increment.value());
 
         ContextResolver.setGameWorld(gameWorldWithActor);
-        message.replyTo.tell(new IWorldMessage.StartWorldFinish());
+        message.replyTo.tell(new IGameRootSystemMessage.StartWorldFinish());
         return Behaviors.same();
     }
 
-    private Behavior<IWorldMessage> onRestart() {
+    private Behavior<IGameRootSystemMessage> onRestart() {
         getContext().getSystem().log().info("Master Control Program restart");
         return Behaviors.same();
     }
@@ -121,7 +120,7 @@ public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
      * 会在 stopGameWorld 前执行
      * @return
      */
-    private Behavior<IWorldMessage> onPostStop() {
+    private Behavior<IGameRootSystemMessage> onPostStop() {
         getContext().getSystem().log().info("Master Control Program stopped");
         return Behaviors.same();
     }
@@ -131,11 +130,11 @@ public class GameRootSystem extends AbstractBehavior<IWorldMessage> {
      * @param message
      * @return
      */
-    private Behavior<IWorldMessage> stopGameWorld(IWorldMessage.StopWorldMessage message) {
+    private Behavior<IGameRootSystemMessage> stopGameWorld(IGameRootSystemMessage.StopGameRootSystemMessage message) {
         return Behaviors.stopped(()->getContext().getSystem().log().info("Clean up"));
     }
 
-    private Behavior<IWorldMessage> sessionOpen(IWorldMessage.SessionOpen message) {
+    private Behavior<IGameRootSystemMessage> sessionOpen(IGameRootSystemMessage.SessionOpen message) {
         getContext().getSystem().log().debug("GameWorld login session");
         ActorPathService.sessionManager.tell(new ISessionManager.SessionOpen(message.ioSession));
         return Behaviors.same();

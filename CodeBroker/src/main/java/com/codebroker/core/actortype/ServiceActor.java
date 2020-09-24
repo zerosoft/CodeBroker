@@ -59,7 +59,7 @@ public class ServiceActor extends AbstractBehavior<IService> {
         try {
             IObject iObject = service.handleBackMessage(message.object);
             message.Reply.tell(StatusReply.success(new IService.HandleUserMessageBack(iObject)));
-        }catch (RuntimeException e){
+        }catch (Exception e){
             message.Reply.tell(StatusReply.error(e));
         }
         return Behaviors.same();
@@ -68,7 +68,7 @@ public class ServiceActor extends AbstractBehavior<IService> {
     private  Behavior<IService> handleMessage(IService.HandleMessage message) {
         try {
             service.handleMessage(message.object);
-        }catch (RuntimeException e){
+        }catch (Exception e){
 
         }
         return Behaviors.same();

@@ -5,11 +5,10 @@ import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.internal.IService;
 import com.codebroker.api.internal.ManagerLocator;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiConsumer;
 
 
 /**
@@ -26,17 +25,17 @@ class ManagerLocatorImpl implements ManagerLocator {
 
     @Override
     public boolean setManager(IService type) {
-        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-        CompletionStage<IWorldMessage.Reply> ask = AskPattern
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+        CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern
                 .ask(actorSystem,
-                replyActorRef -> new IWorldMessage.CreateService(type.getClass().getName(), type,replyActorRef),
+                replyActorRef -> new IGameRootSystemMessage.CreateService(type.getClass().getName(), type,replyActorRef),
                 Duration.ofSeconds(1),
                 actorSystem.scheduler());
-        CompletionStage<IWorldMessage.Reply> exceptionally = ask.exceptionally(throwable -> {
+        CompletionStage<IGameRootSystemMessage.Reply> exceptionally = ask.exceptionally(throwable -> {
             throwable.printStackTrace();
             return null;
         });
-        IWorldMessage.Reply reply = exceptionally.toCompletableFuture().join();
+        IGameRootSystemMessage.Reply reply = exceptionally.toCompletableFuture().join();
         return reply!=null;
     }
 

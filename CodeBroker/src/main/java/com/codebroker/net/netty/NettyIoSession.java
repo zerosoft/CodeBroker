@@ -5,7 +5,7 @@ import akka.actor.typed.ActorSystem;
 import com.codebroker.api.IoSession;
 import com.codebroker.api.internal.IBindingActor;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,8 +26,8 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
     public NettyIoSession(ChannelHandlerContext ctx) {
         super();
         this.ctx = ctx;
-        ActorSystem<IWorldMessage> actorSystem = ContextResolver.getActorSystem();
-        actorSystem.tell(new IWorldMessage.SessionOpen(this));
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+        actorSystem.tell(new IGameRootSystemMessage.SessionOpen(this));
     }
 
     @Override

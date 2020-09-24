@@ -4,7 +4,7 @@ import akka.actor.typed.ActorSystem;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.internal.IService;
-import com.codebroker.core.actortype.message.IWorldMessage;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.util.PropertiesWrapper;
 
 
@@ -47,7 +47,7 @@ public final class ContextResolver {
         context.setManager(service);
     }
 
-    public static ActorSystem<IWorldMessage> getActorSystem() {
+    public static ActorSystem<IGameRootSystemMessage> getActorSystem() {
         return context.getActorSystem();
     }
 
