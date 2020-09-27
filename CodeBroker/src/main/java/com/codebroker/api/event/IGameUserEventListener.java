@@ -1,6 +1,7 @@
 package com.codebroker.api.event;
 
 import com.codebroker.api.IGameUser;
+import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ public interface IGameUserEventListener {
      * @param gameUser 游戏用户
      * @param event  事件
      */
-    void handleEvent(IGameUser gameUser,IEvent event);
+    default IObject handleEvent(IGameUser gameUser,IEvent event){
+        return null;
+    }
 
 }

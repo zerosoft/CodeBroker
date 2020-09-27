@@ -81,7 +81,12 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     }
 
     @Override
-    public Optional<IObject> sendMessageToISession(String serviceName, IObject message) {
+    public void sendMessageToGameUser(String userId, IObject message) {
+        actorRef.tell(new IUser.SendMessageToGameUser(userId,message));
+    }
+
+    @Override
+    public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
         CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
                 replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),

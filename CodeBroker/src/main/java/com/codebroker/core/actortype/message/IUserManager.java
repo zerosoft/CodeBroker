@@ -2,6 +2,7 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
+import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;
 
@@ -42,6 +43,20 @@ public interface IUserManager  {
             this.self=self;
         }
     }
+
+
+        final class SendMessageToGameUser implements IUserManager {
+
+            public final String userId;
+            public final IObject message;
+            public final ActorRef<IUser> reply;
+
+            public SendMessageToGameUser(String userId, IObject message, ActorRef<IUser> reply) {
+                this.userId = userId;
+                this.message = message;
+                this.reply=reply;
+            }
+        }
 
     final class UserClose implements IUserManager {
         public String uid;

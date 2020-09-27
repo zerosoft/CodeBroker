@@ -7,9 +7,11 @@ import akka.actor.typed.DispatcherSelector;
 import akka.actor.typed.javadsl.*;
 import akka.pattern.StatusReply;
 import com.codebroker.api.AppListener;
+import com.codebroker.api.event.Event;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.data.CObjectLite;
+import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 
@@ -35,7 +37,6 @@ public class User extends AbstractBehavior<IUser> {
 
     public static Behavior<IUser> create(String uid, ActorRef<ISession> ioSession, ActorRef<IUserManager> parent) {
         Behavior<IUser> setup = Behaviors.setup(context -> new User(context, uid, ioSession, parent));
-
         return setup;
     }
 
@@ -56,12 +57,26 @@ public class User extends AbstractBehavior<IUser> {
                 .onMessage(IUser.Disconnect.class, this::disconnect)
                 .onMessage(IUser.NewGameUserInit.class, this::newGameUserInit)
                 .onMessage(IUser.SendMessageToSession.class, this::sendMessageToSession)
+				.onMessage(IUser.SendMessageToGameUser.class,this::sendMessageToGameUser)
+				.onMessage(IUser.GetSendMessageToGameUser.class,this::getSendMessageToGameUser)
                 .onMessage(IUser.SendMessageToIService.class, this::sendMessageToIService)
                 .onMessage(IUser.LogicEvent.class, this::handlerLogicEvent)
                 .build();
     }
 
-    private Behavior<IUser> sendMessageToIService(IUser.SendMessageToIService message) {
+	private  Behavior<IUser> getSendMessageToGameUser(IUser.GetSendMessageToGameUser message) {
+		gameUser.dispatchEvent(new Event("",message.message));
+
+		return Behaviors.same();
+	}
+
+	private  Behavior<IUser> sendMessageToGameUser(IUser.SendMessageToGameUser message) {
+		getContext().spawnAnonymous(
+				UserManagerGuardian.create(new IUserManager.SendMessageToGameUser(message.userId,message.message,getContext().getSelf())));
+		return Behaviors.same();
+	}
+
+	private Behavior<IUser> sendMessageToIService(IUser.SendMessageToIService message) {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
         if (ActorPathService.localService.containsKey(message.serviceName)) {

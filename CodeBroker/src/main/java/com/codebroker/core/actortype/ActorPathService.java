@@ -12,12 +12,22 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-public class ActorPathService {
+/**
+ * 管理也存在系统的Actor地址服务
+ */
+public class ActorPathService{
 
+	/**
+	 * 本节点存在的IService的地址
+	 */
 	protected static Map<String, ActorRef<IService>> localService= Maps.newConcurrentMap();
+	/**
+	 * 本节点存在的集群Actor的地址
+	 */
 	protected static Map<String,ActorRef<ShardingEnvelope<IService>>> localClusterService= Maps.newConcurrentMap();
-
+	//网络会话管理
 	protected static ActorRef<ISessionManager> sessionManager;
+	//用户管理
 	protected static ActorRef<IUserManager> userManager;
 	protected static ActorRef<IGameWorldMessage> gameWorldMessageActorRef;
 	protected static ActorRef<UserManagerTimer.Command> userManagerTimer;

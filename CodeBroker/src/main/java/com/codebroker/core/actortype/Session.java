@@ -88,7 +88,7 @@ public class Session extends AbstractBehavior<ISession> {
     private Behavior<ISession> sessionAcceptMessage(ISession.SessionAcceptRequest message) {
         getContext().getLog().debug("Session accept Message {}",message.request.getOpCode());
         if (userActorRef==null){
-            getContext().spawnAnonymous(UserManagerGuardian.create(getContext().getSelf(),new IUserManager.TryBindingUser(getContext().getSelf(), message.request)));
+            getContext().spawnAnonymous(UserManagerGuardian.create(new IUserManager.TryBindingUser(getContext().getSelf(), message.request)));
         }else{
             userActorRef.tell(new IUser.ReceiveMessageFromSession(message.request));
         }

@@ -26,7 +26,14 @@ public interface IGameUser extends IEventDispatcher {
      */
     void sendMessageToIoSession(int requestId, Object message);
 
-    Optional<IObject> sendMessageToISession(String serviceName, IObject message);
+    /**
+     * 发生消息给其他GameUser
+     * @param userId
+     * @param message
+     */
+    void sendMessageToGameUser(String userId,IObject message);
+
+    Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
     /**
      * 主动断开链接
      */

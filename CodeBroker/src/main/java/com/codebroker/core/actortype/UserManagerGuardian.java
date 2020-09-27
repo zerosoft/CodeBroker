@@ -21,15 +21,13 @@ public class UserManagerGuardian {
 
 	private ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IUserManager>> serviceInstances = new HashSet();
-	private ActorRef self;
 	private IUserManager message;
 
-	public static Behavior<IUserManager> create(ActorRef self, IUserManager message) {
-		return Behaviors.setup(context -> new UserManagerGuardian(context, self, message).handle());
+	public static Behavior<IUserManager> create(IUserManager message) {
+		return Behaviors.setup(context -> new UserManagerGuardian(context, message).handle());
 	}
 
-	private UserManagerGuardian(ActorContext<IUserManager> context, ActorRef<ISession> self, IUserManager message) {
-		this.self = self;
+	private UserManagerGuardian(ActorContext<IUserManager> context, IUserManager message) {
 		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
 		this.listingAdapter = context.messageAdapter(Receptionist.Listing.class, IUserManager.AddProcessorReference::new);

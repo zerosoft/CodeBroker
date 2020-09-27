@@ -55,9 +55,18 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         return newReceiveBuilder()
                 .onMessage(IUserManager.TryBindingUser.class,this::bindingSession)
                 .onMessage(IUserManager.UserLostSession.class,this::userLostSession)
+                .onMessage(IUserManager.SendMessageToGameUser.class,this::sendMessageToGameUser)
                 .onMessage(IUserManager.TimeCheck.class,this::timeCheck)
                 .onMessage(IUserManager.UserClose.class,this::userClose)
                 .build();
+    }
+
+    private Behavior<IUserManager> sendMessageToGameUser(IUserManager.SendMessageToGameUser message) {
+        if (userMap.containsKey(message.userId)){
+            ActorRef<IUser> iUserActorRef = userMap.get(message.userId);
+            iUserActorRef.tell(new IUser.GetSendMessageToGameUser(message.message,message.reply));
+        }
+        return Behaviors.same();
     }
 
     private Behavior<IUserManager> userClose(IUserManager.UserClose message) {

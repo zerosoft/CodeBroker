@@ -50,7 +50,12 @@ public class GameUserProxy implements IGameUser, IEventHandler, SerializableType
     }
 
     @Override
-    public Optional<IObject> sendMessageToISession(String serviceName, IObject message) {
+    public void sendMessageToGameUser(String userId, IObject message) {
+
+    }
+
+    @Override
+    public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
         CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
                 replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
                 Duration.ofMillis(3),
