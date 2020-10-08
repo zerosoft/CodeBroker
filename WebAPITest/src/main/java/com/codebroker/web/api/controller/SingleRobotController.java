@@ -1,8 +1,12 @@
 package com.codebroker.web.api.controller;
 
+import com.codebroker.protobuff.login.LoginRequest;
+import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.web.api.service.RobotManager;
 import com.codebroker.web.api.service.netty.SingleRegisty;
 import com.codebroker.web.api.service.netty.TCPClient;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.netty.channel.Channel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,7 +64,12 @@ public class SingleRobotController {
     @RequestMapping(value="/robotLogin",method = {RequestMethod.GET}, produces="text/html;charset=UTF-8")
     @ResponseBody
     public String robotLogin(String account,String passwod){
-        robotManager.client.getChannel().writeAndFlush(null);
+        LoginRequest build = LoginRequest.newBuilder().setAccount(account).setPassword(passwod).build();
+        JsonObject jsonObject=new JsonObject();
+        jsonObject.addProperty("name",account);
+        jsonObject.addProperty("parm",passwod);
+        BaseByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(10,jsonObject.toString().getBytes());
+        robotManager.client.getSingleChannel().writeAndFlush(baseByteArrayPacket);
         return "增加机器人";
     }
 }

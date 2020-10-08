@@ -3,22 +3,18 @@ package com.codebroker.demo;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
-import com.codebroker.core.ServerEngine;
 import com.codebroker.core.data.CObject;
-import com.codebroker.demo.request.DoSomeThingRequestHandler;
+import com.codebroker.demo.request.LoginRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
-import com.codebroker.demo.service.ChatService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +54,7 @@ public class Demo1Extension extends AppListenerExtension {
 	@Override
 	public void init(Object obj) {
 		logger.info("Init 123");
-		addRequestHandler(100, DoSomeThingRequestHandler.class);
+		addRequestHandler(10, LoginRequestHandler.class);
 		addRequestHandler(101, UserDisconnectionRequestHandler.class);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();

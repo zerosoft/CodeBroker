@@ -32,7 +32,6 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("机器人接口列表")
                 .description("基于swagger生成接口文档,可在线对接口进行调试！")
-//                .contact(new Contact("这是作者", "这是网址地址", "这是邮件地址"))//作者
                 .version("1.0")
                 .build();
 

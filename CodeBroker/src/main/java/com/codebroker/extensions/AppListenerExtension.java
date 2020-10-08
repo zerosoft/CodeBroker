@@ -64,6 +64,7 @@ public abstract class AppListenerExtension implements AppListener {
             IClientRequestHandler handler = (IClientRequestHandler) handlerFactory.findHandler(requestId);
             if (handler == null) {
                 logger.info("handler is no found" + requestId);
+                return;
             }
             handler.handleClientRequest(user, params);
         } catch (InstantiationException | IllegalAccessException e) {

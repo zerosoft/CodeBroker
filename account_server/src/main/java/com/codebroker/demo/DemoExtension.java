@@ -4,7 +4,7 @@ import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.core.data.CObject;
-import com.codebroker.demo.request.DoSomeThingRequestHandler;
+import com.codebroker.demo.request.LoginRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
 import com.codebroker.demo.service.ChatService;
@@ -53,8 +53,8 @@ public class DemoExtension extends AppListenerExtension {
 	@Override
 	public void init(Object obj) {
 		logger.info("Init");
-		addRequestHandler(100, DoSomeThingRequestHandler.class);
-		addRequestHandler(101, UserDisconnectionRequestHandler.class);
+		addRequestHandler(10, LoginRequestHandler.class);
+		addRequestHandler(11, UserDisconnectionRequestHandler.class);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
 		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());

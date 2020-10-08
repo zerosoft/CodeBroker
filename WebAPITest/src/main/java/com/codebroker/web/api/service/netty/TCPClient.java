@@ -51,7 +51,7 @@ public class TCPClient {
     private Bootstrap bootstrap;
     private EventLoopGroup workerGroup;
     private FixedChannelPool channelPool;
-
+    private Channel channel;
     public TCPClient(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
@@ -104,7 +104,7 @@ public class TCPClient {
                 }
             });
 
-            Channel channel = f.channel();
+            channel = f.channel();
             f.channel().closeFuture().sync();
             return channel;
         } catch (Exception e) {
@@ -189,6 +189,9 @@ public class TCPClient {
 
         // 连接放回连接池,这里一定记得放回去
         // this.channelPool.release(channel);
+        return channel;
+    }
+    public Channel getSingleChannel()  {
         return channel;
     }
 }
