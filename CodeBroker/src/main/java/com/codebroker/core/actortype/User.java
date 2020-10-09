@@ -106,7 +106,11 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private Behavior<IUser> handlerLogicEvent(IUser.LogicEvent message) {
-        gameUser.handlerEvent(message.event);
+        try {
+            gameUser.handlerEvent(message.event);
+        }catch (Exception e){
+            getContext().getLog().error("handleClientRequest error ", e);
+        }
         return Behaviors.same();
     }
 

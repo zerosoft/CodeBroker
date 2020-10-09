@@ -2,6 +2,7 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
+import akka.cluster.sharding.typed.ShardingEnvelope;
 import akka.pattern.StatusReply;
 import com.codebroker.core.data.IObject;
 /**
@@ -53,6 +54,19 @@ public interface IService{
             Reply = reply;
             this.object = object;
         }
+    }
+
+    final class HandleClusterUserMessage implements IService {
+
+        public final ActorRef<IService.Reply> Reply;
+        public final IObject object;
+
+        public HandleClusterUserMessage(IObject object, ActorRef<IService.Reply> reply) {
+            this.Reply = reply;
+            this.object = object;
+        }
+
+
     }
 
     final class AddProcessorReference implements IService {

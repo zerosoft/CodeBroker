@@ -101,8 +101,14 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         byte[] message = tryBindingUser.message.getRawData();
         Gson gson=new Gson();
         JsonObject jsonElement = gson.fromJson(new String(message), JsonObject.class);
+        String uid;
+        try {
+            uid = appListener.sessionLoginVerification(jsonElement.get("name").getAsString(), jsonElement.get("parm").getAsString());
+        }catch (Exception e){
+            getContext().getLog().error(e.getMessage(),e);
+            return Behaviors.same();
+        }
 
-        String uid = appListener.sessionLoginVerification(jsonElement.get("name").getAsString(), jsonElement.get("parm").getAsString());
         if (userMap.containsKey(uid)){
             lostSessionUser.remove(uid);
 

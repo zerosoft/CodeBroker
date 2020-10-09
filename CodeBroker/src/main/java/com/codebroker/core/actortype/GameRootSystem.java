@@ -4,6 +4,8 @@ import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
 import akka.cluster.ddata.SelfUniqueAddress;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
+import akka.cluster.sharding.typed.ClusterShardingQuery;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import com.codebroker.cluster.ClusterListenerActor;
 import com.codebroker.cluster.ReplicatedCache;
 import com.codebroker.core.ContextResolver;
@@ -93,15 +95,16 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
 
         ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("clusterDomainEventActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());
+//
+//        ClusterSharding sharding = ClusterSharding.get(getContext().getSystem());
+//        SelfUniqueAddress selfUniqueAddress = DistributedData.get(getContext().getSystem()).selfUniqueAddress();
 
-        SelfUniqueAddress selfUniqueAddress = DistributedData.get(getContext().getSystem()).selfUniqueAddress();
-
-        ActorRef<ReplicatedCache.Command> replicatedCache = getContext().spawn(ReplicatedCache.create(), "ReplicatedCache");
-        replicatedCache.tell(new ReplicatedCache.PutInCache("v","232"));
+//        ActorRef<ReplicatedCache.Command> replicatedCache = getContext().spawn(ReplicatedCache.create(), "ReplicatedCache");
+//        replicatedCache.tell(new ReplicatedCache.PutInCache("v","232"));
 
 
 
-        getContext().getSystem().log().info("");
+//        getContext().getSystem().log().info("");
         //        PNCounter pnCounter = PNCounter.create();
 //        PNCounter increment = pnCounter.increment(selfUniqueAddress, 1);
 //        getContext().getSystem().log().info("PNCounter=",increment.value());

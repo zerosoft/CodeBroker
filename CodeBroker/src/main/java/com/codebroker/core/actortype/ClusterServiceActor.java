@@ -7,7 +7,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
+import akka.pattern.StatusReply;
 import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.data.IObject;
 
 public class ClusterServiceActor extends AbstractBehavior<IService> {
 
@@ -37,6 +39,7 @@ public class ClusterServiceActor extends AbstractBehavior<IService> {
         return newReceiveBuilder()
                 .onMessage(IService.Init.class,this::init)
                 .onMessage(IService.Destroy.class,this::destroy)
+                .onMessage(IService.HandleUserMessage.class,this::handleUserMessage)
                 .onMessage(IService.HandleMessage.class,this::handleMessage)
                 .build();
     }
@@ -49,6 +52,18 @@ public class ClusterServiceActor extends AbstractBehavior<IService> {
         }
         return Behaviors.same();
     }
+
+    private  Behavior<IService> handleUserMessage(IService.HandleUserMessage message) {
+        try {
+            IObject iObject = service.handleBackMessage(message.object);
+            message.Reply.tell(StatusReply.success(new IService.HandleUserMessageBack(iObject)));
+        }catch (Exception e){
+            message.Reply.tell(StatusReply.error(e));
+        }
+        return Behaviors.same();
+    }
+
+
 
     private  Behavior<IService> destroy(IService.Destroy destroy) {
         service.destroy(destroy.object);

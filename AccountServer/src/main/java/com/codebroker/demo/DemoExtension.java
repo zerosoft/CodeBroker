@@ -4,10 +4,12 @@ import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.LoginRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
 import com.codebroker.demo.service.ChatService;
+import com.codebroker.demo.service.account.AccountService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
@@ -29,7 +31,14 @@ public class DemoExtension extends AppListenerExtension {
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
 		logger.info("handle login name {} parameter {}", name, parameter);
-		return name;
+//		AccountService manager = AppContext.getManager(AccountService.class);
+//		AppContext.getGameWorld().sendMessageToService();
+		CObject cObject = CObject.newInstance();
+		cObject.putUtfString("name",name);
+		cObject.putUtfString("password",parameter);
+//		IObject iObject =manager.handleBackMessage(cObject);
+		IObject iObject = AppContext.getGameWorld().sendMessageToServiceWithBack("AccountService", cObject);
+		return iObject.getUtfString("uid");
 	}
 
 	@Override
@@ -53,25 +62,11 @@ public class DemoExtension extends AppListenerExtension {
 	@Override
 	public void init(Object obj) {
 		logger.info("Init");
-		addRequestHandler(10, LoginRequestHandler.class);
-		addRequestHandler(11, UserDisconnectionRequestHandler.class);
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+		boolean accountService = gameWorld.createGlobalService("AccountService",new AccountService());
 
-//		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
+		logger.info("Account Service create {}",accountService);
 
-//		System.out.println(setManager);
-		AppContext.setManager(new ChatService());
-
-//		AllianceService manager = AppContext.getManager(AllianceService.class);
-//		manager.init("hello world");
-
-//		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
-		new HelloWOrld().vs();
-//		new HelloWOrld().vs();
-		CObject object = CObject.newInstance();
-		object.putUtfString("message", "hello");
-//		gameWorld.sendMessageToService("AllianceService", object);
 	}
 }

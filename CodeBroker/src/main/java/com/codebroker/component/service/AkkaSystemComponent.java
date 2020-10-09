@@ -64,8 +64,8 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
 
-        AkkaManagement.get(system.classicSystem()).start();
-        HttpServer.start(system);
+//        AkkaManagement.get(system.classicSystem()).start();
+//        HttpServer.start(system);
 
         int http_prot = propertiesWrapper.getIntProperty(SystemEnvironment.HTTP_PORT, 0);
 

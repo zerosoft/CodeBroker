@@ -30,6 +30,13 @@ public interface IGameWorld {
 	 */
 	void sendMessageToService(String serviceName, IObject object);
 	/**
+	 * 发送事件到服务
+	 * @param serviceName 服务名称
+	 * @param object 事件对象
+	 * @return 返回消息对象
+	 */
+	IObject sendMessageToServiceWithBack(String serviceName, IObject object);
+	/**
 	 * 对所有在线玩家发送消息
 	 * @param requestId
 	 * @param message

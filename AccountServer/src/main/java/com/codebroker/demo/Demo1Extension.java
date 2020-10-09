@@ -4,11 +4,13 @@ import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.LoginRequestHandler;
 import com.codebroker.demo.request.UserDisconnectionRequestHandler;
 import com.codebroker.demo.service.AllianceService;
+import com.codebroker.demo.service.ChatService;
+import com.codebroker.demo.service.account.AccountService;
 import com.codebroker.demo.userevent.DoSameEvent;
-import com.codebroker.demo.userevent.LoginBackSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
@@ -20,29 +22,35 @@ import java.util.Map;
 
 public class Demo1Extension extends AppListenerExtension {
 
-	private Logger logger= LoggerFactory.getLogger(Demo1Extension.class);
+	private Logger logger = LoggerFactory.getLogger(DemoExtension.class);
 
-	private Map<String,String> userMap=new HashMap<>();
+	private Map<String, String> userMap = new HashMap<>();
 	//在线用户列表
-	private Map<String,IGameUser> onlineUsers= Maps.newConcurrentMap();
+	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
 
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
-		logger.info("handle login name {} parameter {}",name,parameter);
+		logger.info("handle login name {} parameter {}", name, parameter);
+		AccountService manager = AppContext.getManager(AccountService.class);
+//		AppContext.getGameWorld().sendMessageToService();
+		CObject cObject = CObject.newInstance();
+		cObject.putUtfString("name",name);
+		cObject.putUtfString("password",parameter);
+		IObject iObject =manager.handleBackMessage(cObject);
+//		IObject iObject = AppContext.getGameWorld().sendMessageToServiceWithBack("AccountService", cObject);
 		return name;
 	}
 
 	@Override
 	public void userLogin(IGameUser user) {
-		logger.info("User Login parameter {}",user.getUserId());
+		logger.info("User Login parameter {}", user.getUserId());
 		user.addEventListener("login", new DoSameEvent());
-		user.addEventListener("login Chat back", new LoginBackSameEvent());
 	}
 
 
 	@Override
 	public boolean handleLogout(IGameUser user) {
-		logger.info("User LogOut parameter {}",user.getUserId());
+		logger.info("User LogOut parameter {}", user.getUserId());
 		return false;
 	}
 
@@ -53,38 +61,12 @@ public class Demo1Extension extends AppListenerExtension {
 
 	@Override
 	public void init(Object obj) {
-		logger.info("Init 123");
-		addRequestHandler(10, LoginRequestHandler.class);
-		addRequestHandler(101, UserDisconnectionRequestHandler.class);
+		logger.info("Init");
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean setManager = gameWorld.createGlobalService("AllianceService",new AllianceService());
+		boolean accountService = gameWorld.createGlobalService("AccountService",new AccountService());
 
-//		AppContext.getGameWorld().getClusterService("AllianceService",new AllianceService());
+		logger.info("Account Service create {}",accountService);
 
-//		System.out.println(setManager);
-//		AppContext.setManager(new ChatService());
-
-//		AllianceService manager = AppContext.getManager(AllianceService.class);
-//		manager.init("hello world");
-
-//		boolean chatService = gameWorld.createGlobalService("ChatService", new ChatService());
-
-		try {
-			Thread.sleep(5000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-
-		CObject object = CObject.newInstance();
-		object.putUtfString("message", "hello");
-		gameWorld.sendMessageToService("AllianceService", object);
-	}
-
-	@Override
-	public void destroy(Object obj) {
-		logger.info("Server Destroy");
-		clearAllHandlers();
 	}
 }
