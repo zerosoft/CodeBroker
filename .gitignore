@@ -24,3 +24,6 @@ account_server/.gradle/
 WebAPITest/.gradle/
 *.kotlin_module
 *.MF
+AccountServer/.gradle/
+boot/.gradle/
+WebAPITest/gradle/
