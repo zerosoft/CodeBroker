@@ -4,6 +4,7 @@ import akka.actor.ExtendedActorSystem;
 import akka.actor.typed.ActorRefResolver;
 import akka.actor.typed.javadsl.Adapter;
 import akka.serialization.SerializerWithStringManifest;
+import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IArray;
 import com.codebroker.core.data.IObject;
 
@@ -62,7 +63,7 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (object instanceof IArray) {
             return defaultIDataSerializer.array2binary((IArray) object);
         } else {
-            return defaultIDataSerializer.obj2binary(object);
+            return defaultIDataSerializer.obj2binary(CObject.newFromObject(object));
         }
     }
 }

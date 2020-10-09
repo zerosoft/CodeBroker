@@ -3,12 +3,18 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.cluster.sharding.typed.ShardingEnvelope;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import akka.pattern.StatusReply;
 import com.codebroker.core.data.IObject;
+import com.codebroker.protocol.SerializableType;
+
 /**
  * 服务规则消息
  */
-public interface IService{
+public interface IService extends SerializableType {
+
+    EntityTypeKey<IService> typeKey =
+            EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,"IService");
 
     final class Init implements IService {
         public Object object;
@@ -54,19 +60,6 @@ public interface IService{
             Reply = reply;
             this.object = object;
         }
-    }
-
-    final class HandleClusterUserMessage implements IService {
-
-        public final ActorRef<IService.Reply> Reply;
-        public final IObject object;
-
-        public HandleClusterUserMessage(IObject object, ActorRef<IService.Reply> reply) {
-            this.Reply = reply;
-            this.object = object;
-        }
-
-
     }
 
     final class AddProcessorReference implements IService {

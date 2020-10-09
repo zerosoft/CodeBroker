@@ -93,8 +93,8 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
         ActorPathService.userManagerTimer = getContext().spawn(UserManagerTimer.create( ActorPathService.userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
         getContext().getSystem().log().info("UserManager Path {}", ActorPathService.userManager.path());
 
-        ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
-        getContext().getSystem().log().info("clusterDomainEventActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());
+//        ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
+//        getContext().getSystem().log().info("clusterDomainEventActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());
 //
 //        ClusterSharding sharding = ClusterSharding.get(getContext().getSystem());
 //        SelfUniqueAddress selfUniqueAddress = DistributedData.get(getContext().getSystem()).selfUniqueAddress();

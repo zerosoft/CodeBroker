@@ -65,11 +65,11 @@ public class GameWorldWithActor implements IGameWorld {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 			ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
 
-			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
-					EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
+//			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
+//					EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
 
 			ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
-					clusterSharding.init(Entity.of(typeKey, ctx -> {
+					clusterSharding.init(Entity.of(com.codebroker.core.actortype.message.IService.typeKey, ctx -> {
 						String ctxEntityId = ctx.getEntityId();
 						Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
 								ClusterServiceActor.create(serviceName+"_"+ctxEntityId,service);
@@ -147,11 +147,11 @@ public class GameWorldWithActor implements IGameWorld {
 		{
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
-			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
-					EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
+//			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
+//					EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
 
 			ClusterSharding sharding = ClusterSharding.get(actorSystem);
-			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =sharding.entityRefFor(typeKey, serviceName);
+			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =sharding.entityRefFor(com.codebroker.core.actortype.message.IService.typeKey, serviceName);
 
 			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
 					entityRef,

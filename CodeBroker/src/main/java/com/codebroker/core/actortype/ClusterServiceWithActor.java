@@ -21,7 +21,7 @@ public class ClusterServiceWithActor implements com.codebroker.api.internal.ISer
     public ClusterServiceWithActor(String name, ClusterSharding clusterSharding ) {
         this.name = name;
         this.sharding =clusterSharding;
-        this.typeKey= EntityTypeKey.create(IService.class, name);
+        this.typeKey= com.codebroker.core.actortype.message.IService.typeKey;
     }
 
 
