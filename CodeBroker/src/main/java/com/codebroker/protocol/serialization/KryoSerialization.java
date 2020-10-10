@@ -1,9 +1,11 @@
 package com.codebroker.protocol.serialization;
 
-import com.codebroker.core.data.CArray;
-import com.codebroker.core.data.CArrayLite;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.CObjectLite;
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorRefResolver;
+import akka.actor.typed.ActorSystem;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
+import com.codebroker.core.data.*;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -35,10 +37,13 @@ public class KryoSerialization {
          */
         //支持对象循环引用（否则会栈溢出）
         kryo.setReferences(true); //默认值就是 true，添加此行的目的是为了提醒维护者，不要改变这个配置
-
+        kryo.register(IObject.class,IObjectSerializer.getInstance());
         kryo.register(CObject.class,IObjectSerializer.getInstance());
         kryo.register(CObjectLite.class,IObjectSerializer.getInstance());
 
+        kryo.register(ActorRef.class,ActorRefSerializer.getInstance());
+
+        kryo.register(IArray.class,IArraySerializer.getInstance());
         kryo.register(CArray.class,IArraySerializer.getInstance());
         kryo.register(CArrayLite.class,IArraySerializer.getInstance());
 

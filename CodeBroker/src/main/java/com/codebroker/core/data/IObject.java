@@ -1,12 +1,14 @@
 package com.codebroker.core.data;
 
 
+import com.codebroker.protocol.SerializableType;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public interface IObject {
+public interface IObject extends SerializableType {
 
      boolean isNull(String key);
 

@@ -337,4 +337,7 @@ public class ServerEngine implements InstanceMXBean {
         return name;
     }
 
+    public ClassLoader getiClassLoader() {
+        return iClassLoader;
+    }
 }

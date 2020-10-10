@@ -8,6 +8,8 @@ import akka.pattern.StatusReply;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.SerializableType;
 
+import java.io.Serializable;
+
 /**
  * 服务规则消息
  */
@@ -41,10 +43,10 @@ public interface IService extends SerializableType {
     }
 
 
-    interface Reply {
+    interface Reply extends SerializableType{
     }
 
-    final class HandleUserMessageBack implements Reply{
+    final class HandleUserMessageBack implements IService.Reply{
         public final IObject object;
         public HandleUserMessageBack(IObject iObject) {
             this.object=iObject;
@@ -57,7 +59,7 @@ public interface IService extends SerializableType {
         public final IObject object;
 
         public HandleUserMessage(IObject object,ActorRef<StatusReply<IService.Reply>> reply) {
-            Reply = reply;
+            this.Reply = reply;
             this.object = object;
         }
     }

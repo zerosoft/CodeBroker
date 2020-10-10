@@ -1,9 +1,11 @@
 package com.codebroker.core.data;
 
+import com.codebroker.protocol.SerializableType;
+
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface IArray {
+public interface IArray extends SerializableType {
 
      boolean contains(Object paramObject);
 

@@ -36,9 +36,12 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (string.equals(IArray)) {
             return defaultIDataSerializer.binary2array(bs);
         } else {
-            return defaultIDataSerializer.binary2obj(bs);
+            com.codebroker.core.data.IObject iObject = defaultIDataSerializer.binary2object(bs);
+            Object pojo = defaultIDataSerializer.cbo2pojo(iObject);
+            return pojo;
         }
     }
+
 
     @Override
     public int identifier() {
@@ -63,7 +66,8 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (object instanceof IArray) {
             return defaultIDataSerializer.array2binary((IArray) object);
         } else {
-            return defaultIDataSerializer.obj2binary(CObject.newFromObject(object));
+//            return defaultIDataSerializer.obj2binary(object);
+            return defaultIDataSerializer.object2binary(CObject.newFromObject(object));
         }
     }
 }
