@@ -3,11 +3,8 @@ package com.codebroker.protocol.serialization;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorRefResolver;
 import akka.actor.typed.ActorSystem;
-import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.ServerEngine;
-import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.*;
@@ -17,16 +14,12 @@ import com.codebroker.exception.CRuntimeException;
 import com.codebroker.exception.CodecException;
 import com.codebroker.protocol.IDataSerializer;
 import com.codebroker.protocol.SerializableType;
-import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;
-import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tools.ant.taskdefs.Classloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1039,29 +1032,34 @@ public class DefaultIDataSerializer implements IDataSerializer {
                     Class theClass = Class.forName(string);
 
                     Constructor[] constructors = theClass.getConstructors();
+                    //检查是否有无参数构造,如果多个构造函数选择参数最多的构造
                     boolean noArg=false;
+                    Constructor use=null;
                     for (Constructor constructor : constructors) {
                         if (constructor.getParameterCount()==0){
                             noArg=true;
                             break;
+                        }else {
+                            if (use==null){
+                                use=constructor;
+                            }else {
+                                if (use.getParameterCount()<constructor.getParameterCount()){
+                                    use=constructor;
+                                }
+                            }
                         }
                     }
                     if (noArg){
                         pojo = theClass.newInstance();
-                        if (!(pojo instanceof SerializableType)) {
-                            throw new IllegalStateException("Cannot deserialize object: " + pojo + ", type: " + string
-                                    + " -- It doesn\'t implement the SerializableSFSType interface");
-                        } else {
-                            this.convertSFSObject(iObject.getIArray(CLASS_FIELDS_KEY), pojo);
-                            return pojo;
-                        }
+                        convertSFSObject(iObject.getIArray(CLASS_FIELDS_KEY), pojo);
+                        return pojo;
                     }else {
                         FieldAccess fieldAccess = FieldAccess.get(theClass);
                         Field[] fields = fieldAccess.getFields();
-                        Object[] arg = new Object[constructors[0].getParameterTypes().length];
+                        Object[] arg = new Object[use.getParameterTypes().length];
                         IArray iArray = iObject.getIArray(CLASS_FIELDS_KEY);
-                        for (int i=0;i<constructors[0].getParameterTypes().length;i++) {
-                            Class<?> parameterType = constructors[0].getParameterTypes()[i];
+                        for (int i=0;i<use.getParameterTypes().length;i++) {
+                            Class<?> parameterType = use.getParameterTypes()[i];
                             for (Field field : fields) {
                                 if (field.getType().equals(parameterType)){
                                     for (int j=0;j<iArray.size();j++){
@@ -1074,9 +1072,8 @@ public class DefaultIDataSerializer implements IDataSerializer {
                                 }
                             }
                         }
-                        return  theClass.getConstructor(constructors[0].getParameterTypes()).newInstance(arg);
+                        return  theClass.getConstructor(use.getParameterTypes()).newInstance(arg);
                     }
-
                 }
             } catch (Exception exception) {
                 throw new CRuntimeException(exception);
@@ -1229,50 +1226,22 @@ public class DefaultIDataSerializer implements IDataSerializer {
         return gsonThreadLocal.get().toJson(map);
     }
 
-    public Object binary2obj(byte[] data) {
-        CObject cObject = CObject.newFromBinaryData(data);
-        try {
-            Class<?> loadClass = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString(CLASS_NAME));
-            IArray iArray = cObject.getIArray(CLASS_FIELDS_KEY);
-            loadClass.getConstructors();
-            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray(CLASS_VALUE), loadClass);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public byte[] obj2binary(Object event) {
-        CObject cObject = CObject.newInstance();
-        cObject.putUtfString(CLASS_NAME, event.getClass().getName());
-        cObject.putByteArray(CLASS_VALUE, KryoSerialization.writeObjectToByteArray(event));
-        return cObject.toBinary();
-    }
-
-    public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
-        IObject iObject;
-        Class<IService.HandleUserMessage> handleUserMessageClass = IService.HandleUserMessage.class;
-        Class<?> aClass = DefaultIDataSerializer.class.getClassLoader().loadClass(handleUserMessageClass.getName());
-        System.out.println(handleUserMessageClass.getName());
-        Constructor<?>[] constructors = aClass.getConstructors();
-        FieldAccess fieldAccess = FieldAccess.get(aClass);
-        Field[] fields = fieldAccess.getFields();
-        Object[] arg = new Object[constructors[0].getParameterTypes().length];
-        for (int i=0;i<constructors[0].getParameterTypes().length;i++) {
-            Class<?> parameterType = constructors[0].getParameterTypes()[i];
-            for (Field field : fields) {
-                if (field.getType().equals(parameterType)){
-                    System.out.println(field.getName());
-//                    arg[i]=iObject.getClass(field.getName());
-                }
-            }
-        }
-        ;
-        aClass.getConstructor(constructors[0].getParameterTypes()).newInstance(arg);
-
-//        ConstructorAccess<IService.HandleUserMessage> handleUserMessageConstructorAccess = ConstructorAccess.get(aClass);
-//        IService.HandleUserMessage handleUserMessage = handleUserMessageConstructorAccess.newInstance();
-//        System.out.println(o);
-    }
+//    public Object binary2obj(byte[] data) {
+//        CObject cObject = CObject.newFromBinaryData(data);
+//        try {
+//            Class<?> loadClass = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString(CLASS_NAME));
+//            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray(CLASS_VALUE), loadClass);
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    public byte[] obj2binary(Object event) {
+//        CObject cObject = CObject.newInstance();
+//        cObject.putUtfString(CLASS_NAME, event.getClass().getName());
+//        cObject.putByteArray(CLASS_VALUE, KryoSerialization.writeObjectToByteArray(event));
+//        return cObject.toBinary();
+//    }
 
 }

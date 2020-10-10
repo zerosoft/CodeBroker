@@ -17,7 +17,7 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
 
     private final String IObject = "IO";
     private final String IArray = "IA";
-    private final String Kryo = "KRYO";
+    private final String MESSAGE = "ME";
 
     DefaultIDataSerializer defaultIDataSerializer = DefaultIDataSerializer.getInstance();
 
@@ -36,9 +36,7 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (string.equals(IArray)) {
             return defaultIDataSerializer.binary2array(bs);
         } else {
-            com.codebroker.core.data.IObject iObject = defaultIDataSerializer.binary2object(bs);
-            Object pojo = defaultIDataSerializer.cbo2pojo(iObject);
-            return pojo;
+            return defaultIDataSerializer.cbo2pojo(defaultIDataSerializer.binary2object(bs));
         }
     }
 
@@ -55,7 +53,7 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (object instanceof IArray) {
             return IArray;
         } else {
-            return Kryo;
+            return MESSAGE;
         }
     }
 
@@ -66,7 +64,6 @@ public class CodeBrokerRemoteSerializer extends SerializerWithStringManifest {
         } else if (object instanceof IArray) {
             return defaultIDataSerializer.array2binary((IArray) object);
         } else {
-//            return defaultIDataSerializer.obj2binary(object);
             return defaultIDataSerializer.object2binary(CObject.newFromObject(object));
         }
     }
