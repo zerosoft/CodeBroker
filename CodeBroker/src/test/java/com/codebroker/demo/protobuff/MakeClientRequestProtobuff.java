@@ -9,10 +9,7 @@ import freemarker.template.TemplateException;
 import jodd.io.findfile.ClassScanner;
 import jodd.util.ClassLoaderUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +17,7 @@ import java.util.Map;
 
 public class MakeClientRequestProtobuff {
 
-	public static void main(String[] args) throws IOException, TemplateException {
+	public static void main(String[] args) throws IOException {
 
 		Map<String,Class> classMap= Maps.newHashMap();
 
@@ -43,14 +40,8 @@ public class MakeClientRequestProtobuff {
 
 		scanner.scan("D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\build\\classes\\java\\test\\com\\codebroker\\protobuff\\");
 
-
-
 		Configuration configuration = new Configuration(Configuration.getVersion());
 		// 构建数据
-//		String baseUrl = generate.getBasic().getRequestMapping();
-		//D:\Users\Documents\github\CodeBrokerGit\CodeBroker\src\test\java\com\codebroker\demo\protobuff\template
-		//D:\Users\Documents\github\CodeBrokerGit\CodeBroker\src\java\test\com\codebroker\demo\protobuff\template
-//		System.out.println(MakeClientRequestProtobuff.class.getName().replaceAll( ".","\\/"));
 		String path =System.getProperty("user.dir")+"\\src\\test\\java\\com\\codebroker\\demo\\protobuff\\template\\";
 		// 第二步：设置模板文件所在的路径。
 		configuration.setDirectoryForTemplateLoading(new File(path));
@@ -69,7 +60,6 @@ public class MakeClientRequestProtobuff {
 				e.printStackTrace();
 			}
 		});
-//		buildClass(template);
 	}
 
 	private static void buildClass(Template template,Class t) throws TemplateException, IOException {
@@ -91,7 +81,10 @@ public class MakeClientRequestProtobuff {
 				for (String method1 : methodNames) {
 					if (method.getName().equals(method1)){
 						//排除掉protobuff的ByteString
-						if (com.google.protobuf.ByteString.class.equals(method.getReturnType())){
+						if (com.google.protobuf.ByteString.class.equals(method.getReturnType())
+								||method.getReturnType().getName().contains("$")
+								||method.getName().contains("$")
+								||method.getName().contains("OrBuilder")){
 							continue;
 						}else{
 							methodsList.add(method);
@@ -108,6 +101,9 @@ public class MakeClientRequestProtobuff {
 		dataModel.put("SubPackage",split[split.length-1]);
 		dataModel.put("ProtobuffClass", t.getSimpleName().replace("OrBuilder",""));
 		dataModel.put("methodsList", methodsList);
-		template.process(dataModel,new PrintWriter(System.out));
+
+		Writer out = new FileWriter(new File("D:\\Users\\Documents\\github\\CodeBrokerGit\\AccountServer\\src\\main\\java\\com\\codebroker\\demo\\request\\"+ t.getSimpleName().replace("OrBuilder","Handler")+".java"));
+		template.process(dataModel,out);
+		out.close();
 	}
 }
