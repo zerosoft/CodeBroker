@@ -8,6 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IServerType {
-
+    /**
+     * 是否是集群服务
+     * @return
+     */
     boolean cluster();
 }

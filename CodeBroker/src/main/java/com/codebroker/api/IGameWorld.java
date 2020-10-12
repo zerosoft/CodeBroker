@@ -17,7 +17,7 @@ public interface IGameWorld {
 	Optional<IGameUser> findIGameUserById(String id);
 
 	/**
-	 * 创建一个全局服务，如果开启集群则成为集群服务
+	 * 创建一个全局服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
 	 * @param service
 	 * @return
 	 */
@@ -49,5 +49,8 @@ public interface IGameWorld {
 	 */
 	void sendAllOnlineUserEvent(IEvent event);
 
+	/**
+	 * 服务重启启动
+	 */
 	void restart();
 }

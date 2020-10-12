@@ -3,10 +3,16 @@ syntax="proto3";
 option java_package = "com.codebroker.protobuff.item";
 option java_multiple_files = true;
 
-import "LoginMessage.proto";
-
-
 message ItemBean {
      int32 itemId 	= 1;
      int32 itemCount	= 2;
+}
+//91 创建角色名
+message BuyItemRequest {
+     int32 itemId = 1;
+}
+
+//92 是否成功
+message BuyItemResponse {
+     int64 status = 1;
 }

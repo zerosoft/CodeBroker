@@ -95,12 +95,16 @@ dependencies {
 	compile group: 'cglib', name: 'cglib', version: '3.2.5'
 	//序列化
 	compile group: 'com.esotericsoftware', name: 'kryo', version: '4.0.2'
-    //反射
+	compile group: 'io.altoo', name: 'akka-kryo-serialization_2.13', version: '1.1.5'
+	//反射
 	compile group: 'com.esotericsoftware', name: 'reflectasm', version: '1.11.9'
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+	// https://mvnrepository.com/artifact/org.freemarker/freemarker
+	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+
 }
 
 task copyJars(type:Copy) {

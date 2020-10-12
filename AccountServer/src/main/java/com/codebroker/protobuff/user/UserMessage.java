@@ -15,10 +15,15 @@ public final class UserMessage {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_User_descriptor;
+    internal_static_CreateRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_User_fieldAccessorTable;
+      internal_static_CreateRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_CreateResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_CreateResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -28,22 +33,27 @@ public final class UserMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021UserMessage.proto\"b\n\004User\022\020\n\010fireTime\030" +
-      "\001 \001(\005\022\014\n\004lang\030\002 \001(\t\022\020\n\010serverId\030\003 \001(\005\022\022\n" +
-      "\nallianceId\030\004 \001(\005\022\024\n\014nationalFlag\030\005 \001(\005B" +
-      "!\n\035com.codebroker.protobuff.userP\001b\006prot" +
-      "o3"
+      "\n\021UserMessage.proto\"\035\n\rCreateRequest\022\014\n\004" +
+      "name\030\001 \001(\t\" \n\016CreateResponse\022\016\n\006status\030\001" +
+      " \001(\003B!\n\035com.codebroker.protobuff.userP\001b" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_User_descriptor =
+    internal_static_CreateRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_User_fieldAccessorTable = new
+    internal_static_CreateRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_User_descriptor,
-        new java.lang.String[] { "FireTime", "Lang", "ServerId", "AllianceId", "NationalFlag", });
+        internal_static_CreateRequest_descriptor,
+        new java.lang.String[] { "Name", });
+    internal_static_CreateResponse_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_CreateResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_CreateResponse_descriptor,
+        new java.lang.String[] { "Status", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

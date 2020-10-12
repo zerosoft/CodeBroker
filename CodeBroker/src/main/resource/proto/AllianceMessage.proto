@@ -1,0 +1,14 @@
+syntax="proto3";
+
+option java_package = "com.codebroker.protobuff.alliance";
+option java_multiple_files = true;
+
+//91 创建联盟
+message CreateAllianceRequest {
+     string name = 1;
+}
+
+//92 是否成功
+message CreateAllianceResponse {
+     int64 status = 1;
+}

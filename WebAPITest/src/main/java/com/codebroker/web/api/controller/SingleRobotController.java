@@ -72,4 +72,17 @@ public class SingleRobotController {
         robotManager.client.getSingleChannel().writeAndFlush(baseByteArrayPacket);
         return "增加机器人";
     }
+
+    @ApiOperation(value="发生消息", notes="启动机器人连接到测试服务器")
+    @RequestMapping(value="/robotLoginReq",method = {RequestMethod.GET}, produces="text/html;charset=UTF-8")
+    @ResponseBody
+    public String robotLoginReq(String account,String passwod){
+        LoginRequest build = LoginRequest.newBuilder().setAccount(account).setPassword(passwod).build();
+//        JsonObject jsonObject=new JsonObject();
+//        jsonObject.addProperty("name",account);
+//        jsonObject.addProperty("parm",passwod);
+        BaseByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(10,build.toByteArray());
+        robotManager.client.getSingleChannel().writeAndFlush(baseByteArrayPacket);
+        return "发生消息了";
+    }
 }

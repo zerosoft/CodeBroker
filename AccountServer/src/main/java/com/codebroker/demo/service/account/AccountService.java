@@ -15,6 +15,7 @@ public class AccountService implements IService {
 	@Override
 	public void init(Object o) {
 		logger.info("init");
+
 	}
 
 	@Override
