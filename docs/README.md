@@ -145,7 +145,7 @@ CodeBroker {
 ## 启动方式
 idea
 
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0518/101654_fc8d2acb_19059.png "微信截图_20200518101606.png")
+![Octocat](https://images.gitee.com/uploads/images/2020/0518/101654_fc8d2acb_19059.png)
 
 ## The license
 
