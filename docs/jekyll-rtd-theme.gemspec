@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["zerosoft"]
   spec.email         = ["zerosoft@vip.qq.com"]
 
-  spec.summary       = "Opinionated github flavored standard document theme for open source projects, with few options, but everything!"
+  spec.summary       = "CoderBroker相关使用及二次开发说明"
   spec.license       = "MIT"
   spec.homepage      = "https://github.com/zerosoft/CodeBroker"
 
