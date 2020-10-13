@@ -29,7 +29,7 @@ com.code.broker.netty.server.name=netty
 ```
 ## Akka配置文件 
 `application.conf`
-```yml
+```
 CodeBroker {
 	akka {
 		loggers = ["akka.event.slf4j.Slf4jLogger"]
@@ -137,7 +137,6 @@ CodeBroker {
       throughput = 1
     }
 }
-
 ```
 ## The license
 
