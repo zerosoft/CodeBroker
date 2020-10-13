@@ -4,17 +4,20 @@
 
 ## 快速开始
 
+## 配置文件 
 `app.properties`
-```yml
-#配置文件 
-
+```
 com.code.broker.app.id=1
 com.code.broker.app.name=\u7B80\u5355\u670D\u52A1\u5668
+#服务器启动的主类名
 com.code.broker.app.listener=com.codebroker.demo.DemoExtension
+#服务器的逻辑jar所在位置
 com.code.broker.app.jar.path=D:\\Users\\Documents\\github\\CodeBrokerGit\\AccountServer\\build\\libs\\
+#是否自动重新读取jar
 com.code.broker.app.jar.reload=AUTO
+#jar变更监听时间周期
 com.code.broker.app.jar.reload.second=10
-
+#关联AKKA的配置文件
 com.code.broker.akka.config.name=application.conf
 com.code.broker.akka.name=CodeBroker
 
@@ -29,6 +32,7 @@ com.code.broker.netty.server.name=netty
 ```
 ## Akka配置文件 
 `application.conf`
+
 ```
 CodeBroker {
 	akka {
@@ -106,7 +110,7 @@ CodeBroker {
       }
 	}
 
-	game-logic {
+  game-logic {
 		type = Dispatcher
 		executor = "thread-pool-executor"
 		thread-pool-executor {
@@ -138,6 +142,7 @@ CodeBroker {
     }
 }
 ```
+
 ## The license
 
 The theme is available as open source under the terms of the MIT License
