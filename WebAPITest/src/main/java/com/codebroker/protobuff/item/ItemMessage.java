@@ -19,6 +19,16 @@ public final class ItemMessage {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ItemBean_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_BuyItemRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_BuyItemRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_BuyItemResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_BuyItemResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -28,15 +38,15 @@ public final class ItemMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021ItemMessage.proto\032\022LoginMessage.proto\"" +
-      "-\n\010ItemBean\022\016\n\006itemId\030\001 \001(\005\022\021\n\titemCount" +
-      "\030\002 \001(\005B!\n\035com.codebroker.protobuff.itemP" +
-      "\001b\006proto3"
+      "\n\021ItemMessage.proto\"-\n\010ItemBean\022\016\n\006itemI" +
+      "d\030\001 \001(\005\022\021\n\titemCount\030\002 \001(\005\" \n\016BuyItemReq" +
+      "uest\022\016\n\006itemId\030\001 \001(\005\"!\n\017BuyItemResponse\022" +
+      "\016\n\006status\030\001 \001(\003B!\n\035com.codebroker.protob" +
+      "uff.itemP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.codebroker.protobuff.login.LoginMessage.getDescriptor(),
         });
     internal_static_ItemBean_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -44,7 +54,18 @@ public final class ItemMessage {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ItemBean_descriptor,
         new java.lang.String[] { "ItemId", "ItemCount", });
-    com.codebroker.protobuff.login.LoginMessage.getDescriptor();
+    internal_static_BuyItemRequest_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_BuyItemRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_BuyItemRequest_descriptor,
+        new java.lang.String[] { "ItemId", });
+    internal_static_BuyItemResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_BuyItemResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_BuyItemResponse_descriptor,
+        new java.lang.String[] { "Status", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

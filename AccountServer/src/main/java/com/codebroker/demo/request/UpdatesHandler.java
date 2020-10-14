@@ -1,11 +1,11 @@
 package com.codebroker.demo.request;
 
-import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
+import com.codebroker.demo.AbstractClientRequestHandler;
 import com.codebroker.protobuff.common.Updates;
 
-public class UpdatesHandler implements IClientRequestHandler<Updates> {
+public class UpdatesHandler extends AbstractClientRequestHandler<Updates> {
 	@Override
-	public void handleClientRequest(IGameUser iGameUser, Updates request) {
+	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, Updates request) {
 	}
 }

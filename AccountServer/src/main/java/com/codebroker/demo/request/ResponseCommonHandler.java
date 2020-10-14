@@ -1,18 +1,18 @@
 package com.codebroker.demo.request;
 
-import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
+import com.codebroker.demo.AbstractClientRequestHandler;
 import com.codebroker.protobuff.common.ResponseCommon;
 
-public class ResponseCommonHandler implements IClientRequestHandler<ResponseCommon> {
+public class ResponseCommonHandler extends AbstractClientRequestHandler<ResponseCommon> {
 	@Override
-	public void handleClientRequest(IGameUser iGameUser, ResponseCommon request) {
+	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, ResponseCommon request) {
 		int  cmd = request.getCmd();
+		com.codebroker.protobuff.common.Deletes  deletes = request.getDeletes();
+		com.codebroker.protobuff.common.Creates  creates = request.getCreates();
+		boolean  hasupdates = request.hasUpdates();
 		boolean  hasdeletes = request.hasDeletes();
 		com.codebroker.protobuff.common.Updates  updates = request.getUpdates();
 		boolean  hascreates = request.hasCreates();
-		boolean  hasupdates = request.hasUpdates();
-		com.codebroker.protobuff.common.Creates  creates = request.getCreates();
-		com.codebroker.protobuff.common.Deletes  deletes = request.getDeletes();
 	}
 }

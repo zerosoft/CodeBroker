@@ -1,12 +1,12 @@
 package com.codebroker.demo.request;
 
-import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
+import com.codebroker.demo.AbstractClientRequestHandler;
 import com.codebroker.protobuff.item.ItemBean;
 
-public class ItemBeanHandler implements IClientRequestHandler<ItemBean> {
+public class ItemBeanHandler extends AbstractClientRequestHandler<ItemBean> {
 	@Override
-	public void handleClientRequest(IGameUser iGameUser, ItemBean request) {
+	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, ItemBean request) {
 		int  itemid = request.getItemId();
 		int  itemcount = request.getItemCount();
 	}

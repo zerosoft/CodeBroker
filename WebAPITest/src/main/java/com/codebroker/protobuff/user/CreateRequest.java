@@ -4,26 +4,30 @@
 package com.codebroker.protobuff.user;
 
 /**
- * Protobuf type {@code User}
+ * <pre>
+ *91 创建角色名
+ * </pre>
+ *
+ * Protobuf type {@code CreateRequest}
  */
-public final class User extends
+public final class CreateRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:User)
-    UserOrBuilder {
+    // @@protoc_insertion_point(message_implements:CreateRequest)
+    CreateRequestOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use User.newBuilder() to construct.
-  private User(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use CreateRequest.newBuilder() to construct.
+  private CreateRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private User() {
-    lang_ = "";
+  private CreateRequest() {
+    name_ = "";
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new User();
+    return new CreateRequest();
   }
 
   @java.lang.Override
@@ -31,7 +35,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private User(
+  private CreateRequest(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -49,30 +53,10 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 8: {
-
-            fireTime_ = input.readInt32();
-            break;
-          }
-          case 18: {
+          case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            lang_ = s;
-            break;
-          }
-          case 24: {
-
-            serverId_ = input.readInt32();
-            break;
-          }
-          case 32: {
-
-            allianceId_ = input.readInt32();
-            break;
-          }
-          case 40: {
-
-            nationalFlag_ = input.readInt32();
+            name_ = s;
             break;
           }
           default: {
@@ -96,97 +80,53 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.codebroker.protobuff.user.UserMessage.internal_static_User_descriptor;
+    return com.codebroker.protobuff.user.UserMessage.internal_static_CreateRequest_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.codebroker.protobuff.user.UserMessage.internal_static_User_fieldAccessorTable
+    return com.codebroker.protobuff.user.UserMessage.internal_static_CreateRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.codebroker.protobuff.user.User.class, com.codebroker.protobuff.user.User.Builder.class);
+            com.codebroker.protobuff.user.CreateRequest.class, com.codebroker.protobuff.user.CreateRequest.Builder.class);
   }
 
-  public static final int FIRETIME_FIELD_NUMBER = 1;
-  private int fireTime_;
+  public static final int NAME_FIELD_NUMBER = 1;
+  private volatile java.lang.Object name_;
   /**
-   * <code>int32 fireTime = 1;</code>
-   * @return The fireTime.
+   * <code>string name = 1;</code>
+   * @return The name.
    */
   @java.lang.Override
-  public int getFireTime() {
-    return fireTime_;
-  }
-
-  public static final int LANG_FIELD_NUMBER = 2;
-  private volatile java.lang.Object lang_;
-  /**
-   * <code>string lang = 2;</code>
-   * @return The lang.
-   */
-  @java.lang.Override
-  public java.lang.String getLang() {
-    java.lang.Object ref = lang_;
+  public java.lang.String getName() {
+    java.lang.Object ref = name_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      lang_ = s;
+      name_ = s;
       return s;
     }
   }
   /**
-   * <code>string lang = 2;</code>
-   * @return The bytes for lang.
+   * <code>string name = 1;</code>
+   * @return The bytes for name.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getLangBytes() {
-    java.lang.Object ref = lang_;
+      getNameBytes() {
+    java.lang.Object ref = name_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      lang_ = b;
+      name_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
-  }
-
-  public static final int SERVERID_FIELD_NUMBER = 3;
-  private int serverId_;
-  /**
-   * <code>int32 serverId = 3;</code>
-   * @return The serverId.
-   */
-  @java.lang.Override
-  public int getServerId() {
-    return serverId_;
-  }
-
-  public static final int ALLIANCEID_FIELD_NUMBER = 4;
-  private int allianceId_;
-  /**
-   * <code>int32 allianceId = 4;</code>
-   * @return The allianceId.
-   */
-  @java.lang.Override
-  public int getAllianceId() {
-    return allianceId_;
-  }
-
-  public static final int NATIONALFLAG_FIELD_NUMBER = 5;
-  private int nationalFlag_;
-  /**
-   * <code>int32 nationalFlag = 5;</code>
-   * @return The nationalFlag.
-   */
-  @java.lang.Override
-  public int getNationalFlag() {
-    return nationalFlag_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -203,20 +143,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (fireTime_ != 0) {
-      output.writeInt32(1, fireTime_);
-    }
-    if (!getLangBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, lang_);
-    }
-    if (serverId_ != 0) {
-      output.writeInt32(3, serverId_);
-    }
-    if (allianceId_ != 0) {
-      output.writeInt32(4, allianceId_);
-    }
-    if (nationalFlag_ != 0) {
-      output.writeInt32(5, nationalFlag_);
+    if (!getNameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
     }
     unknownFields.writeTo(output);
   }
@@ -227,24 +155,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (fireTime_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(1, fireTime_);
-    }
-    if (!getLangBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, lang_);
-    }
-    if (serverId_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, serverId_);
-    }
-    if (allianceId_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, allianceId_);
-    }
-    if (nationalFlag_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(5, nationalFlag_);
+    if (!getNameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -256,21 +168,13 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.codebroker.protobuff.user.User)) {
+    if (!(obj instanceof com.codebroker.protobuff.user.CreateRequest)) {
       return super.equals(obj);
     }
-    com.codebroker.protobuff.user.User other = (com.codebroker.protobuff.user.User) obj;
+    com.codebroker.protobuff.user.CreateRequest other = (com.codebroker.protobuff.user.CreateRequest) obj;
 
-    if (getFireTime()
-        != other.getFireTime()) return false;
-    if (!getLang()
-        .equals(other.getLang())) return false;
-    if (getServerId()
-        != other.getServerId()) return false;
-    if (getAllianceId()
-        != other.getAllianceId()) return false;
-    if (getNationalFlag()
-        != other.getNationalFlag()) return false;
+    if (!getName()
+        .equals(other.getName())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -282,84 +186,76 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + FIRETIME_FIELD_NUMBER;
-    hash = (53 * hash) + getFireTime();
-    hash = (37 * hash) + LANG_FIELD_NUMBER;
-    hash = (53 * hash) + getLang().hashCode();
-    hash = (37 * hash) + SERVERID_FIELD_NUMBER;
-    hash = (53 * hash) + getServerId();
-    hash = (37 * hash) + ALLIANCEID_FIELD_NUMBER;
-    hash = (53 * hash) + getAllianceId();
-    hash = (37 * hash) + NATIONALFLAG_FIELD_NUMBER;
-    hash = (53 * hash) + getNationalFlag();
+    hash = (37 * hash) + NAME_FIELD_NUMBER;
+    hash = (53 * hash) + getName().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(byte[] data)
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(java.io.InputStream input)
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.codebroker.protobuff.user.User parseDelimitedFrom(java.io.InputStream input)
+  public static com.codebroker.protobuff.user.CreateRequest parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.codebroker.protobuff.user.User parseDelimitedFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.codebroker.protobuff.user.User parseFrom(
+  public static com.codebroker.protobuff.user.CreateRequest parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -372,7 +268,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.codebroker.protobuff.user.User prototype) {
+  public static Builder newBuilder(com.codebroker.protobuff.user.CreateRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -388,26 +284,30 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code User}
+   * <pre>
+   *91 创建角色名
+   * </pre>
+   *
+   * Protobuf type {@code CreateRequest}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:User)
-      com.codebroker.protobuff.user.UserOrBuilder {
+      // @@protoc_insertion_point(builder_implements:CreateRequest)
+      com.codebroker.protobuff.user.CreateRequestOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.codebroker.protobuff.user.UserMessage.internal_static_User_descriptor;
+      return com.codebroker.protobuff.user.UserMessage.internal_static_CreateRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.codebroker.protobuff.user.UserMessage.internal_static_User_fieldAccessorTable
+      return com.codebroker.protobuff.user.UserMessage.internal_static_CreateRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.codebroker.protobuff.user.User.class, com.codebroker.protobuff.user.User.Builder.class);
+              com.codebroker.protobuff.user.CreateRequest.class, com.codebroker.protobuff.user.CreateRequest.Builder.class);
     }
 
-    // Construct using com.codebroker.protobuff.user.User.newBuilder()
+    // Construct using com.codebroker.protobuff.user.CreateRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -425,15 +325,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      fireTime_ = 0;
-
-      lang_ = "";
-
-      serverId_ = 0;
-
-      allianceId_ = 0;
-
-      nationalFlag_ = 0;
+      name_ = "";
 
       return this;
     }
@@ -441,17 +333,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.codebroker.protobuff.user.UserMessage.internal_static_User_descriptor;
+      return com.codebroker.protobuff.user.UserMessage.internal_static_CreateRequest_descriptor;
     }
 
     @java.lang.Override
-    public com.codebroker.protobuff.user.User getDefaultInstanceForType() {
-      return com.codebroker.protobuff.user.User.getDefaultInstance();
+    public com.codebroker.protobuff.user.CreateRequest getDefaultInstanceForType() {
+      return com.codebroker.protobuff.user.CreateRequest.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.codebroker.protobuff.user.User build() {
-      com.codebroker.protobuff.user.User result = buildPartial();
+    public com.codebroker.protobuff.user.CreateRequest build() {
+      com.codebroker.protobuff.user.CreateRequest result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -459,13 +351,9 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.codebroker.protobuff.user.User buildPartial() {
-      com.codebroker.protobuff.user.User result = new com.codebroker.protobuff.user.User(this);
-      result.fireTime_ = fireTime_;
-      result.lang_ = lang_;
-      result.serverId_ = serverId_;
-      result.allianceId_ = allianceId_;
-      result.nationalFlag_ = nationalFlag_;
+    public com.codebroker.protobuff.user.CreateRequest buildPartial() {
+      com.codebroker.protobuff.user.CreateRequest result = new com.codebroker.protobuff.user.CreateRequest(this);
+      result.name_ = name_;
       onBuilt();
       return result;
     }
@@ -504,31 +392,19 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.codebroker.protobuff.user.User) {
-        return mergeFrom((com.codebroker.protobuff.user.User)other);
+      if (other instanceof com.codebroker.protobuff.user.CreateRequest) {
+        return mergeFrom((com.codebroker.protobuff.user.CreateRequest)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.codebroker.protobuff.user.User other) {
-      if (other == com.codebroker.protobuff.user.User.getDefaultInstance()) return this;
-      if (other.getFireTime() != 0) {
-        setFireTime(other.getFireTime());
-      }
-      if (!other.getLang().isEmpty()) {
-        lang_ = other.lang_;
+    public Builder mergeFrom(com.codebroker.protobuff.user.CreateRequest other) {
+      if (other == com.codebroker.protobuff.user.CreateRequest.getDefaultInstance()) return this;
+      if (!other.getName().isEmpty()) {
+        name_ = other.name_;
         onChanged();
-      }
-      if (other.getServerId() != 0) {
-        setServerId(other.getServerId());
-      }
-      if (other.getAllianceId() != 0) {
-        setAllianceId(other.getAllianceId());
-      }
-      if (other.getNationalFlag() != 0) {
-        setNationalFlag(other.getNationalFlag());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -545,11 +421,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.codebroker.protobuff.user.User parsedMessage = null;
+      com.codebroker.protobuff.user.CreateRequest parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.codebroker.protobuff.user.User) e.getUnfinishedMessage();
+        parsedMessage = (com.codebroker.protobuff.user.CreateRequest) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -559,202 +435,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int fireTime_ ;
+    private java.lang.Object name_ = "";
     /**
-     * <code>int32 fireTime = 1;</code>
-     * @return The fireTime.
+     * <code>string name = 1;</code>
+     * @return The name.
      */
-    @java.lang.Override
-    public int getFireTime() {
-      return fireTime_;
-    }
-    /**
-     * <code>int32 fireTime = 1;</code>
-     * @param value The fireTime to set.
-     * @return This builder for chaining.
-     */
-    public Builder setFireTime(int value) {
-      
-      fireTime_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 fireTime = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearFireTime() {
-      
-      fireTime_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object lang_ = "";
-    /**
-     * <code>string lang = 2;</code>
-     * @return The lang.
-     */
-    public java.lang.String getLang() {
-      java.lang.Object ref = lang_;
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        lang_ = s;
+        name_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string lang = 2;</code>
-     * @return The bytes for lang.
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
     public com.google.protobuf.ByteString
-        getLangBytes() {
-      java.lang.Object ref = lang_;
+        getNameBytes() {
+      java.lang.Object ref = name_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        lang_ = b;
+        name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string lang = 2;</code>
-     * @param value The lang to set.
+     * <code>string name = 1;</code>
+     * @param value The name to set.
      * @return This builder for chaining.
      */
-    public Builder setLang(
+    public Builder setName(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      lang_ = value;
+      name_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string lang = 2;</code>
+     * <code>string name = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearLang() {
+    public Builder clearName() {
       
-      lang_ = getDefaultInstance().getLang();
+      name_ = getDefaultInstance().getName();
       onChanged();
       return this;
     }
     /**
-     * <code>string lang = 2;</code>
-     * @param value The bytes for lang to set.
+     * <code>string name = 1;</code>
+     * @param value The bytes for name to set.
      * @return This builder for chaining.
      */
-    public Builder setLangBytes(
+    public Builder setNameBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      lang_ = value;
-      onChanged();
-      return this;
-    }
-
-    private int serverId_ ;
-    /**
-     * <code>int32 serverId = 3;</code>
-     * @return The serverId.
-     */
-    @java.lang.Override
-    public int getServerId() {
-      return serverId_;
-    }
-    /**
-     * <code>int32 serverId = 3;</code>
-     * @param value The serverId to set.
-     * @return This builder for chaining.
-     */
-    public Builder setServerId(int value) {
-      
-      serverId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 serverId = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearServerId() {
-      
-      serverId_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int allianceId_ ;
-    /**
-     * <code>int32 allianceId = 4;</code>
-     * @return The allianceId.
-     */
-    @java.lang.Override
-    public int getAllianceId() {
-      return allianceId_;
-    }
-    /**
-     * <code>int32 allianceId = 4;</code>
-     * @param value The allianceId to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAllianceId(int value) {
-      
-      allianceId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 allianceId = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearAllianceId() {
-      
-      allianceId_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int nationalFlag_ ;
-    /**
-     * <code>int32 nationalFlag = 5;</code>
-     * @return The nationalFlag.
-     */
-    @java.lang.Override
-    public int getNationalFlag() {
-      return nationalFlag_;
-    }
-    /**
-     * <code>int32 nationalFlag = 5;</code>
-     * @param value The nationalFlag to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNationalFlag(int value) {
-      
-      nationalFlag_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 nationalFlag = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearNationalFlag() {
-      
-      nationalFlag_ = 0;
+      name_ = value;
       onChanged();
       return this;
     }
@@ -771,41 +523,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:User)
+    // @@protoc_insertion_point(builder_scope:CreateRequest)
   }
 
-  // @@protoc_insertion_point(class_scope:User)
-  private static final com.codebroker.protobuff.user.User DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:CreateRequest)
+  private static final com.codebroker.protobuff.user.CreateRequest DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.codebroker.protobuff.user.User();
+    DEFAULT_INSTANCE = new com.codebroker.protobuff.user.CreateRequest();
   }
 
-  public static com.codebroker.protobuff.user.User getDefaultInstance() {
+  public static com.codebroker.protobuff.user.CreateRequest getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<User>
-      PARSER = new com.google.protobuf.AbstractParser<User>() {
+  private static final com.google.protobuf.Parser<CreateRequest>
+      PARSER = new com.google.protobuf.AbstractParser<CreateRequest>() {
     @java.lang.Override
-    public User parsePartialFrom(
+    public CreateRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new User(input, extensionRegistry);
+      return new CreateRequest(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<User> parser() {
+  public static com.google.protobuf.Parser<CreateRequest> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<User> getParserForType() {
+  public com.google.protobuf.Parser<CreateRequest> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.codebroker.protobuff.user.User getDefaultInstanceForType() {
+  public com.codebroker.protobuff.user.CreateRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

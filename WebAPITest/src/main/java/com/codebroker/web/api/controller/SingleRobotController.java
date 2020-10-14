@@ -1,6 +1,6 @@
 package com.codebroker.web.api.controller;
 
-import com.codebroker.protobuff.login.LoginRequest;
+import com.codebroker.protobuff.user.CreateRequest;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.web.api.service.RobotManager;
 import com.codebroker.web.api.service.netty.SingleRegisty;
@@ -64,7 +64,6 @@ public class SingleRobotController {
     @RequestMapping(value="/robotLogin",method = {RequestMethod.GET}, produces="text/html;charset=UTF-8")
     @ResponseBody
     public String robotLogin(String account,String passwod){
-        LoginRequest build = LoginRequest.newBuilder().setAccount(account).setPassword(passwod).build();
         JsonObject jsonObject=new JsonObject();
         jsonObject.addProperty("name",account);
         jsonObject.addProperty("parm",passwod);
@@ -77,11 +76,11 @@ public class SingleRobotController {
     @RequestMapping(value="/robotLoginReq",method = {RequestMethod.GET}, produces="text/html;charset=UTF-8")
     @ResponseBody
     public String robotLoginReq(String account,String passwod){
-        LoginRequest build = LoginRequest.newBuilder().setAccount(account).setPassword(passwod).build();
+        CreateRequest build = CreateRequest.newBuilder().setName(account).build();
 //        JsonObject jsonObject=new JsonObject();
 //        jsonObject.addProperty("name",account);
 //        jsonObject.addProperty("parm",passwod);
-        BaseByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(10,build.toByteArray());
+        BaseByteArrayPacket baseByteArrayPacket=new BaseByteArrayPacket(11,build.toByteArray());
         robotManager.client.getSingleChannel().writeAndFlush(baseByteArrayPacket);
         return "发生消息了";
     }

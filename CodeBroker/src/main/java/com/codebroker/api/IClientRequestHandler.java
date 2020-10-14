@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author LongJu
  */
-public interface IClientRequestHandler<T> {
+public interface IClientRequestHandler {
     /**
      * 获得默认的日志
      * @return
@@ -23,6 +23,6 @@ public interface IClientRequestHandler<T> {
      * @param user 游戏用户
      * @param message 网络消息
      */
-    void handleClientRequest(IGameUser user, T message);
+    void handleClientRequest(IGameUser user, Object message);
 
 }

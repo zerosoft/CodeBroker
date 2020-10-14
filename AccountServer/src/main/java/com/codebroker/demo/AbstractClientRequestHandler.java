@@ -2,25 +2,29 @@ package com.codebroker.demo;
 
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.JavaProtocolTransform;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public abstract class AbstractClientRequestHandler<T> implements IClientRequestHandler<T> {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+
+public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3> implements IClientRequestHandler {
 
 	@Override
-	public void handleClientRequest(IGameUser gameUser, T message) {
+	public void handleClientRequest(IGameUser gameUser, Object message) {
 		try {
-			JavaProtocolTransform decode = decode(message);
+			T decode = (T) decode(message);
 
 			boolean pass = verifyParams(decode);
 
 			if (pass) {
-				handleClientRequest(gameUser, decode);
+				handleClientProtocolBuffersRequest(gameUser, decode);
 			} else {
 
 			}
-		} catch (InvalidProtocolBufferException e) {
-			e.printStackTrace();
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+			getClientRequestLogger().error(e.getMessage());
 		}
 	}
 
@@ -30,7 +34,7 @@ public abstract class AbstractClientRequestHandler<T> implements IClientRequestH
 	 * @param listener
 	 * @param message
 	 */
-	public abstract void handleClientRequest(Object listener, JavaProtocolTransform message);
+	public abstract void handleClientProtocolBuffersRequest(IGameUser listener, T message);
 
 	/**
 	 * 解码
@@ -38,12 +42,19 @@ public abstract class AbstractClientRequestHandler<T> implements IClientRequestH
 	 * @param meObject
 	 * @throws InvalidProtocolBufferException
 	 */
-	public abstract JavaProtocolTransform decode(Object meObject) throws InvalidProtocolBufferException;
+	public  <T extends GeneratedMessageV3> T decode(Object meObject) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		Class<T> tClass = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Method parseFrom = tClass.getDeclaredMethod("parseFrom",byte[].class);
+		Object invoke = parseFrom.invoke(null, meObject);
+		return (T) invoke;
+	}
 
 	/**
 	 * 参数的校对 子类有需求就叫对
 	 */
-	public boolean verifyParams(JavaProtocolTransform javaBean) {
+	public boolean verifyParams(T message) {
 		return true;
 	}
+
+
 }
