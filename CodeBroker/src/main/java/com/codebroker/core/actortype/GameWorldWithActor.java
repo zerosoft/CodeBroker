@@ -81,7 +81,6 @@ public class GameWorldWithActor implements IGameWorld {
 								ClusterServiceActor.create(ctxEntityId,service);
 						return commandBehavior;
 					}));
-
 			ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
 
 			new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());

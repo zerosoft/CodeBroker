@@ -62,7 +62,7 @@ public class Demo1Extension extends AppListenerExtension {
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
 		boolean accountService = gameWorld.createGlobalService("AccountService",new AccountService());
-
+		boolean accountServiceT = gameWorld.createGlobalService("AccountService-T",new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
 		logger.info("Account Service create {}",accountService);
 
