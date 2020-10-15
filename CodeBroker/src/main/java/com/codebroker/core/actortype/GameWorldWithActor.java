@@ -9,6 +9,8 @@ import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.Entity;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
 import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
+import akka.cluster.typed.ClusterSingleton;
+import akka.cluster.typed.SingletonActor;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.annotation.IServerType;
@@ -68,26 +70,38 @@ public class GameWorldWithActor implements IGameWorld {
 		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
 		if (annotation!=null){
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-			ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
-			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(serviceName);
-			ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
-					clusterSharding.init(Entity.of(
-							typeKey,
+			if (!annotation.cluster()){
+				ClusterSingleton singleton = ClusterSingleton.get(actorSystem);
+				ActorRef<com.codebroker.core.actortype.message.IService> serviceActorRef = singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName));
+				ServiceWithActor serviceActor=new ServiceWithActor(serviceName,serviceActorRef);
+
+				new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+
+				ActorPathService.localService.put(serviceName,serviceActorRef);
+				ContextResolver.setManager(service);
+				return true;
+			}else{
+				ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
+				EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(serviceName);
+				ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+						clusterSharding.init(Entity.of(
+								typeKey,
 //							com.codebroker.core.actortype.message.IService.typeKey,
-							ctx -> {
-						String ctxEntityId = ctx.getEntityId();
+								ctx -> {
+									String ctxEntityId = ctx.getEntityId();
 
-						Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
-								ClusterServiceActor.create(ctxEntityId,service);
-						return commandBehavior;
-					}));
-			ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
+									Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
+											ClusterServiceActor.create(ctxEntityId,service);
+									return commandBehavior;
+								}));
+				ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
 
-			new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+				new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
-			ActorPathService.localClusterService.put(serviceName,shardRegion);
-			ContextResolver.setManager(service);
-			return true;
+				ActorPathService.localClusterService.put(serviceName,shardRegion);
+				ContextResolver.setManager(service);
+				return true;
+			}
 		}else {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 			CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(actorSystem,
