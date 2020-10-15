@@ -10,8 +10,12 @@ public class CreateRequestHandler extends AbstractClientRequestHandler<CreateReq
 	@Override
 	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, CreateRequest request) {
 		java.lang.String  name = request.getName();
-		CObject cObject = CObject.newInstance();
-		cObject.putUtfString("name",name);
-		AppContext.getGameWorld().sendMessageToService("AccountService_1",cObject);
+		for (int i = 0; i < 10; i++) {
+			CObject cObject = CObject.newInstance();
+			cObject.putUtfString("name",name);
+			cObject.putInt("id",i);
+			AppContext.getGameWorld().sendMessageToService("AccountService-"+i,cObject);
+		}
+
 	}
 }

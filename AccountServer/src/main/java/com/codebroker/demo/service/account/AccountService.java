@@ -27,6 +27,9 @@ public class AccountService implements IService {
 	public void handleMessage(IObject iObject) {
 		logger.info("handleMessage {}",iObject);
 		IGameUser user = (IGameUser) iObject.getClass("user");
+		if (iObject.containsKey("id")){
+			logger.info("id {}",iObject.getInt("id"));
+		}
 	}
 
 	@Override
@@ -39,6 +42,6 @@ public class AccountService implements IService {
 
 	@Override
 	public String getName() {
-		return null;
+		return AccountService.class.getSimpleName();
 	}
 }
