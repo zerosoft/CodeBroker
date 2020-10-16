@@ -123,9 +123,66 @@ public class GameWorldWithActor implements IGameWorld {
 		return createService(service.getName(),service);
 	}
 
+	@Override
+	public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject object){
+		if (ActorPathService.localService.containsKey(serviceName)) {
+			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+
+			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
+					ActorPathService.localService.get(serviceName),
+					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
+					Duration.ofMillis(TIME_OUT_MILLIS),
+					actorSystem.scheduler());
+
+			ask.exceptionally(throwable -> {
+				throwable.printStackTrace();
+				return null;
+			});
+			com.codebroker.core.actortype.message.IService.Reply join = ask.toCompletableFuture().join();
+			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
+				com.codebroker.core.actortype.message.IService.HandleUserMessageBack result= (com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join;
+				return Optional.of(result.object);
+			}else {
+				return Optional.empty();
+			}
+		}else if (ActorPathService.localClusterService.containsKey(serviceName))
+		{
+			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+
+			ClusterSharding sharding = ClusterSharding.get(actorSystem);
+			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =
+					sharding.entityRefFor(
+							getTypeKey(serviceName),
+							serviceName);
+			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+					entityRef,
+					replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
+					Duration.ofMillis(TIME_OUT_MILLIS),
+					actorSystem.scheduler());
+
+			result.exceptionally(throwable -> {
+				throwable.printStackTrace();
+				return null;
+			});
+			com.codebroker.core.actortype.message.IService.Reply join = result.toCompletableFuture().join();
+			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
+				com.codebroker.core.actortype.message.IService.HandleUserMessageBack back=(com.codebroker.core.actortype.message.IService.HandleUserMessageBack)join;
+				return Optional.of(back.object);
+			}else {
+				return Optional.empty();
+			}
+		}else{
+			return Optional.empty();
+		}
+	}
 
 	@Override
-	public void sendMessageToService(String serviceName, IObject object) {
+	public Optional<IObject> sendMessageToLocalIService(Class clazz, IObject object){
+		return sendMessageToLocalIService(clazz.getSimpleName(),object);
+	}
+
+	@Override
+	public void sendMessageToIService(String serviceName, IObject object){
 		/**
 		 * 如果是当前系统创建则使用当前系统的
 		 */
@@ -141,59 +198,84 @@ public class GameWorldWithActor implements IGameWorld {
 		else {
 			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
 		}
-
 	}
 
 	@Override
-	public IObject sendMessageToService(Class clazz, IObject object) {
-		if (ActorPathService.localService.containsKey(clazz.getSimpleName())) {
-			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-
-			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
-					ActorPathService.localService.get(clazz.getSimpleName()),
-					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
-					Duration.ofMillis(TIME_OUT_MILLIS),
-					actorSystem.scheduler());
-
-			ask.exceptionally(throwable -> {
-				throwable.printStackTrace();
-				return null;
-			});
-			com.codebroker.core.actortype.message.IService.Reply join = ask.toCompletableFuture().join();
-			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
-				return ((com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join).object;
-			}else {
-				return CObjectLite.newInstance();
-			}
-		}else if (ActorPathService.localClusterService.containsKey(clazz.getSimpleName()))
-		{
-			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-
-			ClusterSharding sharding = ClusterSharding.get(actorSystem);
-			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =
-					sharding.entityRefFor(
-					getTypeKey(clazz.getSimpleName()),
-							clazz.getSimpleName());
-			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
-					entityRef,
-					replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
-					Duration.ofMillis(TIME_OUT_MILLIS),
-					actorSystem.scheduler());
-
-			result.exceptionally(throwable -> {
-				throwable.printStackTrace();
-				return null;
-			});
-			com.codebroker.core.actortype.message.IService.Reply join = result.toCompletableFuture().join();
-			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
-				return ((com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join).object;
-			}else {
-				return CObjectLite.newInstance();
-			}
-		}else{
-			return CObjectLite.newInstance();
-		}
+	public void sendMessageToIService(Class iService, IObject message) {
+		sendMessageToIService(iService.getSimpleName(),message);
 	}
+
+
+//	@Override
+//	public void sendMessageToService(String serviceName, IObject object) {
+//		/**
+//		 * 如果是当前系统创建则使用当前系统的
+//		 */
+//		if (ActorPathService.localService.containsKey(serviceName)){
+//			ActorRef<com.codebroker.core.actortype.message.IService> iServiceActorRef = ActorPathService.localService.get(serviceName);
+//			iServiceActorRef.tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+//		}else if (ActorPathService.localClusterService.containsKey(serviceName)){
+//			ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
+//					new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+//			ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardingEnvelopeActorRef = ActorPathService.localClusterService.get(serviceName);
+//			shardingEnvelopeActorRef.tell(shardingEnvelope);
+//		}
+//		else {
+//			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
+//		}
+//
+//	}
+
+//	@Override
+//	public IObject sendMessageToService(Class clazz, IObject object) {
+//		if (ActorPathService.localService.containsKey(clazz.getSimpleName())) {
+//			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+//
+//			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
+//					ActorPathService.localService.get(clazz.getSimpleName()),
+//					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
+//					Duration.ofMillis(TIME_OUT_MILLIS),
+//					actorSystem.scheduler());
+//
+//			ask.exceptionally(throwable -> {
+//				throwable.printStackTrace();
+//				return null;
+//			});
+//			com.codebroker.core.actortype.message.IService.Reply join = ask.toCompletableFuture().join();
+//			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
+//				return ((com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join).object;
+//			}else {
+//				return CObjectLite.newInstance();
+//			}
+//		}else if (ActorPathService.localClusterService.containsKey(clazz.getSimpleName()))
+//		{
+//			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+//
+//			ClusterSharding sharding = ClusterSharding.get(actorSystem);
+//			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =
+//					sharding.entityRefFor(
+//					getTypeKey(clazz.getSimpleName()),
+//							clazz.getSimpleName());
+//			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+//					entityRef,
+//					replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
+//					Duration.ofMillis(TIME_OUT_MILLIS),
+//					actorSystem.scheduler());
+//
+//			result.exceptionally(throwable -> {
+//				throwable.printStackTrace();
+//				return null;
+//			});
+//			com.codebroker.core.actortype.message.IService.Reply join = result.toCompletableFuture().join();
+//			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
+//				return ((com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join).object;
+//			}else {
+//				return CObjectLite.newInstance();
+//			}
+//		}else{
+//			return CObjectLite.newInstance();
+//		}
+//	}
 
 	@Override
 	public void sendAllOnlineUserMessage(int requestId, Object message) {

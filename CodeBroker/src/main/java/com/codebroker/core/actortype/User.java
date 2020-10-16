@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.*;
 import akka.pattern.StatusReply;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.event.Event;
+import com.codebroker.api.event.IEvent;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.data.CObjectLite;
@@ -65,8 +66,7 @@ public class User extends AbstractBehavior<IUser> {
     }
 
 	private  Behavior<IUser> getSendMessageToGameUser(IUser.GetSendMessageToGameUser message) {
-		gameUser.dispatchEvent(new Event("",message.message));
-
+		gameUser.dispatchEvent(new Event(IEvent.GAME_EVENT,message.message));
 		return Behaviors.same();
 	}
 

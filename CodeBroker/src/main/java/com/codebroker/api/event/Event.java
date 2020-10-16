@@ -8,6 +8,8 @@ import com.codebroker.core.data.IObject;
  */
 public class Event implements IEvent {
 
+
+
     private String topic;
     private IObject message;
 

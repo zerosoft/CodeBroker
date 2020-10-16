@@ -3,6 +3,7 @@ package com.codebroker.core.entities;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.javadsl.AskPattern;
+import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IGameUserEventListener;
@@ -51,17 +52,33 @@ public class GameUserProxy implements IGameUser, IEventHandler, SerializableType
 
     @Override
     public void sendMessageToGameUser(String userId, IObject message) {
-
+        actorRef.tell(new IUser.SendMessageToGameUser(userId,message));
     }
 
     @Override
     public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
-        CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
-                replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
-                Duration.ofMillis(3),
-                ContextResolver.getActorSystem().scheduler());
-        IUser.IObjectReply reply = (IUser.IObjectReply) ask.toCompletableFuture().join();
-        return Optional.of(reply.message);
+//        CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
+//                replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
+//                Duration.ofMillis(3),
+//                ContextResolver.getActorSystem().scheduler());
+//        IUser.IObjectReply reply = (IUser.IObjectReply) ask.toCompletableFuture().join();
+//        return Optional.of(reply.message);
+        return AppContext.getGameWorld().sendMessageToLocalIService(serviceName,message);
+    }
+
+    @Override
+    public Optional<IObject> sendMessageToLocalIService(Class iService, IObject message) {
+        return AppContext.getGameWorld().sendMessageToLocalIService(iService,message);
+    }
+
+    @Override
+    public void sendMessageToIService(String serviceName, IObject message) {
+        AppContext.getGameWorld().sendMessageToIService(serviceName,message);
+    }
+
+    @Override
+    public void sendMessageToIService(Class iService, IObject message) {
+        AppContext.getGameWorld().sendMessageToIService(iService,message);
     }
 
     @Override

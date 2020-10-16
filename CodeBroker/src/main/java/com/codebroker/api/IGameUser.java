@@ -41,6 +41,22 @@ public interface IGameUser extends IEventDispatcher {
      */
     Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
     /**
+     * 发消息给本地服务
+     * @param iService
+     * @param message
+     * @return
+     */
+    Optional<IObject> sendMessageToLocalIService(Class iService, IObject message);
+
+    /**
+     * 发送消息到服务
+     * @param serviceName
+     * @param message
+     */
+    void sendMessageToIService(String serviceName, IObject message);
+
+    void sendMessageToIService(Class iService, IObject message);
+    /**
      * 主动断开链接
      */
     void disconnect();

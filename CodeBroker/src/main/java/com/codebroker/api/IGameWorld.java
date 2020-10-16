@@ -31,19 +31,24 @@ public interface IGameWorld {
 	 */
 	boolean createService(IService service);
 
+
+	Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
 	/**
-	 * 发送事件到服务
-	 * @param serviceName 服务名称
-	 * @param object 事件对象
+	 * 发消息给本地服务
+	 * @param iService
+	 * @param message
+	 * @return
 	 */
-	void sendMessageToService(String serviceName, IObject object);
+	Optional<IObject> sendMessageToLocalIService(Class iService, IObject message);
+
 	/**
-	 * 发送事件到服务
-	 * @param serviceClass 服务名称
-	 * @param object 事件对象
-	 * @return 返回消息对象
+	 * 发送消息到服务
+	 * @param serviceName
+	 * @param message
 	 */
-	IObject sendMessageToService(Class serviceClass, IObject object);
+	void sendMessageToIService(String serviceName, IObject message);
+
+	void sendMessageToIService(Class iService, IObject message);
 	/**
 	 * 对所有在线玩家发送消息
 	 * @param requestId
