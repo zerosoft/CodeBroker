@@ -57,12 +57,6 @@ public class GameUserProxy implements IGameUser, IEventHandler, SerializableType
 
     @Override
     public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
-//        CompletionStage<IUser.Reply> ask = AskPattern.ask(actorRef,
-//                replyActorRef -> new IUser.SendMessageToIService(serviceName, message,replyActorRef),
-//                Duration.ofMillis(3),
-//                ContextResolver.getActorSystem().scheduler());
-//        IUser.IObjectReply reply = (IUser.IObjectReply) ask.toCompletableFuture().join();
-//        return Optional.of(reply.message);
         return AppContext.getGameWorld().sendMessageToLocalIService(serviceName,message);
     }
 

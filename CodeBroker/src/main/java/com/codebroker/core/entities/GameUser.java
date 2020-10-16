@@ -39,17 +39,17 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     }
 
     private String uid;
-    private Map<String, Set<IGameUserEventListener>> eventListenerMap= Maps.newTreeMap();
+    private Map<String, Set<IGameUserEventListener>> eventListenerMap = Maps.newTreeMap();
 
-    public void clean(){
-        uid=null;
-        actorRef=null;
+    public void clean() {
+        uid = null;
+        actorRef = null;
         eventListenerMap.clear();
     }
 
     public GameUser(String uid, ActorRef<IUser> spawn) {
-        this.uid=uid;
-        this.actorRef=spawn;
+        this.uid = uid;
+        this.actorRef = spawn;
     }
 
 
@@ -72,10 +72,10 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     @Override
     public void sendMessageToIoSession(int requestId, Object message) {
-        if (message instanceof byte[]){
+        if (message instanceof byte[]) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
             actorRef.tell(new IUser.SendMessageToSession(byteArrayPacket));
-        }else if (message instanceof String){
+        } else if (message instanceof String) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, ((String) message).getBytes());
             actorRef.tell(new IUser.SendMessageToSession(byteArrayPacket));
         }
@@ -83,27 +83,27 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     @Override
     public void sendMessageToGameUser(String userId, IObject message) {
-        actorRef.tell(new IUser.SendMessageToGameUser(userId,message));
+        actorRef.tell(new IUser.SendMessageToGameUser(userId, message));
     }
 
     @Override
     public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
-        return AppContext.getGameWorld().sendMessageToLocalIService(serviceName,message);
+        return AppContext.getGameWorld().sendMessageToLocalIService(serviceName, message);
     }
 
     @Override
     public Optional<IObject> sendMessageToLocalIService(Class iService, IObject message) {
-        return AppContext.getGameWorld().sendMessageToLocalIService(iService,message);
+        return AppContext.getGameWorld().sendMessageToLocalIService(iService, message);
     }
 
     @Override
     public void sendMessageToIService(String serviceName, IObject message) {
-        AppContext.getGameWorld().sendMessageToIService(serviceName,message);
+        AppContext.getGameWorld().sendMessageToIService(serviceName, message);
     }
 
     @Override
     public void sendMessageToIService(Class iService, IObject message) {
-        AppContext.getGameWorld().sendMessageToIService(iService,message);
+        AppContext.getGameWorld().sendMessageToIService(iService, message);
     }
 
     @Override
@@ -113,8 +113,8 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     @Override
     public boolean isConnected() {
-            return actorRef!=null;
-   }
+        return actorRef != null;
+    }
 
 
     public void rebindIoSession(ActorRef actorRef) {
@@ -134,7 +134,7 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     public boolean hasEventListener(String eventType) {
         boolean found = false;
         Set<IGameUserEventListener> listeners = this.eventListenerMap.get(eventType);
-        if (listeners != null && listeners.size() > 0){
+        if (listeners != null && listeners.size() > 0) {
             found = true;
         }
         return found;
@@ -142,21 +142,21 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
 
     public void removeEventListener(String eventType, IGameUserEventListener listener) {
         Set<IGameUserEventListener> listeners = this.eventListenerMap.get(eventType);
-        if (listeners != null){
+        if (listeners != null) {
             listeners.remove(listener);
         }
     }
 
     public void dispatchEvent(IEvent event) {
-       actorRef.tell(new IUser.LogicEvent(event));
+        actorRef.tell(new IUser.LogicEvent(event));
     }
 
     @Override
     public void handlerEvent(IEvent event) {
         Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
-        if (listeners != null && listeners.size() > 0){
-            for (IGameUserEventListener listenerObj : listeners){
-                listenerObj.handleEvent(this,event);
+        if (listeners != null && listeners.size() > 0) {
+            for (IGameUserEventListener listenerObj : listeners) {
+                listenerObj.handleEvent(this, event);
             }
         }
     }

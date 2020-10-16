@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DemoExtension extends AppListenerExtension {
 
@@ -34,8 +35,8 @@ public class DemoExtension extends AppListenerExtension {
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
 //		IObject iObject =manager.handleBackMessage(cObject);
-		IObject iObject = AppContext.getGameWorld().sendMessageToService(AccountService.class, cObject);
-		return iObject.getUtfString("uid");
+		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToLocalIService(AccountService.class, cObject);
+		return iObject.isPresent()?iObject.get().getUtfString("uid"):"null";
 	}
 
 	@Override

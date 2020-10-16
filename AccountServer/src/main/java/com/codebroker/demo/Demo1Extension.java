@@ -7,6 +7,7 @@ import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.account.AccountService;
+import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
@@ -61,8 +62,8 @@ public class Demo1Extension extends AppListenerExtension {
 		logger.info("Init");
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean accountService = gameWorld.createService("AccountService",new AccountService());
-		boolean accountServiceT = gameWorld.createService("AccountService-T",new AccountService());
+		boolean accountService = gameWorld.createService(new AccountService());
+		boolean accountServiceT = gameWorld.createService(new AllianceService());
 		addRequestHandler(11, CreateRequestHandler.class);
 		logger.info("Account Service create {}",accountService);
 
