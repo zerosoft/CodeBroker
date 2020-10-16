@@ -6,6 +6,7 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.demo.AbstractClientRequestHandler;
+import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.protobuff.user.CreateRequest;
 
 import java.applet.AppletContext;
@@ -18,7 +19,7 @@ public class CreateRequestHandler extends AbstractClientRequestHandler<CreateReq
 			CObject cObject = CObject.newInstance();
 			cObject.putUtfString("name",name);
 			cObject.putInt("id",i);
-			AppContext.getGameWorld().sendMessageToServiceWithBack("AccountService-T",cObject);
+			AppContext.getGameWorld().sendMessageToService(AllianceService.class,cObject);
 		}
 
 	}

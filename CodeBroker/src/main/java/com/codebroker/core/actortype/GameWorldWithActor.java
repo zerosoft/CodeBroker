@@ -2,8 +2,6 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
-import akka.cluster.sharding.ShardCoordinator;
-import akka.cluster.sharding.external.ExternalShardAllocation;
 import akka.cluster.sharding.typed.ShardingEnvelope;
 import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.Entity;
@@ -13,7 +11,7 @@ import akka.cluster.typed.ClusterSingleton;
 import akka.cluster.typed.SingletonActor;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
-import com.codebroker.api.annotation.IServerType;
+import com.codebroker.api.annotation.IServerClusterType;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
@@ -32,7 +30,7 @@ import java.util.concurrent.CompletionStage;
  */
 public class GameWorldWithActor implements IGameWorld {
 
-	public static final int TIME_OUT_MILLIS = 500;
+	public static final int TIME_OUT_MILLIS = 5000;
 	private ActorRef<IGameWorldMessage> gameWorldActorRef;
 
 	public static EntityTypeKey<com.codebroker.core.actortype.message.IService> getTypeKey(String name){
@@ -47,7 +45,7 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public Optional<IGameUser> findIGameUserById(String id) {
+	public Optional<IGameUser> findIGameUserById(String id)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {
 		Scheduler scheduler = ContextResolver.getActorSystem().scheduler();
 		CompletionStage<IGameWorldMessage.Reply> result =
 				AskPattern.ask(
@@ -55,9 +53,9 @@ public class GameWorldWithActor implements IGameWorld {
 						replyTo -> new IGameWorldMessage.findIGameUserByIdMessage(id, replyTo),
 						Duration.ofMillis(TIME_OUT_MILLIS),
 						scheduler);
-		CompletionStage<IGameUser> handle = result.handle((a, throwable) -> {
-			if (a instanceof IGameWorldMessage.FindGameUser){
-				return ((IGameWorldMessage.FindGameUser) a).gameUser;
+		CompletionStage<IGameUser> handle = result.handle((reply, throwable) -> {
+			if (reply instanceof IGameWorldMessage.FindGameUser){
+				return ((IGameWorldMessage.FindGameUser) reply).gameUser;
 			}else{
 				return null;
 			}
@@ -66,11 +64,12 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public boolean createGlobalService(String serviceName, IService service) {
-		IServerType annotation = service.getClass().getAnnotation(IServerType.class);
+	public boolean createService(String serviceName, IService service) {
+		IServerClusterType annotation = service.getClass().getAnnotation(IServerClusterType.class);
+		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		if (annotation!=null){
-			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-			if (!annotation.cluster()){
+			//创建独立的节点
+			if (!annotation.sharding()){
 				ClusterSingleton singleton = ClusterSingleton.get(actorSystem);
 				ActorRef<com.codebroker.core.actortype.message.IService> serviceActorRef = singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName));
 				ServiceWithActor serviceActor=new ServiceWithActor(serviceName,serviceActorRef);
@@ -86,10 +85,8 @@ public class GameWorldWithActor implements IGameWorld {
 				ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
 						clusterSharding.init(Entity.of(
 								typeKey,
-//							com.codebroker.core.actortype.message.IService.typeKey,
 								ctx -> {
 									String ctxEntityId = ctx.getEntityId();
-
 									Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
 											ClusterServiceActor.create(ctxEntityId,service);
 									return commandBehavior;
@@ -103,7 +100,6 @@ public class GameWorldWithActor implements IGameWorld {
 				return true;
 			}
 		}else {
-			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 			CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(actorSystem,
 					replyActorRef -> new IGameRootSystemMessage.createGlobalService(serviceName, service,replyActorRef),
 					Duration.ofMillis(TIME_OUT_MILLIS),
@@ -120,6 +116,11 @@ public class GameWorldWithActor implements IGameWorld {
 			return reply!=null;
 		}
 
+	}
+
+	@Override
+	public boolean createService(IService service) {
+		return createService(service.getName(),service);
 	}
 
 
@@ -144,14 +145,16 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public IObject sendMessageToServiceWithBack(String serviceName, IObject object) {
-		if (ActorPathService.localService.containsKey(serviceName)) {
+	public IObject sendMessageToService(Class clazz, IObject object) {
+		if (ActorPathService.localService.containsKey(clazz.getSimpleName())) {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+
 			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
-					ActorPathService.localService.get(serviceName),
+					ActorPathService.localService.get(clazz.getSimpleName()),
 					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
-					Duration.ofMillis(3),
+					Duration.ofMillis(TIME_OUT_MILLIS),
 					actorSystem.scheduler());
+
 			ask.exceptionally(throwable -> {
 				throwable.printStackTrace();
 				return null;
@@ -162,24 +165,19 @@ public class GameWorldWithActor implements IGameWorld {
 			}else {
 				return CObjectLite.newInstance();
 			}
-		}else
-//			if (ActorPathService.localClusterService.containsKey(serviceName))
+		}else if (ActorPathService.localClusterService.containsKey(clazz.getSimpleName()))
 		{
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
-//			EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey =
-//					EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,serviceName);
-
 			ClusterSharding sharding = ClusterSharding.get(actorSystem);
-			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =sharding.entityRefFor(
-					getTypeKey(serviceName),
-//					com.codebroker.core.actortype.message.IService.typeKey,
-					serviceName);
-
+			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =
+					sharding.entityRefFor(
+					getTypeKey(clazz.getSimpleName()),
+							clazz.getSimpleName());
 			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
 					entityRef,
 					replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
-					Duration.ofSeconds(5),
+					Duration.ofMillis(TIME_OUT_MILLIS),
 					actorSystem.scheduler());
 
 			result.exceptionally(throwable -> {
@@ -192,8 +190,9 @@ public class GameWorldWithActor implements IGameWorld {
 			}else {
 				return CObjectLite.newInstance();
 			}
+		}else{
+			return CObjectLite.newInstance();
 		}
-//		return null;
 	}
 
 	@Override

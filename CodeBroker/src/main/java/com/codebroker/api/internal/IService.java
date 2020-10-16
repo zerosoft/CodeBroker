@@ -42,7 +42,7 @@ public interface IService extends SerializableType {
      */
     default String getName(){
         return getClass().getSimpleName();
-    };
+    }
 
 
 }

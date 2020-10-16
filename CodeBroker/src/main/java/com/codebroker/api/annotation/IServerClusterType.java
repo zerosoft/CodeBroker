@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IServerType {
+public @interface IServerClusterType {
     /**
-     * 是否是集群服务
+     * 是否是集群分片的服务
      * @return
      */
-    boolean cluster();
+    boolean sharding();
 }

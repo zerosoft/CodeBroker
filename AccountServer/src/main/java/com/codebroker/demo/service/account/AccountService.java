@@ -1,7 +1,7 @@
 package com.codebroker.demo.service.account;
 
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.annotation.IServerType;
+import com.codebroker.api.annotation.IServerClusterType;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
@@ -9,7 +9,7 @@ import com.codebroker.demo.DemoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@IServerType(cluster = true)
+@IServerClusterType(sharding = true)
 public class AccountService implements IService {
 	private Logger logger = LoggerFactory.getLogger(AccountService.class);
 	@Override
