@@ -9,6 +9,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
+/**
+ * 基于Protobuff 的网络解码
+ * @param <T>
+ */
 public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3> implements IClientRequestHandler {
 
 	@Override
@@ -50,7 +54,7 @@ public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3
 	}
 
 	/**
-	 * 参数的校对 子类有需求就叫对
+	 * 参数的校对 子类有需求就使用校对参数
 	 */
 	public boolean verifyParams(T message) {
 		return true;

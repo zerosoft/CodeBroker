@@ -1,6 +1,7 @@
 package com.codebroker.api.internal;
 
 
+import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.SerializableType;
 
@@ -32,8 +33,13 @@ public interface IService extends SerializableType {
      */
     void handleMessage(IObject obj);
 
+    /**
+     * 处理带有同步的返回消息
+     * @param obj
+     * @return
+     */
     default IObject handleBackMessage(IObject obj){
-        return null;
+        return CObjectLite.newInstance();
     }
     /**
      * 获得服务名称.
@@ -43,6 +49,5 @@ public interface IService extends SerializableType {
     default String getName(){
         return getClass().getSimpleName();
     }
-
 
 }

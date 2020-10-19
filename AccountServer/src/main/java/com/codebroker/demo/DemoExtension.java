@@ -7,16 +7,18 @@ import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.account.AccountService;
+import com.codebroker.demo.service.account.manager.AccountDBManager;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.ServiceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class DemoExtension extends AppListenerExtension {
 
@@ -65,6 +67,11 @@ public class DemoExtension extends AppListenerExtension {
 		boolean accountService = gameWorld.createService(new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
 		logger.info("Account Service create {}",accountService);
+		AccountDBManager accountDBManager =new AccountDBManager();
+		ArrayList<Service> serviceArrayList = Lists.newArrayList();
+		serviceArrayList.add(accountDBManager);
+		ServiceManager serviceManager=new ServiceManager(serviceArrayList);
+		serviceManager.startAsync();
 
 	}
 }
