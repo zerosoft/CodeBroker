@@ -6,6 +6,7 @@ import akka.actor.typed.Behavior;
 import akka.actor.typed.DispatcherSelector;
 import akka.actor.typed.javadsl.*;
 import akka.pattern.StatusReply;
+import com.codebroker.api.AppContext;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEvent;
@@ -72,7 +73,11 @@ public class User extends AbstractBehavior<IUser> {
 
 	private  Behavior<IUser> sendMessageToGameUser(IUser.SendMessageToGameUser message) {
 		getContext().spawnAnonymous(
-				UserManagerGuardian.create(new IUserManager.SendMessageToGameUser(message.userId,message.message,getContext().getSelf())));
+				UserManagerGuardian.create(
+				        new IUserManager.SendMessageToGameUser(message.userId,message.message,getContext().getSelf())
+                        , AppContext.getServerId()
+                )
+        );
 		return Behaviors.same();
 	}
 

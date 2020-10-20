@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import com.codebroker.api.AppContext;
 import com.codebroker.api.IoSession;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
@@ -88,7 +89,10 @@ public class Session extends AbstractBehavior<ISession> {
     private Behavior<ISession> sessionAcceptMessage(ISession.SessionAcceptRequest message) {
         getContext().getLog().debug("Session accept Message {}",message.request.getOpCode());
         if (userActorRef==null){
-            getContext().spawnAnonymous(UserManagerGuardian.create(new IUserManager.TryBindingUser(getContext().getSelf(), message.request)));
+            getContext().spawnAnonymous(
+                    UserManagerGuardian.create(new IUserManager.TryBindingUser(getContext().getSelf(), message.request), AppContext.getServerId()
+                    )
+            );
         }else{
             userActorRef.tell(new IUser.ReceiveMessageFromSession(message.request));
         }

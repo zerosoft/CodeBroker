@@ -102,6 +102,9 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+	// https://mvnrepository.com/artifact/org.mockito/mockito-core
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '3.5.13'
+
 	// https://mvnrepository.com/artifact/org.freemarker/freemarker
 	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
 

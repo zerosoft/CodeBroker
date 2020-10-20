@@ -21,24 +21,24 @@ public class UserManagerGuardian {
 
 	private ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IUserManager>> serviceInstances = new HashSet();
-	private IUserManager message;
+	private final IUserManager message;
+	private final int serverId;
 
-	public static Behavior<IUserManager> create(IUserManager message) {
-		return Behaviors.setup(context -> new UserManagerGuardian(context, message).handle());
+	public static Behavior<IUserManager> create(IUserManager message,int serverId) {
+		return Behaviors.setup(context -> new UserManagerGuardian(context, message,serverId).handle());
 	}
 
-	private UserManagerGuardian(ActorContext<IUserManager> context, IUserManager message) {
+	private UserManagerGuardian(ActorContext<IUserManager> context, IUserManager message,int serverId) {
 		this.message = message;
 		// 消息转换器，监听支付处理器的变更消息
 		this.listingAdapter = context.messageAdapter(Receptionist.Listing.class, IUserManager.AddProcessorReference::new);
-		int serverId = AppContext.getServerId();
+		this.serverId=serverId;
 		context.getSystem().receptionist().tell(Receptionist.subscribe(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + serverId), listingAdapter));
 	}
 
 	private Behavior<IUserManager> handle() {
 		return Behaviors.receive(IUserManager.class)
 				.onMessage(IUserManager.AddProcessorReference.class, listing -> {
-					int serverId = AppContext.getServerId();
 					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + serverId));
 					for (ActorRef<IUserManager> serviceInstance : serviceInstances) {
 						serviceInstance.tell(message);
