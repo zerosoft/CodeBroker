@@ -30,7 +30,7 @@ public class BaseTest {
 
 		ActorRef<IUserManager> userManagerActorRef = testKit.spawn(UserManager.create(1));
 
-		ActorRef<ISession> iSessionActorRef = testKit.spawn(Session.create(1L, session));
+		ActorRef<ISession> iSessionActorRef = testKit.spawn(Session.create(1L, session,1));
 
 		iSessionActorRef.tell(new ISession.SessionAcceptRequest(baseByteArrayPacket));
 

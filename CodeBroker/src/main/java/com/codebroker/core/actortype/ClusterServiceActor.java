@@ -11,6 +11,9 @@ import akka.pattern.StatusReply;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.IObject;
 
+/**
+ * 集群Service的Actor对象
+ */
 public class ClusterServiceActor extends AbstractBehavior<IService> {
 
     private String name;
@@ -19,13 +22,14 @@ public class ClusterServiceActor extends AbstractBehavior<IService> {
 
     public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service) {
         return Behaviors.setup(
-                context -> {
-                    context
-                            .getSystem()
-                            .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IService.class, name), context.getSelf()));
-                    return new ClusterServiceActor(context,name,service);
-                });
+                context ->new ClusterServiceActor(context,name,service));
+//                context -> {
+//                    context
+//                            .getSystem()
+//                            .receptionist()
+//                            .tell(Receptionist.register(ServiceKey.create(IService.class, name), context.getSelf()));
+//                    return new ClusterServiceActor(context,name,service);
+//                });
     }
 
     public ClusterServiceActor(ActorContext<IService> context, String name, com.codebroker.api.internal.IService service) {
@@ -44,14 +48,19 @@ public class ClusterServiceActor extends AbstractBehavior<IService> {
                 .build();
     }
 
+
+
     private  Behavior<IService> handleMessage(IService.HandleMessage message) {
         try {
             service.handleMessage(message.object);
         }catch (RuntimeException e){
-
+            getContext().getLog().error(e.getMessage(),e);
         }
         return Behaviors.same();
     }
+
+
+
 
     private  Behavior<IService> handleUserMessage(IService.HandleUserMessage message) {
         try {

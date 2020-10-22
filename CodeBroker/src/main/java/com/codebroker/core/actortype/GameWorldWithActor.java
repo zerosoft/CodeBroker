@@ -17,6 +17,7 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
+import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.data.IObject;
 
@@ -91,6 +92,10 @@ public class GameWorldWithActor implements IGameWorld {
 											ClusterServiceActor.create(ctxEntityId,service);
 									return commandBehavior;
 								}));
+
+				ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
+						new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.Init(CObject.newInstance()));
+				shardRegion.tell(shardingEnvelope);
 				ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
 
 				new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());

@@ -7,7 +7,6 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.codebroker.api.AppContext;
 import com.codebroker.api.IoSession;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
@@ -26,16 +25,18 @@ public class Session extends AbstractBehavior<ISession> {
 
     long sessionId;
     IoSession ioSession;
+    long gameWorldId;
 
-    public static Behavior<ISession> create(long sessionId, IoSession ioSession) {
-        Behavior<ISession> setup = Behaviors.setup(context->new Session(context,sessionId,ioSession));
+    public static Behavior<ISession> create(long sessionId, IoSession ioSession, long gameWorldId) {
+        Behavior<ISession> setup = Behaviors.setup(context->new Session(context,sessionId,ioSession,gameWorldId));
         return setup;
     }
 
-    public Session(ActorContext<ISession> context,long sessionId, IoSession ioSession) {
+    public Session(ActorContext<ISession> context,long sessionId, IoSession ioSession, long gameWorldId) {
         super(context);
         this.sessionId=sessionId;
         this.ioSession=ioSession;
+        this.gameWorldId=gameWorldId;
     }
 
     @Override
@@ -88,9 +89,12 @@ public class Session extends AbstractBehavior<ISession> {
 
     private Behavior<ISession> sessionAcceptMessage(ISession.SessionAcceptRequest message) {
         getContext().getLog().debug("Session accept Message {}",message.request.getOpCode());
-        if (userActorRef==null){
+        if (userActorRef==null)
+        {
             getContext().spawnAnonymous(
-                    UserManagerGuardian.create(new IUserManager.TryBindingUser(getContext().getSelf(), message.request), AppContext.getServerId()
+                    UserManagerGuardian.create(
+                    		new IUserManager.TryBindingUser(getContext().getSelf(), message.request)
+							,(int) gameWorldId
                     )
             );
         }else{

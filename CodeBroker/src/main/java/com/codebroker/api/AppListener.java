@@ -1,10 +1,8 @@
 package com.codebroker.api;
 
 import com.codebroker.api.internal.IService;
-import com.codebroker.exception.AllReadyRegeditException;
 import com.codebroker.exception.NoAuthException;
 
-import java.util.Collection;
 
 /**
  * 游戏应用登入的入口.

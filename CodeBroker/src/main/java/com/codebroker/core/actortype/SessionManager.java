@@ -33,6 +33,7 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
      * Id 生成使用
      */
     long idGenerator =1L;
+    long gameWorldId;
 
     public static Behavior<ISessionManager> create(long gameWorldId) {
         return Behaviors.setup(
@@ -41,12 +42,13 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
                             .getSystem()
                             .receptionist()
                             .tell(Receptionist.register(ServiceKey.create(ISessionManager.class, SessionManager.IDENTIFY+"."+gameWorldId), context.getSelf()));
-                    return new SessionManager(context);
+                    return new SessionManager(context,gameWorldId);
                 });
     }
 
-    public SessionManager(ActorContext<ISessionManager> context) {
+    public SessionManager(ActorContext<ISessionManager> context,long gameWorldId) {
         super(context);
+        this.gameWorldId=gameWorldId;
         getContext().getSystem().log().info("SessionManager start");
     }
 
@@ -62,7 +64,7 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
         getContext().getLog().debug("SessionManager createSession session");
         //创建一个新的id自增
         long sessionId = idGenerator++;
-        ActorRef<ISession> session = getContext().spawn(Session.create(sessionId, (IoSession)message.ioSession), Session.IDENTIFY+"."+ sessionId);
+        ActorRef<ISession> session = getContext().spawn(Session.create(sessionId, (IoSession)message.ioSession,gameWorldId), Session.IDENTIFY+"."+ sessionId);
         getContext().getLog().debug("session path {}",session.path());
         //对象回调
         message.ioSession.bindingActor(session);

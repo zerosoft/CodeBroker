@@ -75,6 +75,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
     }
 
     private Behavior<IUserManager> timeCheck(Object message) {
+        getContext().getLog().info("time check lost session");
         if (lostSessionUser.size()>0){
             for (String uid : lostSessionUser.keySet()) {
                 ActorRef<IUser> userActorRef = userMap.get(uid);

@@ -74,7 +74,5 @@ public class UserManagerTimer {
 			timers.cancel(TIMER_KEY);
 			return Behaviors.stopped();
 		}
-
-
 	}
 }

@@ -100,6 +100,9 @@ dependencies {
 	compile group: 'com.esotericsoftware', name: 'reflectasm', version: '1.11.9'
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
 
+// https://mvnrepository.com/artifact/org.python/jython-standalone
+	compile group: 'org.python', name: 'jython-standalone', version: '2.7.2'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 	// https://mvnrepository.com/artifact/org.mockito/mockito-core

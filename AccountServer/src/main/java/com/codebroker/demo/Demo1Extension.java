@@ -22,10 +22,6 @@ public class Demo1Extension extends AppListenerExtension {
 
 	private Logger logger = LoggerFactory.getLogger(DemoExtension.class);
 
-	private Map<String, String> userMap = new HashMap<>();
-	//在线用户列表
-	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
-
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
 		logger.info("handle login name {} parameter {}", name, parameter);
