@@ -8,6 +8,7 @@ import akka.cluster.sharding.typed.javadsl.Entity;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
 import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import akka.cluster.typed.ClusterSingleton;
+import akka.cluster.typed.ClusterSingletonSettings;
 import akka.cluster.typed.SingletonActor;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
@@ -72,17 +73,27 @@ public class GameWorldWithActor implements IGameWorld {
 			//创建独立的节点
 			if (!annotation.sharding()){
 				ClusterSingleton singleton = ClusterSingleton.get(actorSystem);
-				ActorRef<com.codebroker.core.actortype.message.IService> serviceActorRef = singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName));
+
+				ActorRef<com.codebroker.core.actortype.message.IService> serviceActorRef =
+						annotation.dateCenter()==""?
+							singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName)):
+							singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName)
+									 .withSettings(ClusterSingletonSettings.create(actorSystem).withDataCenter(annotation.dateCenter()))
+							);
+
 				ServiceWithActor serviceActor=new ServiceWithActor(serviceName,serviceActorRef);
 
 				new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
 				ActorPathService.localService.put(serviceName,serviceActorRef);
+
 				ContextResolver.setManager(service);
 				return true;
 			}else{
 				ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
+
 				EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(serviceName);
+
 				ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
 						clusterSharding.init(Entity.of(
 								typeKey,
@@ -91,7 +102,10 @@ public class GameWorldWithActor implements IGameWorld {
 									Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
 											ClusterServiceActor.create(ctxEntityId,service);
 									return commandBehavior;
-								}));
+								})
+								//停止的时候发的协议
+								.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
+						);
 
 				ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
 						new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.Init(CObject.newInstance()));

@@ -88,11 +88,11 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
         ActorPathService.gameWorldMessageActorRef = getContext().spawn(GameWorld.create(gameWorldId), GameWorld.IDENTIFY+"."+gameWorldId);
         GameWorldWithActor gameWorldWithActor = new GameWorldWithActor(GameWorld.IDENTIFY,  ActorPathService.gameWorldMessageActorRef);
 
-        ActorPathService.userManager = getContext().spawn(UserManager.create(gameWorldId), UserManager.IDENTIFY+"."+gameWorldId);
+        ActorPathService.userManager = getContext().spawn(UserManager.create(gameWorldId,Duration.of(60, ChronoUnit.SECONDS)), UserManager.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("UserManager Path {}", ActorPathService.userManager.path());
 
-        ActorPathService.userManagerTimer = getContext().spawn(UserManagerTimer.create(ActorPathService.userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
-        getContext().getSystem().log().info("userManagerTimer Path {}", ActorPathService.userManagerTimer.path());
+//        ActorPathService.userManagerTimer = getContext().spawn(UserManagerTimer.create(ActorPathService.userManager, Duration.of(1, ChronoUnit.MINUTES)), UserManagerTimer.IDENTIFY);
+//        getContext().getSystem().log().info("userManagerTimer Path {}", ActorPathService.userManagerTimer.path());
 
         ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("cluster Domain Event ActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());

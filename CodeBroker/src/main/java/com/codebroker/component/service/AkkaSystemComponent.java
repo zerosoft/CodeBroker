@@ -48,7 +48,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         String filePath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
 
         logger.debug("akka conf path:" + filePath);
-        File config = FileUtil.scanFileByPath(filePath, property);
+        File configFile = FileUtil.scanFileByPath(filePath, property);
 
         String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME, DEF_KEY);
         logger.debug("AKKA_NAME:" + akkaName);
@@ -57,12 +57,13 @@ public class AkkaSystemComponent extends BaseCoreService {
 
 
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
-        Config cg = ConfigFactory.parseFile(config);
+        Config cg = ConfigFactory.parseFile(configFile);
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
-        Config configFile = ConfigFactory.load(cg).getConfig(configName);
+        Config akkaConfig = ConfigFactory.load(cg).getConfig(configName);
 
-        this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,configFile);
+
+        this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
 
 //        AkkaManagement.get(system.classicSystem()).start();
 //        HttpServer.start(system);

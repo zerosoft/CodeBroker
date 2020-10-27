@@ -1,11 +1,16 @@
 from com.codebroker.api import AppListener;
 from com.codebroker.api import IGameUser;
+from com.codebroker.api import AppContext;
+from Demo1 import Demo;
+
 
 class PythonScriptListener(AppListener):
     def __init__(self):
-        print "hello"
+        print "init hello"
+        demo=Demo()
 
     def init(self,obj):
+        print AppContext;
         print obj
 
     def sessionLoginVerification(self,name,parameter):

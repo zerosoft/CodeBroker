@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * UserManager周期时间检测
  */
+@Deprecated
 public class UserManagerTimer {
 
 	public static final String IDENTIFY = UserManagerTimer.class.getSimpleName();

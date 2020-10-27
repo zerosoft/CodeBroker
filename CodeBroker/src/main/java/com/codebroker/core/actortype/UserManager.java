@@ -17,6 +17,8 @@ import com.codebroker.core.actortype.message.IUserManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,16 +35,19 @@ public class UserManager extends AbstractBehavior<IUserManager> {
     private Map<String, ActorRef<IUser>> userMap=new HashMap<>();
     private Map<String,Long> lostSessionUser=new HashMap<>();
 
-    public static Behavior<IUserManager> create(long gameWorldId) {
+    public static Behavior<IUserManager> create(long gameWorldId,Duration checkUserLostSessionTime) {
         return Behaviors.setup(
-                context -> {
-                    context
-                            .getSystem()
-                            .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY+"."+gameWorldId), context.getSelf()));
-
-                    return new UserManager(context);
-                });
+                (ActorContext<IUserManager> context) ->
+                    Behaviors.withTimers(
+                        timers -> {
+                            timers.startTimerWithFixedDelay("User-Check",IUserManager.TimeCheck.INSTANCE,checkUserLostSessionTime);
+                            context
+                                    .getSystem()
+                                    .receptionist()
+                                    .tell(Receptionist.register(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + gameWorldId), context.getSelf()));
+                            return new UserManager(context);
+                        })
+        ).narrow();
     }
 
     public UserManager(ActorContext<IUserManager> context) {
@@ -69,6 +74,11 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         return Behaviors.same();
     }
 
+    /**
+     * 关闭User Actor时候调用
+     * @param message
+     * @return
+     */
     private Behavior<IUserManager> userClose(IUserManager.UserClose message) {
         userMap.remove(message.uid);
         return Behaviors.same();

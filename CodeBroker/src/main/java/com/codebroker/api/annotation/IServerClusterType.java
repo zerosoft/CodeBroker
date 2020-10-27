@@ -13,4 +13,10 @@ public @interface IServerClusterType {
      * @return
      */
     boolean sharding();
+
+    /**
+     * 数据中心
+     * @return
+     */
+    String dateCenter()default "";
 }

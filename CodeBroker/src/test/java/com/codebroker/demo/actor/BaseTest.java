@@ -16,6 +16,9 @@ import com.codebroker.core.entities.GameUser;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import org.junit.AfterClass;
 import org.junit.Test;
+
+import java.time.Duration;
+
 import static org.mockito.Mockito.*;
 
 public class BaseTest {
@@ -28,7 +31,7 @@ public class BaseTest {
 		IoSession session = mock(IoSession.class);
 		BaseByteArrayPacket baseByteArrayPacket = mock(BaseByteArrayPacket.class);
 
-		ActorRef<IUserManager> userManagerActorRef = testKit.spawn(UserManager.create(1));
+		ActorRef<IUserManager> userManagerActorRef = testKit.spawn(UserManager.create(1, Duration.ofSeconds(10)));
 
 		ActorRef<ISession> iSessionActorRef = testKit.spawn(Session.create(1L, session,1));
 

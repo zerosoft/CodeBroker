@@ -3,29 +3,27 @@ package com.codebroker.extensions;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.entities.GameUser;
+import com.codebroker.exception.NoAuthException;
 import org.apache.commons.io.FileUtils;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.applet.AppletListener;
 
 import javax.script.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
-public class JythonExtension {
+public class JythonExtension extends AppListenerExtension {
 
 	private static JythonExtension instance = null;
-
 
 	public static JythonExtension getInstance(){
 		if(instance == null){
 			instance = new JythonExtension();
 		}
 		return instance;
-
 	}
 
 	private static PyObject pyObject = null;
@@ -101,33 +99,81 @@ public class JythonExtension {
 //	}
 
 	public static void main(String[] args) throws FileNotFoundException, ScriptException {
-		StringWriter writer = new StringWriter();
-		ScriptContext context = new SimpleScriptContext();
-		context.setWriter(writer);
-		Properties properties = new Properties();
-		properties.setProperty("python.path", "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\");
-		PythonInterpreter.initialize(System.getProperties(), properties, new String[]{""});
-		PythonInterpreter pi = new PythonInterpreter();
+//		StringWriter writer = new StringWriter();
+//		ScriptContext context = new SimpleScriptContext();
+//		context.setWriter(writer);
+//		Properties properties = new Properties();
+//		properties.setProperty("python.path", "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\");
+//		PythonInterpreter.initialize(System.getProperties(), properties, new String[]{""});
+//		PythonInterpreter pi = new PythonInterpreter();
+//
+		PythonInterpreter interpreter = new PythonInterpreter();
+		System.setProperty("python.home","D:\\Users\\Administrator\\Downloads\\jython2.7.2");
 
-		JythonObjectFactory factory = JythonObjectFactory.getInstance();
-		AppListener building = (AppListener) factory.createObject(AppListener.class, "PythonScriptListener");
-		building.init("www");
+		// Python程序路径
+		String python = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\PythonScriptListener.py";
+		// Python实例对象名
+		String pyObjName = "PythonScriptListener";
+		// Python类名
+		String pyClazzName = "PythonScriptListener";
+
+		PySystemState sys = interpreter.getSystemState();
+		sys.path.add("D:\\Users\\Administrator\\Downloads\\jython2.7.2");
+
+		// 加载Python程序
+		interpreter.execfile(python);
+		// 实例 Python对象
+		interpreter.exec(pyObjName + "=" + pyClazzName + "()");
+
+		PyObject pyObject = interpreter.get(pyClazzName);
+
+//		JythonObjectFactory factory = JythonObjectFactory.getInstance();
+//		AppListener building = (AppListener) factory.createObject(AppListener.class, "PythonScriptListener");
+//		building.init("www");
 		IGameUser iGameUser=new GameUser("122",null);
-		building.userLogin(iGameUser);
+//		building.userLogin(iGameUser);
+		pyObject.invoke("userLogin",Py.java2py(iGameUser));
 //		ScriptEngineManager manager = new ScriptEngineManager();
 //		ScriptEngine engine = manager.getEngineByName("python");
-
-//		Object eval = engine.eval(new FileReader(new File("D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\PythonScriptListener.py")), context);
+//		System.out.println(engine);
+//
+//		Object eval = engine.eval(new FileReader(new File("D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\PythonScriptListener.py")));
+//
+//		Class<?> aClass = eval.getClass();
 
 //		PyCode compile = pi.compile(new FileReader(new File("D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\PythonScriptListener.py")));
 //		compile.invoke("say");
 //		pi.execfile("D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\script\\PythonScriptListener.py");
 
-
 	}
 
 	private String loadSourceCode(String sourceFilePath) throws IOException {
 		return FileUtils.readFileToString(new File(sourceFilePath), Charset.forName("UTF-8"));
+	}
+
+	@Override
+	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
+		return null;
+	}
+
+	@Override
+	public void userLogin(IGameUser user) {
+
+	}
+
+	@Override
+	public boolean handleLogout(IGameUser user) {
+		return false;
+	}
+
+	@Override
+	public boolean userReconnection(IGameUser user) {
+		return false;
+	}
+
+	@Override
+	public void init(Object obj) {
+
 	}
 }
 class JythonObjectFactory {
