@@ -1,9 +1,6 @@
 package com.codebroker.core.actortype;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.DispatcherSelector;
+import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
 import akka.pattern.StatusReply;
 import com.codebroker.api.AppContext;
@@ -63,10 +60,18 @@ public class User extends AbstractBehavior<IUser> {
 				.onMessage(IUser.GetSendMessageToGameUser.class,this::getSendMessageToGameUser)
                 .onMessage(IUser.SendMessageToIService.class, this::sendMessageToIService)
                 .onMessage(IUser.LogicEvent.class, this::handlerLogicEvent)
+                .onSignal(PostStop.class, this::postStop)
                 .build();
     }
 
-	private  Behavior<IUser> getSendMessageToGameUser(IUser.GetSendMessageToGameUser message) {
+    private Behavior<IUser> postStop(PostStop message) {
+        if (gameUser!=null){
+            gameUser.handlerEvent(new Event("USER_REMOVE",CObjectLite.newInstance()));
+        }
+        return Behaviors.same();
+    }
+
+    private  Behavior<IUser> getSendMessageToGameUser(IUser.GetSendMessageToGameUser message) {
 		gameUser.dispatchEvent(new Event(IEvent.GAME_EVENT,message.message));
 		return Behaviors.same();
 	}

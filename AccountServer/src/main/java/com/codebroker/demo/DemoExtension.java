@@ -9,6 +9,7 @@ import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.account.AccountService;
 import com.codebroker.demo.service.account.manager.AccountDBManager;
 import com.codebroker.demo.userevent.DoSameEvent;
+import com.codebroker.demo.userevent.UserRemoveEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Lists;
@@ -45,6 +46,7 @@ public class DemoExtension extends AppListenerExtension {
 	public void userLogin(IGameUser user) {
 		logger.info("User Login parameter {}", user.getUserId());
 		user.addEventListener("login", new DoSameEvent());
+		user.addEventListener("USER_REMOVE", new UserRemoveEvent());
 	}
 
 
