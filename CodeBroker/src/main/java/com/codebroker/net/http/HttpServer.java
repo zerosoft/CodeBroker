@@ -6,19 +6,46 @@ import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.cluster.typed.Cluster;
 import akka.http.javadsl.Http;
-import akka.http.javadsl.model.ContentTypes;
-import akka.http.javadsl.model.MediaTypes;
+import akka.http.javadsl.model.*;
 import akka.http.javadsl.model.headers.RawHeader;
 import akka.http.javadsl.server.Route;
+import akka.http.scaladsl.model.AttributeKey;
+import akka.http.scaladsl.model.SslSessionInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import scala.Option;
+import akka.NotUsed;
+import akka.http.impl.util.JavaMapping;
+import akka.http.javadsl.ConnectHttp;
+import akka.http.javadsl.ConnectionContext;
+import akka.http.javadsl.model.StatusCodes;
+import akka.http.javadsl.model.ws.WebSocketRequest;
+import akka.http.javadsl.settings.ClientConnectionSettings;
+import akka.http.javadsl.settings.ServerSettings;
+import akka.http.javadsl.settings.WebSocketSettings;
+import akka.http.scaladsl.model.AttributeKeys;
+import akka.japi.JavaPartialFunction;
+import akka.japi.function.Function;
+
+import akka.stream.ActorMaterializer;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Source;
+import akka.http.javadsl.Http;
+import akka.http.javadsl.ServerBinding;
+import akka.http.javadsl.model.HttpRequest;
+import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.model.ws.Message;
+import akka.http.javadsl.model.ws.TextMessage;
+import akka.http.javadsl.model.ws.WebSocket;
+import akka.util.ByteString;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -27,7 +54,7 @@ import static akka.http.javadsl.server.Directives.*;
 
 public class HttpServer {
   public static final String RESOURCE = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\";
-  private final ActorSystem<?> actorSystem;
+  private final ActorSystem actorSystem;
 
   public static void start(ActorSystem<?> actorSystem) {
     final int port = memberPort(Cluster.get(actorSystem).selfMember());
@@ -40,13 +67,30 @@ public class HttpServer {
     }
   }
 
-  private HttpServer(int port, ActorSystem<?> actorSystem) {
+  private HttpServer(int port, ActorSystem actorSystem) {
     this.actorSystem = actorSystem;
     start(port);
   }
 
   private void start(int port) {
-    Http.get(actorSystem).newServerAt("localhost", port).bind(route());
+//    final Function<HttpRequest, HttpResponse> handler = request -> handleRequest(request);
+    ServerSettings defaultSettings = ServerSettings.create(actorSystem.classicSystem());
+
+    AtomicInteger pingCounter = new AtomicInteger();
+
+    WebSocketSettings customWebsocketSettings = defaultSettings.getWebsocketSettings()
+            .withPeriodicKeepAliveData(() ->
+                    ByteString.fromString(String.format("debug-%d", pingCounter.incrementAndGet()))
+            );
+
+
+    ServerSettings customServerSettings = defaultSettings.withWebsocketSettings(customWebsocketSettings);
+
+    Http.get(actorSystem)
+            .newServerAt("localhost", port)
+            .withSettings(customServerSettings)
+            .bind(route());
+//            .bindSync(handler);
     log().info("HTTP Server started on port {}", "" + port);
   }
 
@@ -59,8 +103,61 @@ public class HttpServer {
                     getFromFile(new File(RESOURCE + "dashboard.js"), ContentTypes.APPLICATION_JSON)),
             path("p5.js", () -> getFromFile(new File(RESOURCE + "p5.js"), ContentTypes.APPLICATION_JSON)),
             path("favicon.ico", () -> getFromFile(new File(RESOURCE + "favicon.ico"), MediaTypes.IMAGE_X_ICON.toContentType())),
-            path("cluster-state", this::clusterState)
+            path("cluster-state", this::clusterState),
+            path("greeter", () ->handleWebSocketMessages(greeter()))
+
     );
+  }
+
+  public static Flow<Message, Message, NotUsed> greeter() {
+    return
+            Flow.<Message>create()
+                    .collect(new JavaPartialFunction<Message, Message>() {
+
+                      @Override
+                      public Message apply(Message msg, boolean isCheck) throws Exception {
+                        if (isCheck) {
+                          if (msg.isText()) {
+                            return null;
+                          } else {
+                            throw noMatch();
+                          }
+                        } else {
+
+                          return handleTextMessage(msg.asTextMessage());
+                        }
+                      }
+                    });
+  }
+
+  public static TextMessage handleTextMessage(TextMessage msg) {
+    if (msg.isStrict()) // optimization that directly creates a simple response...
+    {
+      return TextMessage.create("Hello " + msg.getStrictText());
+    } else // ... this would suffice to handle all text messages in a streaming fashion
+    {
+      return TextMessage.create(Source.single("Hello ").concat(msg.getStreamedText()));
+    }
+  }
+
+  public static HttpResponse handleRequest(HttpRequest request) {
+    System.out.println("Handling request to " + request.getUri());
+
+    if (request.getUri().path().equals("/greeter")) {
+      return request
+              .getAttribute(AttributeKeys.webSocketUpgrade())
+              .map(upgrade -> {
+                Flow<Message, Message, NotUsed> greeterFlow = greeter();
+
+                HttpResponse response = upgrade.handleMessagesWith(greeterFlow);
+                return response;
+              })
+              .orElse(
+                      HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST).withEntity("Expected WebSocket request")
+              );
+    } else {
+       return HttpResponse.create().withStatus(404);
+    }
   }
 
   private Route clusterState() {

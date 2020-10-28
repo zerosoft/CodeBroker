@@ -35,7 +35,8 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 	}
 
 	private void subscribeToClusterEvents() {
-		Cluster.get(getContext().getSystem())
+		Cluster.get(getContext()
+				.getSystem())
 				.subscriptions()
 				.tell(Subscribe.create(getContext().getSelf(), ClusterEvent.ClusterDomainEvent.class));
 	}
@@ -59,8 +60,10 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 	}
 
 	private void logClusterMembers(ClusterEvent.CurrentClusterState currentClusterState) {
-		final Optional<Member> old = StreamSupport.stream(currentClusterState.getMembers().spliterator(), false)
-				.reduce((older, member) -> older.isOlderThan(member) ? older : member);
+		final Optional<Member> old =
+				StreamSupport
+						.stream(currentClusterState.getMembers().spliterator(), false)
+						.reduce((older, member) -> older.isOlderThan(member) ? older : member);
 
 		final Member oldest = old.orElse(cluster.selfMember());
 		final Set<Member> unreachable = currentClusterState.getUnreachable();
