@@ -25,6 +25,7 @@ import com.codebroker.core.data.IObject;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -92,30 +93,36 @@ public class GameWorldWithActor implements IGameWorld {
 			}else{
 				ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
 
-				EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(serviceName);
 
-				ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
-						clusterSharding.init(Entity.of(
-								typeKey,
-								ctx -> {
-									String ctxEntityId = ctx.getEntityId();
-									Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
-											ClusterServiceActor.create(ctxEntityId,service);
-									return commandBehavior;
-								})
-								//停止的时候发的协议
-								.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
-						);
 
-				ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
-						new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.Init(CObject.newInstance()));
-				shardRegion.tell(shardingEnvelope);
-				ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(serviceName,clusterSharding);
+				for (int i = 0; i <100; i++) {
+					int finalI = i;
+					EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(service.getClass().getName());
+					ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+							clusterSharding.init(Entity.of(
+									typeKey,
+									ctx -> {
+										String ctxEntityId = ctx.getEntityId()+"."+ finalI;
+										System.out.println("====="+ctxEntityId);
+										Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
+												ClusterServiceActor.create(ctxEntityId,service);
+										return commandBehavior;
+									})
+									//停止的时候发的协议
+									.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
+							);
 
-				new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+					ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
+							new ShardingEnvelope<>(typeKey.name(), new com.codebroker.core.actortype.message.IService.Init(CObject.newInstance()));
+					shardRegion.tell(shardingEnvelope);
+					ClusterServiceWithActor serviceActor=new ClusterServiceWithActor(typeKey.name()+"."+ finalI ,clusterSharding);
 
-				ActorPathService.localClusterService.put(serviceName,shardRegion);
-				ContextResolver.setManager(service);
+					new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+
+					ActorPathService.localClusterService.put(typeKey.name()+"."+ finalI,shardRegion);
+					ContextResolver.setManager(service);
+				}
+
 				return true;
 			}
 		}else {
@@ -144,6 +151,8 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject object){
+		Random random=new Random();
+		String sv=serviceName+"."+random.nextInt(100);
 		if (ActorPathService.localService.containsKey(serviceName)) {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
@@ -164,7 +173,8 @@ public class GameWorldWithActor implements IGameWorld {
 			}else {
 				return Optional.empty();
 			}
-		}else if (ActorPathService.localClusterService.containsKey(serviceName))
+		}else
+			if (ActorPathService.localClusterService.containsKey(sv))
 		{
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
@@ -172,7 +182,7 @@ public class GameWorldWithActor implements IGameWorld {
 			EntityRef<com.codebroker.core.actortype.message.IService> entityRef =
 					sharding.entityRefFor(
 							getTypeKey(serviceName),
-							serviceName);
+							sv);
 			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
 					entityRef,
 					replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),

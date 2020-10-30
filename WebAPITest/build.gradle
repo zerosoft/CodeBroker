@@ -29,7 +29,7 @@ sourceSets {
 
 dependencies {
     compile fileTree(dir: 'lib', include: '*.jar')
-
+//    compile project(':CodeBroker')
     compile 'org.springframework.boot:spring-boot-starter-web:2.0.5.RELEASE'
     compile 'io.springfox:springfox-swagger2:2.9.2'
     compile 'io.springfox:springfox-swagger-ui:2.9.2'

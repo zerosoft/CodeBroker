@@ -32,13 +32,15 @@ public class DemoExtension extends AppListenerExtension {
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
 		logger.info("handle login name {} parameter {}", name, parameter);
-//		AccountService manager = AppContext.getManager(AccountService.class);
+		Random random=new Random();
+//		AccountService manager = AppContext.getManager(AccountService.class.getName()+"."+random.nextInt(100));
 //		AppContext.getGameWorld().sendMessageToService();
 		CObject cObject = CObject.newInstance();
+		cObject.putInt("handlerKey",1);
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
 //		IObject iObject =manager.handleBackMessage(cObject);
-		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToLocalIService(AccountService.class, cObject);
+		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToLocalIService(AccountService.class.getName()+"."+random.nextInt(100), cObject);
 		return iObject.isPresent()?iObject.get().getUtfString("uid"):"null";
 	}
 

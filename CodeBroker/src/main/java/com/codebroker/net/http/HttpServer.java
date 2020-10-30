@@ -1,6 +1,7 @@
 package com.codebroker.net.http;
 
 import akka.actor.typed.ActorSystem;
+import akka.actor.typed.Settings;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
@@ -73,12 +74,12 @@ public class HttpServer {
   }
 
   private void start(int port) {
-//    final Function<HttpRequest, HttpResponse> handler = request -> handleRequest(request);
     ServerSettings defaultSettings = ServerSettings.create(actorSystem.classicSystem());
 
     AtomicInteger pingCounter = new AtomicInteger();
 
-    WebSocketSettings customWebsocketSettings = defaultSettings.getWebsocketSettings()
+    WebSocketSettings customWebsocketSettings = defaultSettings
+            .getWebsocketSettings()
             .withPeriodicKeepAliveData(() ->
                     ByteString.fromString(String.format("debug-%d", pingCounter.incrementAndGet()))
             );
@@ -141,7 +142,6 @@ public class HttpServer {
   }
 
   public static HttpResponse handleRequest(HttpRequest request) {
-    System.out.println("Handling request to " + request.getUri());
 
     if (request.getUri().path().equals("/greeter")) {
       return request

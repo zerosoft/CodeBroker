@@ -1,10 +1,14 @@
 package com.codebroker.demo.service.account;
 
 import com.codebroker.api.annotation.IServerClusterType;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.codebroker.demo.service.AbstractIService;
 import com.codebroker.demo.service.account.request.LoginAccountHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
 
 @IServerClusterType(sharding = true)
 public class AccountService extends AbstractIService {
@@ -22,7 +26,15 @@ public class AccountService extends AbstractIService {
 	}
 
 	@Override
+	public IObject handleBackMessage(IObject iObject) {
+		logger.info("AccountService handleBackMessage");
+		IObject result= CObject.newInstance();
+		result.putUtfString("id", UUID.randomUUID().toString());
+		return result;
+	}
+
+	@Override
 	public String getName() {
-		return AccountService.class.getSimpleName();
+		return AccountService.class.getName();
 	}
 }

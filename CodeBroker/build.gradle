@@ -1,11 +1,34 @@
-apply plugin: 'java'
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+//	dependencies {
+//		// see https://plugins.gradle.org/plugin/com.lightbend.akka.grpc.gradle
+//		// for the currently latest version.
+//		// https://mvnrepository.com/artifact/com.lightbend.akka.grpc/akka-grpc-gradle-plugin
+//		classpath 'gradle.plugin.com.lightbend.akka.grpc:akka-grpc-gradle-plugin:1.0.2'
+//	}
+}
+
+plugins {
+	id 'java'
+	id 'application'
+	id "com.lightbend.akka.grpc.gradle" version '1.0.2'
+}
 
 repositories {
 	maven {
-		url "http://maven.aliyun.com/nexus/content/groups/public"
+		url "https://plugins.gradle.org/m2/"
 	}
+	mavenLocal()
 	mavenCentral()
 }
+
+
 sourceSets {
 	main {
 		java {
@@ -66,6 +89,13 @@ dependencies {
 	compile group: 'com.lightbend.akka.management', name: 'akka-management_2.13', version: '1.0.8'
 	compile group: 'com.lightbend.akka.management', name: 'akka-management-cluster-http_2.13', version: '1.0.8'
 
+	// The Gradle plugin for Akka-gRPC doesn't support 2.13:
+	// https://github.com/akka/akka-grpc/pull/1025
+	compile group: 'com.typesafe.akka', name: "akka-discovery_2.13", version: akka_version
+	compile group: 'com.typesafe.akka', name: "akka-protobuf_2.13", version: akka_version
+	compile group: 'com.typesafe.akka', name: "akka-stream_2.13", version: akka_version
+	compile group: 'com.typesafe.akka', name: "akka-pki_2.13", version: akka_version
+
 
 	testCompile group: 'com.typesafe.akka', name: 'akka-actor-testkit-typed_2.13', version: akka_version
 
@@ -120,3 +150,8 @@ task copyJars(type:Copy) {
   from configurations.runtime
   into 'build/lib'
 }
+
+//akkaGrpc {
+//	generateClient = true
+//	generateServer = true
+//}
