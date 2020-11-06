@@ -144,6 +144,7 @@ public class ReplicatedCache {
   ) {
     this.replicator = replicator;
     node = DistributedData.get(context.getSystem()).selfUniqueAddress();
+    LWWMap<Object, Object> objectObjectLWWMap = LWWMap.create();
   }
 
   public Behavior<Command> createBehavior() {

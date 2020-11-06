@@ -1,348 +1,397 @@
 package com.codebroker.net.http;
 
+import akka.NotUsed;
 import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Settings;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
+import akka.cluster.sharding.typed.javadsl.EntityRef;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import akka.cluster.typed.Cluster;
 import akka.http.javadsl.Http;
-import akka.http.javadsl.model.*;
+import akka.http.javadsl.marshallers.jackson.Jackson;
+import akka.http.javadsl.model.ContentTypes;
+import akka.http.javadsl.model.HttpEntity;
+import akka.http.javadsl.model.MediaTypes;
+import akka.http.javadsl.model.StatusCodes;
 import akka.http.javadsl.model.headers.RawHeader;
+import akka.http.javadsl.model.ws.Message;
+import akka.http.javadsl.model.ws.TextMessage;
 import akka.http.javadsl.server.Route;
-import akka.http.scaladsl.model.AttributeKey;
-import akka.http.scaladsl.model.SslSessionInfo;
+import akka.http.javadsl.settings.ServerSettings;
+import akka.http.javadsl.settings.WebSocketSettings;
+import akka.http.javadsl.unmarshalling.Unmarshaller;
+import akka.japi.JavaPartialFunction;
+import akka.serialization.jackson.JacksonObjectMapperProvider;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Source;
+import akka.util.ByteString;
+import com.codebroker.core.actortype.GameWorldWithActor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.slf4j.Logger;
 import scala.Option;
-import akka.NotUsed;
-import akka.http.impl.util.JavaMapping;
-import akka.http.javadsl.ConnectHttp;
-import akka.http.javadsl.ConnectionContext;
-import akka.http.javadsl.model.StatusCodes;
-import akka.http.javadsl.model.ws.WebSocketRequest;
-import akka.http.javadsl.settings.ClientConnectionSettings;
-import akka.http.javadsl.settings.ServerSettings;
-import akka.http.javadsl.settings.WebSocketSettings;
-import akka.http.scaladsl.model.AttributeKeys;
-import akka.japi.JavaPartialFunction;
-import akka.japi.function.Function;
-
-import akka.stream.ActorMaterializer;
-import akka.stream.Materializer;
-import akka.stream.javadsl.Flow;
-import akka.stream.javadsl.Source;
-import akka.http.javadsl.Http;
-import akka.http.javadsl.ServerBinding;
-import akka.http.javadsl.model.HttpRequest;
-import akka.http.javadsl.model.HttpResponse;
-import akka.http.javadsl.model.ws.Message;
-import akka.http.javadsl.model.ws.TextMessage;
-import akka.http.javadsl.model.ws.WebSocket;
-import akka.util.ByteString;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static akka.http.javadsl.server.Directives.*;
+import static akka.http.javadsl.server.PathMatchers.longSegment;
+import static akka.http.javadsl.server.PathMatchers.segment;
 
 public class HttpServer {
-  public static final String RESOURCE = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\";
-  private final ActorSystem actorSystem;
+	public static final String RESOURCE = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\";
+	private final ActorSystem actorSystem;
+	private final ObjectMapper objectMapper;
+	private Unmarshaller<HttpEntity, Object> dataUnmarshaller;
 
-  public static void start(ActorSystem<?> actorSystem) {
-    final int port = memberPort(Cluster.get(actorSystem).selfMember());
-    if (port >= 2551 && port <= 2559) {
-      new HttpServer(port + 7000, actorSystem);
-    } else {
-      final String message = String.format("HTTP server not started. Node port %d is invalid. The port must be >= 2551 and <= 2559.", port);
-      System.err.printf("%s%n", message);
-      throw new RuntimeException(message);
-    }
-  }
+	public static void start(ActorSystem<?> actorSystem) {
+		final int port = memberPort(Cluster.get(actorSystem).selfMember());
+		if (port >= 2551 && port <= 2559) {
+			new HttpServer(port + 7000, actorSystem);
+		} else {
+			final String message = String.format("HTTP server not started. Node port %d is invalid. The port must be >= 2551 and <= 2559.", port);
+			System.err.printf("%s%n", message);
+			throw new RuntimeException(message);
+		}
+	}
 
-  private HttpServer(int port, ActorSystem actorSystem) {
-    this.actorSystem = actorSystem;
-    start(port);
-  }
+	private HttpServer(int port, ActorSystem actorSystem) {
+		this.actorSystem = actorSystem;
+		start(port);
+		objectMapper = JacksonObjectMapperProvider.get(actorSystem).getOrCreate("jackson-json", Optional.empty());
+		dataUnmarshaller = Jackson.unmarshaller(objectMapper, Object.class);
+	}
 
-  private void start(int port) {
-    ServerSettings defaultSettings = ServerSettings.create(actorSystem.classicSystem());
+	private void start(int port) {
+		ServerSettings defaultSettings = ServerSettings.create(actorSystem.classicSystem());
 
-    AtomicInteger pingCounter = new AtomicInteger();
+		AtomicInteger pingCounter = new AtomicInteger();
 
-    WebSocketSettings customWebsocketSettings = defaultSettings
-            .getWebsocketSettings()
-            .withPeriodicKeepAliveData(() ->
-                    ByteString.fromString(String.format("debug-%d", pingCounter.incrementAndGet()))
-            );
+		WebSocketSettings customWebsocketSettings = defaultSettings
+				.getWebsocketSettings()
+				.withPeriodicKeepAliveData(() ->
+						ByteString.fromString(String.format("debug-%d", pingCounter.incrementAndGet()))
+				);
+
+//    Materializer mat = ActorMaterializer.create(actorSystem.classicSystem());
 
 
-    ServerSettings customServerSettings = defaultSettings.withWebsocketSettings(customWebsocketSettings);
+		// Instantiate implementation
+//    GreeterService impl = new GreeterServiceImpl(mat);
+//    Function<HttpRequest, CompletionStage<HttpResponse>> httpRequestCompletionStageFunction =
+//            GreeterServiceHandlerFactory.create(impl, actorSystem);
 
-    Http.get(actorSystem)
-            .newServerAt("localhost", port)
-            .withSettings(customServerSettings)
-            .bind(route());
+		ServerSettings customServerSettings = defaultSettings.withWebsocketSettings(customWebsocketSettings);
+
+		Http.get(actorSystem)
+				.newServerAt("localhost", port)
+				.withSettings(customServerSettings)
+				.bind(route())
+		;
+//    GRPCServer grpcServer=new GRPCServer(actorSystem,port+1000);
+//    try {
+//      grpcServer.run();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
 //            .bindSync(handler);
-    log().info("HTTP Server started on port {}", "" + port);
-  }
+		log().info("HTTP Server started on port {}", "" + port);
+	}
 
-  private Route route() {
-    return concat(
-            path("", () -> getFromFile(new File(RESOURCE + "dashboard.html")
-                    , ContentTypes.TEXT_HTML_UTF8)),
-            path("dashboard.html", () -> getFromFile(new File(RESOURCE + "dashboard.html"), ContentTypes.TEXT_HTML_UTF8)),
-            path("dashboard.js", () ->
-                    getFromFile(new File(RESOURCE + "dashboard.js"), ContentTypes.APPLICATION_JSON)),
-            path("p5.js", () -> getFromFile(new File(RESOURCE + "p5.js"), ContentTypes.APPLICATION_JSON)),
-            path("favicon.ico", () -> getFromFile(new File(RESOURCE + "favicon.ico"), MediaTypes.IMAGE_X_ICON.toContentType())),
-            path("cluster-state", this::clusterState),
-            path("greeter", () ->handleWebSocketMessages(greeter()))
 
-    );
-  }
+	private CompletionStage<String> query(long shardId,String serviceName,String message) {
+		ClusterSharding sharding = ClusterSharding.get(null);
+		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = GameWorldWithActor.getTypeKey(serviceName);
+		EntityRef<?> ref = sharding.entityRefFor(typeKey, Long.toString(shardId));
+//    return ref.ask(replyTo -> new WeatherStation.Query(dataType, function, replyTo), timeout);
+		return null;
+	}
 
-  public static Flow<Message, Message, NotUsed> greeter() {
-    return
-            Flow.<Message>create()
-                    .collect(new JavaPartialFunction<Message, Message>() {
 
-                      @Override
-                      public Message apply(Message msg, boolean isCheck) throws Exception {
-                        if (isCheck) {
-                          if (msg.isText()) {
-                            return null;
-                          } else {
-                            throw noMatch();
-                          }
-                        } else {
+	private CompletionStage<?> recordData() {
+//    EntityRef<WeatherStation.Command> ref = sharding.entityRefFor(WeatherStation.TypeKey, Long.toString(wsid));
+//    return ref.ask(replyTo -> new WeatherStation.Record(data, System.currentTimeMillis(), replyTo), timeout);
+		return null;
+	}
 
-                          return handleTextMessage(msg.asTextMessage());
-                        }
-                      }
-                    });
-  }
+	private Route route() {
+		return concat(
+				path("", () -> getFromFile(new File(RESOURCE + "dashboard.html"), ContentTypes.TEXT_HTML_UTF8)),
+				path("dashboard.html", () -> getFromFile(new File(RESOURCE + "dashboard.html"), ContentTypes.TEXT_HTML_UTF8)),
+				path("dashboard.js", () -> getFromFile(new File(RESOURCE + "dashboard.js"), ContentTypes.APPLICATION_JSON)),
+				path("p5.js", () -> getFromFile(new File(RESOURCE + "p5.js"), ContentTypes.APPLICATION_JSON)),
+				path("favicon.ico", () -> getFromFile(new File(RESOURCE + "favicon.ico"), MediaTypes.IMAGE_X_ICON.toContentType())),
+				path("cluster-state", this::clusterState),
+				path("webSocket", () -> handleWebSocketMessages(websocket())),
+				path(segment("iservice")
+								.slash()
+								.concat(longSegment()), shardId ->//集群Id
+								concat(
+										get(() ->
+												parameter("service_name", (
+														serviceName -> parameter("message",(message
+																  -> completeOKWithFuture(query(shardId,serviceName,message),Jackson.marshaller())
+																)
+															)
+														)
+												)
+										),
+										post(() -> entity(dataUnmarshaller, date ->
+														onSuccess(recordData(), performed ->
+																complete(StatusCodes.ACCEPTED, performed + " from event time: ")
+														)
+												)
+										)
 
-  public static TextMessage handleTextMessage(TextMessage msg) {
-    if (msg.isStrict()) // optimization that directly creates a simple response...
-    {
-      return TextMessage.create("Hello " + msg.getStrictText());
-    } else // ... this would suffice to handle all text messages in a streaming fashion
-    {
-      return TextMessage.create(Source.single("Hello ").concat(msg.getStreamedText()));
-    }
-  }
+				))
+                );
+	}
 
-  public static HttpResponse handleRequest(HttpRequest request) {
 
-    if (request.getUri().path().equals("/greeter")) {
-      return request
-              .getAttribute(AttributeKeys.webSocketUpgrade())
-              .map(upgrade -> {
-                Flow<Message, Message, NotUsed> greeterFlow = greeter();
 
-                HttpResponse response = upgrade.handleMessagesWith(greeterFlow);
-                return response;
-              })
-              .orElse(
-                      HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST).withEntity("Expected WebSocket request")
-              );
-    } else {
-       return HttpResponse.create().withStatus(404);
-    }
-  }
 
-  private Route clusterState() {
-    return get(
-            () -> respondWithHeader(RawHeader.create("Access-Control-Allow-Origin", "*"),
-                    () -> complete(loadNodes(actorSystem).toJson()))
-    );
-  }
+	public static Flow<Message, Message, NotUsed> websocket() {
+		return
+				Flow.<Message>create()
+						.collect(new JavaPartialFunction<Message, Message>() {
 
-  private static Nodes loadNodes(ActorSystem<?> actorSystem) {
-    final Cluster cluster = Cluster.get(actorSystem);
-    final ClusterEvent.CurrentClusterState clusterState = cluster.state();
+							@Override
+							public Message apply(Message msg, boolean isCheck) throws Exception {
+								if (isCheck) {
+									if (msg.isText()) {
+										return null;
+									} else {
+										throw noMatch();
+									}
+								} else {
 
-    final Set<Member> unreachable = clusterState.getUnreachable();
+									return handleTextMessage(msg.asTextMessage());
+								}
+							}
+						});
+	}
 
-    final Optional<Member> old = StreamSupport.stream(clusterState.getMembers().spliterator(), false)
-            .filter(member -> member.status().equals(MemberStatus.up()))
-            .filter(member -> !(unreachable.contains(member)))
-            .reduce((older, member) -> older.isOlderThan(member) ? older : member);
+	public static TextMessage handleTextMessage(TextMessage msg) {
+		if (msg.isStrict()) // optimization that directly creates a simple response...
+		{
+			return TextMessage.create("Hello " + msg.getStrictText());
+		} else // ... this would suffice to handle all text messages in a streaming fashion
+		{
+			return TextMessage.create(Source.single("Hello ").concat(msg.getStreamedText()));
+		}
+	}
 
-    final Member oldest = old.orElse(cluster.selfMember());
+//  public static HttpResponse handleRequest(HttpRequest request) {
+//
+//    if (request.getUri().path().equals("/webSocket")) {
+//      return request
+//              .getAttribute(AttributeKeys.webSocketUpgrade())
+//              .map(upgrade -> {
+//                Flow<Message, Message, NotUsed> greeterFlow = websocket();
+//
+//                HttpResponse response = upgrade.handleMessagesWith(greeterFlow);
+//                return response;
+//              })
+//              .orElse(
+//                      HttpResponse.create().withStatus(StatusCodes.BAD_REQUEST).withEntity("Expected WebSocket request")
+//              );
+//    } else {
+//       return HttpResponse.create().withStatus(404);
+//    }
+//  }
 
-    final List<Integer> seedNodePorts = seedNodePorts(actorSystem);
+	private Route clusterState() {
+		return get(
+				() -> respondWithHeader(RawHeader.create("Access-Control-Allow-Origin", "*"),
+						() -> complete(loadNodes(actorSystem).toJson()))
+		);
+	}
 
-    final Nodes nodes = new Nodes(
-            memberPort(cluster.selfMember()),
-            cluster.selfMember().address().equals(clusterState.getLeader()),
-            oldest.equals(cluster.selfMember()));
+	private static Nodes loadNodes(ActorSystem<?> actorSystem) {
+		final Cluster cluster = Cluster.get(actorSystem);
+		final ClusterEvent.CurrentClusterState clusterState = cluster.state();
 
-    StreamSupport.stream(clusterState.getMembers().spliterator(), false)
-            .forEach(new Consumer<Member>() {
-              @Override
-              public void accept(Member member) {
-                nodes.add(member, leader(member), oldest(member), seedNode(member));
-              }
+		final Set<Member> unreachable = clusterState.getUnreachable();
 
-              private boolean leader(Member member) {
-                return member.address().equals(clusterState.getLeader());
-              }
+		final Optional<Member> old = StreamSupport.stream(clusterState.getMembers().spliterator(), false)
+				.filter(member -> member.status().equals(MemberStatus.up()))
+				.filter(member -> !(unreachable.contains(member)))
+				.reduce((older, member) -> older.isOlderThan(member) ? older : member);
 
-              private boolean oldest(Member member) {
-                return oldest.equals(member);
-              }
+		final Member oldest = old.orElse(cluster.selfMember());
 
-              private boolean seedNode(Member member) {
-                return seedNodePorts.contains(memberPort(member));
-              }
-            });
+		final List<Integer> seedNodePorts = seedNodePorts(actorSystem);
 
-    clusterState.getUnreachable()
-            .forEach(nodes::addUnreachable);
+		final Nodes nodes = new Nodes(
+				memberPort(cluster.selfMember()),
+				cluster.selfMember().address().equals(clusterState.getLeader()),
+				oldest.equals(cluster.selfMember()));
 
-    return nodes;
-  }
+		StreamSupport.stream(clusterState.getMembers().spliterator(), false)
+				.forEach(new Consumer<Member>() {
+					@Override
+					public void accept(Member member) {
+						nodes.add(member, leader(member), oldest(member), seedNode(member));
+					}
 
-  private Logger log() {
-    return actorSystem.log();
-  }
+					private boolean leader(Member member) {
+						return member.address().equals(clusterState.getLeader());
+					}
 
-  private static boolean isValidPort(int port) {
-    return port >= 2551 && port <= 2559;
-  }
+					private boolean oldest(Member member) {
+						return oldest.equals(member);
+					}
 
-  private static int memberPort(Member member) {
-    final Option<Object> portOption = member.address().port();
-    return portOption.isDefined()
-            ? Integer.parseInt(portOption.get().toString())
-            : 0;
-  }
+					private boolean seedNode(Member member) {
+						return seedNodePorts.contains(memberPort(member));
+					}
+				});
 
-  private static List<Integer> seedNodePorts(ActorSystem<?> actorSystem) {
-    return actorSystem.settings().config().getList("akka.cluster.seed-nodes")
-            .stream().map(s -> s.unwrapped().toString())
-            .map(s -> {
-              final String[] split = s.split(":");
-              return split.length == 0 ? 0 : Integer.parseInt(split[split.length - 1]);
-            }).collect(Collectors.toList());
-  }
+		clusterState.getUnreachable()
+				.forEach(nodes::addUnreachable);
 
-  public static class Nodes implements Serializable {
-    public final int selfPort;
-    public final boolean leader;
-    public final boolean oldest;
-    public List<Node> nodes = new ArrayList<>();
+		return nodes;
+	}
 
-    public Nodes(int selfPort, boolean leader, boolean oldest) {
-      this.selfPort = selfPort;
-      this.leader = leader;
-      this.oldest = oldest;
-    }
+	private Logger log() {
+		return actorSystem.log();
+	}
 
-    void add(Member member, boolean leader, boolean oldest, boolean seedNode) {
-      final int port = memberPort(member);
-      if (isValidPort(port)) {
-        nodes.add(new Node(port, state(member.status()), memberStatus(member.status()), leader, oldest, seedNode));
-      }
-    }
+	private static boolean isValidPort(int port) {
+		return port >= 2551 && port <= 2559;
+	}
 
-    void addUnreachable(Member member) {
-      final int port = memberPort(member);
-      if (isValidPort(port)) {
-        Node node = new Node(port, "unreachable", "unreachable", false, false, false);
-        nodes.remove(node);
-        nodes.add(node);
-      }
-    }
+	private static int memberPort(Member member) {
+		final Option<Object> portOption = member.address().port();
+		return portOption.isDefined()
+				? Integer.parseInt(portOption.get().toString())
+				: 0;
+	}
 
-    private static String state(MemberStatus memberStatus) {
-      if (memberStatus.equals(MemberStatus.down())) {
-        return "down";
-      } else if (memberStatus.equals(MemberStatus.joining())) {
-        return "starting";
-      } else if (memberStatus.equals(MemberStatus.weaklyUp())) {
-        return "starting";
-      } else if (memberStatus.equals(MemberStatus.up())) {
-        return "up";
-      } else if (memberStatus.equals(MemberStatus.exiting())) {
-        return "stopping";
-      } else if (memberStatus.equals(MemberStatus.leaving())) {
-        return "stopping";
-      } else if (memberStatus.equals(MemberStatus.removed())) {
-        return "stopping";
-      } else {
-        return "offline";
-      }
-    }
+	private static List<Integer> seedNodePorts(ActorSystem<?> actorSystem) {
+		return actorSystem.settings().config().getList("akka.cluster.seed-nodes")
+				.stream().map(s -> s.unwrapped().toString())
+				.map(s -> {
+					final String[] split = s.split(":");
+					return split.length == 0 ? 0 : Integer.parseInt(split[split.length - 1]);
+				}).collect(Collectors.toList());
+	}
 
-    private static String memberStatus(MemberStatus memberStatus) {
-      if (memberStatus.equals(MemberStatus.down())) {
-        return "down";
-      } else if (memberStatus.equals(MemberStatus.joining())) {
-        return "joining";
-      } else if (memberStatus.equals(MemberStatus.weaklyUp())) {
-        return "weaklyup";
-      } else if (memberStatus.equals(MemberStatus.up())) {
-        return "up";
-      } else if (memberStatus.equals(MemberStatus.exiting())) {
-        return "exiting";
-      } else if (memberStatus.equals(MemberStatus.leaving())) {
-        return "leaving";
-      } else if (memberStatus.equals(MemberStatus.removed())) {
-        return "removed";
-      } else {
-        return "unknown";
-      }
-    }
+	public static class Nodes implements Serializable {
+		public final int selfPort;
+		public final boolean leader;
+		public final boolean oldest;
+		public List<Node> nodes = new ArrayList<>();
 
-    String toJson() {
-      final ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-      try {
-        return ow.writeValueAsString(this);
-      } catch (JsonProcessingException e) {
-        return String.format("{ \"error\" : \"%s\" }", e.getMessage());
-      }
-    }
-  }
+		public Nodes(int selfPort, boolean leader, boolean oldest) {
+			this.selfPort = selfPort;
+			this.leader = leader;
+			this.oldest = oldest;
+		}
 
-  public static class Node implements Serializable {
-    public final int port;
-    public final String state;
-    public final String memberState;
-    public final boolean leader;
-    public final boolean oldest;
-    public final boolean seedNode;
+		void add(Member member, boolean leader, boolean oldest, boolean seedNode) {
+			final int port = memberPort(member);
+			if (isValidPort(port)) {
+				nodes.add(new Node(port, state(member.status()), memberStatus(member.status()), leader, oldest, seedNode));
+			}
+		}
 
-    public Node(int port, String state, String memberState, boolean leader, boolean oldest, boolean seedNode) {
-      this.port = port;
-      this.state = state;
-      this.memberState = memberState;
-      this.leader = leader;
-      this.oldest = oldest;
-      this.seedNode = seedNode;
-    }
+		void addUnreachable(Member member) {
+			final int port = memberPort(member);
+			if (isValidPort(port)) {
+				Node node = new Node(port, "unreachable", "unreachable", false, false, false);
+				nodes.remove(node);
+				nodes.add(node);
+			}
+		}
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Node node = (Node) o;
-      return Objects.equals(port, node.port);
-    }
+		private static String state(MemberStatus memberStatus) {
+			if (memberStatus.equals(MemberStatus.down())) {
+				return "down";
+			} else if (memberStatus.equals(MemberStatus.joining())) {
+				return "starting";
+			} else if (memberStatus.equals(MemberStatus.weaklyUp())) {
+				return "starting";
+			} else if (memberStatus.equals(MemberStatus.up())) {
+				return "up";
+			} else if (memberStatus.equals(MemberStatus.exiting())) {
+				return "stopping";
+			} else if (memberStatus.equals(MemberStatus.leaving())) {
+				return "stopping";
+			} else if (memberStatus.equals(MemberStatus.removed())) {
+				return "stopping";
+			} else {
+				return "offline";
+			}
+		}
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(port);
-    }
-  }
+		private static String memberStatus(MemberStatus memberStatus) {
+			if (memberStatus.equals(MemberStatus.down())) {
+				return "down";
+			} else if (memberStatus.equals(MemberStatus.joining())) {
+				return "joining";
+			} else if (memberStatus.equals(MemberStatus.weaklyUp())) {
+				return "weaklyup";
+			} else if (memberStatus.equals(MemberStatus.up())) {
+				return "up";
+			} else if (memberStatus.equals(MemberStatus.exiting())) {
+				return "exiting";
+			} else if (memberStatus.equals(MemberStatus.leaving())) {
+				return "leaving";
+			} else if (memberStatus.equals(MemberStatus.removed())) {
+				return "removed";
+			} else {
+				return "unknown";
+			}
+		}
+
+		String toJson() {
+			final ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			try {
+				return ow.writeValueAsString(this);
+			} catch (JsonProcessingException e) {
+				return String.format("{ \"error\" : \"%s\" }", e.getMessage());
+			}
+		}
+	}
+
+	public static class Node implements Serializable {
+		public final int port;
+		public final String state;
+		public final String memberState;
+		public final boolean leader;
+		public final boolean oldest;
+		public final boolean seedNode;
+
+		public Node(int port, String state, String memberState, boolean leader, boolean oldest, boolean seedNode) {
+			this.port = port;
+			this.state = state;
+			this.memberState = memberState;
+			this.leader = leader;
+			this.oldest = oldest;
+			this.seedNode = seedNode;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Node node = (Node) o;
+			return Objects.equals(port, node.port);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(port);
+		}
+	}
 }
