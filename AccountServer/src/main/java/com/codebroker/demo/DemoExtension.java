@@ -40,7 +40,7 @@ public class DemoExtension extends AppListenerExtension {
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
 //		IObject iObject =manager.handleBackMessage(cObject);
-		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToLocalIService(AccountService.class.getName()+"."+random.nextInt(100), cObject);
+		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToClusterIService(AccountService.class.getName(), cObject);
 		return iObject.isPresent()?iObject.get().getUtfString("uid"):"null";
 	}
 

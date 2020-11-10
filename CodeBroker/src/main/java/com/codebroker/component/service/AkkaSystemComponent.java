@@ -3,6 +3,7 @@ package com.codebroker.component.service;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.component.BaseCoreService;
+import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.core.actortype.GameRootSystem;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.jmx.ManagementService;
@@ -10,13 +11,18 @@ import com.codebroker.net.http.HttpServer;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.impl.ConfigImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import akka.management.javadsl.AkkaManagement;
 /**
@@ -58,9 +64,15 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
         Config cg = ConfigFactory.parseFile(configFile);
+        List<String> roles= Lists.newArrayList();
+        roles.add("Cluster");
+        Config config = cg.withValue("CodeBroker.akka.cluster.roles",
+                ConfigImpl.fromAnyRef(roles, "集群节点"));
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
-        Config akkaConfig = ConfigFactory.load(cg).getConfig(configName);
+        Config akkaConfig = ConfigFactory
+                .load(config)
+                .getConfig(configName);
 
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
@@ -68,62 +80,12 @@ public class AkkaSystemComponent extends BaseCoreService {
         AkkaManagement.get(system.classicSystem()).start();
         HttpServer.start(system);
 
+        ActorPathService.akkaConfig=akkaConfig;
+
+        System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
+
         int http_prot = propertiesWrapper.getIntProperty(SystemEnvironment.HTTP_PORT, 0);
 
-        if (http_prot>0){
-//            final Http http = Http.get(system);
-//
-//            //In order to access all directives we need an instance where the routes are define.
-//            HttpDirectives app = new HttpDirectives();
-//
-//            final CompletionStage<ServerBinding> binding =
-//                    http.newServerAt("0.0.0.0", http_prot)
-//                            .bind(app.createRoute());
-        }
-
-//        binding
-//                .thenCompose(ServerBinding::unbind) // trigger unbinding from the port
-//                .thenAccept(unbound -> system.terminate()); // and shutdown when done
-        //集群单节点
-//        ClusterSingleton singleton = ClusterSingleton.get(system);
-        // Start if needed and provide a proxy to a named singleton
-//        ActorRef<Counter.Command> proxy =
-//                singleton.init(SingletonActor.of(Counter.create("11"), "GlobalCounter"));
-
-        //监督策略的单节点
-//        ClusterSingleton singleton = ClusterSingleton.get(system);
-//        ActorRef<Counter.Command> proxy =
-//                singleton.init(
-//                        SingletonActor.of(
-//                                Behaviors.supervise(Counter.create(""))
-//                                        .onFailure(
-//                                                SupervisorStrategy.restartWithBackoff(
-//                                                        Duration.ofSeconds(1), Duration.ofSeconds(10), 0.2)),
-//                                "GlobalCounter"));
-//
-//        proxy.tell(Counter.Increment.INSTANCE);
-
-//        ExternalShardAllocationClient counter = ExternalShardAllocation.get(system).getClient("Counter");
-//
-//        ClusterSharding clusterSharding = ClusterSharding.get(system);
-//        EntityTypeKey<Counter.Command> typeKey = EntityTypeKey.create(Counter.Command.class, "Counter");
-//
-//        ActorRef<ShardingEnvelope<Counter.Command>> shardRegion =clusterSharding.init(Entity.of(typeKey, ctx -> {
-//            String ctxEntityId = ctx.getEntityId();
-//            Behavior<Counter.Command> commandBehavior = Counter.create(ctxEntityId);
-//            return commandBehavior;
-//        }));
-//
-//        System.out.println(shardRegion.path().toSerializationFormat());
-////        EntityRef<Counter.Command> counterOne = clusterSharding.entityRefFor(typeKey, "counter-1");
-////        counterOne.tell(Counter.Increment.INSTANCE);
-//
-//        shardRegion.tell(new ShardingEnvelope<>("counter-1", Counter.Increment.INSTANCE));
-//        shardRegion.tell(new ShardingEnvelope<>("counter-2", Counter.Increment.INSTANCE));
-//
-//
-//        HelloWorldService helloWorldService = new HelloWorldService(system);
-//        helloWorldService.sayHello("123","2323");
         CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(system,
                 replyActorRef ->new IGameRootSystemMessage.StartGameRootSystemMessage(replyActorRef),
                 Duration.ofMillis(500),

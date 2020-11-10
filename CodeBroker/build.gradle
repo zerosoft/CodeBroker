@@ -1,23 +1,6 @@
-//buildscript {
-//	repositories {
-//		mavenLocal()
-//		mavenCentral()
-//		maven {
-//			url "https://plugins.gradle.org/m2/"
-//		}
-//	}
-////	dependencies {
-////		// see https://plugins.gradle.org/plugin/com.lightbend.akka.grpc.gradle
-////		// for the currently latest version.
-////		// https://mvnrepository.com/artifact/com.lightbend.akka.grpc/akka-grpc-gradle-plugin
-////		classpath 'gradle.plugin.com.lightbend.akka.grpc:akka-grpc-gradle-plugin:1.0.2'
-////	}
-//}
-
 plugins {
 	id 'java'
 	id 'application'
-//	id "com.lightbend.akka.grpc.gradle" version '1.0.2'
 }
 
 repositories {
@@ -91,13 +74,6 @@ dependencies {
 	compile group: 'com.lightbend.akka.management', name: "akka-management_${ScalaBinary}", version: AkkaManagementVersion
 	compile group: 'com.lightbend.akka.management', name: "akka-management-cluster-http_${ScalaBinary}", version: AkkaManagementVersion
 
-	// The Gradle plugin for Akka-gRPC doesn't support ${ScalaBinary}:
-	// https://github.com/akka/akka-grpc/pull/1025
-//	compile group: 'com.typesafe.akka', name: "akka-discovery_${ScalaBinary}", version: AkkaVersion
-//	compile group: 'com.typesafe.akka', name: "akka-protobuf_${ScalaBinary}", version: AkkaVersion
-//	compile group: 'com.typesafe.akka', name: "akka-pki_${ScalaBinary}", version: AkkaVersion
-//	compile group: 'com.typesafe.akka', name: "akka-http2-support_${ScalaBinary}", version: AkkaVersion
-
 
 	compile group: 'com.typesafe.akka', name: "akka-stream_${ScalaBinary}", version: AkkaVersion
 	compile group: 'com.typesafe.akka', name: "akka-http_${ScalaBinary}", version: akka_http_version
@@ -154,8 +130,3 @@ task copyJars(type:Copy) {
   from configurations.runtime
   into 'build/lib'
 }
-
-//akkaGrpc {
-//	generateClient = true
-//	generateServer = true
-//}

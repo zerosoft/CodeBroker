@@ -11,6 +11,7 @@ import com.maxmind.geoip2.record.Country;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Optional;
 
 /**
  * IP地理服务
@@ -62,17 +63,17 @@ public class GeoIPComponent extends BaseCoreService {
      * @param ip
      * @return
      */
-    public Country getCityCountry(String ip) {
+    public Optional<Country> getCityCountry(String ip) {
         try {
             // "128.101.101.101"
             InetAddress ipAddress = InetAddress.getByName(ip);
             CityResponse response = cityReader.city(ipAddress);
             Country country = response.getCountry();
-            return country;
+            return Optional.of(country);
         } catch (IOException | GeoIp2Exception e) {
             e.printStackTrace();
+            return Optional.empty();
         }
-        return null;
     }
 
     /**
@@ -81,17 +82,16 @@ public class GeoIPComponent extends BaseCoreService {
      * @param ip
      * @return
      */
-    public Country getCountry(String ip) {
+    public Optional<Country> getCountry(String ip) {
         try {
             InetAddress ipAddress = InetAddress.getByName(ip);
             CountryResponse response = countryReader.country(ipAddress);
 
             Country country = response.getCountry();
-            return country;
+            return Optional.of(country);
         } catch (Exception e) {
-            e.printStackTrace();
+            return Optional.empty();
         }
-        return null;
     }
 
     @Override

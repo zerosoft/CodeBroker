@@ -2,6 +2,7 @@ package com.codebroker.net.http;
 
 import akka.NotUsed;
 import akka.actor.typed.ActorSystem;
+import akka.actor.typed.javadsl.AskPattern;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
@@ -28,6 +29,9 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import com.codebroker.core.actortype.GameWorldWithActor;
+import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.data.CObject;
+import com.codebroker.core.data.IObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -36,6 +40,7 @@ import scala.Option;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,7 +56,7 @@ public class HttpServer {
 	public static final String RESOURCE = "D:\\Users\\Documents\\github\\CodeBrokerGit\\CodeBroker\\src\\main\\resource\\";
 	private final ActorSystem actorSystem;
 	private final ObjectMapper objectMapper;
-	private Unmarshaller<HttpEntity, Object> dataUnmarshaller;
+	private Unmarshaller<HttpEntity, HTTPRequest> dataUnmarshaller;
 
 	public static void start(ActorSystem<?> actorSystem) {
 		final int port = memberPort(Cluster.get(actorSystem).selfMember());
@@ -68,7 +73,7 @@ public class HttpServer {
 		this.actorSystem = actorSystem;
 		start(port);
 		objectMapper = JacksonObjectMapperProvider.get(actorSystem).getOrCreate("jackson-json", Optional.empty());
-		dataUnmarshaller = Jackson.unmarshaller(objectMapper, Object.class);
+		dataUnmarshaller = Jackson.unmarshaller(objectMapper, HTTPRequest.class);
 	}
 
 	private void start(int port) {
@@ -82,45 +87,64 @@ public class HttpServer {
 						ByteString.fromString(String.format("debug-%d", pingCounter.incrementAndGet()))
 				);
 
-//    Materializer mat = ActorMaterializer.create(actorSystem.classicSystem());
-
-
-		// Instantiate implementation
-//    GreeterService impl = new GreeterServiceImpl(mat);
-//    Function<HttpRequest, CompletionStage<HttpResponse>> httpRequestCompletionStageFunction =
-//            GreeterServiceHandlerFactory.create(impl, actorSystem);
-
 		ServerSettings customServerSettings = defaultSettings.withWebsocketSettings(customWebsocketSettings);
 
 		Http.get(actorSystem)
-				.newServerAt("localhost", port)
+				.newServerAt("127.0.0.1", port)
 				.withSettings(customServerSettings)
 				.bind(route())
 		;
-//    GRPCServer grpcServer=new GRPCServer(actorSystem,port+1000);
-//    try {
-//      grpcServer.run();
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//            .bindSync(handler);
 		log().info("HTTP Server started on port {}", "" + port);
 	}
 
 
-	private CompletionStage<String> query(long shardId,String serviceName,String message) {
-		ClusterSharding sharding = ClusterSharding.get(null);
+	private CompletionStage<String> processClusterGet(long shardId,String serviceName,String message) {
+		ClusterSharding sharding = ClusterSharding.get(actorSystem);
 		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = GameWorldWithActor.getTypeKey(serviceName);
-		EntityRef<?> ref = sharding.entityRefFor(typeKey, Long.toString(shardId));
-//    return ref.ask(replyTo -> new WeatherStation.Query(dataType, function, replyTo), timeout);
-		return null;
+		EntityRef<IService> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
+
+		IObject iObject = CObject.newFromJsonData(message);
+
+		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+				entityRef,
+				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
+				Duration.ofMillis(500),
+				actorSystem.scheduler());
+
+		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
+			if (f instanceof IService.HandleUserMessageBack) {
+				IService.HandleUserMessageBack back = (IService.HandleUserMessageBack) f;
+				return back.object.toJson();
+			} else {
+				return "Optional.empty()";
+			}
+		});
+		return objectCompletionStage;
 	}
 
 
-	private CompletionStage<?> recordData() {
-//    EntityRef<WeatherStation.Command> ref = sharding.entityRefFor(WeatherStation.TypeKey, Long.toString(wsid));
-//    return ref.ask(replyTo -> new WeatherStation.Record(data, System.currentTimeMillis(), replyTo), timeout);
-		return null;
+	private CompletionStage<String> processClusterHTTPRequest(long shardId,HTTPRequest date) {
+		ClusterSharding sharding = ClusterSharding.get(actorSystem);
+		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = GameWorldWithActor.getTypeKey(date.serviceName);
+		EntityRef<IService> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
+
+		IObject iObject = CObject.newFromJsonData(date.message);
+
+		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+				entityRef,
+				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
+				Duration.ofMillis(500),
+				actorSystem.scheduler());
+
+		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
+			if (f instanceof IService.HandleUserMessageBack) {
+				IService.HandleUserMessageBack back = (IService.HandleUserMessageBack) f;
+				return back.object.toJson();
+			} else {
+				return "Optional.empty()";
+			}
+		});
+		return objectCompletionStage;
 	}
 
 	private Route route() {
@@ -132,21 +156,21 @@ public class HttpServer {
 				path("favicon.ico", () -> getFromFile(new File(RESOURCE + "favicon.ico"), MediaTypes.IMAGE_X_ICON.toContentType())),
 				path("cluster-state", this::clusterState),
 				path("webSocket", () -> handleWebSocketMessages(websocket())),
-				path(segment("iservice")
+				path(segment("service")
 								.slash()
 								.concat(longSegment()), shardId ->//集群Id
 								concat(
 										get(() ->
-												parameter("service_name", (
+												parameter("servicename", (
 														serviceName -> parameter("message",(message
-																  -> completeOKWithFuture(query(shardId,serviceName,message),Jackson.marshaller())
+																  -> completeOKWithFuture(processClusterGet(shardId,serviceName,message),Jackson.marshaller())
 																)
 															)
 														)
 												)
 										),
 										post(() -> entity(dataUnmarshaller, date ->
-														onSuccess(recordData(), performed ->
+														onSuccess(processClusterHTTPRequest(shardId,date), performed ->
 																complete(StatusCodes.ACCEPTED, performed + " from event time: ")
 														)
 												)

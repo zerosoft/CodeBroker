@@ -7,9 +7,14 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
+import akka.cluster.ddata.LWWMap;
+import akka.cluster.ddata.typed.javadsl.DistributedData;
+import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import akka.cluster.typed.Cluster;
 import akka.cluster.typed.Subscribe;
+import com.codebroker.core.actortype.ActorPathService;
 import org.slf4j.Logger;
+import scala.Option;
 
 import java.util.Optional;
 import java.util.Set;
@@ -44,14 +49,50 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 	@Override
 	public Receive<ClusterEvent.ClusterDomainEvent> createReceive() {
 		return newReceiveBuilder()
+				.onMessage(ClusterEvent.MemberUp.class,this::memberUp)
+				.onMessage(ClusterEvent.MemberExited.class,this::memberExited)
+				.onMessage(ClusterEvent.UnreachableMember.class,this::unreachableMember)
+				.onMessage(ClusterEvent.ReachableMember.class,this::reachableMember)
 				.onAnyMessage(this::logClusterEvent)
 				.build();
+	}
+
+	private Behavior<ClusterEvent.ClusterDomainEvent> reachableMember(ClusterEvent.ReachableMember message) {
+		addMember(message.member());
+		return Behaviors.same();
+	}
+
+	private Behavior<ClusterEvent.ClusterDomainEvent> unreachableMember(ClusterEvent.UnreachableMember message) {
+		delMember(message.member());
+		return Behaviors.same();
+	}
+
+
+	private Behavior<ClusterEvent.ClusterDomainEvent> memberExited(ClusterEvent.MemberExited message) {
+		delMember(message.member());
+		return Behaviors.same();
+	}
+
+	private Behavior<ClusterEvent.ClusterDomainEvent> memberUp(ClusterEvent.MemberUp message) {
+		addMember(message.member());
+		return Behaviors.same();
+	}
+
+	private void addMember(Member member) {
+		Set<String> roles = member.getRoles();
+		if (roles.contains("Cluster")){
+			log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
+			ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
+		}
+	}
+
+	private void delMember(Member member) {
+		ActorPathService.clusterService.remove(member.uniqueAddress().toString());
 	}
 
 	private Behavior<ClusterEvent.ClusterDomainEvent> logClusterEvent(Object clusterEventMessage) {
 		log.info("{} - {} sent to {}", getClass().getSimpleName(), clusterEventMessage, cluster.selfMember());
 		logClusterMembers();
-
 		return Behaviors.same();
 	}
 

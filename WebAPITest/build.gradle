@@ -15,9 +15,6 @@ tasks.withType(JavaCompile) {
 
 sourceSets {
     main{
-//      groovy{
-//            srcDir 'src/main/groovy'
-//        }
         java{
             srcDir 'src/main/java'
         }

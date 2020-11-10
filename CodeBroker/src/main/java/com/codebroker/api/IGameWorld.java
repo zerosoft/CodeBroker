@@ -31,8 +31,32 @@ public interface IGameWorld {
 	 */
 	boolean createService(IService service);
 
+	/**
+	 * 创建一个集群服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
+	 * @param serviceName 指定名称
+	 * @param service
+	 * @return
+	 */
+	boolean createClusterService(String serviceName, IService service);
+	/**
+	 * 创建一个集群服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
+	 * 使用 IService.getName() 作为 serviceName
+	 * @param service
+	 * @return
+	 */
+	boolean createClusterService(IService service);
+
 
 	Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
+	/**
+	 * 发消息给集群服务
+	 * @param iService
+	 * @param message
+	 * @return
+	 */
+	Optional<IObject> sendMessageToClusterIService(Class iService, IObject message);
+
+	Optional<IObject> sendMessageToClusterIService(String serviceName, IObject message);
 	/**
 	 * 发消息给本地服务
 	 * @param iService
