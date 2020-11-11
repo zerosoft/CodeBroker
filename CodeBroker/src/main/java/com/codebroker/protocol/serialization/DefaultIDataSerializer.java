@@ -166,21 +166,21 @@ public class DefaultIDataSerializer implements IDataSerializer {
         }
     }
 
-    private IArray decodeIArray(JsonArray jsa) {
-        CArrayLite cArrayLite = CArrayLite.newInstance();
-        Iterator<JsonElement> iterator = jsa.iterator();
-
-        while (iterator.hasNext()) {
-            Object value = iterator.next();
-            DataWrapper decodedObject = this.decodeJsonObject(value);
-            if (decodedObject == null) {
-                throw new IllegalStateException("(json2sfarray) Could not decode value for object: " + value);
-            }
-            cArrayLite.add(decodedObject);
-        }
-
-        return cArrayLite;
-    }
+//    private IArray decodeIArray(JsonArray jsa) {
+//        CArrayLite cArrayLite = CArrayLite.newInstance();
+//        Iterator<JsonElement> iterator = jsa.iterator();
+//
+//        while (iterator.hasNext()) {
+//            Object value = iterator.next();
+//            DataWrapper decodedObject = this.decodeJsonObject(value);
+//            if (decodedObject == null) {
+//                throw new IllegalStateException("(json2sfarray) Could not decode value for object: " + value);
+//            }
+//            cArrayLite.add(decodedObject);
+//        }
+//
+//        return cArrayLite;
+//    }
 
     public IObject json2object(String jsonStr) {
         if (jsonStr.length() < 2) {
@@ -326,8 +326,17 @@ public class DefaultIDataSerializer implements IDataSerializer {
             return new DataWrapper(DataType.OBJECT,decodeIObject(object.getAsJsonObject()));
         }
         else if (dataType.equals(DataType.ARRAY)){
-            return null;
+            return new DataWrapper(DataType.ARRAY,decodeIArray(object.getAsJsonArray()));
         }
+        else if (dataType.equals(DataType.CLASS)){
+            return new DataWrapper(DataType.CLASS,object.getAsString());
+        }else if (dataType.equals(DataType.ACTOR_REF)){
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+            ActorRef objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(object.getAsString());
+            DataWrapper decodedObject = new DataWrapper(DataType.ACTOR_REF, objectActorRef);
+            return decodedObject;
+        }
+
         else {
             throw new IllegalArgumentException(
                     String.format("Unrecognized DataType while converting JSONObject 2 Code Broker Object. Object: %s, Type: %s",
@@ -1320,12 +1329,10 @@ public class DefaultIDataSerializer implements IDataSerializer {
 
     public String array2json(List list) {
         return gson.toJson(list);
-//        return gsonThreadLocal.get().toJson(list);
     }
 
     @Override
     public String object2json(Map map) {
-//        Gson gson = gsonThreadLocal.get();
         return gson.toJson(map);
     }
 
@@ -1336,34 +1343,57 @@ public class DefaultIDataSerializer implements IDataSerializer {
         for (Entry<String, JsonElement> jsonElementEntry : iterator) {
             JsonElement value = jsonElementEntry.getValue();
             if (value.isJsonObject()) {
-                JsonObject jsonObject = value.getAsJsonObject();
-                JsonElement typeId1 = jsonObject.get("typeId");
-                String asString = typeId1.getAsString();
-                DataType dataType = DataType.valueOf(asString);
-                JsonElement object = jsonObject.get("object");
-                DataWrapper decodedObject = this.decodeJsonObject(dataType, object);
-                if (decodedObject == null) {
-                    throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + jsonElementEntry.getKey());
-                }
+                DataWrapper decodedObject = getDataWrapper(value);
                 cObject.put(jsonElementEntry.getKey(), decodedObject);
             }else if (value.isJsonArray()){
-                CArray cArray = CArray.newInstance();
+//                CArray cArray = CArray.newInstance();
                 JsonArray asJsonArray = value.getAsJsonArray();
-                for (JsonElement jsonElement : asJsonArray) {
-                    JsonObject jsonObject = value.getAsJsonObject();
-                    JsonElement typeId1 = jsonObject.get("typeId");
-                    String asString = typeId1.getAsString();
-                    DataType dataType = DataType.valueOf(asString);
-                    JsonElement object = jsonObject.get("object");
-                    DataWrapper decodedObject = this.decodeJsonObject(dataType, object);
-                    if (decodedObject == null) {
-                        throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + jsonElementEntry.getKey());
-                    }
-                    cArray.add(decodedObject);
-                }
+//                for (JsonElement jsonElement : asJsonArray) {
+//                    DataWrapper decodedObject = getDataWrapper(value);
+//                    cArray.add(decodedObject);
+//                }
+                IArray iArray = decodeIArray(asJsonArray);
+                cObject.putIArray(jsonElementEntry.getKey(),iArray);
             }
         }
         return cObject;
+    }
+
+    private IArray decodeIArray(JsonArray value) {
+        CArray cArray = CArray.newInstance();
+        JsonArray asJsonArray = value.getAsJsonArray();
+        for (JsonElement jsonElement : asJsonArray) {
+            if (jsonElement.isJsonArray()){
+                JsonArray asJsonArray1 = jsonElement.getAsJsonArray();
+                IArray iArray = decodeIArray(asJsonArray1);
+                cArray.addIArray(iArray);
+            }else{
+                DataWrapper decodedObject = getDataWrapper(jsonElement);
+                cArray.add(decodedObject);
+            }
+
+        }
+        return cArray;
+    }
+
+    private DataWrapper getDataWrapper( JsonElement value) {
+        JsonObject jsonObject = value.getAsJsonObject();
+        if (!jsonObject.has("typeId")){
+            throw new IllegalStateException("JsonElement not has typeId");
+        }
+        JsonElement typeId1 = jsonObject.get("typeId");
+        String asString = typeId1.getAsString();
+        DataType dataType = DataType.valueOf(asString);
+        if (!jsonObject.has("object")){
+            throw new IllegalStateException("JsonElement not has object");
+        }
+        JsonElement object = jsonObject.get("object");
+
+        DataWrapper decodedObject = this.decodeJsonObject(dataType, object);
+        if (decodedObject == null) {
+            throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + value.getAsString());
+        }
+        return decodedObject;
     }
 
     //    public Object binary2obj(byte[] data) {
@@ -1383,18 +1413,31 @@ public class DefaultIDataSerializer implements IDataSerializer {
 //        cObject.putByteArray(CLASS_VALUE, KryoSerialization.writeObjectToByteArray(event));
 //        return cObject.toBinary();
 //    }
-    public static void main(String[] args) {
-        DefaultIDataSerializer instance = DefaultIDataSerializer.getInstance();
-        CObject cObject = CObject.newInstance();
-        byte[] s = new byte[]{1, 2, 3};
-//        cObject.putByteArray("aa", s);
-        CArray cArray = CArray.newInstance();
-        cArray.addByte((byte) 1);
-        cArray.addUtfString("Asd");
-        cObject.putIArray("liost",cArray);
-        String s1 = cObject.toJson();
-        System.out.println(s1);
-            CObject.newFromJsonData(s1);
-    }
+//    public static void main(String[] args) {
+//        DefaultIDataSerializer instance = DefaultIDataSerializer.getInstance();
+//        CObject cObject = CObject.newInstance();
+//        byte[] s = new byte[]{1, 2, 3};
+////        cObject.putByteArray("aa", s);
+//        CArray cArray = CArray.newInstance();
+//        cArray.addByte((byte) 1);
+//        cArray.addUtfString("Asd");
+//
+//        CArray cArray1 = CArray.newInstance();
+//        cArray1.addByte((byte) 2);
+//        cArray1.addUtfString("sss");
+//
+//        CArray cArray2 = CArray.newInstance();
+//        cArray2.addByte((byte) 3);
+//        cArray2.addUtfString("swwwss");
+//        cArray1.addIArray(cArray2);
+//
+//        cArray.addIArray(cArray1);
+//
+//        cObject.putIArray("liost",cArray);
+//        String s1 = cObject.toJson();
+//        System.out.println(s1);
+//        IObject iObject = CObject.newFromJsonData(s1);
+//        System.out.println(iObject.toJson());
+//    }
 }
 
