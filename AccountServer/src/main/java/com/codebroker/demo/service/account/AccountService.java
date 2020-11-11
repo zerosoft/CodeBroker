@@ -29,7 +29,7 @@ public class AccountService extends AbstractIService {
 	public IObject handleBackMessage(IObject iObject) {
 		logger.info("AccountService handleBackMessage");
 		IObject result= CObject.newInstance();
-		result.putUtfString("id", UUID.randomUUID().toString());
+		result.putUtfString("uid", UUID.randomUUID().toString());
 		return result;
 	}
 

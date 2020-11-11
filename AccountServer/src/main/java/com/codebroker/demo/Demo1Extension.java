@@ -36,7 +36,7 @@ public class Demo1Extension extends AppListenerExtension {
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
 //		IObject iObject =manager.handleBackMessage(cObject);
-		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToLocalIService(AccountService.class.getName(), cObject);
+		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToClusterIService(AccountService.class.getName(), cObject);
 		return name;
 	}
 
@@ -64,7 +64,7 @@ public class Demo1Extension extends AppListenerExtension {
 		logger.info("Init");
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean accountService = gameWorld.createService(AccountService.class.getName(),new AccountService());
+		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
 		boolean accountServiceT = gameWorld.createService(new AllianceService());
 		addRequestHandler(11, CreateRequestHandler.class);
 		logger.info("Account Service create {}",accountService);

@@ -15,6 +15,7 @@ import com.codebroker.exception.CodecException;
 import com.codebroker.protocol.IDataSerializer;
 import com.codebroker.protocol.SerializableType;
 import com.esotericsoftware.reflectasm.FieldAccess;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -32,7 +33,7 @@ import java.util.concurrent.*;
 public class DefaultIDataSerializer implements IDataSerializer {
 
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private  transient final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final long serialVersionUID = -6749126348064423022L;
 
@@ -47,15 +48,17 @@ public class DefaultIDataSerializer implements IDataSerializer {
     private static final String FIELD_VALUE_KEY = "V";
     private static final String ACTOR_VALUE_KEY = "P";
 
-    private static DefaultIDataSerializer instance = new DefaultIDataSerializer();
+    private transient static DefaultIDataSerializer instance = new DefaultIDataSerializer();
 
-    ThreadLocal<Gson> gsonThreadLocal=new ThreadLocal<Gson>();
+    //    ThreadLocal<Gson> gsonThreadLocal=new ThreadLocal<>();
+    private transient final Gson gson;
 
     private static int BUFFER_CHUNK_SIZE = 512;
 
 
     private DefaultIDataSerializer() {
-        gsonThreadLocal.set(new Gson());
+//        gsonThreadLocal.set(new Gson());
+        gson = new Gson();
     }
 
     public static DefaultIDataSerializer getInstance() {
@@ -157,7 +160,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
         if (jsonStr.length() < 2) {
             throw new IllegalStateException("Can\'t decode Code Broker Object. JSON String is too short. Len: " + jsonStr.length());
         } else {
-            Gson gson=gsonThreadLocal.get();
+//            Gson gson=gsonThreadLocal.get();
             JsonArray jsonElements = gson.fromJson(jsonStr, JsonArray.class);
             return this.decodeIArray(jsonElements);
         }
@@ -184,28 +187,11 @@ public class DefaultIDataSerializer implements IDataSerializer {
             throw new IllegalStateException(
                     "Can\'t decode Code Broker Object. JSON String is too short. Len: " + jsonStr.length());
         } else {
-            Gson gson = gsonThreadLocal.get();
             JsonObject jsonObject = gson.fromJson(jsonStr, JsonObject.class);
             return this.decodeIObject(jsonObject);
         }
     }
 
-    private IObject decodeIObject(JsonObject jso) {
-        CObject cObject = CObjectLite.newInstance();
-        Set<Entry<String, JsonElement>> iterator = jso.entrySet();
-        for (Entry<String, JsonElement> jsonElementEntry : iterator) {
-            JsonElement value = jsonElementEntry.getValue();
-            if (value.isJsonObject()) {
-                JsonObject asJsonObject = value.getAsJsonObject();
-                DataWrapper decodedObject = this.decodeJsonObject(value);
-                if (decodedObject == null) {
-                    throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + jsonElementEntry.getKey());
-                }
-                cObject.put(jsonElementEntry.getKey(), decodedObject);
-            }
-        }
-        return cObject;
-    }
 
     private DataWrapper decodeJsonObject(Object o) {
         if (o instanceof Integer) {
@@ -230,13 +216,132 @@ public class DefaultIDataSerializer implements IDataSerializer {
         }
     }
 
+    private DataWrapper decodeJsonObject(DataType dataType, JsonElement object) {
+        if (dataType.equals(DataType.BYTE)) {
+            return new DataWrapper(DataType.BYTE, object.getAsByte());
+        } else if (dataType.equals(DataType.BOOL)) {
+            return new DataWrapper(DataType.BOOL, object.getAsBoolean());
+        } else if (dataType.equals(DataType.SHORT)) {
+            return new DataWrapper(DataType.SHORT, object.getAsShort());
+        } else if (dataType.equals(DataType.INT)) {
+            return new DataWrapper(DataType.INT, object.getAsInt());
+        } else if (dataType.equals(DataType.FLOAT)) {
+            return new DataWrapper(DataType.FLOAT, object.getAsFloat());
+        } else if (dataType.equals(DataType.LONG)) {
+            return new DataWrapper(DataType.LONG, object.getAsLong());
+        } else if (dataType.equals(DataType.DOUBLE)) {
+            return new DataWrapper(DataType.DOUBLE, object.getAsDouble());
+        } else if (dataType.equals(DataType.UTF_STRING)) {
+            return new DataWrapper(DataType.UTF_STRING, object.getAsString());
+        }
+        else if (dataType.equals(DataType.BOOL_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            boolean[] result=new boolean[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                boolean asBoolean = iterator.next().getAsBoolean();
+                result[index++]=asBoolean;
+            }
+            return  new DataWrapper(DataType.BOOL_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.BYTE_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            byte[] result=new byte[array.size()];
+            int index=0;
+             while (iterator.hasNext()){
+                 byte asByte = iterator.next().getAsByte();
+                 result[index++]=asByte;
+             }
+            return  new DataWrapper(DataType.BYTE_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.SHORT_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            short[] result=new short[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                short asByte = iterator.next().getAsShort();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.SHORT_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.INT_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            int[] result=new int[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                int asByte = iterator.next().getAsInt();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.INT_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.LONG_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            long[] result=new long[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                long asByte = iterator.next().getAsLong();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.LONG_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.FLOAT_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            float[] result=new float[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                float asByte = iterator.next().getAsFloat();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.FLOAT_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.DOUBLE_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            double[] result=new double[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                double asByte = iterator.next().getAsDouble();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.DOUBLE_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.UTF_STRING_ARRAY)) {
+            JsonArray array=object.getAsJsonArray();
+            Iterator<JsonElement> iterator = array.iterator();
+            String[] result=new String[array.size()];
+            int index=0;
+            while (iterator.hasNext()){
+                String asByte = iterator.next().getAsString();
+                result[index++]=asByte;
+            }
+            return  new DataWrapper(DataType.UTF_STRING_ARRAY,result);
+        }
+        else if (dataType.equals(DataType.OBJECT)){
+            return new DataWrapper(DataType.OBJECT,decodeIObject(object.getAsJsonObject()));
+        }
+        else if (dataType.equals(DataType.ARRAY)){
+            return null;
+        }
+        else {
+            throw new IllegalArgumentException(
+                    String.format("Unrecognized DataType while converting JSONObject 2 Code Broker Object. Object: %s, Type: %s",
+                            new Object[]{object, object == null ? "null" : object.getClass()}));
+        }
+    }
+
+
     public byte[] object2binary(IObject object) {
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CHUNK_SIZE);
         buffer.put((byte) DataType.OBJECT.typeID);
         buffer.putShort((short) object.size());
         return this.obj2bin(object, buffer);
     }
-
 
 
     private byte[] obj2bin(IObject object, ByteBuffer buffer) {
@@ -246,8 +351,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
         Object dataObj;
         for (Iterator<String> result = keys.iterator();
              result.hasNext();
-             buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj))
-        {
+             buffer = this.encodeObject(buffer, wrapper.getTypeId(), dataObj)) {
             String pos = result.next();
             wrapper = object.get(pos);
             dataObj = wrapper.getObject();
@@ -300,8 +404,10 @@ public class DefaultIDataSerializer implements IDataSerializer {
                 ArrayList<Object> objectArrayList = new ArrayList<>();
                 map.put(key, objectArrayList);
                 this.flattenArray(objectArrayList, (CArray) value.getObject());
-            } else {
-                map.put(key, value.getObject());
+            }
+            else {
+
+                map.put(key, value);
             }
         }
 
@@ -321,7 +427,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
                 array.add(objectArrayList);
                 this.flattenArray(objectArrayList, (CArray) value.getObject());
             } else {
-                array.add(value.getObject());
+                array.add(value);
             }
         }
 
@@ -379,8 +485,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
                 ActorRef objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(decodedString);
                 decodedObject = new DataWrapper(DataType.ACTOR_REF, objectActorRef);
             }
-        }
-        else {
+        } else {
             if (headerByte != DataType.OBJECT.typeID) {
                 throw new CodecException("Unknow DataType ID: " + headerByte);
             }
@@ -389,11 +494,11 @@ public class DefaultIDataSerializer implements IDataSerializer {
             IObject iObject = this.decodeIObject(buffer);
             DataType type = DataType.OBJECT;
             if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)
-                    ||iObject.containsKey(CLASS_ACTOR_KEY) && iObject.containsKey(ACTOR_VALUE_KEY)
+                    || iObject.containsKey(CLASS_ACTOR_KEY) && iObject.containsKey(ACTOR_VALUE_KEY)
             ) {
                 type = DataType.CLASS;
-                decodedObject = new DataWrapper(type,this.cbo2pojo(iObject));
-            }else{
+                decodedObject = new DataWrapper(type, this.cbo2pojo(iObject));
+            } else {
                 decodedObject = new DataWrapper(type, iObject);
             }
         }
@@ -887,8 +992,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
             String serializationFormat = ActorRefResolver.get(actorSystem).toSerializationFormat(gameUser.getActorRef());
             iObject.putUtfString(CLASS_ACTOR_KEY, gameUser.getUserId());
             iObject.putUtfString(ACTOR_VALUE_KEY, serializationFormat);
-        }
-        else {
+        } else {
             CArray fieldList = CArray.newInstance();
             iObject.putUtfString(CLASS_MARKER_KEY, classFullName);
             iObject.putIArray(CLASS_FIELDS_KEY, fieldList);
@@ -954,13 +1058,11 @@ public class DefaultIDataSerializer implements IDataSerializer {
                 wrapper = new DataWrapper(DataType.DOUBLE, value);
             } else if (value instanceof String) {
                 wrapper = new DataWrapper(DataType.UTF_STRING, value);
-            }else if (value instanceof ActorRef) {
+            } else if (value instanceof ActorRef) {
                 wrapper = new DataWrapper(DataType.ACTOR_REF, value);
-            }
-            else if (value instanceof IObject) {
+            } else if (value instanceof IObject) {
                 wrapper = new DataWrapper(DataType.OBJECT, value);
-            }
-            else if (value.getClass().isArray()) {
+            } else if (value.getClass().isArray()) {
                 wrapper = new DataWrapper(DataType.ARRAY, this.unrollArray((Object[]) value));
             } else if (value instanceof Collection) {
                 wrapper = new DataWrapper(DataType.ARRAY, this.unrollCollection((Collection) value));
@@ -1001,7 +1103,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
         Iterator<Entry> iter = entries.iterator();
 
         while (iter.hasNext()) {
-            Entry item =  iter.next();
+            Entry item = iter.next();
             Object key = item.getKey();
             if (key instanceof String) {
                 cObject.put((String) key, this.wrapPojoField(item.getValue()));
@@ -1026,53 +1128,52 @@ public class DefaultIDataSerializer implements IDataSerializer {
                     ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
                     GameUserProxy gameUserProxy = new GameUserProxy(iObject.getUtfString(CLASS_ACTOR_KEY), objectActorRef);
                     return gameUserProxy;
-                }
-                else {
+                } else {
                     String string = iObject.getUtfString(CLASS_MARKER_KEY);
                     Class theClass = Class.forName(string);
 
                     Constructor[] constructors = theClass.getConstructors();
                     //检查是否有无参数构造,如果多个构造函数选择参数最多的构造
-                    boolean noArg=false;
-                    Constructor use=null;
+                    boolean noArg = false;
+                    Constructor use = null;
                     for (Constructor constructor : constructors) {
-                        if (constructor.getParameterCount()==0){
-                            noArg=true;
+                        if (constructor.getParameterCount() == 0) {
+                            noArg = true;
                             break;
-                        }else {
-                            if (use==null){
-                                use=constructor;
-                            }else {
-                                if (use.getParameterCount()<constructor.getParameterCount()){
-                                    use=constructor;
+                        } else {
+                            if (use == null) {
+                                use = constructor;
+                            } else {
+                                if (use.getParameterCount() < constructor.getParameterCount()) {
+                                    use = constructor;
                                 }
                             }
                         }
                     }
-                    if (noArg){
+                    if (noArg) {
                         pojo = theClass.newInstance();
                         convertSFSObject(iObject.getIArray(CLASS_FIELDS_KEY), pojo);
                         return pojo;
-                    }else {
+                    } else {
                         FieldAccess fieldAccess = FieldAccess.get(theClass);
                         Field[] fields = fieldAccess.getFields();
                         Object[] arg = new Object[use.getParameterTypes().length];
                         IArray iArray = iObject.getIArray(CLASS_FIELDS_KEY);
-                        for (int i=0;i<use.getParameterTypes().length;i++) {
+                        for (int i = 0; i < use.getParameterTypes().length; i++) {
                             Class<?> parameterType = use.getParameterTypes()[i];
                             for (Field field : fields) {
-                                if (field.getType().equals(parameterType)){
-                                    for (int j=0;j<iArray.size();j++){
+                                if (field.getType().equals(parameterType)) {
+                                    for (int j = 0; j < iArray.size(); j++) {
                                         IObject object = iArray.getObject(j);
                                         String utfString = object.getUtfString(FIELD_NAME_KEY);
-                                        if (utfString.equals(field.getName())){
-                                            arg[i]=object.get(FIELD_VALUE_KEY).getObject();
+                                        if (utfString.equals(field.getName())) {
+                                            arg[i] = object.get(FIELD_VALUE_KEY).getObject();
                                         }
                                     }
                                 }
                             }
                         }
-                        return  theClass.getConstructor(use.getParameterTypes()).newInstance(arg);
+                        return theClass.getConstructor(use.getParameterTypes()).newInstance(arg);
                     }
                 }
             } catch (Exception exception) {
@@ -1209,7 +1310,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
         Iterator<String> iterator = iObject.getKeys().iterator();
 
         while (iterator.hasNext()) {
-            String key =  iterator.next();
+            String key = iterator.next();
             DataWrapper wrapper = iObject.get(key);
             map.put(key, this.unwrapPojoField(wrapper));
         }
@@ -1218,15 +1319,54 @@ public class DefaultIDataSerializer implements IDataSerializer {
     }
 
     public String array2json(List list) {
-        return gsonThreadLocal.get().toJson(list);
+        return gson.toJson(list);
+//        return gsonThreadLocal.get().toJson(list);
     }
 
     @Override
     public String object2json(Map map) {
-        return gsonThreadLocal.get().toJson(map);
+//        Gson gson = gsonThreadLocal.get();
+        return gson.toJson(map);
     }
 
-//    public Object binary2obj(byte[] data) {
+
+    private IObject decodeIObject(JsonObject jso) {
+        CObject cObject = CObjectLite.newInstance();
+        Set<Entry<String, JsonElement>> iterator = jso.entrySet();
+        for (Entry<String, JsonElement> jsonElementEntry : iterator) {
+            JsonElement value = jsonElementEntry.getValue();
+            if (value.isJsonObject()) {
+                JsonObject jsonObject = value.getAsJsonObject();
+                JsonElement typeId1 = jsonObject.get("typeId");
+                String asString = typeId1.getAsString();
+                DataType dataType = DataType.valueOf(asString);
+                JsonElement object = jsonObject.get("object");
+                DataWrapper decodedObject = this.decodeJsonObject(dataType, object);
+                if (decodedObject == null) {
+                    throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + jsonElementEntry.getKey());
+                }
+                cObject.put(jsonElementEntry.getKey(), decodedObject);
+            }else if (value.isJsonArray()){
+                CArray cArray = CArray.newInstance();
+                JsonArray asJsonArray = value.getAsJsonArray();
+                for (JsonElement jsonElement : asJsonArray) {
+                    JsonObject jsonObject = value.getAsJsonObject();
+                    JsonElement typeId1 = jsonObject.get("typeId");
+                    String asString = typeId1.getAsString();
+                    DataType dataType = DataType.valueOf(asString);
+                    JsonElement object = jsonObject.get("object");
+                    DataWrapper decodedObject = this.decodeJsonObject(dataType, object);
+                    if (decodedObject == null) {
+                        throw new IllegalStateException("(json2Iobj) Could not decode value for key: " + jsonElementEntry.getKey());
+                    }
+                    cArray.add(decodedObject);
+                }
+            }
+        }
+        return cObject;
+    }
+
+    //    public Object binary2obj(byte[] data) {
 //        CObject cObject = CObject.newFromBinaryData(data);
 //        try {
 //            Class<?> loadClass = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString(CLASS_NAME));
@@ -1243,5 +1383,18 @@ public class DefaultIDataSerializer implements IDataSerializer {
 //        cObject.putByteArray(CLASS_VALUE, KryoSerialization.writeObjectToByteArray(event));
 //        return cObject.toBinary();
 //    }
-
+    public static void main(String[] args) {
+        DefaultIDataSerializer instance = DefaultIDataSerializer.getInstance();
+        CObject cObject = CObject.newInstance();
+        byte[] s = new byte[]{1, 2, 3};
+//        cObject.putByteArray("aa", s);
+        CArray cArray = CArray.newInstance();
+        cArray.addByte((byte) 1);
+        cArray.addUtfString("Asd");
+        cObject.putIArray("liost",cArray);
+        String s1 = cObject.toJson();
+        System.out.println(s1);
+            CObject.newFromJsonData(s1);
+    }
 }
+

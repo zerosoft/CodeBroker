@@ -133,7 +133,7 @@ public class HttpServer {
 		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
 				entityRef,
 				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
-				Duration.ofMillis(500),
+				Duration.ofSeconds(5),
 				actorSystem.scheduler());
 
 		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
@@ -171,7 +171,7 @@ public class HttpServer {
 										),
 										post(() -> entity(dataUnmarshaller, date ->
 														onSuccess(processClusterHTTPRequest(shardId,date), performed ->
-																complete(StatusCodes.ACCEPTED, performed + " from event time: ")
+																complete(StatusCodes.ACCEPTED, performed)
 														)
 												)
 										)

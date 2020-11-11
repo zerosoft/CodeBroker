@@ -26,9 +26,13 @@ public enum DataType {
 
     public final int typeID;
 
+
+
     DataType(int typeID) {
         this.typeID = typeID;
     }
-
+    public DataType getDataType(String name){
+        return DataType.valueOf(name);
+    }
 
 }

@@ -22,7 +22,11 @@ import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
+import com.codebroker.net.http.HTTPRequest;
+import com.codebroker.protocol.serialization.DefaultIDataSerializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -189,21 +193,22 @@ public class GameWorldWithActor implements IGameWorld {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		Http http = Http.get(actorSystem);
 		String json = message.toJson();
-
+		HTTPRequest httpRequest=new HTTPRequest(serviceName,json);
 		Collection<Member> values = ActorPathService.clusterService.values();
 		Optional<Member> first = values.stream().findFirst();
 		String stationUrl;
+		Gson gson=new Gson();
+		String toJson = gson.toJson(httpRequest, HTTPRequest.class);
 		if (first.isPresent()){
 			Member member = first.get();
 			Random random=new Random();
 			int shardId = ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
 			stationUrl = "http://" + member.address().getHost().get()
 					+ ":" + (member.address().getPort().get()+7000) + "/service/" + (random.nextInt(shardId)+1);
-
 			CompletionStage<String> futureResponseBody =
 					http.singleRequest(
 							HttpRequest.POST(stationUrl)
-									.withEntity(ContentTypes.APPLICATION_JSON, json))
+									.withEntity(ContentTypes.APPLICATION_JSON, toJson))
 							.thenCompose(response ->
 									Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
 											.thenApply(body -> {
@@ -213,7 +218,7 @@ public class GameWorldWithActor implements IGameWorld {
 											})
 							);
 			String join = futureResponseBody.toCompletableFuture().join();
-			return Optional.of(CObject.newFromJsonData(json));
+			return Optional.of(CObject.newFromJsonData(join));
 		}
 
 		return Optional.empty();

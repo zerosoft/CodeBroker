@@ -83,10 +83,11 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	}
 
 	private Behavior<IGameWorldMessage> userLoginWorld(IGameWorldMessage.UserLoginWorld message) {
-		userMap.put(message.gameUser.getUserId(),message.gameUser);
+		IGameUser gameUser = message.gameUser;
+		userMap.put(gameUser.getUserId(), gameUser);
 
 		AppListener appListener = ContextResolver.getAppListener();
-		appListener.userLogin(message.gameUser);
+		appListener.userLogin(gameUser);
 
 		return Behaviors.same();
 	}

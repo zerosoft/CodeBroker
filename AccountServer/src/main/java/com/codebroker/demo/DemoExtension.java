@@ -32,7 +32,7 @@ public class DemoExtension extends AppListenerExtension {
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
 		logger.info("handle login name {} parameter {}", name, parameter);
-		Random random=new Random();
+//		Random random=new Random();
 //		AccountService manager = AppContext.getManager(AccountService.class.getName()+"."+random.nextInt(100));
 //		AppContext.getGameWorld().sendMessageToService();
 		CObject cObject = CObject.newInstance();
@@ -41,7 +41,14 @@ public class DemoExtension extends AppListenerExtension {
 		cObject.putUtfString("password",parameter);
 //		IObject iObject =manager.handleBackMessage(cObject);
 		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToClusterIService(AccountService.class.getName(), cObject);
-		return iObject.isPresent()?iObject.get().getUtfString("uid"):"null";
+		String uid;
+		if (iObject.isPresent()) {
+			IObject iObject1 = iObject.get();
+			uid = iObject1.getUtfString("uid");
+		} else {
+			uid = "null";
+		}
+		return uid;
 	}
 
 	@Override
@@ -68,7 +75,7 @@ public class DemoExtension extends AppListenerExtension {
 		logger.info("Init");
 
 		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean accountService = gameWorld.createService(new AccountService());
+		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
 		logger.info("Account Service create {}",accountService);
 		AccountDBManager accountDBManager =new AccountDBManager();
