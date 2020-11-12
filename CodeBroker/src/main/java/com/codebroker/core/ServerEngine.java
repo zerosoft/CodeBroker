@@ -2,6 +2,7 @@ package com.codebroker.core;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.AppListener;
+import com.codebroker.api.classloader.JarLoader;
 import com.codebroker.api.internal.*;
 import com.codebroker.component.ComponentRegistryImpl;
 import com.codebroker.component.service.GeoIPComponent;
@@ -19,8 +20,6 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
-import org.apache.commons.io.IOCase;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;

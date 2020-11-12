@@ -11,7 +11,6 @@ import akka.http.javadsl.Http;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.unmarshalling.Unmarshaller;
-import akka.serialization.jackson.JacksonObjectMapperProvider;
 import akka.stream.SystemMaterializer;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
@@ -23,9 +22,6 @@ import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.net.http.HTTPRequest;
-import com.codebroker.protocol.serialization.DefaultIDataSerializer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.time.Duration;
@@ -47,12 +43,10 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	private String gameWorldId;
-	private final ObjectMapper objectMapper;
 
 	public GameWorldWithActor(String gameWorldId, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
 		this.gameWorldActorRef = gameWorldActorRef;
 		this.gameWorldId = gameWorldId;
-		objectMapper = JacksonObjectMapperProvider.get(ContextResolver.getActorSystem()).getOrCreate("weather-station", Optional.empty());
 	}
 
 	@Override
@@ -238,13 +232,6 @@ public class GameWorldWithActor implements IGameWorld {
 			ActorRef<com.codebroker.core.actortype.message.IService> iServiceActorRef = ActorPathService.localService.get(serviceName);
 			iServiceActorRef.tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
 		}
-//		else if (ActorPathService.clusterService.containsKey(serviceName)){
-//			ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
-//					new ShardingEnvelope<>(serviceName, new com.codebroker.core.actortype.message.IService.HandleMessage(object));
-//			ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardingEnvelopeActorRef =
-//					ActorPathService.clusterService.get(serviceName);
-//			shardingEnvelopeActorRef.tell(shardingEnvelope);
-//		}
 		else {
 			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
 		}
@@ -269,8 +256,5 @@ public class GameWorldWithActor implements IGameWorld {
 	public void restart() {
 		com.codebroker.core.actortype.message.IService.Destroy destroy = new com.codebroker.core.actortype.message.IService.Destroy("");
 		ActorPathService.localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));
-//		for (Map.Entry<String, ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>>> stringActorRefEntry : ActorPathService.clusterService.entrySet()) {
-//			stringActorRefEntry.getValue().tell(new ShardingEnvelope<>(stringActorRefEntry.getKey(), destroy));
-//		}
 	}
 }

@@ -6,13 +6,12 @@ import akka.pattern.StatusReply;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEvent;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.data.CObjectLite;
-import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
+import com.codebroker.api.event.EventName;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
@@ -72,7 +71,7 @@ public class User extends AbstractBehavior<IUser> {
     }
 
     private  Behavior<IUser> getSendMessageToGameUser(IUser.GetSendMessageToGameUser message) {
-		gameUser.dispatchEvent(new Event(IEvent.GAME_EVENT,message.message));
+		gameUser.dispatchEvent(new Event(EventName.GAME_EVENT,message.message));
 		return Behaviors.same();
 	}
 

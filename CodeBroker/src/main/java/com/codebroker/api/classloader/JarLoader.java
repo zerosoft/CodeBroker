@@ -1,18 +1,16 @@
-package com.codebroker.api.internal;
+package com.codebroker.api.classloader;
 
 import jodd.io.findfile.FindFile;
 import jodd.util.cl.ExtendedURLClassLoader;
-import org.apache.tools.ant.taskdefs.Classloader;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 /**
  * jar读取器
  */
-public class JarLoader implements IClassLoader{
+public class JarLoader implements IClassLoader {
 
     private ExtendedURLClassLoader extendedURLClassLoader;
 

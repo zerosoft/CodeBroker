@@ -30,34 +30,32 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
+/**
+ * 默认的序列化器
+ * 提供byte序列化及json序列化
+ */
 public class DefaultIDataSerializer implements IDataSerializer {
 
+    private static final long serialVersionUID = -6749126348064423022L;
 
     private  transient final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private static final long serialVersionUID = -6749126348064423022L;
+    private transient static DefaultIDataSerializer instance = new DefaultIDataSerializer();
+
+    private transient final Gson gson;
 
     private static final String CLASS_MARKER_KEY = "$C";
     private static final String CLASS_FIELDS_KEY = "$F";
     private static final String CLASS_ACTOR_KEY = "$A";
 
-    public static final String CLASS_NAME = "$cn";
-    public static final String CLASS_VALUE = "cv";
-
     private static final String FIELD_NAME_KEY = "N";
     private static final String FIELD_VALUE_KEY = "V";
     private static final String ACTOR_VALUE_KEY = "P";
 
-    private transient static DefaultIDataSerializer instance = new DefaultIDataSerializer();
-
-    //    ThreadLocal<Gson> gsonThreadLocal=new ThreadLocal<>();
-    private transient final Gson gson;
 
     private static int BUFFER_CHUNK_SIZE = 512;
 
-
     private DefaultIDataSerializer() {
-//        gsonThreadLocal.set(new Gson());
         gson = new Gson();
     }
 
@@ -160,27 +158,10 @@ public class DefaultIDataSerializer implements IDataSerializer {
         if (jsonStr.length() < 2) {
             throw new IllegalStateException("Can\'t decode Code Broker Object. JSON String is too short. Len: " + jsonStr.length());
         } else {
-//            Gson gson=gsonThreadLocal.get();
             JsonArray jsonElements = gson.fromJson(jsonStr, JsonArray.class);
             return this.decodeIArray(jsonElements);
         }
     }
-
-//    private IArray decodeIArray(JsonArray jsa) {
-//        CArrayLite cArrayLite = CArrayLite.newInstance();
-//        Iterator<JsonElement> iterator = jsa.iterator();
-//
-//        while (iterator.hasNext()) {
-//            Object value = iterator.next();
-//            DataWrapper decodedObject = this.decodeJsonObject(value);
-//            if (decodedObject == null) {
-//                throw new IllegalStateException("(json2sfarray) Could not decode value for object: " + value);
-//            }
-//            cArrayLite.add(decodedObject);
-//        }
-//
-//        return cArrayLite;
-//    }
 
     public IObject json2object(String jsonStr) {
         if (jsonStr.length() < 2) {
@@ -189,30 +170,6 @@ public class DefaultIDataSerializer implements IDataSerializer {
         } else {
             JsonObject jsonObject = gson.fromJson(jsonStr, JsonObject.class);
             return this.decodeIObject(jsonObject);
-        }
-    }
-
-
-    private DataWrapper decodeJsonObject(Object o) {
-        if (o instanceof Integer) {
-            return new DataWrapper(DataType.INT, o);
-        } else if (o instanceof Long) {
-            return new DataWrapper(DataType.LONG, o);
-        } else if (o instanceof Double) {
-            return new DataWrapper(DataType.DOUBLE, o);
-        } else if (o instanceof Boolean) {
-            return new DataWrapper(DataType.BOOL, o);
-        } else if (o instanceof String) {
-            return new DataWrapper(DataType.UTF_STRING, o);
-        } else if (o instanceof JsonObject) {
-            JsonObject jso = (JsonObject) o;
-            return jso.isJsonNull() ? new DataWrapper(DataType.NULL, null) : new DataWrapper(DataType.OBJECT, this.decodeIObject(jso));
-        } else if (o instanceof JsonArray) {
-            return new DataWrapper(DataType.ARRAY, this.decodeIArray(((JsonArray) o)));
-        } else {
-            throw new IllegalArgumentException(
-                    String.format("Unrecognized DataType while converting JSONObject 2 Code Broker Object. Object: %s, Type: %s",
-                            new Object[]{o, o == null ? "null" : o.getClass()}));
         }
     }
 
@@ -343,7 +300,6 @@ public class DefaultIDataSerializer implements IDataSerializer {
                             new Object[]{object, object == null ? "null" : object.getClass()}));
         }
     }
-
 
     public byte[] object2binary(IObject object) {
         ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CHUNK_SIZE);
@@ -1346,12 +1302,7 @@ public class DefaultIDataSerializer implements IDataSerializer {
                 DataWrapper decodedObject = getDataWrapper(value);
                 cObject.put(jsonElementEntry.getKey(), decodedObject);
             }else if (value.isJsonArray()){
-//                CArray cArray = CArray.newInstance();
                 JsonArray asJsonArray = value.getAsJsonArray();
-//                for (JsonElement jsonElement : asJsonArray) {
-//                    DataWrapper decodedObject = getDataWrapper(value);
-//                    cArray.add(decodedObject);
-//                }
                 IArray iArray = decodeIArray(asJsonArray);
                 cObject.putIArray(jsonElementEntry.getKey(),iArray);
             }
@@ -1396,48 +1347,5 @@ public class DefaultIDataSerializer implements IDataSerializer {
         return decodedObject;
     }
 
-    //    public Object binary2obj(byte[] data) {
-//        CObject cObject = CObject.newFromBinaryData(data);
-//        try {
-//            Class<?> loadClass = ClassLoader.getSystemClassLoader().loadClass(cObject.getUtfString(CLASS_NAME));
-//            return KryoSerialization.readObjectFromByteArray(cObject.getByteArray(CLASS_VALUE), loadClass);
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    public byte[] obj2binary(Object event) {
-//        CObject cObject = CObject.newInstance();
-//        cObject.putUtfString(CLASS_NAME, event.getClass().getName());
-//        cObject.putByteArray(CLASS_VALUE, KryoSerialization.writeObjectToByteArray(event));
-//        return cObject.toBinary();
-//    }
-//    public static void main(String[] args) {
-//        DefaultIDataSerializer instance = DefaultIDataSerializer.getInstance();
-//        CObject cObject = CObject.newInstance();
-//        byte[] s = new byte[]{1, 2, 3};
-////        cObject.putByteArray("aa", s);
-//        CArray cArray = CArray.newInstance();
-//        cArray.addByte((byte) 1);
-//        cArray.addUtfString("Asd");
-//
-//        CArray cArray1 = CArray.newInstance();
-//        cArray1.addByte((byte) 2);
-//        cArray1.addUtfString("sss");
-//
-//        CArray cArray2 = CArray.newInstance();
-//        cArray2.addByte((byte) 3);
-//        cArray2.addUtfString("swwwss");
-//        cArray1.addIArray(cArray2);
-//
-//        cArray.addIArray(cArray1);
-//
-//        cObject.putIArray("liost",cArray);
-//        String s1 = cObject.toJson();
-//        System.out.println(s1);
-//        IObject iObject = CObject.newFromJsonData(s1);
-//        System.out.println(iObject.toJson());
-//    }
 }
 
