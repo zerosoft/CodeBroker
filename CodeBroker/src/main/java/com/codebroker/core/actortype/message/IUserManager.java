@@ -37,6 +37,7 @@ public interface IUserManager  {
     }
 
 
+
     final class UserLostSession implements IUserManager {
         public ActorRef<IUser> self;
         public UserLostSession(ActorRef<IUser> self) {

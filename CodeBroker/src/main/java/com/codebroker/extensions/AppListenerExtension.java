@@ -5,6 +5,7 @@ import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IHandlerFactory;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.data.IObject;
+import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.extensions.request.ClientExtensionFilterChain;
 import com.codebroker.extensions.request.ClientHandlerFactory;
 import com.codebroker.extensions.request.filter.ClientExtensionFilter;
@@ -34,10 +35,8 @@ public abstract class AppListenerExtension implements AppListener {
 
     public void addRequestHandler(int requestId, Class<?> theClass) {
         if (!(IClientRequestHandler.class).isAssignableFrom(theClass)) {
-            // throw new
-            // ALawsRuntimeException(String.format("Provided Request Handler
-            // does not implement IClientRequestHandler: %s, Cmd: %s",
-            // new Object[] {theClass, requestId }));
+             throw new CodeBrokerException(String.format("Provided Request Handler does not implement IClientRequestHandler: %s, Cmd: %s",
+             new Object[] {theClass, requestId }));
         } else {
             logger.info("add handler id {} class {}", requestId, theClass);
             handlerFactory.addHandler(requestId, theClass);
@@ -68,7 +67,7 @@ public abstract class AppListenerExtension implements AppListener {
             }
             handler.handleClientRequest(user, params);
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            logger.error("IClientRequestHandler error",e);
         }
 
     }

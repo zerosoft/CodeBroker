@@ -14,6 +14,7 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
+import com.codebroker.exception.NoAuthException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -108,7 +109,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
 
     private Behavior<IUserManager> bindingSession(IUserManager.TryBindingUser tryBindingUser) {
         AppListener appListener = ContextResolver.getAppListener();
-        //TODO 更具需求调整
+        //TODO 根据需求调整
         byte[] message = tryBindingUser.message.getRawData();
         Gson gson=new Gson();
         JsonObject jsonElement = gson.fromJson(new String(message), JsonObject.class);
@@ -117,6 +118,8 @@ public class UserManager extends AbstractBehavior<IUserManager> {
             uid = appListener.sessionLoginVerification(jsonElement.get("name").getAsString(), jsonElement.get("parm").getAsString());
         }catch (Exception e){
             getContext().getLog().error(e.getMessage(),e);
+            //登入失败,关闭处理
+            tryBindingUser.ioSession.tell(new ISession.TryBindingUserFail());
             return Behaviors.same();
         }
 

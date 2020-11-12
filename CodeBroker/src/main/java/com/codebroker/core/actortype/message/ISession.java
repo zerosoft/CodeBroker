@@ -47,4 +47,10 @@ public interface ISession {
     }
 
 
+    //尝试绑定用户失败
+    final class TryBindingUserFail implements ISession{
+
+    }
+
+
 }

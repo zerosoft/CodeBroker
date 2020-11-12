@@ -45,9 +45,15 @@ public class Session extends AbstractBehavior<ISession> {
                 .onMessage(ISession.SessionAcceptRequest.class,this::sessionAcceptMessage)
                 .onMessage(ISession.SessionWriteResponse.class,this::sessionSendMessage)
                 .onMessage(ISession.SessionBindingUser.class,this::sessionBindingUser)
+                .onMessage(ISession.TryBindingUserFail.class,this::tryBindingUserFail)
                 .onMessage(ISession.SessionClose.class,this::sessionClose)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
+    }
+
+    private Behavior<ISession> tryBindingUserFail(ISession.TryBindingUserFail message) {
+        getContext().getSystem().log().info("tryBindingUserFail fail");
+        return Behaviors.stopped();
     }
 
     private  Behavior<ISession> sessionSendMessage(ISession.SessionWriteResponse message) {
