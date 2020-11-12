@@ -74,15 +74,15 @@ public class DemoExtension extends AppListenerExtension {
 	public void init(Object obj) {
 		logger.info("Init");
 
-		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
+//		IGameWorld gameWorld = AppContext.getGameWorld();
+//		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
-		logger.info("Account Service create {}",accountService);
-		AccountDBManager accountDBManager =new AccountDBManager();
-		ArrayList<Service> serviceArrayList = Lists.newArrayList();
-		serviceArrayList.add(accountDBManager);
-		ServiceManager serviceManager=new ServiceManager(serviceArrayList);
-		serviceManager.startAsync();
+//		logger.info("Account Service create {}",accountService);
+//		AccountDBManager accountDBManager =new AccountDBManager();
+//		ArrayList<Service> serviceArrayList = Lists.newArrayList();
+//		serviceArrayList.add(accountDBManager);
+//		ServiceManager serviceManager=new ServiceManager(serviceArrayList);
+//		serviceManager.startAsync();
 
 	}
 }

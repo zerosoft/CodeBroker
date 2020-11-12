@@ -22,12 +22,12 @@ import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.net.http.HTTPRequest;
+import com.codebroker.util.MathUtil;
 import com.google.gson.Gson;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -97,27 +97,11 @@ public class GameWorldWithActor implements IGameWorld {
 	public boolean createClusterService(String serviceName, IService service) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		//创建独立的节点
-//		if (!annotation.sharding()){
-//			ClusterSingleton singleton = ClusterSingleton.get(actorSystem);
-//
-//			ActorRef<com.codebroker.core.actortype.message.IService> serviceActorRef =
-//					annotation.dateCenter()==""?
-//							singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName)):
-//							singleton.init(SingletonActor.of(ServiceActor.create(serviceName, service), serviceName)
-//									.withSettings(ClusterSingletonSettings.create(actorSystem).withDataCenter(annotation.dateCenter()))
-//							);
-//
-//			ServiceWithActor serviceActor=new ServiceWithActor(serviceName,serviceActorRef);
-//
-//			new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
-//
-//			ActorPathService.localService.put(serviceName,serviceActorRef);
-//
-//			ContextResolver.setManager(service);
-//			return true;
-//		}else{
 		ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
-
+		String dataCenter="";
+		if (ActorPathService.akkaConfig.hasPath("akka.cluster.multi-data-center.self-data-center")){
+			dataCenter = ActorPathService.akkaConfig.getString("akka.cluster.multi-data-center.self-data-center");
+		}
 
 		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(service.getClass().getName());
 		ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
@@ -128,7 +112,8 @@ public class GameWorldWithActor implements IGameWorld {
 							Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
 									ClusterServiceActor.create(ctxEntityId, service);
 							return commandBehavior;
-						})
+						}).withDataCenter(dataCenter)
+						.withRole("B")
 						//停止的时候发的协议
 						.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
 				);
@@ -188,6 +173,7 @@ public class GameWorldWithActor implements IGameWorld {
 		Http http = Http.get(actorSystem);
 		String json = message.toJson();
 		HTTPRequest httpRequest=new HTTPRequest(serviceName,json);
+		//节点数量
 		Collection<Member> values = ActorPathService.clusterService.values();
 		Optional<Member> first = values.stream().findFirst();
 		String stationUrl;
@@ -195,10 +181,16 @@ public class GameWorldWithActor implements IGameWorld {
 		String toJson = gson.toJson(httpRequest, HTTPRequest.class);
 		if (first.isPresent()){
 			Member member = first.get();
-			Random random=new Random();
-			int shardId = ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
+			//随机因子，
+			int shardId = 100;
+			if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
+				shardId=ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
+			}
+
+			int randomShardId = MathUtil.random(shardId) + 1;
+
 			stationUrl = "http://" + member.address().getHost().get()
-					+ ":" + (member.address().getPort().get()+7000) + "/service/" + (random.nextInt(shardId)+1);
+					+ ":" + (member.address().getPort().get()+7000) + "/service/" + randomShardId;
 			CompletionStage<String> futureResponseBody =
 					http.singleRequest(
 							HttpRequest.POST(stationUrl)

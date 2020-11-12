@@ -2,6 +2,9 @@ package com.codebroker.component.service;
 
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
+import akka.discovery.Discovery;
+import akka.discovery.Lookup;
+import akka.discovery.ServiceDiscovery;
 import com.codebroker.component.BaseCoreService;
 import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.core.actortype.GameRootSystem;
@@ -64,25 +67,25 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
         Config cg = ConfigFactory.parseFile(configFile);
-        List<String> roles= Lists.newArrayList();
-        roles.add("Cluster");
-        Config config = cg.withValue("CodeBroker.akka.cluster.roles",
-                ConfigImpl.fromAnyRef(roles, "集群节点"));
+//        List<String> roles= Lists.newArrayList();
+//        roles.add("Cluster");
+//        Config config = cg.withValue("CodeBroker.akka.cluster.roles",
+//                ConfigImpl.fromAnyRef(roles, "集群节点"));
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory
-                .load(config)
+                .load(cg)
                 .getConfig(configName);
 
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
 
-        AkkaManagement.get(system.classicSystem()).start();
+//        AkkaManagement.get(system.classicSystem()).start();
         HttpServer.start(system);
 
         ActorPathService.akkaConfig=akkaConfig;
 
-        System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
+//        System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
 
         int http_prot = propertiesWrapper.getIntProperty(SystemEnvironment.HTTP_PORT, 0);
 
