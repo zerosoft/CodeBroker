@@ -73,7 +73,7 @@ dependencies {
 	//Akka Management
 	compile group: 'com.lightbend.akka.management', name: "akka-management_${ScalaBinary}", version: AkkaManagementVersion
 	compile group: 'com.lightbend.akka.management', name: "akka-management-cluster-http_${ScalaBinary}", version: AkkaManagementVersion
-
+	compile group: 'com.typesafe.akka', name: "akka-discovery_${ScalaBinary}", version: AkkaVersion
 
 	compile group: 'com.typesafe.akka', name: "akka-stream_${ScalaBinary}", version: AkkaVersion
 	compile group: 'com.typesafe.akka', name: "akka-http_${ScalaBinary}", version: akka_http_version
@@ -123,6 +123,11 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.freemarker/freemarker
 	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+    // https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper
+    compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.6.2'
+	// https://mvnrepository.com/artifact/com.101tec/zkclient
+	compile group: 'com.101tec', name: 'zkclient', version: '0.11'
+
 
 }
 
