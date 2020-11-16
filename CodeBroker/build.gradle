@@ -4,10 +4,10 @@ plugins {
 }
 
 repositories {
-	maven {
-		url "https://plugins.gradle.org/m2/"
-	}
-	mavenLocal()
+//	maven {
+//		url "https://plugins.gradle.org/m2/"
+//	}
+//	mavenLocal()
 	mavenCentral()
 }
 
@@ -68,7 +68,7 @@ dependencies {
 	compile group: 'com.typesafe.akka', name: "akka-persistence-typed_${ScalaBinary}", version: AkkaVersion
 
 	// https://mvnrepository.com/artifact/org.scalatestplus/scalatestplus-junit
-	testCompile group: 'org.scalatestplus', name: 'scalatestplus-junit_${ScalaBinary}', version: '1.0.0-M2'
+	testCompile group: 'org.scalatestplus', name: "scalatestplus-junit_${ScalaBinary}", version: '1.0.0-M2'
 
 	//Akka Management
 	compile group: 'com.lightbend.akka.management', name: "akka-management_${ScalaBinary}", version: AkkaManagementVersion
@@ -128,6 +128,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.101tec/zkclient
 	compile group: 'com.101tec', name: 'zkclient', version: '0.11'
 
+    // https://mvnrepository.com/artifact/org.apache.curator/curator-framework
+	compile group: 'org.apache.curator', name: 'curator-framework', version: '5.1.0'
+	compile group: 'org.apache.curator', name: 'curator-recipes', version: '5.1.0'
 
 }
 

@@ -1,12 +1,9 @@
 package com.codebroker.util.zookeeper;
 
-import org.apache.zookeeper.AsyncCallback;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.data.Stat;
 
-public class ClusterServiceMonitor implements Watcher, AsyncCallback.StatCallback {
+public class ClusterServiceMonitor implements Watcher {
 	@Override
 	public void process(WatchedEvent event) {
 		if (event.getState() == Event.KeeperState.SyncConnected) {
@@ -22,43 +19,43 @@ public class ClusterServiceMonitor implements Watcher, AsyncCallback.StatCallbac
 		}
 	}
 
-	@Override
-	public void processResult(int rc, String path, Object ctx, Stat stat) {
-		boolean exists;
-		switch (rc) {
-			case KeeperException.Code.OK:
-				exists = true;
-				break;
-			case KeeperException.Code.NONODE:
-				exists = false;
-				break;
-			case KeeperException.Code.INVALIDCALLBACK:
-			case KeeperException.Code.NOAUTH:
-				dead = true;
-				listener.closing(rc);
-				return;
-			default:
-				// Retry errors
-				zk.exists(znode, true, this, null);
-				return;
-		}
-
-		byte b[] = null;
-		if (exists) {
-			try {
-				b = zk.getData(znode, false, null);
-			} catch (KeeperException e) {
-				// We don't need to worry about recovering now. The watch
-				// callbacks will kick off any exception handling
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				return;
-			}
-		}
-		if ((b == null && b != prevData)
-				|| (b != null && !Arrays.equals(prevData, b))) {
-			listener.exists(b);
-			prevData = b;
-		}
-	}
+//	@Override
+//	public void processResult(int rc, String path, Object ctx, Stat stat) {
+//		boolean exists;
+//		switch (rc) {
+//			case KeeperException.Code.OK:
+//				exists = true;
+//				break;
+//			case KeeperException.Code.NONODE:
+//				exists = false;
+//				break;
+//			case KeeperException.Code.INVALIDCALLBACK:
+//			case KeeperException.Code.NOAUTH:
+////				dead = true;
+////				listener.closing(rc);
+//				return;
+//			default:
+//				// Retry errors
+////				zk.exists(znode, true, this, null);
+//				return;
+//		}
+//
+//		byte b[] = null;
+//		if (exists) {
+//			try {
+//				b = zk.getData(znode, false, null);
+//			} catch (KeeperException e) {
+//				// We don't need to worry about recovering now. The watch
+//				// callbacks will kick off any exception handling
+//				e.printStackTrace();
+//			} catch (InterruptedException e) {
+//				return;
+//			}
+//		}
+//		if ((b == null && b != prevData)
+//				|| (b != null && !Arrays.equals(prevData, b))) {
+//			listener.exists(b);
+//			prevData = b;
+//		}
+//	}
 }
