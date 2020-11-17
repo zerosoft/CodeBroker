@@ -6,13 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class URL {
 
 	String DEFAULT_KEY_PREFIX = "default.";
+	private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
 	private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)");
 	Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 	static String LOCALHOST_KEY = "localhost";
@@ -30,21 +30,12 @@ public class URL {
 
 	private final String password;
 
-	// by default, host to registry
 	private final String host;
-
-	// by default, port to registry
 	private final int port;
 
 	private final String path;
 
 	private final Map<String, String> parameters;
-
-	// ==== cache ====
-
-	private volatile transient Map<String, Number> numbers;
-
-	private volatile transient Map<String, URL> urls;
 
 	private volatile transient String ip;
 
@@ -69,10 +60,6 @@ public class URL {
 	public URL(String protocol, String host, int port) {
 		this(protocol, null, null, host, port, null, (Map<String, String>) null);
 	}
-
-//	public URL(String protocol, String host, int port, String[] pairs) { // varargs ... conflict with the following path argument, use array instead.
-//		this(protocol, null, null, host, port, null, CollectionUtils.toStringMap(pairs));
-//	}
 
 	public URL(String protocol, String host, int port, Map<String, String> parameters) {
 		this(protocol, null, null, host, port, null, parameters);
@@ -441,162 +428,6 @@ public class URL {
 		return Arrays.asList(strArray);
 	}
 
-	private Map<String, Number> getNumbers() {
-		// concurrent initialization is tolerant
-		return numbers == null ? new ConcurrentHashMap<>() : numbers;
-	}
-
-	private Map<String, URL> getUrls() {
-		// concurrent initialization is tolerant
-		return urls == null ? new ConcurrentHashMap<>() : urls;
-	}
-
-	public URL getUrlParameter(String key) {
-		URL u = getUrls().get(key);
-		if (u != null) {
-			return u;
-		}
-		String value = getParameterAndDecoded(key);
-		if (StringUtils.isEmpty(value)) {
-			return null;
-		}
-		u = URL.valueOf(value);
-		getUrls().put(key, u);
-		return u;
-	}
-
-	public double getParameter(String key, double defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.doubleValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		double d = Double.parseDouble(value);
-		getNumbers().put(key, d);
-		return d;
-	}
-
-	public float getParameter(String key, float defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.floatValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		float f = Float.parseFloat(value);
-		getNumbers().put(key, f);
-		return f;
-	}
-
-	public long getParameter(String key, long defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.longValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		long l = Long.parseLong(value);
-		getNumbers().put(key, l);
-		return l;
-	}
-
-	public int getParameter(String key, int defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.intValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		int i = Integer.parseInt(value);
-		getNumbers().put(key, i);
-		return i;
-	}
-
-	public short getParameter(String key, short defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.shortValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		short s = Short.parseShort(value);
-		getNumbers().put(key, s);
-		return s;
-	}
-
-	public byte getParameter(String key, byte defaultValue) {
-		Number n = getNumbers().get(key);
-		if (n != null) {
-			return n.byteValue();
-		}
-		String value = getParameter(key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		byte b = Byte.parseByte(value);
-		getNumbers().put(key, b);
-		return b;
-	}
-
-	public float getPositiveParameter(String key, float defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		float value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public double getPositiveParameter(String key, double defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		double value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public long getPositiveParameter(String key, long defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		long value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public int getPositiveParameter(String key, int defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		int value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public short getPositiveParameter(String key, short defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		short value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public byte getPositiveParameter(String key, byte defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		byte value = getParameter(key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
 	public char getParameter(String key, char defaultValue) {
 		String value = getParameter(key);
 		return StringUtils.isEmpty(value) ? defaultValue : value.charAt(0);
@@ -630,143 +461,6 @@ public class URL {
 		return StringUtils.isEmpty(value) ? defaultValue : value;
 	}
 
-	public double getMethodParameter(String method, String key, double defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.doubleValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		double d = Double.parseDouble(value);
-		getNumbers().put(methodKey, d);
-		return d;
-	}
-
-	public float getMethodParameter(String method, String key, float defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.floatValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		float f = Float.parseFloat(value);
-		getNumbers().put(methodKey, f);
-		return f;
-	}
-
-	public long getMethodParameter(String method, String key, long defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.longValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		long l = Long.parseLong(value);
-		getNumbers().put(methodKey, l);
-		return l;
-	}
-
-	public int getMethodParameter(String method, String key, int defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.intValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		int i = Integer.parseInt(value);
-		getNumbers().put(methodKey, i);
-		return i;
-	}
-
-	public short getMethodParameter(String method, String key, short defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.shortValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		short s = Short.parseShort(value);
-		getNumbers().put(methodKey, s);
-		return s;
-	}
-
-	public byte getMethodParameter(String method, String key, byte defaultValue) {
-		String methodKey = method + "." + key;
-		Number n = getNumbers().get(methodKey);
-		if (n != null) {
-			return n.byteValue();
-		}
-		String value = getMethodParameter(method, key);
-		if (StringUtils.isEmpty(value)) {
-			return defaultValue;
-		}
-		byte b = Byte.parseByte(value);
-		getNumbers().put(methodKey, b);
-		return b;
-	}
-
-	public double getMethodPositiveParameter(String method, String key, double defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		double value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public float getMethodPositiveParameter(String method, String key, float defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		float value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public long getMethodPositiveParameter(String method, String key, long defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		long value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public int getMethodPositiveParameter(String method, String key, int defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		int value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public short getMethodPositiveParameter(String method, String key, short defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		short value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
-
-	public byte getMethodPositiveParameter(String method, String key, byte defaultValue) {
-		if (defaultValue <= 0) {
-			throw new IllegalArgumentException("defaultValue <= 0");
-		}
-		byte value = getMethodParameter(method, key, defaultValue);
-		return value <= 0 ? defaultValue : value;
-	}
 
 	public char getMethodParameter(String method, String key, char defaultValue) {
 		String value = getMethodParameter(method, key);
@@ -811,7 +505,7 @@ public class URL {
 				|| host.equalsIgnoreCase(LOCALHOST_KEY));
 	}
 
-	private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
+
 	public boolean isAnyHost() {
 		return ANYHOST_VALUE.equals(host) || getParameter(ANYHOST_KEY, false);
 	}

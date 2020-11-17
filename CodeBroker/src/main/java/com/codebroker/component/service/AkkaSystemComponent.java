@@ -65,12 +65,17 @@ public class AkkaSystemComponent extends BaseCoreService {
         logger.debug("configName:" + configName);
 
 
+        String arteryHostname = propertiesWrapper.getProperty(SystemEnvironment.ARTERY_HOSTNAME, "127.0.0.1");
+        int arteryPort = propertiesWrapper.getIntProperty(SystemEnvironment.ARTERY_PORT, 2551);
+
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
         Config cg = ConfigFactory.parseFile(configFile);
 //        List<String> roles= Lists.newArrayList();
 //        roles.add("Cluster");
-//        Config config = cg.withValue("CodeBroker.akka.cluster.roles",
-//                ConfigImpl.fromAnyRef(roles, "集群节点"));
+        Config config = cg.withValue(akkaName+".akka.remote.artery.canonical.hostname",
+                ConfigImpl.fromAnyRef(arteryHostname, "网络服务地址IP"))
+                         .withValue(akkaName+".akka.remote.artery.canonical.port",
+                ConfigImpl.fromAnyRef(arteryPort, "网络服务地址端口"));
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory

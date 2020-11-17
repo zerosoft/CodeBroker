@@ -6,7 +6,9 @@ import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -104,6 +106,7 @@ public class ZookeeperClient1 {
 //		}
 		URL url=new URL("ptl","127.0.0.1",2181);
 		CuratorZookeeperClient curatorZookeeperClient=new CuratorZookeeperClient(url);
+		ZookeeperClusterServiceRegister zookeeperClusterServiceRegister=new ZookeeperClusterServiceRegister(curatorZookeeperClient);
 
 		ChildListener childListener=new ChildListener() {
 			@Override
@@ -154,6 +157,15 @@ public class ZookeeperClient1 {
 		}
 
 
+		zookeeperClusterServiceRegister.registerService("a.b.c","A1","123.44.44.22",3567);
+		zookeeperClusterServiceRegister.registerService("a.b.c","A2","123.44.44.23",3557);
+
+		Set<String> roles=new HashSet();
+		roles.add("game");
+		roles.add("sdsd");
+
+		zookeeperClusterServiceRegister.registerServer(12,"123.233.2.44",3557,"Game",roles);
+		zookeeperClusterServiceRegister.registerServer(13,"123.233.2.44",3558,"Game",roles);
 		Thread.sleep(102009);
 
 //		byte[] bs = zookeeper.getData("/top/jinyong", true, null);

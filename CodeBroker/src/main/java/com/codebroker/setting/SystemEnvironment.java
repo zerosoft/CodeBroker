@@ -37,6 +37,21 @@ public class SystemEnvironment {
      */
     public static final String AKKA_CONFIG_PATH = AKKA_CONFIG_NAME + ".config.path";
 
+    //com.code.broker.artery.hostname = 127.0.0.1
+    public static final String ARTERY_HOSTNAME = APP_ROOT + ".artery.hostname";
+    //com.code.broker.artery.port = 2552
+    public static final String ARTERY_PORT = APP_ROOT + ".artery.port";
+    //com.code.broker.server.type=game
+    public static final String CLUSTER_TYPE = APP_ROOT + ".cluster.type";
+    // com.code.broker.server.center=north
+    public static final String CLUSTER_CENTER = APP_ROOT + ".cluster.center";
+    //com.code.broker.server.shards=100
+    public static final String CLUSTER_SHARDS = APP_ROOT + ".cluster.shards";
+
+    //com.code.broker.zookeeper.host=127.0.0.1
+    public static final String ZOOKEEPER_HOST = APP_ROOT + ".zookeeper.host";
+    //com.code.broker.zookeeper.port=2181
+    public static final String ZOOKEEPER_PORT = APP_ROOT + ".zookeeper.port";
     /**
      * Netty网络配置
      */

@@ -32,7 +32,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 	protected static final Logger logger = LoggerFactory.getLogger(CuratorZookeeperClient.class);
 
 	static final Charset CHARSET = Charset.forName("UTF-8");
-	private static final String TIMEOUT_KEY = "timeout";
 	private final CuratorFramework client;
 	private Map<String, CuratorCache> treeCacheMap = new ConcurrentHashMap<>();
 
@@ -40,7 +39,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 	public CuratorZookeeperClient(URL url) {
 		super(url);
 		try {
-			int timeout = url.getParameter(TIMEOUT_KEY, 5000);
+			int timeout = 5000;
 			CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
 					.connectString(url.getBackupAddress())
 					.retryPolicy(new RetryNTimes(1, 1000))
@@ -259,7 +258,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 				childListener.childChanged(path,
 						StringUtils.isNotEmpty(path)
 								? client.getChildren().usingWatcher(this).forPath(path)
-								: Collections.<String>emptyList());
+								: Collections.emptyList());
 			}
 		}
 
