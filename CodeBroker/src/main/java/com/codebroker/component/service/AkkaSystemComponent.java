@@ -68,14 +68,27 @@ public class AkkaSystemComponent extends BaseCoreService {
         String arteryHostname = propertiesWrapper.getProperty(SystemEnvironment.ARTERY_HOSTNAME, "127.0.0.1");
         int arteryPort = propertiesWrapper.getIntProperty(SystemEnvironment.ARTERY_PORT, 2551);
 
+        String clusterType = propertiesWrapper.getProperty(SystemEnvironment.CLUSTER_TYPE, "default-game");
+        String clusterCenter = propertiesWrapper.getProperty(SystemEnvironment.CLUSTER_CENTER, "default-group");
+
+        int clusterShards = propertiesWrapper.getIntProperty(SystemEnvironment.CLUSTER_SHARDS, 1000);
+
         logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
+
         Config cg = ConfigFactory.parseFile(configFile);
-//        List<String> roles= Lists.newArrayList();
-//        roles.add("Cluster");
+        List<String> roles= Lists.newArrayList();
+        roles.add(clusterType);
+
         Config config = cg.withValue(akkaName+".akka.remote.artery.canonical.hostname",
                 ConfigImpl.fromAnyRef(arteryHostname, "网络服务地址IP"))
                          .withValue(akkaName+".akka.remote.artery.canonical.port",
-                ConfigImpl.fromAnyRef(arteryPort, "网络服务地址端口"));
+                ConfigImpl.fromAnyRef(arteryPort, "网络服务地址端口"))
+                          .withValue(akkaName+".akka.cluster.roles",
+                        ConfigImpl.fromAnyRef(roles, "网络集群的角色"))
+                         .withValue(akkaName+".akka.cluster.sharding.number-of-shards",
+                                ConfigImpl.fromAnyRef(clusterShards, "网络集群因子"))
+                .withValue(akkaName+".akka.cluster.multi-data-center.self-data-center",
+                        ConfigImpl.fromAnyRef(clusterCenter, "网络集群所属数据中心"));
 
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory
