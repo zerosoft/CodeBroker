@@ -29,7 +29,8 @@ public class ZookeeperComponent extends BaseCoreService {
 
 	@Override
 	public void destroy(Object obj) {
-		super.destroy(obj);
+
+
 		curatorZookeeperClient.doClose();
 	}
 

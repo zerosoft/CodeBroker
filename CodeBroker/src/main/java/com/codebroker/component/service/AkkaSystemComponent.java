@@ -35,10 +35,11 @@ import akka.management.javadsl.AkkaManagement;
  */
 public class AkkaSystemComponent extends BaseCoreService {
 
+    private static Logger logger = LoggerFactory.getLogger(AkkaSystemComponent.class);
+
     public static final String CONF_NAME = "config";
     public static final String DEF_AKKA_CONFIG_NAME = "application.conf";
-    private static final String DEF_KEY = "CodeBroker";
-    private static Logger logger = LoggerFactory.getLogger(AkkaSystemComponent.class);
+
 
     private ActorSystem<IGameRootSystemMessage> system;
 
@@ -59,10 +60,10 @@ public class AkkaSystemComponent extends BaseCoreService {
         logger.debug("akka conf path:" + filePath);
         File configFile = FileUtil.scanFileByPath(filePath, property);
 
-        String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME, DEF_KEY);
+        String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME,SystemEnvironment.ENGINE_NAME);
         logger.debug("AKKA_NAME:" + akkaName);
-        String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_KEY);
-        logger.debug("configName:" + configName);
+//        String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_AKKA_CONFIG_NAME);
+//        logger.debug("configName:" + configName);
 
 
         String arteryHostname = propertiesWrapper.getProperty(SystemEnvironment.ARTERY_HOSTNAME, "127.0.0.1");
@@ -73,7 +74,7 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         int clusterShards = propertiesWrapper.getIntProperty(SystemEnvironment.CLUSTER_SHARDS, 1000);
 
-        logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
+//        logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
 
         Config cg = ConfigFactory.parseFile(configFile);
         List<String> roles= Lists.newArrayList();
@@ -97,7 +98,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory
                 .load(config)
-                .getConfig(configName);
+                .getConfig(akkaName);
 
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
@@ -107,8 +108,6 @@ public class AkkaSystemComponent extends BaseCoreService {
         HttpServer.start(system,akkaHttpHost,akkaHttpPort);
 
         ActorPathService.akkaConfig=akkaConfig;
-
-		//System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
 
 
         CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(system,
@@ -143,8 +142,5 @@ public class AkkaSystemComponent extends BaseCoreService {
     public void setManagementService(ManagementService managementService) {
         this.managementService = managementService;
     }
-
-
-
 
 }
