@@ -5,11 +5,7 @@ import com.codebroker.api.AppListener;
 import com.codebroker.api.classloader.JarLoader;
 import com.codebroker.api.internal.*;
 import com.codebroker.component.ComponentRegistryImpl;
-import com.codebroker.component.service.GeoIPComponent;
-import com.codebroker.component.service.AkkaSystemComponent;
-import com.codebroker.component.service.NettyComponent;
-import com.codebroker.component.service.RedisComponent;
-import com.codebroker.component.service.MongoDBComponent;
+import com.codebroker.component.service.*;
 import com.codebroker.jmx.InstanceMXBean;
 import com.codebroker.jmx.ManagementService;
 import com.codebroker.setting.SystemEnvironment;
@@ -158,6 +154,9 @@ public class ServerEngine implements InstanceMXBean {
         IService geoIPService = new GeoIPComponent();
         systemRegistry.addComponent(geoIPService);
 
+        //增加zookeeper
+        IService zookeeper=new ZookeeperComponent();
+        systemRegistry.addComponent(zookeeper);
 
         // 如果是网关和单幅模式需要启动网络服务
         IService nettyComponent = new NettyComponent();

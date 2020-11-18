@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.CuratorWatcherImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
@@ -41,13 +43,14 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 		try {
 			int timeout = 5000;
 			CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
-					.connectString(url.getBackupAddress())
+					.connectString(url.getZookeeperAddress())
+					.threadFactory(r -> {
+						Thread thread=new Thread(r,"zookeeper");
+						return thread;
+					})
+					.runSafeService(Executors.newSingleThreadExecutor())
 					.retryPolicy(new RetryNTimes(1, 1000))
 					.connectionTimeoutMs(timeout);
-			String authority = url.getAuthority();
-			if (authority != null && authority.length() > 0) {
-				builder = builder.authorization("digest", authority.getBytes());
-			}
 			client = builder.build();
 			client.getConnectionStateListenable()
 					.addListener((client, state) -> {

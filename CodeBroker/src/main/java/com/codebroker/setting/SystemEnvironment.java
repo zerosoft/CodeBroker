@@ -41,6 +41,12 @@ public class SystemEnvironment {
     public static final String ARTERY_HOSTNAME = APP_ROOT + ".artery.hostname";
     //com.code.broker.artery.port = 2552
     public static final String ARTERY_PORT = APP_ROOT + ".artery.port";
+
+    //com.code.broker.artery.hostname = 127.0.0.1
+    public static final String AKKA_HTTP_HOSTNAME = APP_ROOT + ".http.hostname";
+    //com.code.broker.artery.port = 2552
+    public static final String AKKA_HTTP_PORT = APP_ROOT + ".http.port";
+
     //com.code.broker.server.type=game
     public static final String CLUSTER_TYPE = APP_ROOT + ".cluster.type";
     // com.code.broker.server.center=north

@@ -58,25 +58,18 @@ public class HttpServer {
 	private final ObjectMapper objectMapper;
 	private Unmarshaller<HttpEntity, HTTPRequest> dataUnmarshaller;
 
-	public static void start(ActorSystem<?> actorSystem) {
-		final int port = memberPort(Cluster.get(actorSystem).selfMember());
-		if (port >= 2551 && port <= 2559) {
-			new HttpServer(port + 7000, actorSystem);
-		} else {
-			final String message = String.format("HTTP server not started. Node port %d is invalid. The port must be >= 2551 and <= 2559.", port);
-			System.err.printf("%s%n", message);
-			throw new RuntimeException(message);
-		}
+	public static void start(ActorSystem<?> actorSystem,String host,int port) {
+		new HttpServer(host,port , actorSystem);
 	}
 
-	private HttpServer(int port, ActorSystem actorSystem) {
+	private HttpServer(String host, int port, ActorSystem actorSystem) {
 		this.actorSystem = actorSystem;
-		start(port);
+		start(host,port);
 		objectMapper = JacksonObjectMapperProvider.get(actorSystem).getOrCreate("jackson-json", Optional.empty());
 		dataUnmarshaller = Jackson.unmarshaller(objectMapper, HTTPRequest.class);
 	}
 
-	private void start(int port) {
+	private void start(String host, int port) {
 		ServerSettings defaultSettings = ServerSettings.create(actorSystem.classicSystem());
 
 		AtomicInteger pingCounter = new AtomicInteger();
@@ -90,10 +83,10 @@ public class HttpServer {
 		ServerSettings customServerSettings = defaultSettings.withWebsocketSettings(customWebsocketSettings);
 
 		Http.get(actorSystem)
-				.newServerAt("127.0.0.1", port)
+				.newServerAt(host, port)
 				.withSettings(customServerSettings)
-				.bind(route())
-		;
+				.bind(route());
+
 		log().info("HTTP Server started on port {}", "" + port);
 	}
 

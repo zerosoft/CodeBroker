@@ -78,6 +78,9 @@ public class AkkaSystemComponent extends BaseCoreService {
         Config cg = ConfigFactory.parseFile(configFile);
         List<String> roles= Lists.newArrayList();
         roles.add(clusterType);
+        //	"akka://CodeBroker@127.0.0.1:2551"
+        List<String> clusterNodes= Lists.newArrayList();
+        clusterNodes.add("akka://"+akkaName+"@"+arteryHostname+":"+arteryPort);
 
         Config config = cg.withValue(akkaName+".akka.remote.artery.canonical.hostname",
                 ConfigImpl.fromAnyRef(arteryHostname, "网络服务地址IP"))
@@ -87,25 +90,26 @@ public class AkkaSystemComponent extends BaseCoreService {
                         ConfigImpl.fromAnyRef(roles, "网络集群的角色"))
                          .withValue(akkaName+".akka.cluster.sharding.number-of-shards",
                                 ConfigImpl.fromAnyRef(clusterShards, "网络集群因子"))
-                .withValue(akkaName+".akka.cluster.multi-data-center.self-data-center",
-                        ConfigImpl.fromAnyRef(clusterCenter, "网络集群所属数据中心"));
-
+                        .withValue(akkaName+".akka.cluster.multi-data-center.self-data-center",
+                        ConfigImpl.fromAnyRef(clusterCenter, "网络集群所属数据中心"))
+                        .withValue(akkaName+".akka.cluster.seed-nodes",
+                        ConfigImpl.fromAnyRef(clusterNodes, "网络集群节点"));
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory
-                .load(cg)
+                .load(config)
                 .getConfig(configName);
 
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
-
+		String akkaHttpHost = propertiesWrapper.getProperty(SystemEnvironment.AKKA_HTTP_HOSTNAME, "127.0.0.1");
+		int akkaHttpPort = propertiesWrapper.getIntProperty(SystemEnvironment.AKKA_HTTP_PORT, 0);
 //        AkkaManagement.get(system.classicSystem()).start();
-        HttpServer.start(system);
+        HttpServer.start(system,akkaHttpHost,akkaHttpPort);
 
         ActorPathService.akkaConfig=akkaConfig;
 
-//        System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
+		//System.out.println(akkaConfig.getLong("akka.cluster.sharding.number-of-shards"));
 
-        int http_prot = propertiesWrapper.getIntProperty(SystemEnvironment.HTTP_PORT, 0);
 
         CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(system,
                 replyActorRef ->new IGameRootSystemMessage.StartGameRootSystemMessage(replyActorRef),
