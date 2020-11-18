@@ -1,6 +1,7 @@
 package com.codebroker.jmx;
 
 import com.codebroker.core.ServerEngine;
+import com.codebroker.setting.SystemEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,9 @@ import java.util.regex.Pattern;
 public class ManagementService {
 
     //顶级目录
-    static final String DOMAIN = "codebroker";
+    static final String DOMAIN = SystemEnvironment.ENGINE_NAME;
     private static final int INITIAL_CAPACITY = 3;
-    private static Logger logger = LoggerFactory.getLogger("codebroker");
+    private static Logger logger = LoggerFactory.getLogger(ManagementService.class);
     final InstanceMXBean instance;
     private final InstanceMediator instanceMBean;
 
@@ -47,7 +48,7 @@ public class ManagementService {
                 }
             }
         } catch (Exception e) {
-            logger.warn("AvalonInstanceMediator shutdownAll error", e);
+            logger.warn("InstanceMediator shutdownAll error", e);
         }
     }
 
@@ -76,8 +77,7 @@ public class ManagementService {
     }
 
     protected ObjectName createObjectName(String type, String name) {
-        Hashtable<String, String> properties = new Hashtable<String, String>(INITIAL_CAPACITY);
-        // properties.put("instance", quote(instance.getName()));
+        Hashtable<String, String> properties = new Hashtable<>(INITIAL_CAPACITY);
         if (type != null) {
             properties.put("type", quote(type));
         }
@@ -95,7 +95,7 @@ public class ManagementService {
 
     @Override
     public String toString() {
-        return "ManagementService []";
+        return ManagementService.class.getName();
     }
 
 }

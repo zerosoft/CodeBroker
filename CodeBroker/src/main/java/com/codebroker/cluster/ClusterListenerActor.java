@@ -12,6 +12,8 @@ import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import akka.cluster.typed.Cluster;
 import akka.cluster.typed.Subscribe;
+import com.codebroker.component.service.ZookeeperComponent;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.ActorPathService;
 import org.slf4j.Logger;
 import scala.Option;
@@ -81,6 +83,12 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 	private void addMember(Member member) {
 		Set<String> roles = member.getRoles();
 		if (roles.contains("Cluster")){
+			ZookeeperComponent manager = ContextResolver.getManager(ZookeeperComponent.class);
+			manager.getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
+					member.address().getHost().get(),
+					member.address().getPort().get(),
+					member.dataCenter(),
+					roles);
 			log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
 			ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
 		}
