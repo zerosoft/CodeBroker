@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZookeeperComponent extends BaseCoreService {
+	private static Logger logger = LoggerFactory.getLogger(ZookeeperComponent.class);
+
 	CuratorZookeeperClient curatorZookeeperClient;
 	ZookeeperClusterServiceRegister zookeeperClusterServiceRegister;
-	private static Logger logger = LoggerFactory.getLogger(ZookeeperComponent.class);
+
 	@Override
 	public void init(Object obj) {
 		super.init(obj);
@@ -29,8 +31,6 @@ public class ZookeeperComponent extends BaseCoreService {
 
 	@Override
 	public void destroy(Object obj) {
-
-
 		curatorZookeeperClient.doClose();
 	}
 

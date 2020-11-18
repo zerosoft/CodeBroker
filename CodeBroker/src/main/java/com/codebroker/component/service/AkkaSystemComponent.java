@@ -62,8 +62,6 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME,SystemEnvironment.ENGINE_NAME);
         logger.debug("AKKA_NAME:" + akkaName);
-//        String configName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_NAME, DEF_AKKA_CONFIG_NAME);
-//        logger.debug("configName:" + configName);
 
 
         String arteryHostname = propertiesWrapper.getProperty(SystemEnvironment.ARTERY_HOSTNAME, "127.0.0.1");
@@ -73,8 +71,6 @@ public class AkkaSystemComponent extends BaseCoreService {
         String clusterCenter = propertiesWrapper.getProperty(SystemEnvironment.CLUSTER_CENTER, "default-group");
 
         int clusterShards = propertiesWrapper.getIntProperty(SystemEnvironment.CLUSTER_SHARDS, 1000);
-
-//        logger.debug("init Actor System start: akkaName=" + akkaName + " configName:" + configName);
 
         Config cg = ConfigFactory.parseFile(configFile);
         List<String> roles= Lists.newArrayList();
