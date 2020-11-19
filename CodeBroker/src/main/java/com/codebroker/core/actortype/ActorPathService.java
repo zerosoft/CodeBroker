@@ -34,5 +34,5 @@ public class ActorPathService{
 	//用户管理
 	protected static ActorRef<IUserManager> userManager;
 	protected static ActorRef<IGameWorldMessage> gameWorldMessageActorRef;
-	protected static ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
+	public static ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
 }

@@ -113,7 +113,6 @@ public class GameWorldWithActor implements IGameWorld {
 									ClusterServiceActor.create(ctxEntityId, service);
 							return commandBehavior;
 						}).withDataCenter(dataCenter)
-						.withRole("B")
 						//停止的时候发的协议
 						.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
 				);

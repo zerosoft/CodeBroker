@@ -108,57 +108,55 @@ public class ZookeeperClient1 {
 		CuratorZookeeperClient curatorZookeeperClient=new CuratorZookeeperClient(url);
 		ZookeeperClusterServiceRegister zookeeperClusterServiceRegister=new ZookeeperClusterServiceRegister(curatorZookeeperClient);
 
-		ChildListener childListener=new ChildListener() {
-			@Override
-			public void childChanged(String path, List<String> children) {
-				System.out.println("============"+path);
-				for (String child : children) {
-					System.out.println(child);
-				}
-			}
-		};
-		DataListener dataListener = new DataListener() {
-			@Override
-			public void dataChanged(String path, Object value, EventType eventType) {
-				System.out.println("============"+path);
-				if (eventType.equals(EventType.NodeDataChanged)){
-					List<String> children = curatorZookeeperClient.getChildren(path);
-					for (String child : children) {
-						System.out.println(child);
-					}
-				}
-			}
-		};
+//		ChildListener childListener=new ChildListener() {
+//			@Override
+//			public void childChanged(String path, List<String> children) {
+//				System.out.println("============"+path);
+//				for (String child : children) {
+//					System.out.println(child);
+//				}
+//			}
+//		};
+//		DataListener dataListener = new DataListener() {
+//			@Override
+//			public void dataChanged(String path, Object value, EventType eventType) {
+//				System.out.println("============"+path);
+//				if (eventType.equals(EventType.NodeDataChanged)){
+//					List<String> children = curatorZookeeperClient.getChildren(path);
+//					for (String child : children) {
+//						System.out.println(child);
+//					}
+//				}
+//			}
+//		};
 
-		curatorZookeeperClient.addChildListener("/",childListener);
-		curatorZookeeperClient.addDataListener("/CodeBroker",dataListener);
-
-//		curatorZookeeperClient.addTargetChildListener("/CodeBroker/Test124",new CuratorZookeeperClient.CuratorWatcherImpl(curatorZookeeperClient,childListener));
-		boolean b = curatorZookeeperClient.checkExists("/CodeBroker");
-		if (b){
-			curatorZookeeperClient.createPersistent("/CodeBroker/Test125");
-		}else{
-			curatorZookeeperClient.createPersistent("/CodeBroker");
-			curatorZookeeperClient.createPersistent("/CodeBroker/Test124");
-		}
-		boolean b1 = curatorZookeeperClient.checkExists("/CodeBroker/Test124");
-		if (b1){
-			String name = ChildListener.class.getName();
-			boolean b2 = curatorZookeeperClient.checkExists("/CodeBroker/Test124/" + name);
-			if (b2){
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/11",name,true);
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/13",name,true);
-			}else {
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name,name,false);
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
-			}
-
-
-		}
+//		curatorZookeeperClient.addChildListener("/",childListener);
+//		curatorZookeeperClient.addDataListener("/CodeBroker",dataListener);
+//
+////		curatorZookeeperClient.addTargetChildListener("/CodeBroker/Test124",new CuratorZookeeperClient.CuratorWatcherImpl(curatorZookeeperClient,childListener));
+//		boolean b = curatorZookeeperClient.checkExists("/CodeBroker");
+//		if (b){
+//			curatorZookeeperClient.createPersistent("/CodeBroker/Test125");
+//		}else{
+//			curatorZookeeperClient.createPersistent("/CodeBroker");
+//			curatorZookeeperClient.createPersistent("/CodeBroker/Test124");
+//		}
+//		boolean b1 = curatorZookeeperClient.checkExists("/CodeBroker/Test124");
+//		if (b1){
+//			String name = ChildListener.class.getName();
+//			boolean b2 = curatorZookeeperClient.checkExists("/CodeBroker/Test124/" + name);
+//			if (b2){
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/11",name,true);
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/13",name,true);
+//			}else {
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name,name,false);
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
+//			}
+//		}
 
 
-		zookeeperClusterServiceRegister.registerService("a.b.c","A1","123.44.44.22",3567);
-		zookeeperClusterServiceRegister.registerService("a.b.c","A2","123.44.44.23",3557);
+		zookeeperClusterServiceRegister.registerService("com.codebroker.demo.service.account.AccountService","A1","123.44.44.22",3567);
+		zookeeperClusterServiceRegister.registerService("com.codebroker.demo.service.account.AccountService","A2","123.44.44.23",3557);
 
 		Set<String> roles=new HashSet();
 		roles.add("game");

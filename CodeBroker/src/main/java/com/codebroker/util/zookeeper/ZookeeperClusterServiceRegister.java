@@ -1,7 +1,11 @@
 package com.codebroker.util.zookeeper;
 
 import akka.actor.Address;
+import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.Member;
+import com.codebroker.cluster.ClusterListenerActor;
+import com.codebroker.cluster.ServerOnline;
+import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
@@ -20,8 +24,14 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 	private Map<String, List<ServiceInfo>> serverNameMap= Maps.newConcurrentMap();
 	private Set<MemberInfo> members= Sets.newConcurrentHashSet();
 
+
+	DataListener serverDataListener;
+	DataListener serviceDataListener;
+
 	public ZookeeperClusterServiceRegister(CuratorZookeeperClient curatorZookeeperClient) {
 		this.curatorZookeeperClient = curatorZookeeperClient;
+		serverDataListener=new ServerDataListener(this);
+		serviceDataListener=new ServiceDataListener(this);
 	}
 
 	@Override
@@ -45,16 +55,19 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 		if (!curatorZookeeperClient.checkExists(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName)) {
 			curatorZookeeperClient.createPersistent(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName);
 		}
-		curatorZookeeperClient.create(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName+"/"+sid, serviceInfo.toString(), true);
+		curatorZookeeperClient.create(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName+"/"+serviceInfo.toString(), serviceInfo.toString(), true);
+		curatorZookeeperClient.addDataListener(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName,serviceDataListener);
 	}
 
 
 	private void registerEphemeralServer(long sid,String dateCenter, String host, int port, Set<String> roles) {
 		MemberInfo memberInfo=new MemberInfo(sid,host,port,dateCenter,roles);
-		if (!curatorZookeeperClient.checkExists(ROOT_PATH + SERVER_PATH + "/" + dateCenter)) {
-			curatorZookeeperClient.createPersistent(ROOT_PATH + SERVER_PATH + "/" + dateCenter);
+		String path = ROOT_PATH + SERVER_PATH + "/" + dateCenter;
+		if (!curatorZookeeperClient.checkExists(path)) {
+			curatorZookeeperClient.createPersistent(path);
 		}
-		curatorZookeeperClient.create(ROOT_PATH + SERVER_PATH + "/" + dateCenter+"/"+sid, memberInfo.toString(), true);
+		curatorZookeeperClient.create(ROOT_PATH + SERVER_PATH + "/" + dateCenter+"/"+memberInfo.toString(), memberInfo.toString(), true);
+		curatorZookeeperClient.addDataListener(path,serverDataListener);
 	}
 
 
@@ -113,7 +126,45 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 			}
 		}
 	}
+
+	protected List<String> getChildren(String path){
+		List<String> children = curatorZookeeperClient.getChildren(path.substring(0,path.lastIndexOf("/")));
+		return children;
+	}
+
+
+	public void changeServiceData(String fullClassName, String path) {
+		List<String> children = getChildren(path);
+		List<ServiceInfo> collect = children.stream().map(da -> ServiceInfo.buildServiceInfo(da)).collect(Collectors.toList());
+		serverNameMap.put(fullClassName,collect);
+	}
+
+	public void changeServerData(String path) {
+		List<String> children = getChildren(path);
+		List<MemberInfo> collect = children.stream().map(da -> MemberInfo.buildMemberInfo(da)).collect(Collectors.toList());
+		members.clear();
+		members.addAll(collect);
+		//本地的
+		Collection<Member> values = ActorPathService.clusterService.values();
+		for (MemberInfo value : collect) {
+			boolean has=false;
+			for (Member memberInfo : values) {
+				Address address = memberInfo.uniqueAddress().address();
+				String host =address.getHost().get();
+				int port =address.getPort().get();
+				if (value.ip.equals(host)&&port==value.port){
+					has=true;
+					break;
+				}
+			}
+			if (!has){
+				ServerOnline serverOnline = new ServerOnline(value.ip, value.port, value.dataCenter, value.role);
+				ActorPathService.clusterDomainEventActorRef.tell(serverOnline);
+			}
+		}
+	}
 }
+
 class ServiceInfo{
 	public final String serviceFullName;
 	public final String sid;

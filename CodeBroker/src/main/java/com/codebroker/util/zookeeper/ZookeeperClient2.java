@@ -6,7 +6,9 @@ import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class ZookeeperClient2 {
@@ -102,56 +104,70 @@ public class ZookeeperClient2 {
 //			e.printStackTrace();
 //		}
 		URL url=new URL("ptl","127.0.0.1",2181);
+//		CuratorZookeeperClient curatorZookeeperClient=new CuratorZookeeperClient(url);
+//
+//		ChildListener childListener=new ChildListener() {
+//			@Override
+//			public void childChanged(String path, List<String> children) {
+//				System.out.println("============"+path);
+//				for (String child : children) {
+//					System.out.println(child);
+//				}
+//			}
+//		};
+//		DataListener dataListener = new DataListener() {
+//			@Override
+//			public void dataChanged(String path, Object value, EventType eventType) {
+//				System.out.println("============"+path);
+//				if (eventType.equals(EventType.NodeDataChanged)){
+//					List<String> children = curatorZookeeperClient.getChildren(path);
+//					for (String child : children) {
+//						System.out.println(child);
+//					}
+//				}
+//			}
+//		};
+//
+//		curatorZookeeperClient.addChildListener("/CodeBroker/Test124",childListener);
+//		curatorZookeeperClient.addDataListener("/CodeBroker",dataListener);
+//
+////		curatorZookeeperClient.addTargetChildListener("/CodeBroker/Test124",new CuratorZookeeperClient.CuratorWatcherImpl(curatorZookeeperClient,childListener));
+//		boolean b = curatorZookeeperClient.checkExists("/CodeBroker");
+//		if (b){
+//			curatorZookeeperClient.createPersistent("/CodeBroker/Test125");
+//		}else{
+//			curatorZookeeperClient.createPersistent("/CodeBroker");
+//			curatorZookeeperClient.createPersistent("/CodeBroker/Test124");
+//		}
+//		boolean b1 = curatorZookeeperClient.checkExists("/CodeBroker/Test124");
+//		if (b1){
+//			String name = ChildListener.class.getName();
+//			boolean b2 = curatorZookeeperClient.checkExists("/CodeBroker/Test124/" + name);
+//			if (b2){
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/14",name,true);
+//			}else {
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name,name,false);
+//				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
+//			}
+//
+//
+//		}
+
+//		URL url=new URL("ptl","127.0.0.1",2181);
 		CuratorZookeeperClient curatorZookeeperClient=new CuratorZookeeperClient(url);
+		ZookeeperClusterServiceRegister zookeeperClusterServiceRegister=new ZookeeperClusterServiceRegister(curatorZookeeperClient);
 
-		ChildListener childListener=new ChildListener() {
-			@Override
-			public void childChanged(String path, List<String> children) {
-				System.out.println("============"+path);
-				for (String child : children) {
-					System.out.println(child);
-				}
-			}
-		};
-		DataListener dataListener = new DataListener() {
-			@Override
-			public void dataChanged(String path, Object value, EventType eventType) {
-				System.out.println("============"+path);
-				if (eventType.equals(EventType.NodeDataChanged)){
-					List<String> children = curatorZookeeperClient.getChildren(path);
-					for (String child : children) {
-						System.out.println(child);
-					}
-				}
-			}
-		};
+		zookeeperClusterServiceRegister.registerService("com.codebroker.demo.service.account.AccountService","A3","123.44.44.22",3567);
+		zookeeperClusterServiceRegister.registerService("com.codebroker.demo.service.account.AccountService","A4","123.44.44.23",3557);
 
-		curatorZookeeperClient.addChildListener("/CodeBroker/Test124",childListener);
-		curatorZookeeperClient.addDataListener("/CodeBroker",dataListener);
+		Set<String> roles=new HashSet();
+		roles.add("game");
+		roles.add("sdsd");
 
-//		curatorZookeeperClient.addTargetChildListener("/CodeBroker/Test124",new CuratorZookeeperClient.CuratorWatcherImpl(curatorZookeeperClient,childListener));
-		boolean b = curatorZookeeperClient.checkExists("/CodeBroker");
-		if (b){
-			curatorZookeeperClient.createPersistent("/CodeBroker/Test125");
-		}else{
-			curatorZookeeperClient.createPersistent("/CodeBroker");
-			curatorZookeeperClient.createPersistent("/CodeBroker/Test124");
-		}
-		boolean b1 = curatorZookeeperClient.checkExists("/CodeBroker/Test124");
-		if (b1){
-			String name = ChildListener.class.getName();
-			boolean b2 = curatorZookeeperClient.checkExists("/CodeBroker/Test124/" + name);
-			if (b2){
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/14",name,true);
-			}else {
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name,name,false);
-				curatorZookeeperClient.create("/CodeBroker/Test124/"+name+"/12",name,true);
-			}
-
-
-		}
-
+		zookeeperClusterServiceRegister.registerServer(15,"123.233.2.44",3557,"Game",roles);
+		zookeeperClusterServiceRegister.registerServer(16,"123.233.2.44",3558,"Game",roles);
+		Thread.sleep(102009);
 
 		Thread.sleep(102009);
 

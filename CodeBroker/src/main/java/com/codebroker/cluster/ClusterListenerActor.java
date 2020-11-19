@@ -1,5 +1,7 @@
 package com.codebroker.cluster;
 
+import akka.actor.Address;
+import akka.actor.AddressFromURIString;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -10,7 +12,9 @@ import akka.cluster.Member;
 import akka.cluster.ddata.LWWMap;
 import akka.cluster.ddata.typed.javadsl.DistributedData;
 import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
+import akka.cluster.sharding.ClusterSharding;
 import akka.cluster.typed.Cluster;
+import akka.cluster.typed.JoinSeedNodes;
 import akka.cluster.typed.Subscribe;
 import com.codebroker.component.service.ZookeeperComponent;
 import com.codebroker.core.ContextResolver;
@@ -18,8 +22,7 @@ import com.codebroker.core.actortype.ActorPathService;
 import org.slf4j.Logger;
 import scala.Option;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
@@ -55,8 +58,39 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 				.onMessage(ClusterEvent.MemberExited.class,this::memberExited)
 				.onMessage(ClusterEvent.UnreachableMember.class,this::unreachableMember)
 				.onMessage(ClusterEvent.ReachableMember.class,this::reachableMember)
+				.onMessage(ServerOnline.class,this::serverOnline)
 				.onAnyMessage(this::logClusterEvent)
 				.build();
+	}
+
+	private Behavior<ClusterEvent.ClusterDomainEvent> serverOnline(ServerOnline message) {
+		String dataCenter = cluster.selfMember().dataCenter();
+		Address address = cluster.selfMember().uniqueAddress().address();
+
+		String host = address.getHost().get();
+		Integer port = address.getPort().get();
+		Set<String> roles = cluster.selfMember().getRoles();
+		if (message.host.equals(host)&&port==message.port){
+			return Behaviors.same();
+		}else{
+			if (message.dataCenter.equals(dataCenter)){
+				if (message.roles.containsAll(roles)){
+					Collection<Member> values = ActorPathService.clusterService.values();
+					for (Member value : values) {
+						 address = value.uniqueAddress().address();
+						 host =address.getHost().get();
+						 port =address.getPort().get();
+						 if (message.host.equals(host)&&port==message.port){
+						 	return Behaviors.same();
+						 }
+					}
+					List<Address> seedNodes = new ArrayList<>();
+					seedNodes.add(AddressFromURIString.parse("akka://CodeBroker@"+host+":"+port));
+					Cluster.get(getContext().getSystem()).manager().tell(new JoinSeedNodes(seedNodes));
+				}
+			}
+		}
+		return Behaviors.same();
 	}
 
 	private Behavior<ClusterEvent.ClusterDomainEvent> reachableMember(ClusterEvent.ReachableMember message) {
@@ -82,8 +116,9 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 
 	private void addMember(Member member) {
 		Set<String> roles = member.getRoles();
-		if (roles.contains("Cluster")){
-			ZookeeperComponent manager = ContextResolver.getManager(ZookeeperComponent.class);
+		//akka://CodeBroker@127.0.0.1:2552
+		log.info(member.uniqueAddress().address().toString());
+			ZookeeperComponent manager = ContextResolver.getComponent(ZookeeperComponent.class);
 			manager.getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
 					member.address().getHost().get(),
 					member.address().getPort().get(),
@@ -91,7 +126,6 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 					roles);
 			log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
 			ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
-		}
 	}
 
 	private void delMember(Member member) {
@@ -151,3 +185,4 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 				});
 	}
 }
+
