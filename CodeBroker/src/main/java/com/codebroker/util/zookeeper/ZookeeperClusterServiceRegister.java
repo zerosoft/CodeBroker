@@ -8,12 +8,15 @@ import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZookeeperClusterServiceRegister implements IClusterServiceRegister {
 
+	private Logger logger= LoggerFactory.getLogger(ZookeeperClusterServiceRegister.class);
 	private CuratorZookeeperClient curatorZookeeperClient;
 
 	private static final String ROOT_PATH="/CodeBroker";
@@ -31,9 +34,28 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 		serverDataListener=new ServerDataListener(this);
 		serviceDataListener=new ServiceDataListener(this);
 	}
-
+	@Override
+	public void registerServer(long sid, String ip, int port, String dateCenter, Set<String> roles) {
+		if (!curatorZookeeperClient.isConnected()){
+			logger.debug("curatorZookeeperClient is not connected");
+			return;
+		}
+		if (curatorZookeeperClient.checkExists(ROOT_PATH)){
+			if (!curatorZookeeperClient.checkExists(ROOT_PATH+SERVER_PATH)){
+				curatorZookeeperClient.createPersistent(ROOT_PATH+SERVER_PATH);
+			}
+		}else {
+			curatorZookeeperClient.createPersistent(ROOT_PATH);
+			curatorZookeeperClient.createPersistent(ROOT_PATH+SERVER_PATH);
+		}
+		registerEphemeralServer(sid,dateCenter, ip, port,roles);
+	}
 	@Override
 	public void registerService(String serviceFullName, String sid, String ip, int port) {
+		if (!curatorZookeeperClient.isConnected()){
+			logger.debug("curatorZookeeperClient is not connected");
+			return;
+		}
 		if (curatorZookeeperClient.checkExists(ROOT_PATH)){
 			if (curatorZookeeperClient.checkExists(ROOT_PATH+SERVICE_PATH)){
 				registerEphemeralService(serviceFullName, sid, ip, port);
@@ -49,6 +71,7 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 	}
 
 	private void registerEphemeralService(String serviceFullName, String sid, String ip, int port) {
+
 		ServiceInfo serviceInfo = new ServiceInfo(serviceFullName, sid, ip, port);
 		if (!curatorZookeeperClient.checkExists(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName)) {
 			curatorZookeeperClient.createPersistent(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName);
@@ -72,6 +95,10 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 	@Override
 	public Optional<Collection<String>> getCacheService(String serviceFullName) {
 		if (!serverNameMap.containsKey(serviceFullName)){
+			if (!curatorZookeeperClient.isConnected()){
+				logger.debug("curatorZookeeperClient is not connected");
+				return Optional.empty();
+			}
 			List<String> children = getChildren(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName+ "/");
 			if(children.size()>0){
 				List<ServiceInfo> collect = children.stream().map(da -> ServiceInfo.buildServiceInfo(da)).collect(Collectors.toList());
@@ -82,22 +109,15 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 		return Optional.ofNullable(collect);
 	}
 
-	@Override
-	public void registerServer(long sid, String ip, int port, String dateCenter, Set<String> roles) {
-		if (curatorZookeeperClient.checkExists(ROOT_PATH)){
-			if (!curatorZookeeperClient.checkExists(ROOT_PATH+SERVER_PATH)){
-				curatorZookeeperClient.createPersistent(ROOT_PATH+SERVER_PATH);
-			}
-		}else {
-			curatorZookeeperClient.createPersistent(ROOT_PATH);
-			curatorZookeeperClient.createPersistent(ROOT_PATH+SERVER_PATH);
-		}
-		registerEphemeralServer(sid,dateCenter, ip, port,roles);
-	}
+
 
 	@Override
 	public Optional<Collection<String>> getCacheServer(String dateCenter) {
-		return Optional.empty();
+		List<String> collect = members.stream()
+				.filter(memberInfo -> memberInfo.dataCenter.equals(dateCenter))
+				.map(memberInfo -> memberInfo.ip+":"+memberInfo.port)
+				.collect(Collectors.toList());
+		return Optional.ofNullable(collect);
 	}
 
 	@Override
