@@ -16,17 +16,21 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IService;
+import com.codebroker.component.service.ZookeeperComponent;
 import com.codebroker.core.ContextResolver;
+import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actortype.message.IGameWorldMessage;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.net.http.HTTPRequest;
+import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.MathUtil;
 import com.google.gson.Gson;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
@@ -43,10 +47,14 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	private String gameWorldId;
+	private int shardId= 100;
 
 	public GameWorldWithActor(String gameWorldId, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
 		this.gameWorldActorRef = gameWorldActorRef;
 		this.gameWorldId = gameWorldId;
+		if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
+			this.shardId=ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
+		}
 	}
 
 	@Override
@@ -123,6 +131,13 @@ public class GameWorldWithActor implements IGameWorld {
 		ClusterServiceWithActor serviceActor = new ClusterServiceWithActor(typeKey.name(), clusterSharding);
 		new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
+		try {
+			ZookeeperComponent component = ContextResolver.getComponent(ZookeeperComponent.class);
+			component.getIClusterServiceRegister().registerService(serviceName, gameWorldId,ServerEngine.akkaHttpHost,ServerEngine.akkaHttpPort);
+		}catch (MissingResourceException miss){
+
+		}
+
 		ContextResolver.setManager(service);
 
 		return true;
@@ -130,7 +145,7 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public boolean createClusterService(IService service) {
-		return createService(service.getName(),service);
+		return createClusterService(service.getName(),service);
 	}
 
 	@Override
@@ -169,42 +184,69 @@ public class GameWorldWithActor implements IGameWorld {
 	@Override
 	public Optional<IObject> sendMessageToClusterIService(String serviceName, IObject message) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+		ZookeeperComponent component = ContextResolver.getComponent(ZookeeperComponent.class);
+		Optional<Collection<String>> cacheService = component.getIClusterServiceRegister().getCacheService(serviceName);
+
 		Http http = Http.get(actorSystem);
 		String json = message.toJson();
 		HTTPRequest httpRequest=new HTTPRequest(serviceName,json);
 		//节点数量
-		Collection<Member> values = ActorPathService.clusterService.values();
-		Optional<Member> first = values.stream().findFirst();
+//		Collection<Member> values = ActorPathService.clusterService.values();
+//		Optional<Member> first = values.stream().findFirst();
 		String stationUrl;
 		Gson gson=new Gson();
 		String toJson = gson.toJson(httpRequest, HTTPRequest.class);
-		if (first.isPresent()){
-			Member member = first.get();
-			//随机因子，
-			int shardId = 100;
-			if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
-				shardId=ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
-			}
 
+		if (cacheService.isPresent()){
+			Collection<String> strings = cacheService.get();
 			int randomShardId = MathUtil.random(shardId) + 1;
-
-			stationUrl = "http://" + member.address().getHost().get()
-					+ ":" + (member.address().getPort().get()+7000) + "/service/" + randomShardId;
-			CompletionStage<String> futureResponseBody =
-					http.singleRequest(
-							HttpRequest.POST(stationUrl)
-									.withEntity(ContentTypes.APPLICATION_JSON, toJson))
-							.thenCompose(response ->
-									Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
-											.thenApply(body -> {
-												if (response.status().isSuccess())
-													return body;
-												else throw new RuntimeException("Failed to register data: " + body);
-											})
-							);
-			String join = futureResponseBody.toCompletableFuture().join();
-			return Optional.of(CObject.newFromJsonData(join));
+			for (String string : strings) {
+				stationUrl = "http://" + string + "/service/" + randomShardId;
+				CompletionStage<String> futureResponseBody =
+						http.singleRequest(
+								HttpRequest.POST(stationUrl)
+										.withEntity(ContentTypes.APPLICATION_JSON, toJson))
+								.thenCompose(response ->
+										Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
+												.thenApply(body -> {
+													if (response.status().isSuccess())
+														return body;
+													else throw new RuntimeException("Failed to register data: " + body);
+												})
+								);
+				String join = futureResponseBody.toCompletableFuture().join();
+				return Optional.of(CObject.newFromJsonData(join));
+			}
 		}
+
+
+//		if (first.isPresent()){
+//			Member member = first.get();
+//			//随机因子，
+//			int shardId = 100;
+//			if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
+//				shardId=ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
+//			}
+//
+//			int randomShardId = MathUtil.random(shardId) + 1;
+//
+//			stationUrl = "http://" + member.address().getHost().get()
+//					+ ":" + (member.address().getPort().get()+7000) + "/service/" + randomShardId;
+//			CompletionStage<String> futureResponseBody =
+//					http.singleRequest(
+//							HttpRequest.POST(stationUrl)
+//									.withEntity(ContentTypes.APPLICATION_JSON, toJson))
+//							.thenCompose(response ->
+//									Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
+//											.thenApply(body -> {
+//												if (response.status().isSuccess())
+//													return body;
+//												else throw new RuntimeException("Failed to register data: " + body);
+//											})
+//							);
+//			String join = futureResponseBody.toCompletableFuture().join();
+//			return Optional.of(CObject.newFromJsonData(join));
+//		}
 
 		return Optional.empty();
 	}

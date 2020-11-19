@@ -38,7 +38,11 @@ import static com.codebroker.setting.SystemEnvironment.APP_JAR_RELOAD_SECOND;
 public class ServerEngine implements InstanceMXBean {
 
     public static int serverId;
+    public static String akkaHttpHost;
+    public static int akkaHttpPort;
+
     private static String name;
+
 
     private static Logger logger = LoggerFactory.getLogger("ServerEngine");
 

@@ -6,6 +6,7 @@ import akka.discovery.Discovery;
 import akka.discovery.Lookup;
 import akka.discovery.ServiceDiscovery;
 import com.codebroker.component.BaseCoreService;
+import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.core.actortype.GameRootSystem;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
@@ -98,10 +99,10 @@ public class AkkaSystemComponent extends BaseCoreService {
 
 
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
-		String akkaHttpHost = propertiesWrapper.getProperty(SystemEnvironment.AKKA_HTTP_HOSTNAME, "127.0.0.1");
-		int akkaHttpPort = propertiesWrapper.getIntProperty(SystemEnvironment.AKKA_HTTP_PORT, 0);
+        ServerEngine.akkaHttpHost = propertiesWrapper.getProperty(SystemEnvironment.AKKA_HTTP_HOSTNAME, "127.0.0.1");
+        ServerEngine.akkaHttpPort = propertiesWrapper.getIntProperty(SystemEnvironment.AKKA_HTTP_PORT, 0);
 //        AkkaManagement.get(system.classicSystem()).start();
-        HttpServer.start(system,akkaHttpHost,akkaHttpPort);
+        HttpServer.start(system,ServerEngine.akkaHttpHost,ServerEngine.akkaHttpPort);
 
         ActorPathService.akkaConfig=akkaConfig;
 

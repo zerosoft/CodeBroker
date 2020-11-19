@@ -1,9 +1,7 @@
 package com.codebroker.util.zookeeper;
 
 import akka.actor.Address;
-import akka.actor.typed.javadsl.Behaviors;
 import akka.cluster.Member;
-import com.codebroker.cluster.ClusterListenerActor;
 import com.codebroker.cluster.ServerOnline;
 import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
@@ -73,11 +71,15 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 
 	@Override
 	public Optional<Collection<String>> getCacheService(String serviceFullName) {
-		if (serverNameMap.containsKey(serviceFullName)){
-			List<String> collect = serverNameMap.get(serviceFullName).stream().map(serviceInfo -> serviceInfo.ip + ":" + serviceInfo.port).collect(Collectors.toList());
-			return Optional.ofNullable(collect);
+		if (!serverNameMap.containsKey(serviceFullName)){
+			List<String> children = getChildren(ROOT_PATH + SERVICE_PATH + "/" + serviceFullName+ "/");
+			if(children.size()>0){
+				List<ServiceInfo> collect = children.stream().map(da -> ServiceInfo.buildServiceInfo(da)).collect(Collectors.toList());
+				serverNameMap.put(serviceFullName,collect);
+			}
 		}
-		return Optional.empty();
+		List<String> collect = serverNameMap.get(serviceFullName).stream().map(serviceInfo -> serviceInfo.ip + ":" + serviceInfo.port).collect(Collectors.toList());
+		return Optional.ofNullable(collect);
 	}
 
 	@Override

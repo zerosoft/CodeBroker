@@ -84,6 +84,7 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 						 	return Behaviors.same();
 						 }
 					}
+					log.info("add new member host {} port {} dc {}",message.host,message.host,message.dataCenter);
 					List<Address> seedNodes = new ArrayList<>();
 					seedNodes.add(AddressFromURIString.parse("akka://CodeBroker@"+host+":"+port));
 					Cluster.get(getContext().getSystem()).manager().tell(new JoinSeedNodes(seedNodes));

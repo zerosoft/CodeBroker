@@ -3,7 +3,9 @@ package com.codebroker.util.zookeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * 服务器节点变化监控
+ */
 public class ServerDataListener implements DataListener{
     ZookeeperClusterServiceRegister clusterServiceRegister;
     private Logger logger= LoggerFactory.getLogger(ServerDataListener.class);
