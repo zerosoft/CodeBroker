@@ -69,5 +69,13 @@ public class SystemEnvironment {
 
     public static final String TCP_PORT = APP_ROOT + ".netty.tcp.port";
     public static final String HTTP_PORT = APP_ROOT +".http.port";
-
+    /**
+     * redis缓存配置
+     */
+    //com.code.broker.redis.host=127.0.0.1
+    public static final String REDIS_URL = APP_ROOT + ".redis.url";
+    //com.code.broker.redis.port=2181
+    public static final String REDIS_PORT = APP_ROOT + ".redis.port";
+    public static final String REDIS_POOL = APP_ROOT + ".redis.isPool";
+    public static final String REDIS_PASSWORD = APP_ROOT + ".redis.password";
 }

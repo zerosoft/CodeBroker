@@ -5,6 +5,9 @@ import akka.cluster.Member;
 import com.codebroker.cluster.ServerOnline;
 import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
+import com.codebroker.util.zookeeper.listener.ServerDataListener;
+import com.codebroker.util.zookeeper.listener.ServerWatch;
+import com.codebroker.util.zookeeper.listener.ServiceDataListener;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -33,6 +36,8 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 		this.curatorZookeeperClient = curatorZookeeperClient;
 		serverDataListener=new ServerDataListener(this);
 		serviceDataListener=new ServiceDataListener(this);
+		ServerWatch serverWatch=new ServerWatch();
+		List<String> strings = curatorZookeeperClient.addTargetChildListener(ROOT_PATH+SERVER_PATH, new CuratorZookeeperClient.CuratorWatcherImpl(null, serverWatch));
 	}
 	@Override
 	public void registerServer(long sid, String ip, int port, String dateCenter, Set<String> roles) {

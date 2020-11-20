@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.codebroker.setting.SystemEnvironment.APP_JAR_RELOAD_SECOND;
@@ -143,7 +144,7 @@ public class ServerEngine implements InstanceMXBean {
         /**
          * 注册Redis服务
          */
-        if (propertiesWrapper.getBooleanProperty("redis", false)) {
+        if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.REDIS_URL))) {
             logger.info("redis component init");
             IService redisService = new RedisComponent();
             systemRegistry.addComponent(redisService);
@@ -158,13 +159,20 @@ public class ServerEngine implements InstanceMXBean {
         IService geoIPService = new GeoIPComponent();
         systemRegistry.addComponent(geoIPService);
 
-        //增加zookeeper
-        IService zookeeper=new ZookeeperComponent();
-        systemRegistry.addComponent(zookeeper);
 
-        // 如果是网关和单幅模式需要启动网络服务
-        IService nettyComponent = new NettyComponent();
-        systemRegistry.addComponent(nettyComponent);
+        if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.ZOOKEEPER_HOST))){
+            logger.info("zookeeper component init");
+            //增加zookeeper
+            IService zookeeper=new ZookeeperComponent();
+            systemRegistry.addComponent(zookeeper);
+        }
+
+        if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.TCP_PORT))){
+            logger.info("netty component init");
+            // 如果是网关和单幅模式需要启动网络服务
+            IService nettyComponent = new NettyComponent();
+            systemRegistry.addComponent(nettyComponent);
+        }
 
         IService akkaSystemComponent = new AkkaSystemComponent();
         // jmx相关启动

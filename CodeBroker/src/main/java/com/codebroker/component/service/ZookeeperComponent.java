@@ -5,7 +5,7 @@ import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
 import com.codebroker.util.zookeeper.IClusterServiceRegister;
 import com.codebroker.util.zookeeper.StateListener;
-import com.codebroker.util.zookeeper.URL;
+import com.codebroker.util.zookeeper.ZookeeperURL;
 import com.codebroker.util.zookeeper.ZookeeperClusterServiceRegister;
 import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
 import org.slf4j.Logger;
@@ -24,27 +24,14 @@ public class ZookeeperComponent extends BaseCoreService {
 		String zookeeperHostname = propertiesWrapper.getProperty(SystemEnvironment.ZOOKEEPER_HOST, "127.0.0.1");
 		int zookeeperPort = propertiesWrapper.getIntProperty(SystemEnvironment.ZOOKEEPER_PORT, 2181);
 		logger.info("zookeeper ip {} port {}",zookeeperHostname,zookeeperPort);
-		URL url=new URL("",zookeeperHostname,zookeeperPort);
-		curatorZookeeperClient=new CuratorZookeeperClient(url);
+		ZookeeperURL zookeeperUrl =new ZookeeperURL("",zookeeperHostname,zookeeperPort);
+		curatorZookeeperClient=new CuratorZookeeperClient(zookeeperUrl);
 		zookeeperClusterServiceRegister=new ZookeeperClusterServiceRegister(curatorZookeeperClient);
 
 		curatorZookeeperClient.addStateListener(state -> {
-			if (state == StateListener.CONNECTED) {
-				try {
-					logger.info("CuratorZookeeperClient CONNECTED");
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-			if (state == StateListener.DISCONNECTED) {
-				try {
-					logger.info("CuratorZookeeperClient DISCONNECTED");
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
 			if (state == StateListener.RECONNECTED) {
 				try {
+					//重新连上干点啥？
 					logger.info("CuratorZookeeperClient RECONNECTED");
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);

@@ -10,7 +10,6 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.CuratorWatcherImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
@@ -38,12 +36,12 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 	private Map<String, CuratorCache> treeCacheMap = new ConcurrentHashMap<>();
 
 
-	public CuratorZookeeperClient(URL url) {
-		super(url);
+	public CuratorZookeeperClient(ZookeeperURL zookeeperUrl) {
+		super(zookeeperUrl);
 		try {
 			int timeout = 5000;
 			CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
-					.connectString(url.getZookeeperAddress())
+					.connectString(zookeeperUrl.getZookeeperAddress())
 					.runSafeService(Executors.newSingleThreadExecutor())
 					.retryPolicy(new RetryNTimes(1, 1000))
 					.connectionTimeoutMs(timeout);
@@ -267,26 +265,22 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 				if (logger.isDebugEnabled()) {
 					logger.debug("listen the zookeeper changed. The changed data:" +type);
 				}
-				EventType eventType = null;
 				String content = null;
 				String path = null;
 				switch (type) {
 					case NODE_CREATED:
-						eventType = EventType.NodeCreated;
 						path = data.getPath();
 						content = data.getData() == null ? "" : new String(data.getData(), CHARSET);
 						break;
 					case NODE_CHANGED:
-						eventType = EventType.NodeDataChanged;
 						path = data.getPath();
 						content = data.getData() == null ? "" : new String(data.getData(), CHARSET);
 						break;
 					case NODE_DELETED:
-						eventType = EventType.NodeDeleted;
 						path = oldData.getPath();
 						break;
 				}
-				dataListener.dataChanged(path, content, eventType);
+				dataListener.dataChanged(path, content, type);
 			}
 		}
 	}

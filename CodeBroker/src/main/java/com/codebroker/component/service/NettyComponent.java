@@ -48,32 +48,30 @@ public class NettyComponent extends BaseCoreService {
 
         name = propertiesWrapper.getProperty(SystemEnvironment.NETTY_SERVER_NAME, "NETTY_SERVER");
         int port = propertiesWrapper.getIntProperty(SystemEnvironment.TCP_PORT, D_PORT);
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                bootstrap = new ServerBootstrap();
-                bossGroup = new NioEventLoopGroup(bossGroupNum);
-                workerGroup = new NioEventLoopGroup(workerGroupNum);
-                bootstrap.group(bossGroup, workerGroup)
-                        .channel(NioServerSocketChannel.class)
-                        .option(ChannelOption.SO_BACKLOG, backlog)
-                        .option(ChannelOption.SO_REUSEADDR, true)
-                        // .option(ChannelOption.TCP_NODELAY,
-                        // Boolean.valueOf(true))
-                        // .option(ChannelOption.SO_KEEPALIVE,
-                        // Boolean.valueOf(true))
-                        .childOption(ChannelOption.TCP_NODELAY, true)
-                        .childOption(ChannelOption.SO_KEEPALIVE, true)
-                        .childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
-                        .childOption(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(BACKLOG))
-                        .handler(new LoggingHandler(LogLevel.INFO))
-                        .childHandler(new NettyServerInitializer());
-                ChannelFuture f;
-                try {
-                    f = bootstrap.bind(port).sync();
-                    f.channel().closeFuture().sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        Thread thread = new Thread(() -> {
+            bootstrap = new ServerBootstrap();
+            bossGroup = new NioEventLoopGroup(bossGroupNum);
+            workerGroup = new NioEventLoopGroup(workerGroupNum);
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, backlog)
+                    .option(ChannelOption.SO_REUSEADDR, true)
+                    // .option(ChannelOption.TCP_NODELAY,
+                    // Boolean.valueOf(true))
+                    // .option(ChannelOption.SO_KEEPALIVE,
+                    // Boolean.valueOf(true))
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                    .childOption(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(BACKLOG))
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new NettyServerInitializer());
+            ChannelFuture f;
+            try {
+                f = bootstrap.bind(port).sync();
+                f.channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }, "Netty-Start-Thread");
         thread.start();

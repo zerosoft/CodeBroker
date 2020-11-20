@@ -4,7 +4,7 @@ package com.codebroker.util.zookeeper;
 import java.net.*;
 import java.util.regex.Pattern;
 
-public class URL {
+public class ZookeeperURL {
 
 	private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
 	static String LOCALHOST_KEY = "localhost";
@@ -16,13 +16,13 @@ public class URL {
 
 	private volatile transient String ip;
 
-	protected URL() {
+	protected ZookeeperURL() {
 		this.protocol = null;
 		this.host = null;
 		this.port = 0;
 	}
 
-	public URL(String protocol, String host, int port) {
+	public ZookeeperURL(String protocol, String host, int port) {
 		this.protocol = protocol;
 		this.host = host;
 		this.port = (port < 0 ? 0 : port);
@@ -32,16 +32,16 @@ public class URL {
 		return protocol;
 	}
 
-	public URL setProtocol(String protocol) {
-		return new URL(protocol, host, port);
+	public ZookeeperURL setProtocol(String protocol) {
+		return new ZookeeperURL(protocol, host, port);
 	}
 
 	public String getHost() {
 		return host;
 	}
 
-	public URL setHost(String host) {
-		return new URL(protocol, host, port);
+	public ZookeeperURL setHost(String host) {
+		return new ZookeeperURL(protocol, host, port);
 	}
 
 	public String getIp() {
@@ -63,8 +63,8 @@ public class URL {
 		return port;
 	}
 
-	public URL setPort(int port) {
-		return new URL(protocol, host, port);
+	public ZookeeperURL setPort(int port) {
+		return new ZookeeperURL(protocol, host, port);
 	}
 
 	public int getPort(int defaultPort) {
@@ -75,7 +75,7 @@ public class URL {
 		return port <= 0 ? host : host + ":" + port;
 	}
 
-	public URL setAddress(String address) {
+	public ZookeeperURL setAddress(String address) {
 		int i = address.lastIndexOf(':');
 		String host;
 		int port = this.port;
@@ -85,7 +85,7 @@ public class URL {
 		} else {
 			host = address;
 		}
-		return new URL(protocol, host, port);
+		return new ZookeeperURL(protocol, host, port);
 	}
 
 	public boolean isLocalHost() {

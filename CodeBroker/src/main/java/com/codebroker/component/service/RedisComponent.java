@@ -1,7 +1,9 @@
 package com.codebroker.component.service;
 
 import com.codebroker.component.BaseCoreService;
+import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
+import com.google.common.base.Strings;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,21 +64,16 @@ public class RedisComponent extends BaseCoreService {
     @Override
     public void init(Object obj) {
         PropertiesWrapper wrapper = (PropertiesWrapper) obj;
-        // 设置
-        log.debug("开始执行默认的配置,使用单例redis");
-        System.err.println("cant find redis.properties file,load default set ---->127.0.0.1->32768");
-        // 判断是否使用pool 如果不使用则是单例的redis
-
-        isPool = wrapper.getBooleanProperty("redis.isPool", true);
-        url = wrapper.getProperty("redis.url");
-        port = wrapper.getIntProperty("redis.port", 6379);
-        password = wrapper.getProperty("redis.password");
+        isPool = wrapper.getBooleanProperty(SystemEnvironment.REDIS_POOL, true);
+        url = wrapper.getProperty(SystemEnvironment.REDIS_URL);
+        port = wrapper.getIntProperty(SystemEnvironment.REDIS_PORT, 6379);
+        password = wrapper.getProperty(SystemEnvironment.REDIS_PASSWORD);
         // 设置全局的配置
         if (isPool) {
             // 设置全局判断变量为true
             log.debug("开始执行pool的创建工作");
             poolConfig.setMaxTotal(50);
-            if (password == null || password.trim().equals("")) {
+            if (Strings.isNullOrEmpty(password)) {
                 jedisPool = new JedisPool(poolConfig, url, port, timeout);
             } else {
                 jedisPool = new JedisPool(poolConfig, url, port, timeout, password);

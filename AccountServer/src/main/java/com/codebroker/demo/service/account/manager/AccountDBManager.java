@@ -23,6 +23,7 @@ public class AccountDBManager extends AbstractService {
 	@Override
 	protected void doStart() {
 		logger.info("Start AccountManager");
+
 		AccountDBManager.instance=this;
 	}
 

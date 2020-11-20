@@ -16,7 +16,7 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
 
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperClient.class);
 
-	private final URL url;
+	private final ZookeeperURL zookeeperUrl;
 
 	private final Set<StateListener> stateListeners = new CopyOnWriteArraySet();
 
@@ -26,13 +26,13 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
 
 	private volatile boolean closed = false;
 
-	public AbstractZookeeperClient(URL url) {
-		this.url = url;
+	public AbstractZookeeperClient(ZookeeperURL zookeeperUrl) {
+		this.zookeeperUrl = zookeeperUrl;
 	}
 
 	@Override
-	public URL getUrl() {
-		return url;
+	public ZookeeperURL getZookeeperUrl() {
+		return zookeeperUrl;
 	}
 
 	@Override

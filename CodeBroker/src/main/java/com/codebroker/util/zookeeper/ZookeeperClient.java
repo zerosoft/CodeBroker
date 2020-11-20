@@ -29,7 +29,7 @@ public interface ZookeeperClient {
 
 	void close();
 
-	URL getUrl();
+	ZookeeperURL getZookeeperUrl();
 
 	void create(String path, String content, boolean ephemeral);
 
