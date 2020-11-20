@@ -2,32 +2,20 @@
 sort: 4
 ---
 
-# Mermaid Test
+# 架构示意
 
-    ```mermaid
-    graph TB
-        c1-->a2
-        subgraph one
-        a1-->a2
-        end
-        subgraph two
-        b1-->b2
-        end
-        subgraph three
-        c1-->c2
-        end
-    ```
+集群结构
 
 ```mermaid
 graph TB
     c1-->a2
-    subgraph one
+    subgraph other-server
     a1-->a2
     end
-    subgraph two
+    subgraph center login-server
     b1-->b2
     end
-    subgraph three
+    subgraph center game-server
     c1-->c2
     end
 ```

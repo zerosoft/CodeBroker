@@ -32,6 +32,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
+/**
+ * 集群监听Actor
+ */
 public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterDomainEvent> {
 	public static final String IDENTIFY = "clusterListener";
 	private final Cluster cluster;
@@ -65,7 +68,7 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 				.onMessage(ClusterEvent.UnreachableMember.class,this::unreachableMember)
 				.onMessage(ClusterEvent.ReachableMember.class,this::reachableMember)
 				.onMessage(ServerOnline.class,this::serverOnline)
-				.onAnyMessage(this::logClusterEvent)
+//				.onAnyMessage(this::logClusterEvent)
 				.build();
 	}
 
@@ -142,57 +145,57 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 		ActorPathService.clusterService.remove(member.uniqueAddress().toString());
 	}
 
-	private Behavior<ClusterEvent.ClusterDomainEvent> logClusterEvent(Object clusterEventMessage) {
-		log.info("{} - {} sent to {}", getClass().getSimpleName(), clusterEventMessage, cluster.selfMember());
-		logClusterMembers();
-		return Behaviors.same();
-	}
+//	private Behavior<ClusterEvent.ClusterDomainEvent> logClusterEvent(Object clusterEventMessage) {
+//		log.info("{} - {} sent to {}", getClass().getSimpleName(), clusterEventMessage, cluster.selfMember());
+//		logClusterMembers();
+//		return Behaviors.same();
+//	}
 
-	private void logClusterMembers() {
-		logClusterMembers(cluster.state());
-	}
-
-	private void logClusterMembers(ClusterEvent.CurrentClusterState currentClusterState) {
-		final Optional<Member> old =
-				StreamSupport
-						.stream(currentClusterState.getMembers().spliterator(), false)
-						.reduce((older, member) -> older.isOlderThan(member) ? older : member);
-
-		final Member oldest = old.orElse(cluster.selfMember());
-		final Set<Member> unreachable = currentClusterState.getUnreachable();
-		final String className = getClass().getSimpleName();
-
-		StreamSupport.stream(currentClusterState.getMembers().spliterator(), false)
-				.forEach(new Consumer<Member>() {
-					int m = 0;
-
-					@Override
-					public void accept(Member member) {
-						log.info("{} - {} {}{}{}{}", className, ++m, leader(member), oldest(member), unreachable(member), member);
-					}
-
-					private String leader(Member member) {
-						return member.address().equals(currentClusterState.getLeader()) ? "(LEADER) " : "";
-					}
-
-					private String oldest(Member member) {
-						return oldest.equals(member) ? "(OLDEST) " : "";
-					}
-
-					private String unreachable(Member member) {
-						return unreachable.contains(member) ? "(UNREACHABLE) " : "";
-					}
-				});
-
-		currentClusterState.getUnreachable()
-				.forEach(new Consumer<Member>() {
-					int m = 0;
-
-					@Override
-					public void accept(Member member) {
-						log.info("{} - {} {} (unreachable)", getClass().getSimpleName(), ++m, member);
-					}
-				});
-	}
+//	private void logClusterMembers() {
+//		logClusterMembers(cluster.state());
+//	}
+//
+//	private void logClusterMembers(ClusterEvent.CurrentClusterState currentClusterState) {
+//		final Optional<Member> old =
+//				StreamSupport
+//						.stream(currentClusterState.getMembers().spliterator(), false)
+//						.reduce((older, member) -> older.isOlderThan(member) ? older : member);
+//
+//		final Member oldest = old.orElse(cluster.selfMember());
+//		final Set<Member> unreachable = currentClusterState.getUnreachable();
+//		final String className = getClass().getSimpleName();
+//
+//		StreamSupport.stream(currentClusterState.getMembers().spliterator(), false)
+//				.forEach(new Consumer<Member>() {
+//					int m = 0;
+//
+//					@Override
+//					public void accept(Member member) {
+//						log.info("{} - {} {}{}{}{}", className, ++m, leader(member), oldest(member), unreachable(member), member);
+//					}
+//
+//					private String leader(Member member) {
+//						return member.address().equals(currentClusterState.getLeader()) ? "(LEADER) " : "";
+//					}
+//
+//					private String oldest(Member member) {
+//						return oldest.equals(member) ? "(OLDEST) " : "";
+//					}
+//
+//					private String unreachable(Member member) {
+//						return unreachable.contains(member) ? "(UNREACHABLE) " : "";
+//					}
+//				});
+//
+//		currentClusterState.getUnreachable()
+//				.forEach(new Consumer<Member>() {
+//					int m = 0;
+//
+//					@Override
+//					public void accept(Member member) {
+//						log.info("{} - {} {} (unreachable)", getClass().getSimpleName(), ++m, member);
+//					}
+//				});
+//	}
 }
 
