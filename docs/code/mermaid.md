@@ -4,19 +4,37 @@ sort: 4
 
 # 架构示意
 
-集群结构
+集群结构示意
+相同类型的
+com.code.broker.cluster.type=game
+com.code.broker.cluster.center=uk
 
 ```mermaid
 graph TB
-    c1-->a2
-    subgraph other-server
-    a1-->a2
+    game-1-->|http|login-service-1
+	game-n-->other-service-1
+	
+
+	game-1-->game-n
+	game-n-->game-1
+		
+	other-service-1-->other-service-n
+	other-service-n-->other-service-1	
+	
+	login-service-1-->login-service-n
+	login-service-n-->login-service-1	
+	
+    subgraph cluster-other
+		other-service-1
+		other-service-n
     end
-    subgraph center login-server
-    b1-->b2
+    subgraph cluster-login
+		login-service-1
+		login-service-n
     end
-    subgraph center game-server
-    c1-->c2
+    subgraph cluster-game
+		game-1
+		game-n
     end
 ```
 
