@@ -7,6 +7,8 @@ import com.codebroker.exception.ManagerNotFoundException;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
 
+import java.util.Optional;
+
 
 /**
  * 引擎应用的上下文.
@@ -24,7 +26,7 @@ public final class AppContext {
      * @param <T>
      * @return
      */
-    public static <T> T getManager(Class<T> type) {
+    public static <T> Optional<T> getManager(Class<T> type) {
         try {
             return InternalContext.getManagerLocator().getManager(type);
         } catch (IllegalStateException ise) {

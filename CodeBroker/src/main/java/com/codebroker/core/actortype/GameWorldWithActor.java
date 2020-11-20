@@ -131,11 +131,9 @@ public class GameWorldWithActor implements IGameWorld {
 		ClusterServiceWithActor serviceActor = new ClusterServiceWithActor(typeKey.name(), clusterSharding);
 		new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
 
-		try {
-			ZookeeperComponent component = ContextResolver.getComponent(ZookeeperComponent.class);
-			component.getIClusterServiceRegister().registerService(serviceName, gameWorldId,ServerEngine.akkaHttpHost,ServerEngine.akkaHttpPort);
-		}catch (MissingResourceException miss){
-
+		Optional<ZookeeperComponent> component = ContextResolver.getComponent(ZookeeperComponent.class);
+		if (component.isPresent()){
+			component.get().getIClusterServiceRegister().registerService(serviceName, gameWorldId,ServerEngine.akkaHttpHost,ServerEngine.akkaHttpPort);
 		}
 
 		ContextResolver.setManager(service);
@@ -184,8 +182,11 @@ public class GameWorldWithActor implements IGameWorld {
 	@Override
 	public Optional<IObject> sendMessageToClusterIService(String serviceName, IObject message) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-		ZookeeperComponent component = ContextResolver.getComponent(ZookeeperComponent.class);
-		Optional<Collection<String>> cacheService = component.getIClusterServiceRegister().getCacheService(serviceName);
+		Optional<ZookeeperComponent> component = ContextResolver.getComponent(ZookeeperComponent.class);
+		Optional<Collection<String>> cacheService=Optional.empty();
+		if (component.isPresent()){
+			cacheService = component.get().getIClusterServiceRegister().getCacheService(serviceName);
+		}
 
 		Http http = Http.get(actorSystem);
 		String json = message.toJson();

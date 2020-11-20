@@ -7,6 +7,8 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.util.PropertiesWrapper;
 
+import java.util.Optional;
+
 
 /**
  * 上下文解析器.
@@ -27,11 +29,11 @@ public final class ContextResolver {
         return context.getAppListener();
     }
 
-    public static <T> T getManager(Class<T> type) {
+    public static <T> Optional<T> getManager(Class<T> type) {
         return context.getManager(type);
     }
 
-    public static <T> T getComponent(Class<T> type) {
+    public static <T> Optional<T> getComponent(Class<T> type) {
         return context.getComponent(type);
     }
 

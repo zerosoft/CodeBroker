@@ -44,10 +44,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 			int timeout = 5000;
 			CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
 					.connectString(url.getZookeeperAddress())
-					.threadFactory(r -> {
-						Thread thread=new Thread(r,"zookeeper");
-						return thread;
-					})
 					.runSafeService(Executors.newSingleThreadExecutor())
 					.retryPolicy(new RetryNTimes(1, 1000))
 					.connectionTimeoutMs(timeout);

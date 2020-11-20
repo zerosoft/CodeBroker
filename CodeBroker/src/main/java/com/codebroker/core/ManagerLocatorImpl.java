@@ -8,6 +8,7 @@ import com.codebroker.api.internal.ManagerLocator;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 
@@ -19,7 +20,7 @@ import java.util.concurrent.CompletionStage;
 class ManagerLocatorImpl implements ManagerLocator {
 
     @Override
-    public <T> T getManager(Class<T> type) {
+    public <T> Optional<T> getManager(Class<T> type) {
         return ContextResolver.getManager(type);
     }
 

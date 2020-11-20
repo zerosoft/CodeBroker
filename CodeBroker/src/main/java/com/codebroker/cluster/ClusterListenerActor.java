@@ -119,13 +119,16 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 		Set<String> roles = member.getRoles();
 		//akka://CodeBroker@127.0.0.1:2552
 		log.info(member.uniqueAddress().address().toString());
-			ZookeeperComponent manager = ContextResolver.getComponent(ZookeeperComponent.class);
-			manager.getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
-					member.address().getHost().get(),
-					member.address().getPort().get(),
-					member.dataCenter(),
-					roles);
-			log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
+			Optional<ZookeeperComponent> manager = ContextResolver.getComponent(ZookeeperComponent.class);
+			if (manager.isPresent()){
+				manager.get().getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
+						member.address().getHost().get(),
+						member.address().getPort().get(),
+						member.dataCenter(),
+						roles);
+				log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
+			}
+
 			ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
 	}
 

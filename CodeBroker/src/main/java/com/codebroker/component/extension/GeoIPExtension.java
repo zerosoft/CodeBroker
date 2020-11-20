@@ -8,8 +8,10 @@ import akka.actor.typed.javadsl.Behaviors;
 import com.codebroker.component.service.GeoIPComponent;
 import com.codebroker.core.ContextResolver;
 
+import java.util.Optional;
+
 public class GeoIPExtension implements Extension {
-	GeoIPComponent manager;
+	Optional<GeoIPComponent> manager;
 
 	public GeoIPExtension() {
 		manager = ContextResolver.getManager(GeoIPComponent.class);
@@ -34,7 +36,7 @@ public class GeoIPExtension implements Extension {
 			Behaviors.setup(
 					(context) -> {
 						Id.get(context.getSystem())
-								.manager.getCityCountry("sss");
+								.manager.get().getCityCountry("sss");
 						return Behaviors.same();
 					});
 		}

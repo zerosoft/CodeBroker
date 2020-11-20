@@ -11,6 +11,7 @@ import com.codebroker.exception.ManagerNotFoundException;
 import com.codebroker.util.PropertiesWrapper;
 
 import java.util.MissingResourceException;
+import java.util.Optional;
 
 /**
  * 内核上下文
@@ -54,7 +55,7 @@ class KernelContext {
         this.propertieswrapper = propertieswrapper;
     }
 
-    <T> T getManager(Class<T> type) {
+    <T> Optional<T> getManager(Class<T> type) {
         try {
             return managerComponents.getComponent(type);
         } catch (MissingResourceException mre) {
@@ -62,7 +63,7 @@ class KernelContext {
         }
     }
 
-    <T> T getComponent(Class<T> type) {
+    <T> Optional<T> getComponent(Class<T> type) {
         return serviceComponents.getComponent(type);
     }
 
@@ -88,8 +89,11 @@ class KernelContext {
     }
 
     public ActorSystem<IGameRootSystemMessage> getActorSystem() {
-        AkkaSystemComponent component = getComponent(AkkaSystemComponent.class);
-        return component.getSystem();
+        Optional<AkkaSystemComponent> component = getComponent(AkkaSystemComponent.class);
+        if (component.isPresent()){
+            return component.get().getSystem();
+        }
+        throw new RuntimeException();
     }
 
 }

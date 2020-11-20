@@ -4,6 +4,7 @@ import com.codebroker.component.BaseCoreService;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.PropertiesWrapper;
 import com.codebroker.util.zookeeper.IClusterServiceRegister;
+import com.codebroker.util.zookeeper.StateListener;
 import com.codebroker.util.zookeeper.URL;
 import com.codebroker.util.zookeeper.ZookeeperClusterServiceRegister;
 import com.codebroker.util.zookeeper.curator.CuratorZookeeperClient;
@@ -26,6 +27,30 @@ public class ZookeeperComponent extends BaseCoreService {
 		URL url=new URL("",zookeeperHostname,zookeeperPort);
 		curatorZookeeperClient=new CuratorZookeeperClient(url);
 		zookeeperClusterServiceRegister=new ZookeeperClusterServiceRegister(curatorZookeeperClient);
+
+		curatorZookeeperClient.addStateListener(state -> {
+			if (state == StateListener.CONNECTED) {
+				try {
+					logger.info("CuratorZookeeperClient CONNECTED");
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+			if (state == StateListener.DISCONNECTED) {
+				try {
+					logger.info("CuratorZookeeperClient DISCONNECTED");
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+			if (state == StateListener.RECONNECTED) {
+				try {
+					logger.info("CuratorZookeeperClient RECONNECTED");
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		});
 		setActive();
 	}
 

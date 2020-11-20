@@ -1,5 +1,7 @@
 package com.codebroker.api.internal;
 
+import java.util.Optional;
+
 /**
  * 系统组件管理器.
  *
@@ -14,7 +16,7 @@ public interface ComponentRegistry extends Iterable<IService> {
      * @param type the type
      * @return the component
      */
-    <T> T getComponent(Class<T> type);
+    <T> Optional<T> getComponent(Class<T> type);
 
     /**
      * 移除组件

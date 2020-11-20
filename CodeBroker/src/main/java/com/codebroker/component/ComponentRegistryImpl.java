@@ -6,10 +6,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.MissingResourceException;
+import java.util.*;
 
 /**
  * 组件管理器的基本实现.
@@ -36,29 +33,35 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     @Override
-    public <T> T getComponent(Class<T> type) {
+    public <T> Optional<T> getComponent(Class<T> type) {
         // 目标组件
         Object matchComponent = null;
 
         for (IService component : componentSet) {
             if (type.isAssignableFrom(component.getClass())) {
                 if (matchComponent != null) {
-                    throw new MissingResourceException("More than one matching component", type.getName(), null);
+                    logger.info("More than one matching component", type.getName());
+                    return Optional.empty();
+//                    throw new MissingResourceException("More than one matching component", type.getName(), null);
                 }
                 matchComponent = component;
             }else if (type.getName()==component.getName()){
                 if (matchComponent != null) {
-                    throw new MissingResourceException("More than one matching component", type.getName(), null);
+                    logger.info("More than one matching component", type.getName());
+                    return Optional.empty();
+//                    throw new MissingResourceException("More than one matching component", type.getName(), null);
                 }
                 matchComponent = component;
             }
         }
 
         if (matchComponent == null) {
-            throw new MissingResourceException("No matching components", type.getName(), null);
+            logger.info("No matching components", type.getName());
+            return Optional.empty();
+//            throw new MissingResourceException("No matching components", type.getName(), null);
         }
 
-        return type.cast(matchComponent);
+        return Optional.ofNullable(type.cast(matchComponent));
     }
 
     @Override
