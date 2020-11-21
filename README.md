@@ -1,8 +1,16 @@
 # CodeBroker
 
-1. 这里是列表文本游戏服务器逻辑基于`Akka2.6.8`构建业务架构，使用Actor构建游戏模型。
-2. 这里是列表文本游戏内部依赖于`事件`驱动。
-3. 服务器之间通讯使用Akka的`Artery Remoting`依赖于 akka的Receptionist 集群查找。不建议当做低延时函数使用。
+基于用Akka framework 构建的可伸缩分布式服务器
+
+基于Actor管理线程模型，模块间使用消息投递方式进行通讯
+
+集群模式使用akka cluster，注册发现基于zookeepr。
+同一个数据中心和同类型的节点会自动连接。
+同一个集群且类型相同的节点，通讯方式基于Actor Remote。
+集群之间不同的节点通讯通过，Http方式访问。
+
+更多说明
+- https://zerosoft.github.io/codebroker
 
  **当前的akka模型** 
 
