@@ -1,7 +1,16 @@
 # CodeBroker
 
-使用Akka java版本构建的可伸缩分布式服务器
+基于用Akka framework 构建的可伸缩分布式服务器
 
+基于Actor管理线程模型，模块间使用消息投递方式进行通讯
+
+集群模式使用akka cluster，注册发现基于zookeepr。
+同一个数据中心和同类型的节点会自动连接。
+同一个集群且类型相同的节点，通讯方式基于Actor Remote。
+集群之间不同的节点通讯通过，Http方式访问。
+
+更多说明
+- https://zerosoft.github.io/codebroker
 ## 快速开始
 
 ## 配置文件 
