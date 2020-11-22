@@ -20,7 +20,7 @@ com.code.broker.cluster.center=uk
 
 # Actor结构示意
 
-![img](/assets/images/Actorframeworkk.png)
+![img](/assets/images/actor_framework.png)
 
 ```
 GameRootSystem 根节点Actor，提供非Actor对象访问的入口API
