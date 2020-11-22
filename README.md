@@ -14,10 +14,6 @@
 
  **当前的akka模型** 
 
-
-![服务器当前Actor节点属性图](https://github.com/zerosoft/CodeBroker/raw/master/docs/assets/images/Actorframework.png "微信截图_20200927160226.png")
-
-
  **RootGameSystem**  根节点Actor，提供非Actor对象访问的入口API
 
  **SessionManager** 管理网络Session Actor，负责和Session交互的Actor
