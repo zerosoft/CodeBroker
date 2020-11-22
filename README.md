@@ -15,7 +15,7 @@
  **当前的akka模型** 
 
 
-![服务器当前Actor节点属性图](https://images.gitee.com/uploads/images/2020/0927/161236_d6773db3_19059.png "微信截图_20200927160226.png")
+![服务器当前Actor节点属性图](https://github.com/zerosoft/CodeBroker/blob/master/docs/assets/images/Actorframework.png "微信截图_20200927160226.png")
 
 
  **RootGameSystem**  根节点Actor，提供非Actor对象访问的入口API
