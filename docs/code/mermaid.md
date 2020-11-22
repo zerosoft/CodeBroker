@@ -17,29 +17,28 @@ com.code.broker.cluster.center=uk
 ```
 
 ![img](/assets/images/framework.png)
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-```
 
-```mermaid
-classDiagram
-classA <|-- classB
-classC *-- classD
-classE o-- classF
-classG <-- classH
-classI -- classJ
-classK <.. classL
-classM <|.. classN
-classO .. classP
-```
+# Actor结构示意
 
-```mermaid
-erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ LINE-ITEM : contains
-    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+![img](/assets/images/Actorframeworkk.png)
+
+```
+GameRootSystem 根节点Actor，提供非Actor对象访问的入口API
+
+SessionManager 管理网络Session Actor，负责和Session交互的Actor
+
+GameWorld 游戏世界Acotr负责后续创建IService的Actor，可创建单机服务及多机服务IService
+GameWorldGuardian 游戏world的查询
+ServiceActor 代理Service的服务提供
+ServiceGuardian 服务查询
+ClusterServiceActor 集群服务的提供
+
+
+UserManager 游戏内部用户Actor，负责处理用户事件
+UserManagerGuardian 负责查询uer服务
+
+ClusterListener 集群监听
+
+http 负责接收集群间的通讯服务
+
 ```

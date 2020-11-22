@@ -9,8 +9,6 @@
 同一个集群且类型相同的节点，通讯方式基于Actor Remote。
 集群之间不同的节点通讯通过，Http方式访问。
 
-更多说明
-- https://zerosoft.github.io/codebroker
 ## 快速开始
 
 ## 配置文件 
