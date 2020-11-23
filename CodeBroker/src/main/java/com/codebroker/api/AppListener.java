@@ -14,11 +14,10 @@ public interface AppListener extends IService {
      /**
      * 用户连接到系统的验证
      *
-     * @param name
-     * @param parameter
+     * @param sourceProtocol
      * @return 重连接key
      */
-    String sessionLoginVerification(String name, String parameter) throws NoAuthException;
+    String sessionLoginVerification(byte[] sourceProtocol) throws NoAuthException;
 
     /**
      * 用户登入到系统

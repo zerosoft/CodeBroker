@@ -151,8 +151,9 @@ public class JythonExtension extends AppListenerExtension {
 		return FileUtils.readFileToString(new File(sourceFilePath), Charset.forName("UTF-8"));
 	}
 
+
 	@Override
-	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
+	public String sessionLoginVerification(byte[] sourceProtocol) throws NoAuthException {
 		return null;
 	}
 

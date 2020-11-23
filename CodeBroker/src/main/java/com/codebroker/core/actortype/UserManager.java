@@ -15,8 +15,7 @@ import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IUserManager;
 import com.codebroker.exception.NoAuthException;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -34,6 +33,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
     public static final String IDENTIFY = UserManager.class.getSimpleName();
     private Map<String, ActorRef<IUser>> userMap=new HashMap<>();
     private Map<String,Long> lostSessionUser=new HashMap<>();
+
 
     public static Behavior<IUserManager> create(long gameWorldId,Duration checkUserLostSessionTime) {
         return Behaviors.setup(
@@ -110,11 +110,10 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         AppListener appListener = ContextResolver.getAppListener();
         //TODO 根据需求调整
         byte[] message = tryBindingUser.message.getRawData();
-        Gson gson=new Gson();
-        JsonObject jsonElement = gson.fromJson(new String(message), JsonObject.class);
+
         String uid;
         try {
-            uid = appListener.sessionLoginVerification(jsonElement.get("name").getAsString(), jsonElement.get("parm").getAsString());
+            uid = appListener.sessionLoginVerification(message);
         }catch (Exception e){
             getContext().getLog().error(e.getMessage(),e);
             //登入失败,关闭处理
@@ -137,7 +136,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
                     User.create(
                             uid,
                             tryBindingUser.ioSession,getContext().getSelf()),
-                    key,
+                            key,
                             DispatcherSelector.fromConfig("game-logic"));
             //通知Session绑定User
             tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(spawn));

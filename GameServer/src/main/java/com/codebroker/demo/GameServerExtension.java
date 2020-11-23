@@ -12,6 +12,8 @@ import com.codebroker.extensions.AppListenerExtension;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.*;
 
@@ -22,9 +24,13 @@ public class GameServerExtension extends AppListenerExtension {
 	private Map<String, String> userMap = new HashMap<>();
 	//在线用户列表
 	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
+	Gson gson=new Gson();
 
 	@Override
-	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
+	public String sessionLoginVerification(byte[] sourceProtocol) throws NoAuthException {
+		JsonObject jsonElement = gson.fromJson(new String(sourceProtocol), JsonObject.class);
+		String name=jsonElement.get("name").getAsString();
+		String parameter=jsonElement.get("parm").getAsString();
 		logger.info("handle login name {} parameter {}", name, parameter);
 		CObject cObject = CObject.newInstance();
 		cObject.putInt("handlerKey",1);
