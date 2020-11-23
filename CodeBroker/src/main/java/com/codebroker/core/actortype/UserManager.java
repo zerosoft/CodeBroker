@@ -32,7 +32,6 @@ import java.util.Map;
 public class UserManager extends AbstractBehavior<IUserManager> {
 
     public static final String IDENTIFY = UserManager.class.getSimpleName();
-
     private Map<String, ActorRef<IUser>> userMap=new HashMap<>();
     private Map<String,Long> lostSessionUser=new HashMap<>();
 
@@ -123,23 +122,30 @@ public class UserManager extends AbstractBehavior<IUserManager> {
             return Behaviors.same();
         }
 
-        if (userMap.containsKey(uid)){
-            lostSessionUser.remove(uid);
+        String key = User.IDENTIFY + "." + uid;
+        if (userMap.containsKey(key)){
+            lostSessionUser.remove(key);
 
-            ActorRef<IUser> userActorRef= userMap.get(uid);
+            ActorRef<IUser> userActorRef= userMap.get(key);
             //通知User之前的session被顶掉了
             userActorRef.tell(new IUser.NewSessionLogin(tryBindingUser.ioSession));
             //通知Session绑定User
             tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(userActorRef));
+
         }else {
-            ActorRef<IUser> spawn = getContext().spawn(User.create(uid,tryBindingUser.ioSession,getContext().getSelf()),User.IDENTIFY+"."+uid,DispatcherSelector.fromConfig("game-logic"));
+            ActorRef<IUser> spawn = getContext().spawn(
+                    User.create(
+                            uid,
+                            tryBindingUser.ioSession,getContext().getSelf()),
+                    key,
+                            DispatcherSelector.fromConfig("game-logic"));
             //通知Session绑定User
             tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(spawn));
             spawn.tell(IUser.NewGameUserInit.INSTANCE);
 
             //加入监听
             getContext().watchWith(spawn,new IUserManager.UserClose(uid));
-            userMap.put(User.IDENTIFY+"."+uid,spawn);
+            userMap.put(key,spawn);
         }
 
         return Behaviors.same();

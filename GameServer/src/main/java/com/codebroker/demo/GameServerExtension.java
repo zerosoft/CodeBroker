@@ -38,10 +38,15 @@ public class GameServerExtension extends AppListenerExtension {
 			IObject iObject1 = iObject.get();
 			uid = iObject1.getUtfString("uid");
 			logger.info("user login {}",uid);
+
+//			if (onlineUsers.containsKey(uid)){
+//				onlineUsers.get(uid).disconnect();
+//			}
+			return uid;
 		} else {
 			throw new NoAuthException();
 		}
-		return uid;
+
 	}
 
 	@Override
@@ -49,12 +54,14 @@ public class GameServerExtension extends AppListenerExtension {
 		logger.info("User Login parameter {}", user.getUserId());
 		user.addEventListener("login", new DoSameEvent());
 		user.addEventListener("USER_REMOVE", new UserRemoveEvent());
+		onlineUsers.put(user.getUserId(),user);
 	}
 
 
 	@Override
 	public boolean handleLogout(IGameUser user) {
 		logger.info("User LogOut parameter {}", user.getUserId());
+		onlineUsers.remove(user.getUserId());
 		return false;
 	}
 
@@ -67,15 +74,7 @@ public class GameServerExtension extends AppListenerExtension {
 	public void init(Object obj) {
 		logger.info("Init");
 
-//		IGameWorld gameWorld = AppContext.getGameWorld();
-//		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
-//		logger.info("Account Service create {}",accountService);
-//		AccountDBManager accountDBManager =new AccountDBManager();
-//		ArrayList<Service> serviceArrayList = Lists.newArrayList();
-//		serviceArrayList.add(accountDBManager);
-//		ServiceManager serviceManager=new ServiceManager(serviceArrayList);
-//		serviceManager.startAsync();
 
 	}
 }

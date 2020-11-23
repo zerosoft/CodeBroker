@@ -142,8 +142,12 @@ public class User extends AbstractBehavior<IUser> {
     private Behavior<IUser> disconnect(IUser.Disconnect message) {
         boolean enforce = message.enforce;
         if (enforce) {
-            ioSession.tell(new ISession.SessionClose(enforce));
-            ioSession = null;
+            if (ioSession!=null){
+                ioSession.tell(new ISession.SessionClose(enforce));
+                ioSession = null;
+            }
+
+
         }
         if (gameUser != null) {
             getContext().spawnAnonymous(GameWorldGuardian.create(new IGameWorldMessage.UserLogOutWorld(gameUser)));
