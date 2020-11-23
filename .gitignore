@@ -29,3 +29,4 @@ boot/.gradle/
 WebAPITest/gradle/
 CodeBroker/.jython_cache/
 CodeBroker/src/main/resource/script/.jython_cache/
+GameServer/.gradle/

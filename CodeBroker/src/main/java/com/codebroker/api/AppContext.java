@@ -22,6 +22,7 @@ public final class AppContext {
 
     /**
      * 获取当前JVM的服务
+     *
      * @param type
      * @param <T>
      * @return
@@ -36,6 +37,7 @@ public final class AppContext {
 
     /**
      * 设置当前JVM的服务
+     *
      * @param service
      * @return
      */
@@ -45,18 +47,20 @@ public final class AppContext {
 
     /**
      * 获得游戏世界的API
+     *
      * @return
      */
-    public static IGameWorld getGameWorld(){
+    public static IGameWorld getGameWorld() {
         return InternalContext.getManagerLocator().getGameWorld();
     }
 
     /**
      * 获得静态文件配置的服务器ID
+     *
      * @return
      */
-    public static int getServerId(){
+    public static int getServerId() {
         PropertiesWrapper propertiesWrapper = ContextResolver.getPropertiesWrapper();
-       return propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
+        return propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID, 1);
     }
 }

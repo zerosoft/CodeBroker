@@ -2,12 +2,9 @@ package com.codebroker.demo;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.IGameWorld;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
-import com.codebroker.demo.service.account.AccountService;
-import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.UserRemoveEvent;
 import com.codebroker.exception.NoAuthException;
@@ -16,28 +13,35 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
-public class Demo1Extension extends AppListenerExtension {
+public class GameServerExtension extends AppListenerExtension {
 
-	private Logger logger = LoggerFactory.getLogger(DemoExtension.class);
+	private Logger logger = LoggerFactory.getLogger(GameServerExtension.class);
+
+	private Map<String, String> userMap = new HashMap<>();
+	//在线用户列表
+	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
 
 	@Override
 	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
 		logger.info("handle login name {} parameter {}", name, parameter);
-
-//		AccountService manager = AppContext.getManager(AccountService.class.getName()+"."+random.nextInt(100));
-//		AppContext.getGameWorld().sendMessageToService();
 		CObject cObject = CObject.newInstance();
 		cObject.putInt("handlerKey",1);
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
-//		IObject iObject =manager.handleBackMessage(cObject);
-		Optional<IObject> iObject = AppContext.getGameWorld().sendMessageToClusterIService(AccountService.class.getName(), cObject);
-		return name;
+
+		Optional<IObject> iObject = AppContext.getGameWorld()
+				.sendMessageToClusterIService("com.codebroker.demo.service.account.AccountService", cObject);
+		String uid;
+		if (iObject.isPresent()) {
+			IObject iObject1 = iObject.get();
+			uid = iObject1.getUtfString("uid");
+			logger.info("user login {}",uid);
+		} else {
+			throw new NoAuthException();
+		}
+		return uid;
 	}
 
 	@Override
@@ -63,11 +67,15 @@ public class Demo1Extension extends AppListenerExtension {
 	public void init(Object obj) {
 		logger.info("Init");
 
-		IGameWorld gameWorld = AppContext.getGameWorld();
-		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
-		boolean accountServiceT = gameWorld.createService(new AllianceService());
+//		IGameWorld gameWorld = AppContext.getGameWorld();
+//		boolean accountService = gameWorld.createClusterService(AccountService.class.getName(),new AccountService());
 		addRequestHandler(11, CreateRequestHandler.class);
-		logger.info("Account Service create {}",accountService);
+//		logger.info("Account Service create {}",accountService);
+//		AccountDBManager accountDBManager =new AccountDBManager();
+//		ArrayList<Service> serviceArrayList = Lists.newArrayList();
+//		serviceArrayList.add(accountDBManager);
+//		ServiceManager serviceManager=new ServiceManager(serviceArrayList);
+//		serviceManager.startAsync();
 
 	}
 }

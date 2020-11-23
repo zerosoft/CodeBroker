@@ -6,6 +6,8 @@ public class Account {
 
 	private String uid;
 
+	private String passoword;
+
 	public String getAccount() {
 		return account;
 	}
@@ -20,5 +22,13 @@ public class Account {
 
 	public void setUid(String uid) {
 		this.uid = uid;
+	}
+
+	public String getPassoword() {
+		return passoword;
+	}
+
+	public void setPassoword(String passoword) {
+		this.passoword = passoword;
 	}
 }

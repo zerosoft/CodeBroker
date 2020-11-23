@@ -4,7 +4,6 @@ import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
-import com.codebroker.demo.service.account.AccountService;
 import com.codebroker.extensions.request.ClientHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 
 public abstract class AbstractIService implements IService {
-	private ClientHandlerFactory clientHandlerFactory = new ClientHandlerFactory();
-	private Logger logger = LoggerFactory.getLogger(AccountService.class);
+	private ClientHandlerFactory clientHandlerFactory=new ClientHandlerFactory();
+	private Logger logger = LoggerFactory.getLogger(AbstractIService.class);
 
 
 	public void addRequestHandler(int requestId, Class<?> theClass) {

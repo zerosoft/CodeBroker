@@ -89,7 +89,7 @@ public class RedisComponent extends BaseCoreService {
 
     @Override
     public String getName() {
-        return RedisComponent.class.getSimpleName();
+        return RedisComponent.class.getName();
     }
 
 }

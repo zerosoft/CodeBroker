@@ -32,7 +32,7 @@ public class ClientHandlerFactory implements IHandlerFactory {
         }
     }
 
-    public  Optional<Object> findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
+    public  Optional<Object> findHandler(int handlerKey)  {
         Object handler = cachedHandlers.get(handlerKey);
         if (handler != null) {
             return Optional.of(handler);
@@ -42,7 +42,13 @@ public class ClientHandlerFactory implements IHandlerFactory {
         if (handlerClass == null) {
             return Optional.empty();
         }
-        handler = handlerClass.newInstance();
+
+        try {
+            handler = handlerClass.newInstance();
+        } catch (InstantiationException |IllegalAccessException e) {
+
+            return Optional.empty();
+        }
         cachedHandlers.put(handlerKey, handler);
         return Optional.of(handler);
     }

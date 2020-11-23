@@ -1,13 +1,10 @@
 package com.codebroker.demo.service.account;
 
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.IObject;
 import com.codebroker.demo.service.AbstractIService;
 import com.codebroker.demo.service.account.request.LoginAccountHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
 
 public class AccountService extends AbstractIService {
 	private Logger logger = LoggerFactory.getLogger(AccountService.class);
@@ -21,14 +18,6 @@ public class AccountService extends AbstractIService {
 	@Override
 	public void destroy(Object o) {
 
-	}
-
-	@Override
-	public IObject handleBackMessage(IObject iObject) {
-		logger.info("AccountService handleBackMessage");
-		IObject result= CObject.newInstance();
-		result.putUtfString("uid", UUID.randomUUID().toString());
-		return result;
 	}
 
 	@Override

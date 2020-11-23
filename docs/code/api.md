@@ -172,18 +172,29 @@ com.codebroker.api.AppListener.IHandlerFactory
 
 ```
 
-```tip
-It’s bigger than a bread box.
-```
+```note
 
-```tip
-It’s tip 2
-```
+## IoSession
 
-```warning
-Strong prose may provoke extreme mental exertion. Reader discretion is strongly advised.
-```
+网络会话
 
-```danger
-Mad scientist at work!
+
+com.codebroker.api.AppListener.IoSession
+
+数据写入.
+
+`void write(Object msg);`
+
+数据是否写出
+  
+`void write(Object msg,boolean flush);`
+
+连接是否正常.
+    
+`boolean isConnection();`
+
+关闭连接
+
+`void close(boolean close);`
+
 ```

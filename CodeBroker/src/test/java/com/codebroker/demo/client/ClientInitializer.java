@@ -1,5 +1,6 @@
 package com.codebroker.demo.client;
 
+import akka.remote.transport.netty.ClientHandler;
 import com.codebroker.net.netty.filter.ByteArrayPacketCodecDecoder;
 import com.codebroker.net.netty.filter.ByteArrayPacketCodecEncoder;
 

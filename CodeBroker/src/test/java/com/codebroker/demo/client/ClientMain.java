@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.setting.SystemRequest;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
