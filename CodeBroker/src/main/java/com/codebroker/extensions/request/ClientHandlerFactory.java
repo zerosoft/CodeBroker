@@ -3,6 +3,7 @@ package com.codebroker.extensions.request;
 import com.codebroker.api.IHandlerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientHandlerFactory implements IHandlerFactory {
@@ -31,27 +32,19 @@ public class ClientHandlerFactory implements IHandlerFactory {
         }
     }
 
-    public Object findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
-        Object handler = getHandlerInstance(handlerKey);
-        if (handler == null) {
-            handler = getHandlerInstance(handlerKey);
-        }
-        return handler;
-    }
-
-    private Object getHandlerInstance(int handlerKey) throws InstantiationException, IllegalAccessException {
+    public  Optional<Object> findHandler(int handlerKey) throws InstantiationException, IllegalAccessException {
         Object handler = cachedHandlers.get(handlerKey);
         if (handler != null) {
-            return handler;
+            return Optional.of(handler);
         }
 
         Class<?> handlerClass = handlers.get(handlerKey);
         if (handlerClass == null) {
-            return null;
+            return Optional.empty();
         }
         handler = handlerClass.newInstance();
         cachedHandlers.put(handlerKey, handler);
-        return handler;
+        return Optional.of(handler);
     }
 
 }

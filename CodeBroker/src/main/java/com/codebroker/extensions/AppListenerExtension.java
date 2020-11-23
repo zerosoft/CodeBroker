@@ -14,6 +14,8 @@ import com.codebroker.extensions.request.filter.IFilterChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 /**
  * 请求拓展接口.
  *
@@ -60,12 +62,12 @@ public abstract class AppListenerExtension implements AppListener {
             return;
         }
         try {
-            IClientRequestHandler handler = (IClientRequestHandler) handlerFactory.findHandler(requestId);
-            if (handler == null) {
+            Optional<Object> handler =  handlerFactory.findHandler(requestId);
+            if (!handler.isPresent()) {
                 logger.info("handler is no found" + requestId);
                 return;
             }
-            handler.handleClientRequest(user, params);
+            ((IClientRequestHandler) handler.get()).handleClientRequest(user, params);
         } catch (InstantiationException | IllegalAccessException e) {
             logger.error("IClientRequestHandler error",e);
         }

@@ -18,7 +18,7 @@ public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3
 	@Override
 	public void handleClientRequest(IGameUser gameUser, Object message) {
 		try {
-			T decode = (T) decode(message);
+			T decode = decode(message);
 
 			boolean pass = verifyParams(decode);
 

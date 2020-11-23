@@ -1,5 +1,7 @@
 package com.codebroker.api;
 
+import java.util.Optional;
+
 /**
  * 请求的Handler接口.
  *
@@ -37,7 +39,7 @@ public interface IHandlerFactory {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    Object findHandler(int handlerKey) throws InstantiationException, IllegalAccessException;
+    Optional<Object> findHandler(int handlerKey) throws InstantiationException, IllegalAccessException;
 
     /**
      * 清除所有的handler
