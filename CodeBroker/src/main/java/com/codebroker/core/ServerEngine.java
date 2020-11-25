@@ -156,6 +156,12 @@ public class ServerEngine implements InstanceMXBean {
             systemRegistry.addComponent(mongoDBComponent);
         }
 
+        if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.MYSQL_SOURCE_NAME))) {
+            logger.info("DataSourceComponent component init");
+            DataSourceComponent dataSourceComponent=new DataSourceComponent();
+            systemRegistry.addComponent(dataSourceComponent);
+        }
+
         IService geoIPService = new GeoIPComponent();
         systemRegistry.addComponent(geoIPService);
 
@@ -236,7 +242,7 @@ public class ServerEngine implements InstanceMXBean {
 
         try {
             JarLoader jarLoader = new JarLoader();
-            iClassLoader = jarLoader.loadClasses(new String[]{path}, ClassLoader.getSystemClassLoader());
+            iClassLoader = jarLoader.loadClasses(path, ClassLoader.getSystemClassLoader());
         } catch (Exception e) {
             logger.error("ClassLoader error", e);
             System.exit(1);
@@ -269,7 +275,7 @@ public class ServerEngine implements InstanceMXBean {
 
                     //启动新的
                     JarLoader jarLoader = new JarLoader();
-                    iClassLoader = jarLoader.loadClasses(new String[]{path}, ClassLoader.getSystemClassLoader());
+                    iClassLoader = jarLoader.loadClasses(path, ClassLoader.getSystemClassLoader());
                     startApplication();
 
                 } catch (Exception e) {

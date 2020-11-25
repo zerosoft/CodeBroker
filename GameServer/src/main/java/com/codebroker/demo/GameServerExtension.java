@@ -2,6 +2,9 @@ package com.codebroker.demo;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
+import com.codebroker.component.service.DataSourceComponent;
+import com.codebroker.component.service.MybatisComponent;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
@@ -9,21 +12,29 @@ import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.UserRemoveEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
+import com.codebroker.mybatis.gameserver1.mapper.GameUserMapper;
+import com.codebroker.mybatis.gameserver1.model.GameUser;
 import com.google.common.collect.Maps;
+import jodd.io.FileUtil;
+import jodd.io.findfile.ClassScanner;
+import jodd.util.ClassLoaderUtil;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.net.URL;
 import java.util.*;
 
 public class GameServerExtension extends AppListenerExtension {
 
 	private Logger logger = LoggerFactory.getLogger(GameServerExtension.class);
 
-	private Map<String, String> userMap = new HashMap<>();
 	//在线用户列表
 	private Map<String, IGameUser> onlineUsers = Maps.newConcurrentMap();
+
 	Gson gson=new Gson();
 
 	@Override
@@ -45,9 +56,6 @@ public class GameServerExtension extends AppListenerExtension {
 			uid = iObject1.getUtfString("uid");
 			logger.info("user login {}",uid);
 
-//			if (onlineUsers.containsKey(uid)){
-//				onlineUsers.get(uid).disconnect();
-//			}
 			return uid;
 		} else {
 			throw new NoAuthException();
@@ -82,5 +90,20 @@ public class GameServerExtension extends AppListenerExtension {
 
 		addRequestHandler(11, CreateRequestHandler.class);
 
+
+		MybatisComponent mybatisComponent=new MybatisComponent();
+		mybatisComponent.init(obj);
+
+		Optional<SqlSessionFactory> game = mybatisComponent.getSqlSessionFactory("game");
+		boolean present = game.isPresent();
+		if (present){
+			SqlSessionFactory sqlSessionFactory = game.get();
+			SqlSession sqlSession = sqlSessionFactory.openSession();
+			GameUserMapper mapper = sqlSession.getMapper(GameUserMapper.class);
+			GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
+			System.out.println(gameUser);
+			sqlSession.close();
+		}
 	}
+
 }

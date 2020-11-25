@@ -78,4 +78,23 @@ public class SystemEnvironment {
     public static final String REDIS_PORT = APP_ROOT + ".redis.port";
     public static final String REDIS_POOL = APP_ROOT + ".redis.isPool";
     public static final String REDIS_PASSWORD = APP_ROOT + ".redis.password";
+    /**
+     * mysql数据源名称
+     */
+    public static final String MYSQL_SOURCE_NAME = APP_ROOT + ".mysql.source.name";
+    //=com.mysql.jdbc.Driver
+    public static final String MYSQL_DRIVER = APP_ROOT + ".mysql.%s.driver";
+    public static final String MYSQL_URL = APP_ROOT + ".mysql.%s.url";
+    public static final String MYSQL_USER_NAME = APP_ROOT + ".mysql.%s.username";
+    public static final String MYSQL_PASS_WORD = APP_ROOT + ".mysql.%s.password";
+
+    public static final String MYSQL_ACQUIRE_INCREMENT = APP_ROOT + ".mysql.%s.acquire.increment";
+    public static final String MYSQL_MIN_POOL_SIZE = APP_ROOT + ".mysql.%s.min.pool.size";
+    public static final String MYSQL_MAX_POOL_SIZE = APP_ROOT + ".mysql.%s.max.pool.size";
+    /**
+     * mybatis
+     */
+    public static final String MYBATIS_MODEL = APP_ROOT + ".mybatis.%s.model";
+    public static final String MYBATIS_MAPPER = APP_ROOT + ".mybatis.%s.mapper";
+    public static final String MYBATIS_XML_PATH = APP_ROOT + ".mybatis.%s.xml.path";
 }

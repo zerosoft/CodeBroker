@@ -6,6 +6,7 @@ import jodd.util.cl.ExtendedURLClassLoader;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * jar读取器
@@ -15,7 +16,7 @@ public class JarLoader implements IClassLoader {
     private ExtendedURLClassLoader extendedURLClassLoader;
 
     @Override
-    public ClassLoader loadClasses(String[] jarPath, ClassLoader classLoader) throws Exception {
+    public ClassLoader loadClasses(String jarPath, ClassLoader classLoader) throws Exception {
         FindFile ff = new FindFile()
                 .recursive(true)
                 .includeDirs(true)

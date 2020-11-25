@@ -40,8 +40,8 @@ dependencies {
 	compile fileTree(dir: 'lib', include: '*.jar')
 
     compile 'org.slf4j:slf4j-api:1.7.30'
-    compile 'org.jodd:jodd-core:3.8.6'
-    compile 'org.jodd:jodd-props:3.8.6'
+    compile 'org.jodd:jodd-core:5.2.0'
+    compile 'org.jodd:jodd-props:5.2.0'
     
 	compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.11.4'
 	compile 'org.javassist:javassist:3.20.0-GA'
@@ -67,8 +67,7 @@ dependencies {
 	compile group: 'com.typesafe.akka', name: "akka-cluster-sharding-typed_${ScalaBinary}", version: AkkaVersion
 	compile group: 'com.typesafe.akka', name: "akka-persistence-typed_${ScalaBinary}", version: AkkaVersion
 
-	// https://mvnrepository.com/artifact/org.scalatestplus/scalatestplus-junit
-	testCompile group: 'org.scalatestplus', name: "scalatestplus-junit_${ScalaBinary}", version: '1.0.0-M2'
+
 
 	//Akka Management
 	compile group: 'com.lightbend.akka.management', name: "akka-management_${ScalaBinary}", version: AkkaManagementVersion
@@ -111,28 +110,39 @@ dependencies {
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
 	compile group: 'cglib', name: 'cglib', version: '3.2.5'
 
-    //Jython脚本
+	//freemarker 模板工具
+	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+
+    //Mybatis
+    compile group: 'org.mybatis', name: 'mybatis', version: '3.5.6'
+	//Mysql
+	compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.5'
+	compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
+
+	//zookeeper
+	compile group: 'org.apache.curator', name: 'curator-framework', version: '5.1.0'
+	compile group: 'org.apache.curator', name: 'curator-recipes', version: '5.1.0'
+	compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.6.2'
+
+	//Jython脚本
 	compile group: 'org.python', name: 'jython-standalone', version: '2.7.2'
 
-    // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+	// Use JUnit test framework
+	testImplementation 'junit:junit:4.12'
 	// https://mvnrepository.com/artifact/org.mockito/mockito-core
 	testCompile group: 'org.mockito', name: 'mockito-core', version: '3.5.13'
 
-	// https://mvnrepository.com/artifact/org.freemarker/freemarker
-	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
-    // https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper
-    compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.6.2'
-	// https://mvnrepository.com/artifact/com.101tec/zkclient
-	compile group: 'com.101tec', name: 'zkclient', version: '0.11'
-
-    // https://mvnrepository.com/artifact/org.apache.curator/curator-framework
-	compile group: 'org.apache.curator', name: 'curator-framework', version: '5.1.0'
-	compile group: 'org.apache.curator', name: 'curator-recipes', version: '5.1.0'
+	// https://mvnrepository.com/artifact/org.scalatestplus/scalatestplus-junit
+	testCompile group: 'org.scalatestplus', name: "scalatestplus-junit_${ScalaBinary}", version: '1.0.0-M2'
 
 }
 
 task copyJars(type:Copy) {
   from configurations.runtime
   into 'build/lib'
+}
+
+task copyJartoGame(type:Copy){
+	from 'build/libs'
+	into 'D:\\Users\\Documents\\github\\CodeBrokerGit\\GameServer\\lib'
 }
