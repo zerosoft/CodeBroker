@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.codebroker.mybatis.gameserver1.mapper.GameItemMapper">
-  <resultMap id="BaseResultMap" type="com.codebroker.mybatis.gameserver1.model.GameItem">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    <id column="sid" jdbcType="BIGINT" property="sid" />
-    <result column="num" jdbcType="INTEGER" property="num" />
+<mapper namespace="com.codebroker.mybatis.gameserver1.mapper.GameUserMapper">
+  <resultMap id="BaseResultMap" type="com.codebroker.mybatis.gameserver1.model.GameUser">
+    <id column="uid" jdbcType="BIGINT" property="uid" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="accountUid" jdbcType="VARCHAR" property="accountUid" />
   </resultMap>
   <sql id="Example_Where_Clause">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
     <where>
       <foreach collection="oredCriteria" item="criteria" separator="or">
         <if test="criteria.valid">
@@ -37,7 +36,6 @@
     </where>
   </sql>
   <sql id="Update_By_Example_Where_Clause">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
     <where>
       <foreach collection="example.oredCriteria" item="criteria" separator="or">
         <if test="criteria.valid">
@@ -67,17 +65,16 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    sid, num
+    `uid`, `name`, accountUid
   </sql>
-  <select id="selectByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameItemExample" resultMap="BaseResultMap">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
+  <select id="selectByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameUserExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
+    'true' as QUERYID,
     <include refid="Base_Column_List" />
-    from game_item
+    from game_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -86,65 +83,69 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
     select 
     <include refid="Base_Column_List" />
-    from game_item
-    where sid = #{sid,jdbcType=BIGINT}
+    from game_user
+    where `uid` = #{uid,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    delete from game_item
-    where sid = #{sid,jdbcType=BIGINT}
+    delete from game_user
+    where `uid` = #{uid,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameItemExample">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    delete from game_item
+  <delete id="deleteByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameUserExample">
+    delete from game_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.codebroker.mybatis.gameserver1.model.GameItem">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    insert into game_item (sid, num)
-    values (#{sid,jdbcType=BIGINT}, #{num,jdbcType=INTEGER})
+  <insert id="insert" parameterType="com.codebroker.mybatis.gameserver1.model.GameUser">
+    insert into game_user (`uid`, `name`, accountUid
+      )
+    values (#{uid,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{accountUid,jdbcType=VARCHAR}
+      )
   </insert>
-  <insert id="insertSelective" parameterType="com.codebroker.mybatis.gameserver1.model.GameItem">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    insert into game_item
+  <insert id="insertSelective" parameterType="com.codebroker.mybatis.gameserver1.model.GameUser">
+    insert into game_user
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="sid != null">
-        sid,
+      <if test="uid != null">
+        `uid`,
       </if>
-      <if test="num != null">
-        num,
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="accountUid != null">
+        accountUid,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="sid != null">
-        #{sid,jdbcType=BIGINT},
+      <if test="uid != null">
+        #{uid,jdbcType=BIGINT},
       </if>
-      <if test="num != null">
-        #{num,jdbcType=INTEGER},
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="accountUid != null">
+        #{accountUid,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameItemExample" resultType="java.lang.Long">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    select count(*) from game_item
+  <select id="countByExample" parameterType="com.codebroker.mybatis.gameserver1.model.GameUserExample" resultType="java.lang.Long">
+    select count(*) from game_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    update game_item
+    update game_user
     <set>
-      <if test="record.sid != null">
-        sid = #{record.sid,jdbcType=BIGINT},
+      <if test="record.uid != null">
+        `uid` = #{record.uid,jdbcType=BIGINT},
       </if>
-      <if test="record.num != null">
-        num = #{record.num,jdbcType=INTEGER},
+      <if test="record.name != null">
+        `name` = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.accountUid != null">
+        accountUid = #{record.accountUid,jdbcType=VARCHAR},
       </if>
     </set>
     <if test="_parameter != null">
@@ -152,28 +153,30 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    update game_item
-    set sid = #{record.sid,jdbcType=BIGINT},
-      num = #{record.num,jdbcType=INTEGER}
+    update game_user
+    set `uid` = #{record.uid,jdbcType=BIGINT},
+      `name` = #{record.name,jdbcType=VARCHAR},
+      accountUid = #{record.accountUid,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.codebroker.mybatis.gameserver1.model.GameItem">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    update game_item
+  <update id="updateByPrimaryKeySelective" parameterType="com.codebroker.mybatis.gameserver1.model.GameUser">
+    update game_user
     <set>
-      <if test="num != null">
-        num = #{num,jdbcType=INTEGER},
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="accountUid != null">
+        accountUid = #{accountUid,jdbcType=VARCHAR},
       </if>
     </set>
-    where sid = #{sid,jdbcType=BIGINT}
+    where `uid` = #{uid,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.codebroker.mybatis.gameserver1.model.GameItem">
-    <!-- @mbg.generated: generated automatically, do not modify! -->
-    update game_item
-    set num = #{num,jdbcType=INTEGER}
-    where sid = #{sid,jdbcType=BIGINT}
+  <update id="updateByPrimaryKey" parameterType="com.codebroker.mybatis.gameserver1.model.GameUser">
+    update game_user
+    set `name` = #{name,jdbcType=VARCHAR},
+      accountUid = #{accountUid,jdbcType=VARCHAR}
+    where `uid` = #{uid,jdbcType=BIGINT}
   </update>
 </mapper>

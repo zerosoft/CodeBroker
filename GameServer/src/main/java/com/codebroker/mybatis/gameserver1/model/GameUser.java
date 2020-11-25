@@ -1,18 +1,11 @@
 package com.codebroker.mybatis.gameserver1.model;
 
-/**
- * Table: game_user
- */
 public class GameUser {
-    /**
-     * Column: uid
-     */
     private Long uid;
 
-    /**
-     * Column: name
-     */
     private String name;
+
+    private String accountUid;
 
     public Long getUid() {
         return uid;
@@ -28,5 +21,13 @@ public class GameUser {
 
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
+    }
+
+    public String getAccountUid() {
+        return accountUid;
+    }
+
+    public void setAccountUid(String accountUid) {
+        this.accountUid = accountUid == null ? null : accountUid.trim();
     }
 }

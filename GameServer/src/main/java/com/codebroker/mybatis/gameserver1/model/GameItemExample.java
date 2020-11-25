@@ -10,67 +10,40 @@ public class GameItemExample {
 
     protected List<Criteria> oredCriteria;
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public GameItemExample() {
-        oredCriteria = new ArrayList<Criteria>();
+        oredCriteria = new ArrayList<>();
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public String getOrderByClause() {
         return orderByClause;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public boolean isDistinct() {
         return distinct;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public List<Criteria> getOredCriteria() {
         return oredCriteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void or(Criteria criteria) {
         oredCriteria.add(criteria);
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public Criteria or() {
         Criteria criteria = createCriteriaInternal();
         oredCriteria.add(criteria);
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         if (oredCriteria.size() == 0) {
@@ -79,17 +52,11 @@ public class GameItemExample {
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     protected Criteria createCriteriaInternal() {
         Criteria criteria = new Criteria();
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void clear() {
         oredCriteria.clear();
         orderByClause = null;
@@ -101,7 +68,7 @@ public class GameItemExample {
 
         protected GeneratedCriteria() {
             super();
-            criteria = new ArrayList<Criterion>();
+            criteria = new ArrayList<>();
         }
 
         public boolean isValid() {
@@ -259,7 +226,6 @@ public class GameItemExample {
     }
 
     public static class Criteria extends GeneratedCriteria {
-
         protected Criteria() {
             super();
         }

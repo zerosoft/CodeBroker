@@ -14,6 +14,7 @@ import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.codebroker.mybatis.gameserver1.mapper.GameUserMapper;
 import com.codebroker.mybatis.gameserver1.model.GameUser;
+import com.codebroker.mybatis.gameserver1.model.GameUserExample;
 import com.google.common.collect.Maps;
 import jodd.io.FileUtil;
 import jodd.io.findfile.ClassScanner;
@@ -65,6 +66,26 @@ public class GameServerExtension extends AppListenerExtension {
 	@Override
 	public void userLogin(IGameUser user) {
 		logger.info("User Login parameter {}", user.getUserId());
+		Optional<MybatisComponent> optionalMybatisComponent=ContextResolver.getComponent(MybatisComponent.class);
+		if (optionalMybatisComponent.isPresent()){
+			Optional<SqlSessionFactory> game = optionalMybatisComponent.get().getSqlSessionFactory("game");
+			boolean present = game.isPresent();
+			if (present){
+				SqlSessionFactory sqlSessionFactory = game.get();
+				try (SqlSession session = sqlSessionFactory.openSession()) {
+					GameUserMapper mapper = session.getMapper(GameUserMapper.class);
+					GameUserExample gameUserExample=new GameUserExample();
+					GameUserExample.Criteria criteria = gameUserExample.createCriteria().andAccountUidEqualTo(user.getUserId());
+					List<GameUser> gameUsers = mapper.selectByExample(gameUserExample);
+					if (gameUsers.size()<1){
+						GameUser gameUser=new GameUser();
+						gameUser.setAccountUid(user.getUserId());
+						gameUser.setUid(System.currentTimeMillis());
+						mapper.insert(gameUser);
+					}
+				}
+			}
+		}
 		user.addEventListener("login", new DoSameEvent());
 		user.addEventListener("USER_REMOVE", new UserRemoveEvent());
 		onlineUsers.put(user.getUserId(),user);
@@ -95,19 +116,7 @@ public class GameServerExtension extends AppListenerExtension {
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
 
-		Optional<MybatisComponent> optionalMybatisComponent=ContextResolver.getComponent(MybatisComponent.class);
-		if (optionalMybatisComponent.isPresent()){
-			Optional<SqlSessionFactory> game = optionalMybatisComponent.get().getSqlSessionFactory("game");
-			boolean present = game.isPresent();
-			if (present){
-				SqlSessionFactory sqlSessionFactory = game.get();
-				try (SqlSession session = sqlSessionFactory.openSession()) {
-					GameUserMapper mapper = session.getMapper(GameUserMapper.class);
-					GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
-					System.out.println(gameUser);
-				}
-			}
-		}
+
 
 
 

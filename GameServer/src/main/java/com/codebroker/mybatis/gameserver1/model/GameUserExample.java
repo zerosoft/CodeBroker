@@ -10,67 +10,40 @@ public class GameUserExample {
 
     protected List<Criteria> oredCriteria;
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public GameUserExample() {
-        oredCriteria = new ArrayList<Criteria>();
+        oredCriteria = new ArrayList<>();
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public String getOrderByClause() {
         return orderByClause;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public boolean isDistinct() {
         return distinct;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public List<Criteria> getOredCriteria() {
         return oredCriteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void or(Criteria criteria) {
         oredCriteria.add(criteria);
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public Criteria or() {
         Criteria criteria = createCriteriaInternal();
         oredCriteria.add(criteria);
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         if (oredCriteria.size() == 0) {
@@ -79,17 +52,11 @@ public class GameUserExample {
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     protected Criteria createCriteriaInternal() {
         Criteria criteria = new Criteria();
         return criteria;
     }
 
-    /**
-     * @mbg.generated generated automatically, do not modify!
-     */
     public void clear() {
         oredCriteria.clear();
         orderByClause = null;
@@ -101,7 +68,7 @@ public class GameUserExample {
 
         protected GeneratedCriteria() {
             super();
-            criteria = new ArrayList<Criterion>();
+            criteria = new ArrayList<>();
         }
 
         public boolean isValid() {
@@ -266,10 +233,79 @@ public class GameUserExample {
             addCriterion("`name` not between", value1, value2, "name");
             return (Criteria) this;
         }
+
+        public Criteria andAccountUidIsNull() {
+            addCriterion("accountUid is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidIsNotNull() {
+            addCriterion("accountUid is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidEqualTo(String value) {
+            addCriterion("accountUid =", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidNotEqualTo(String value) {
+            addCriterion("accountUid <>", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidGreaterThan(String value) {
+            addCriterion("accountUid >", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidGreaterThanOrEqualTo(String value) {
+            addCriterion("accountUid >=", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidLessThan(String value) {
+            addCriterion("accountUid <", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidLessThanOrEqualTo(String value) {
+            addCriterion("accountUid <=", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidLike(String value) {
+            addCriterion("accountUid like", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidNotLike(String value) {
+            addCriterion("accountUid not like", value, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidIn(List<String> values) {
+            addCriterion("accountUid in", values, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidNotIn(List<String> values) {
+            addCriterion("accountUid not in", values, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidBetween(String value1, String value2) {
+            addCriterion("accountUid between", value1, value2, "accountUid");
+            return (Criteria) this;
+        }
+
+        public Criteria andAccountUidNotBetween(String value1, String value2) {
+            addCriterion("accountUid not between", value1, value2, "accountUid");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {
-
         protected Criteria() {
             super();
         }
