@@ -117,7 +117,7 @@ public class MybatisComponent extends BaseCoreService {
 				}
 			}
 		});
-
+		ContextResolver.setManager(this);
 		setActive();
 	}
 

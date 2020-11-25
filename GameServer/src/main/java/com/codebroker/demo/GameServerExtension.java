@@ -95,18 +95,22 @@ public class GameServerExtension extends AppListenerExtension {
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
 
-		Optional<SqlSessionFactory> game = mybatisComponent.getSqlSessionFactory("game");
-		boolean present = game.isPresent();
-		if (present){
-			SqlSessionFactory sqlSessionFactory = game.get();
-			try (SqlSession session = sqlSessionFactory.openSession()) {
-				GameUserMapper mapper = session.getMapper(GameUserMapper.class);
-				GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
-				System.out.println(gameUser);
+		Optional<MybatisComponent> optionalMybatisComponent=ContextResolver.getComponent(MybatisComponent.class);
+		if (optionalMybatisComponent.isPresent()){
+			Optional<SqlSessionFactory> game = optionalMybatisComponent.get().getSqlSessionFactory("game");
+			boolean present = game.isPresent();
+			if (present){
+				SqlSessionFactory sqlSessionFactory = game.get();
+				try (SqlSession session = sqlSessionFactory.openSession()) {
+					GameUserMapper mapper = session.getMapper(GameUserMapper.class);
+					GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
+					System.out.println(gameUser);
+				}
 			}
 		}
 
-		AppContext.getManager()
+
+
 	}
 
 }
