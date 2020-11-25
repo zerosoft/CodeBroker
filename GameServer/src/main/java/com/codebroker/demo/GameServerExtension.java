@@ -55,7 +55,6 @@ public class GameServerExtension extends AppListenerExtension {
 			IObject iObject1 = iObject.get();
 			uid = iObject1.getUtfString("uid");
 			logger.info("user login {}",uid);
-
 			return uid;
 		} else {
 			throw new NoAuthException();
@@ -90,7 +89,9 @@ public class GameServerExtension extends AppListenerExtension {
 
 		addRequestHandler(11, CreateRequestHandler.class);
 
-
+		/**
+		 * 初始化MyBatis组件
+		 */
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
 
@@ -98,12 +99,14 @@ public class GameServerExtension extends AppListenerExtension {
 		boolean present = game.isPresent();
 		if (present){
 			SqlSessionFactory sqlSessionFactory = game.get();
-			SqlSession sqlSession = sqlSessionFactory.openSession();
-			GameUserMapper mapper = sqlSession.getMapper(GameUserMapper.class);
-			GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
-			System.out.println(gameUser);
-			sqlSession.close();
+			try (SqlSession session = sqlSessionFactory.openSession()) {
+				GameUserMapper mapper = session.getMapper(GameUserMapper.class);
+				GameUser gameUser = mapper.selectByPrimaryKey((long) 1);
+				System.out.println(gameUser);
+			}
 		}
+
+		AppContext.getManager()
 	}
 
 }

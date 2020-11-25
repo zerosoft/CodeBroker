@@ -114,7 +114,7 @@ public class GeoIPComponent extends BaseCoreService {
 
     @Override
     public String getName() {
-        return getClass().getName();
+        return GeoIPComponent.class.getName();
     }
 
 }

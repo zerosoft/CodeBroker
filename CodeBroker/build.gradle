@@ -131,7 +131,6 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 	// https://mvnrepository.com/artifact/org.mockito/mockito-core
 	testCompile group: 'org.mockito', name: 'mockito-core', version: '3.5.13'
-
 	// https://mvnrepository.com/artifact/org.scalatestplus/scalatestplus-junit
 	testCompile group: 'org.scalatestplus', name: "scalatestplus-junit_${ScalaBinary}", version: '1.0.0-M2'
 
