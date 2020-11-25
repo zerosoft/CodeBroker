@@ -61,4 +61,8 @@ public final class ContextResolver {
     public static void setGameWorld(IGameWorld gameWorld) {
         ContextResolver.gameWorld = gameWorld;
     }
+
+    public static void setComponent(IService service) {
+        context.setComponent(service);
+    }
 }

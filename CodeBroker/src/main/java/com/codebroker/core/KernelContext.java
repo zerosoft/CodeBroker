@@ -96,4 +96,7 @@ class KernelContext {
         throw new RuntimeException();
     }
 
+    public void setComponent(IService service) {
+        ((ComponentRegistryImpl) serviceComponents).addComponent(service);
+    }
 }

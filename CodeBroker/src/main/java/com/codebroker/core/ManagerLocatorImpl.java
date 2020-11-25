@@ -45,4 +45,14 @@ class ManagerLocatorImpl implements ManagerLocator {
        return ContextResolver.getGameWorld();
     }
 
+    @Override
+    public <T> Optional<T> getComponent(Class<T> type) {
+        return ContextResolver.getComponent(type);
+    }
+
+    @Override
+    public void setComponent(IService service) {
+        ContextResolver.setComponent(service);
+    }
+
 }

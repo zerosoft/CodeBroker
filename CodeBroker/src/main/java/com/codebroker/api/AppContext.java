@@ -41,6 +41,24 @@ public final class AppContext {
      * @param service
      * @return
      */
+    public static void setComponent(IService service) {
+        InternalContext.getManagerLocator().setComponent(service);
+    }
+
+    public static <T> Optional<T> getComponent(Class<T> type) {
+        try {
+            return InternalContext.getManagerLocator().getComponent(type);
+        } catch (IllegalStateException ise) {
+            throw new ManagerNotFoundException("ManagerLocator is " + "unavailable", ise);
+        }
+    }
+
+    /**
+     * 设置当前JVM的服务
+     *
+     * @param service
+     * @return
+     */
     public static boolean setManager(IService service) {
         return InternalContext.getManagerLocator().setManager(service);
     }

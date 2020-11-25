@@ -66,7 +66,7 @@ public class GameServerExtension extends AppListenerExtension {
 	@Override
 	public void userLogin(IGameUser user) {
 		logger.info("User Login parameter {}", user.getUserId());
-		Optional<MybatisComponent> optionalMybatisComponent=ContextResolver.getComponent(MybatisComponent.class);
+		Optional<MybatisComponent> optionalMybatisComponent=AppContext.getComponent(MybatisComponent.class);
 		if (optionalMybatisComponent.isPresent()){
 			Optional<SqlSessionFactory> game = optionalMybatisComponent.get().getSqlSessionFactory("game");
 			boolean present = game.isPresent();
@@ -75,14 +75,21 @@ public class GameServerExtension extends AppListenerExtension {
 				try (SqlSession session = sqlSessionFactory.openSession()) {
 					GameUserMapper mapper = session.getMapper(GameUserMapper.class);
 					GameUserExample gameUserExample=new GameUserExample();
-					GameUserExample.Criteria criteria = gameUserExample.createCriteria().andAccountUidEqualTo(user.getUserId());
+					gameUserExample.createCriteria().andAccountUidEqualTo(user.getUserId());
 					List<GameUser> gameUsers = mapper.selectByExample(gameUserExample);
-					if (gameUsers.size()<1){
-						GameUser gameUser=new GameUser();
-						gameUser.setAccountUid(user.getUserId());
-						gameUser.setUid(System.currentTimeMillis());
-						mapper.insert(gameUser);
+					try {
+						if (gameUsers.size()<1){
+							GameUser gameUser=new GameUser();
+							gameUser.setAccountUid(user.getUserId());
+							gameUser.setUid(System.currentTimeMillis());
+							gameUser.setName("");
+							mapper.insertSelective(gameUser);
+							session.commit();
+						}
+					}catch (Exception e){
+						e.printStackTrace();
 					}
+
 				}
 			}
 		}
@@ -115,11 +122,7 @@ public class GameServerExtension extends AppListenerExtension {
 		 */
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
-
-
-
-
-
+		AppContext.setComponent(mybatisComponent);
 	}
 
 }

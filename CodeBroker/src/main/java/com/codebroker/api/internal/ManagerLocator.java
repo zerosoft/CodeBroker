@@ -22,4 +22,8 @@ public interface ManagerLocator {
     boolean setManager(IService type);
 
 	IGameWorld getGameWorld();
+
+	<T> Optional<T> getComponent(Class<T> type);
+
+	void setComponent(IService service);
 }
