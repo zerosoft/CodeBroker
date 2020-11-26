@@ -12,6 +12,7 @@ import com.codebroker.core.data.CObjectLite;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 import com.codebroker.api.event.EventName;
+import com.codebroker.setting.SystemEnvironment;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
@@ -89,11 +90,13 @@ public class User extends AbstractBehavior<IUser> {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
         if (ActorPathService.localService.containsKey(message.serviceName)) {
+
             CompletionStage<IService.Reply> ask = AskPattern.askWithStatus(
                     ActorPathService.localService.get(message.serviceName),
                     replyActorRef -> new IService.HandleUserMessage(message.message, replyActorRef),
-                    Duration.ofMillis(3),
+                    Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
                     actorSystem.scheduler());
+
             ask.whenComplete((reply, throwable) -> {
                 if (reply instanceof IService.HandleUserMessageBack) {
                     message.replyTo.tell(new IUser.IObjectReply(((IService.HandleUserMessageBack) reply).object));
@@ -118,7 +121,7 @@ public class User extends AbstractBehavior<IUser> {
         try {
             gameUser.handlerEvent(message.event);
         }catch (Exception e){
-            getContext().getLog().error("handleClientRequest error ", e);
+            getContext().getLog().error("handlerLogicEvent error ", e);
         }
         return Behaviors.same();
     }
@@ -146,8 +149,6 @@ public class User extends AbstractBehavior<IUser> {
                 ioSession.tell(new ISession.SessionClose(enforce));
                 ioSession = null;
             }
-
-
         }
         if (gameUser != null) {
             getContext().spawnAnonymous(GameWorldGuardian.create(new IGameWorldMessage.UserLogOutWorld(gameUser)));

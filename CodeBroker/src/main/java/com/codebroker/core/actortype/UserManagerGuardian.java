@@ -17,10 +17,14 @@ import com.codebroker.util.PropertiesWrapper;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 用户查找
+ */
 public class UserManagerGuardian {
 
 	private ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IUserManager>> serviceInstances = new HashSet();
+
 	private final IUserManager message;
 	private final int serverId;
 

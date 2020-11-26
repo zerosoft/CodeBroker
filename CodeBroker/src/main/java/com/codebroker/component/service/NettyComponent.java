@@ -46,7 +46,6 @@ public class NettyComponent extends BaseCoreService {
         workerGroupNum = propertiesWrapper.getIntProperty(SystemEnvironment.NETTY_WORKER_GROUP_NUM, defaultValue);
         backlog = propertiesWrapper.getIntProperty(SystemEnvironment.NETTY_BACKLOG, BACKLOG);
 
-        name = propertiesWrapper.getProperty(SystemEnvironment.NETTY_SERVER_NAME, "NETTY_SERVER");
         int port = propertiesWrapper.getIntProperty(SystemEnvironment.TCP_PORT, D_PORT);
         Thread thread = new Thread(() -> {
             bootstrap = new ServerBootstrap();
@@ -77,6 +76,7 @@ public class NettyComponent extends BaseCoreService {
         thread.start();
         logger.info("初始化Netty 线程启动");
         super.setActive();
+        name=getClass().getName();
     }
 
     @Override
@@ -86,14 +86,5 @@ public class NettyComponent extends BaseCoreService {
         workerGroup.shutdownGracefully();
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName();
-    }
 
 }

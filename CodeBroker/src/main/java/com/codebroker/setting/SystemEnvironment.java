@@ -64,7 +64,6 @@ public class SystemEnvironment {
     public static final String NETTY_BOSS_GROUP_NUM = APP_ROOT + ".netty.boss.group";
     public static final String NETTY_WORKER_GROUP_NUM = APP_ROOT + ".netty.worker.group";
     public static final String NETTY_BACKLOG = APP_ROOT + ".netty.backlog";
-    public static final String NETTY_SERVER_NAME = APP_ROOT + ".netty.server.name";
 
 
     public static final String TCP_PORT = APP_ROOT + ".netty.tcp.port";
@@ -105,4 +104,6 @@ public class SystemEnvironment {
     public static final String MONGODB_HOST = APP_ROOT + ".mongodb.%s.host";
     public static final String MONGODB_PORT = APP_ROOT + ".mongodb.%s.port";
     public static final String MONGODB_DBNAME = APP_ROOT + ".mongodb.%s.dbname";
+
+    public static final int TIME_OUT_MILLIS = 5000;
 }

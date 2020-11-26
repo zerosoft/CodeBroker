@@ -9,6 +9,7 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.protocol.BaseByteArrayPacket;
+import com.codebroker.setting.SystemEnvironment;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class NettyIoSession implements IoSession {
                 AskPattern.ask(
                         actorSystem,
                         replyTo -> new IGameRootSystemMessage.SessionOpen(replyTo, this),
-                        Duration.ofMillis(500),
+                        Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
                         scheduler);
         result.handle((reply, throwable) -> {
             if (reply instanceof IGameRootSystemMessage.SessionOpenReply) {

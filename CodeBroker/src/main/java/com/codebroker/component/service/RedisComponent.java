@@ -85,11 +85,8 @@ public class RedisComponent extends BaseCoreService {
             log.debug("开始执行单例redis");
         }
         super.setActive();
+        name=getClass().getName();
     }
 
-    @Override
-    public String getName() {
-        return RedisComponent.class.getName();
-    }
 
 }

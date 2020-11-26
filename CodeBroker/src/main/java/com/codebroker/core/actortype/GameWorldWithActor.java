@@ -39,7 +39,6 @@ import java.util.concurrent.CompletionStage;
  */
 public class GameWorldWithActor implements IGameWorld {
 
-	public static final int TIME_OUT_MILLIS = 5000;
 	private ActorRef<IGameWorldMessage> gameWorldActorRef;
 
 	public static EntityTypeKey<com.codebroker.core.actortype.message.IService> getTypeKey(String name){
@@ -64,7 +63,7 @@ public class GameWorldWithActor implements IGameWorld {
 				AskPattern.ask(
 						gameWorldActorRef,
 						replyTo -> new IGameWorldMessage.findIGameUserByIdMessage(id, replyTo),
-						Duration.ofMillis(TIME_OUT_MILLIS),
+						Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 						scheduler);
 		CompletionStage<IGameUser> handle = result.handle((reply, throwable) -> {
 			if (reply instanceof IGameWorldMessage.FindGameUser){
@@ -82,7 +81,7 @@ public class GameWorldWithActor implements IGameWorld {
 
 		CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(actorSystem,
 				replyActorRef -> new IGameRootSystemMessage.createGlobalService(serviceName, service, replyActorRef),
-				Duration.ofMillis(TIME_OUT_MILLIS),
+				Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 				actorSystem.scheduler());
 		CompletionStage<IGameRootSystemMessage.Reply> exceptionally = ask.whenComplete((reply, throwable) -> {
 			if (reply instanceof IGameRootSystemMessage.ReplyCreateService) {
@@ -154,7 +153,7 @@ public class GameWorldWithActor implements IGameWorld {
 			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
 					ActorPathService.localService.get(serviceName),
 					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
-					Duration.ofMillis(TIME_OUT_MILLIS),
+					Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 					actorSystem.scheduler());
 
 			ask.exceptionally(throwable -> {

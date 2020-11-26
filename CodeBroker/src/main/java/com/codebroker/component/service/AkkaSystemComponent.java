@@ -109,7 +109,7 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(system,
                 replyActorRef ->new IGameRootSystemMessage.StartGameRootSystemMessage(replyActorRef),
-                Duration.ofMillis(500),
+                Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
                 system.scheduler());
         ask.whenComplete((reply, throwable) -> {
             super.setActive();
@@ -117,6 +117,8 @@ public class AkkaSystemComponent extends BaseCoreService {
             throwable.printStackTrace();
             return null;
         });
+        name=getClass().getName();
+        setActive();
     }
 
 
@@ -127,10 +129,6 @@ public class AkkaSystemComponent extends BaseCoreService {
        logger.debug("akka system closed");
     }
 
-    @Override
-    public String getName() {
-        return AkkaSystemComponent.class.getSimpleName();
-    }
 
     public ActorSystem<IGameRootSystemMessage> getSystem() {
         return system;

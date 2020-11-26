@@ -1,21 +1,22 @@
-package com.codebroker.demo.service.alliance;
+package com.codebroker.demo.service.item;
 
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-public class AllianceService implements IService {
 
-    private Logger logger= LoggerFactory.getLogger(AllianceService.class);
+public class ItemService implements IService {
+
+    private Logger logger= LoggerFactory.getLogger(ItemService.class);
 
     @Override
     public void init(Object obj) {
-        logger.info("init Alliance "+obj);
+        logger.info("init Item Service "+obj);
     }
 
     @Override
     public void destroy(Object obj) {
-        logger.info("destroy Alliance "+obj);
+        logger.info("destroy Item Service "+obj);
     }
 
     @Override
@@ -25,8 +26,7 @@ public class AllianceService implements IService {
 
     @Override
     public String getName() {
-        return AllianceService.class.getName();
+        return ItemService.class.getName();
     }
-
 
 }

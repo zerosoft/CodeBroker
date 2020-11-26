@@ -8,6 +8,8 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
+import com.codebroker.demo.service.alliance.AllianceService;
+import com.codebroker.demo.service.item.ItemService;
 import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.UserRemoveEvent;
 import com.codebroker.exception.NoAuthException;
@@ -123,6 +125,12 @@ public class GameServerExtension extends AppListenerExtension {
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
 		AppContext.setComponent(mybatisComponent);
+
+		AppContext.getGameWorld().createService(new AllianceService());
+		AppContext.getGameWorld().createService(new ItemService());
+
+		Optional<AllianceService> manager = AppContext.getManager(AllianceService.class);
+		manager.ifPresent(c->c.init(""));
 	}
 
 }

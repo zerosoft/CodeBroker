@@ -118,6 +118,7 @@ public class MybatisComponent extends BaseCoreService {
 			}
 		});
 		setActive();
+		name=getClass().getName();
 	}
 
 	public Optional<SqlSessionFactory> getSqlSessionFactory(String sourceName){

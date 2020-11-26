@@ -54,7 +54,8 @@ public class GeoIPComponent extends BaseCoreService {
                 }
             }
         }
-        super.setActive();
+        setActive();
+        name=getClass().getName();
     }
 
     /**

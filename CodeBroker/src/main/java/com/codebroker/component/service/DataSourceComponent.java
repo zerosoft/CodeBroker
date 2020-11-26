@@ -64,6 +64,8 @@ public class DataSourceComponent extends BaseCoreService {
 			}
 		});
 		setActive();
+
+		name=getClass().getName();
 	}
 
 	public Optional<Connection> getConnect(String key){

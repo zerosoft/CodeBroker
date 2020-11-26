@@ -32,6 +32,7 @@ import com.codebroker.core.actortype.GameWorldWithActor;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
+import com.codebroker.setting.SystemEnvironment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -101,7 +102,7 @@ public class HttpServer {
 		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
 				entityRef,
 				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
-				Duration.ofMillis(500),
+				Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 				actorSystem.scheduler());
 
 		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {

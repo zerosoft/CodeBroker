@@ -42,6 +42,8 @@ public class MongoDBComponent extends BaseCoreService {
         });
 
         super.setActive();
+        name=getClass().getName();
+
     }
 
     @Override

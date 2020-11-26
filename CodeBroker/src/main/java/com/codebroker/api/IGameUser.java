@@ -49,14 +49,14 @@ public interface IGameUser extends IEventDispatcher {
     Optional<IObject> sendMessageToLocalIService(Class iService, IObject message);
 
     /**
-     * 发送消息到服务
+     * 发送消息到服务 会去查找其他服务器的serverice
      * @param serviceName
      * @param message
      */
     void sendMessageToIService(String serviceName, IObject message);
 
     /**
-     * 发送消息到服务
+     * 发送消息到服务 会去查找其他服务器的serverice
      * @param iService 事件的服务类
      * @param message
      */

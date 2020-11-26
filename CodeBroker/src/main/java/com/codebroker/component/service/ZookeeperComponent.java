@@ -39,16 +39,12 @@ public class ZookeeperComponent extends BaseCoreService {
 			}
 		});
 		setActive();
+		name=getClass().getName();
 	}
 
 	@Override
 	public void destroy(Object obj) {
 		curatorZookeeperClient.doClose();
-	}
-
-	@Override
-	public String getName() {
-		return ZookeeperComponent.class.getName();
 	}
 
 	public IClusterServiceRegister getIClusterServiceRegister() {
