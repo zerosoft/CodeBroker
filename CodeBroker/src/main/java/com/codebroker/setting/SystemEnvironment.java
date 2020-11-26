@@ -97,4 +97,12 @@ public class SystemEnvironment {
     public static final String MYBATIS_MODEL = APP_ROOT + ".mybatis.%s.model";
     public static final String MYBATIS_MAPPER = APP_ROOT + ".mybatis.%s.mapper";
     public static final String MYBATIS_XML_PATH = APP_ROOT + ".mybatis.%s.xml.path";
+
+    /**
+     * mongodb
+     */
+    public static final String MONGODB_SOURCE_NAME = APP_ROOT + ".mongodb.source.name";
+    public static final String MONGODB_HOST = APP_ROOT + ".mongodb.%s.host";
+    public static final String MONGODB_PORT = APP_ROOT + ".mongodb.%s.port";
+    public static final String MONGODB_DBNAME = APP_ROOT + ".mongodb.%s.dbname";
 }
