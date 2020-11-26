@@ -42,14 +42,12 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                 if (matchComponent != null) {
                     logger.info("More than one matching component", type.getName());
                     return Optional.empty();
-//                    throw new MissingResourceException("More than one matching component", type.getName(), null);
                 }
                 matchComponent = component;
             }else if (type.getName()==component.getName()){
                 if (matchComponent != null) {
                     logger.info("More than one matching component", type.getName());
                     return Optional.empty();
-//                    throw new MissingResourceException("More than one matching component", type.getName(), null);
                 }
                 matchComponent = component;
             }
@@ -58,7 +56,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         if (matchComponent == null) {
             logger.info("No matching components", type.getName());
             return Optional.empty();
-//            throw new MissingResourceException("No matching components", type.getName(), null);
         }
 
         return Optional.ofNullable(type.cast(matchComponent));
@@ -69,10 +66,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         for (IService component : componentSet) {
             if (type.isAssignableFrom(component.getClass())) {
                 componentSet.remove(component);
-                return;
             }else if (type.getName()==component.getName()){
                 componentSet.remove(component);
-                return;
             }
         }
     }

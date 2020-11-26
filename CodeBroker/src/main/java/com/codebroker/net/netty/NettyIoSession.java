@@ -2,15 +2,20 @@ package com.codebroker.net.netty;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
+import akka.actor.typed.Scheduler;
+import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.IoSession;
-import com.codebroker.api.internal.IBindingActor;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import io.netty.channel.ChannelHandlerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -18,7 +23,9 @@ import java.nio.ByteBuffer;
  *
  * @author LongJu
  */
-public class NettyIoSession implements IoSession , IBindingActor<ISession> {
+public class NettyIoSession implements IoSession {
+
+    private Logger logger= LoggerFactory.getLogger(NettyIoSession.class);
 
     final ChannelHandlerContext ctx;
     public ActorRef<ISession> sessionActorRef = null;
@@ -27,7 +34,24 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
         super();
         this.ctx = ctx;
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-        actorSystem.tell(new IGameRootSystemMessage.SessionOpen(this));
+
+        //同步等待Actor绑定
+        Scheduler scheduler = ContextResolver.getActorSystem().scheduler();
+        CompletionStage<IGameRootSystemMessage.Reply> result =
+                AskPattern.ask(
+                        actorSystem,
+                        replyTo -> new IGameRootSystemMessage.SessionOpen(replyTo, this),
+                        Duration.ofMillis(500),
+                        scheduler);
+        result.handle((reply, throwable) -> {
+            if (reply instanceof IGameRootSystemMessage.SessionOpenReply) {
+                sessionActorRef = ((IGameRootSystemMessage.SessionOpenReply) reply).sessionActorRef;
+            } else {
+                logger.error("bind actor error");
+                this.close(true);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -46,7 +70,6 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
         }else {
             ctx.write(msg);
         }
-
     }
 
     @Override
@@ -86,9 +109,4 @@ public class NettyIoSession implements IoSession , IBindingActor<ISession> {
         }
     }
 
-    @Override
-    public boolean bindingActor(ActorRef<ISession> ref) {
-        this.sessionActorRef = ref;
-        return true;
-    }
 }

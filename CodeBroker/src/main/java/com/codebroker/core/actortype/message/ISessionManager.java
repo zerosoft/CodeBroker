@@ -1,7 +1,7 @@
 package com.codebroker.core.actortype.message;
 
-import com.codebroker.api.internal.IBindingActor;
-import com.codebroker.protocol.SerializableType;
+import akka.actor.typed.ActorRef;
+import com.codebroker.api.IoSession;
 
 /**
  * description
@@ -14,10 +14,13 @@ public interface ISessionManager {
      * 创建一个网络session的执行Actor
      */
     final class SessionOpen implements ISessionManager{
-        public IBindingActor<ISession> ioSession;
 
-        public SessionOpen(IBindingActor<ISession> ioSession) {
-            this.ioSession = ioSession;
+        public final ActorRef<IGameRootSystemMessage.Reply> replyTo;
+        public final IoSession ioSession;
+
+        public SessionOpen(ActorRef<IGameRootSystemMessage.Reply> replyTo, IoSession ioSession) {
+            this.replyTo=replyTo;
+            this.ioSession=ioSession;
         }
     }
 

@@ -9,6 +9,7 @@ import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
 import com.codebroker.api.IoSession;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.ISession;
 import com.codebroker.core.actortype.message.ISessionManager;
 import com.codebroker.core.actortype.message.IUserManager;
@@ -64,13 +65,14 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
         getContext().getLog().debug("SessionManager createSession session");
         //创建一个新的id自增
         long sessionId = idGenerator++;
-        ActorRef<ISession> session = getContext().spawn(Session.create(sessionId, (IoSession)message.ioSession,gameWorldId), Session.IDENTIFY+"."+ sessionId);
+        ActorRef<ISession> session = getContext().spawn(Session.create(sessionId, message.ioSession,gameWorldId), Session.IDENTIFY+"."+ sessionId);
         getContext().getLog().debug("session path {}",session.path());
-        //对象回调
-        message.ioSession.bindingActor(session);
+
         //加入监听
         getContext().watchWith(session,new ISessionManager.SessionClose(sessionId));
         sessions.put(sessionId,session);
+        //通知给调用Session
+        message.replyTo.tell(new IGameRootSystemMessage.SessionOpenReply(session));
 
         return Behaviors.same();
     }

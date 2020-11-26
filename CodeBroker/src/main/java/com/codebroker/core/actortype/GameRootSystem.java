@@ -8,6 +8,7 @@ import com.codebroker.core.actortype.message.*;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -133,8 +134,9 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
     }
 
     private Behavior<IGameRootSystemMessage> sessionOpen(IGameRootSystemMessage.SessionOpen message) {
-        getContext().getSystem().log().debug("GameWorld login session");
-        ActorPathService.sessionManager.tell(new ISessionManager.SessionOpen(message.ioSession));
+        ActorSystem<Void> system = getContext().getSystem();
+        system.log().debug("GameWorld login session");
+        ActorPathService.sessionManager.tell(new ISessionManager.SessionOpen(message.replyTo,message.ioSession));
         return Behaviors.same();
     }
 }

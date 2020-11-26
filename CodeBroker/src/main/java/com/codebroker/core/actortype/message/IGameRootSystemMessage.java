@@ -1,7 +1,7 @@
 package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
-import com.codebroker.api.internal.IBindingActor;
+import com.codebroker.api.IoSession;
 
 /**
  * 游戏世界 相关通讯协议
@@ -14,9 +14,11 @@ public interface IGameRootSystemMessage {
      * 会话登入
      */
     final class SessionOpen implements IGameRootSystemMessage {
-        public IBindingActor<ISession> ioSession;
+        public final ActorRef<Reply> replyTo;
+        public final IoSession ioSession;
 
-        public SessionOpen(IBindingActor<ISession> ioSession) {
+        public SessionOpen(ActorRef<Reply> replyTo, IoSession ioSession) {
+            this.replyTo = replyTo;
             this.ioSession = ioSession;
         }
     }
@@ -105,7 +107,16 @@ public interface IGameRootSystemMessage {
         }
     }
 
+
     final class StartWorldFinish implements Reply {
 
+    }
+    final class  SessionOpenReply implements Reply {
+
+        public final ActorRef<ISession> sessionActorRef;
+
+        public SessionOpenReply(ActorRef<ISession> sessionActorRef) {
+            this.sessionActorRef = sessionActorRef;
+        }
     }
 }

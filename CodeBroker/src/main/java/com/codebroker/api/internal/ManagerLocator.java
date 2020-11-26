@@ -12,6 +12,8 @@ import java.util.Optional;
  */
 public interface ManagerLocator {
 
+	IGameWorld getGameWorld();
+
     <T> Optional<T> getManager(Class<T> type);
 
     /**
@@ -21,7 +23,6 @@ public interface ManagerLocator {
      */
     boolean setManager(IService type);
 
-	IGameWorld getGameWorld();
 
 	<T> Optional<T> getComponent(Class<T> type);
 
