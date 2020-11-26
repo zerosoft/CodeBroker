@@ -12,11 +12,11 @@ import java.util.HashSet;
 import java.util.Set;
 public class ServiceGuardian {
 
-	private ActorRef<Receptionist.Listing> listingAdapter;
+	private final ActorRef<Receptionist.Listing> listingAdapter;
 	private Set<ActorRef<IService>> serviceInstances = new HashSet();
 
-	private IService message;
-	private String serviceName;
+	private final IService message;
+	private final String serviceName;
 
 	public static Behavior<IService> create(String serviceName, IService message) {
 		return Behaviors.setup(context -> new ServiceGuardian(context, serviceName, message).handle());
@@ -36,7 +36,8 @@ public class ServiceGuardian {
 		return Behaviors.receive(IService.class)
 				.onMessage(IService.AddProcessorReference.class, listing ->
 				{
-					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IService.class, serviceName));
+					serviceInstances = listing.listing.getAllServiceInstances(ServiceKey.create(IService.class, serviceName));
+					System.out.println("Service name "+serviceName+"size ="+serviceInstances.size());
 					for (ActorRef<IService> serviceInstance : serviceInstances)
 					{
 						serviceInstance.tell(message);

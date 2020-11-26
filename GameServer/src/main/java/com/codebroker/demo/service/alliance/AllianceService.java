@@ -20,7 +20,7 @@ public class AllianceService implements IService {
 
     @Override
     public void handleMessage(IObject obj) {
-        System.out.println("O +"+obj);
+        System.out.println("O============================ +"+obj);
     }
 
     @Override

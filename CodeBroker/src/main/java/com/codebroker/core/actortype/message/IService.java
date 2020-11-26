@@ -15,8 +15,6 @@ import java.io.Serializable;
  */
 public interface IService extends SerializableType {
 
-//    EntityTypeKey<IService> typeKey = EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,IService.class.getSimpleName());
-
     final class Init implements IService {
         public Object object;
 

@@ -218,42 +218,12 @@ public class GameWorldWithActor implements IGameWorld {
 				return Optional.of(CObject.newFromJsonData(join));
 			}
 		}
-
-
-//		if (first.isPresent()){
-//			Member member = first.get();
-//			//随机因子，
-//			int shardId = 100;
-//			if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
-//				shardId=ActorPathService.akkaConfig.getInt("akka.cluster.sharding.number-of-shards");
-//			}
-//
-//			int randomShardId = MathUtil.random(shardId) + 1;
-//
-//			stationUrl = "http://" + member.address().getHost().get()
-//					+ ":" + (member.address().getPort().get()+7000) + "/service/" + randomShardId;
-//			CompletionStage<String> futureResponseBody =
-//					http.singleRequest(
-//							HttpRequest.POST(stationUrl)
-//									.withEntity(ContentTypes.APPLICATION_JSON, toJson))
-//							.thenCompose(response ->
-//									Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
-//											.thenApply(body -> {
-//												if (response.status().isSuccess())
-//													return body;
-//												else throw new RuntimeException("Failed to register data: " + body);
-//											})
-//							);
-//			String join = futureResponseBody.toCompletableFuture().join();
-//			return Optional.of(CObject.newFromJsonData(join));
-//		}
-
 		return Optional.empty();
 	}
 
 	@Override
 	public Optional<IObject> sendMessageToLocalIService(Class clazz, IObject object){
-		return sendMessageToLocalIService(clazz.getSimpleName(),object);
+		return sendMessageToLocalIService(clazz.getName(),object);
 	}
 
 	@Override
@@ -272,7 +242,7 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public void sendMessageToIService(Class iService, IObject message) {
-		sendMessageToIService(iService.getSimpleName(),message);
+		sendMessageToIService(iService.getName(),message);
 	}
 
 	@Override

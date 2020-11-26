@@ -11,13 +11,14 @@ import com.codebroker.protobuff.user.CreateRequest;
 public class CreateRequestHandler extends AbstractClientRequestHandler<CreateRequest> {
 	@Override
 	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, CreateRequest request) {
-		java.lang.String  name = request.getName();
-		for (int i = 0; i < 10; i++) {
-			CObject cObject = CObject.newInstance();
-			cObject.putUtfString("name",name);
-			cObject.putInt("id",i);
-			AppContext.getGameWorld().sendMessageToIService(AllianceService.class,cObject);
-		}
+		CObject cObject = CObject.newInstance();
+		cObject.putUtfString("hello","world");
+		AppContext.getGameWorld().sendMessageToIService(AllianceService.class,cObject);
 
+		AppContext.getGameWorld().sendMessageToLocalIService(AllianceService.class,cObject);
+
+		AppContext.getGameWorld().sendMessageToIService(AllianceService.class.getName()+".1",cObject);
+
+		AppContext.getGameWorld().sendMessageToIService(AllianceService.class.getName()+".2",cObject);
 	}
 }

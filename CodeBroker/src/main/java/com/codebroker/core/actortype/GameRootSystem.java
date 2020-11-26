@@ -52,12 +52,17 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
     }
 
     private Behavior<IGameRootSystemMessage> createService(IGameRootSystemMessage.CreateService message) {
-            ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service), message.name, DispatcherSelector.fromConfig("game-service"));
+            ActorRef<IService> spawn = getContext()
+                    .spawn(ServiceActor.create(message.name, message.service),
+                    message.name+"."+gameWorldId,
+                    DispatcherSelector.fromConfig("game-service"));
             return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
     private Behavior<IGameRootSystemMessage> createGlobalService(IGameRootSystemMessage.createGlobalService message) {
-        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true), message.name, DispatcherSelector.fromConfig("game-service"));
+        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true),
+                    message.name+"."+gameWorldId,
+                DispatcherSelector.fromConfig("game-service"));
         return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 

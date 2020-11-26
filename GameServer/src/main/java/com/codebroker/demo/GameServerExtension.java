@@ -116,7 +116,7 @@ public class GameServerExtension extends AppListenerExtension {
 	@Override
 	public void init(Object obj) {
 		logger.info("Init");
-
+		//注册消息命令
 		addRequestHandler(11, CreateRequestHandler.class);
 
 		/**
@@ -125,12 +125,12 @@ public class GameServerExtension extends AppListenerExtension {
 		MybatisComponent mybatisComponent=new MybatisComponent();
 		mybatisComponent.init(obj);
 		AppContext.setComponent(mybatisComponent);
-
-		AppContext.getGameWorld().createService(new AllianceService());
-		AppContext.getGameWorld().createService(new ItemService());
-
-		Optional<AllianceService> manager = AppContext.getManager(AllianceService.class);
-		manager.ifPresent(c->c.init(""));
+		//创建服务
+		AppContext.setManager(new AllianceService());
+		AppContext.setManager(new ItemService());
+		//初始化服务
+		AppContext.getManager(AllianceService.class).ifPresent(c->c.init(null));
+		AppContext.getManager(ItemService.class).ifPresent(c->c.init(null));
 	}
 
 }

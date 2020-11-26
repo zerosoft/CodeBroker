@@ -68,7 +68,7 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 				.onMessage(ClusterEvent.UnreachableMember.class,this::unreachableMember)
 				.onMessage(ClusterEvent.ReachableMember.class,this::reachableMember)
 				.onMessage(ServerOnline.class,this::serverOnline)
-//				.onAnyMessage(this::logClusterEvent)
+				.onAnyMessage(this::logClusterEvent)
 				.build();
 	}
 
@@ -93,9 +93,10 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 						 	return Behaviors.same();
 						 }
 					}
-					log.info("add new member host {} port {} dc {}",message.host,message.host,message.dataCenter);
+
+					log.info("add new member host {} port {} dc {}",message.host,message.port,message.dataCenter);
 					List<Address> seedNodes = new ArrayList<>();
-					seedNodes.add(AddressFromURIString.parse("akka://CodeBroker@"+host+":"+port));
+					seedNodes.add(AddressFromURIString.parse("akka://CodeBroker@"+message.host+":"+message.port));
 					Cluster.get(getContext().getSystem()).manager().tell(new JoinSeedNodes(seedNodes));
 				}
 			}
@@ -128,6 +129,7 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 		Set<String> roles = member.getRoles();
 		//akka://CodeBroker@127.0.0.1:2552
 		log.info(member.uniqueAddress().address().toString());
+		ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
 			Optional<ZookeeperComponent> manager = ContextResolver.getComponent(ZookeeperComponent.class);
 			if (manager.isPresent()){
 				manager.get().getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
@@ -138,64 +140,64 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 				log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
 			}
 
-			ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
+
 	}
 
 	private void delMember(Member member) {
 		ActorPathService.clusterService.remove(member.uniqueAddress().toString());
 	}
 
-//	private Behavior<ClusterEvent.ClusterDomainEvent> logClusterEvent(Object clusterEventMessage) {
-//		log.info("{} - {} sent to {}", getClass().getSimpleName(), clusterEventMessage, cluster.selfMember());
-//		logClusterMembers();
-//		return Behaviors.same();
-//	}
+	private Behavior<ClusterEvent.ClusterDomainEvent> logClusterEvent(Object clusterEventMessage) {
+		log.info("{} - {} sent to {}", getClass().getSimpleName(), clusterEventMessage, cluster.selfMember());
+		logClusterMembers();
+		return Behaviors.same();
+	}
 
-//	private void logClusterMembers() {
-//		logClusterMembers(cluster.state());
-//	}
-//
-//	private void logClusterMembers(ClusterEvent.CurrentClusterState currentClusterState) {
-//		final Optional<Member> old =
-//				StreamSupport
-//						.stream(currentClusterState.getMembers().spliterator(), false)
-//						.reduce((older, member) -> older.isOlderThan(member) ? older : member);
-//
-//		final Member oldest = old.orElse(cluster.selfMember());
-//		final Set<Member> unreachable = currentClusterState.getUnreachable();
-//		final String className = getClass().getSimpleName();
-//
-//		StreamSupport.stream(currentClusterState.getMembers().spliterator(), false)
-//				.forEach(new Consumer<Member>() {
-//					int m = 0;
-//
-//					@Override
-//					public void accept(Member member) {
-//						log.info("{} - {} {}{}{}{}", className, ++m, leader(member), oldest(member), unreachable(member), member);
-//					}
-//
-//					private String leader(Member member) {
-//						return member.address().equals(currentClusterState.getLeader()) ? "(LEADER) " : "";
-//					}
-//
-//					private String oldest(Member member) {
-//						return oldest.equals(member) ? "(OLDEST) " : "";
-//					}
-//
-//					private String unreachable(Member member) {
-//						return unreachable.contains(member) ? "(UNREACHABLE) " : "";
-//					}
-//				});
-//
-//		currentClusterState.getUnreachable()
-//				.forEach(new Consumer<Member>() {
-//					int m = 0;
-//
-//					@Override
-//					public void accept(Member member) {
-//						log.info("{} - {} {} (unreachable)", getClass().getSimpleName(), ++m, member);
-//					}
-//				});
-//	}
+	private void logClusterMembers() {
+		logClusterMembers(cluster.state());
+	}
+
+	private void logClusterMembers(ClusterEvent.CurrentClusterState currentClusterState) {
+		final Optional<Member> old =
+				StreamSupport
+						.stream(currentClusterState.getMembers().spliterator(), false)
+						.reduce((older, member) -> older.isOlderThan(member) ? older : member);
+
+		final Member oldest = old.orElse(cluster.selfMember());
+		final Set<Member> unreachable = currentClusterState.getUnreachable();
+		final String className = getClass().getSimpleName();
+
+		StreamSupport.stream(currentClusterState.getMembers().spliterator(), false)
+				.forEach(new Consumer<Member>() {
+					int m = 0;
+
+					@Override
+					public void accept(Member member) {
+						log.info("{} - {} {}{}{}{}", className, ++m, leader(member), oldest(member), unreachable(member), member);
+					}
+
+					private String leader(Member member) {
+						return member.address().equals(currentClusterState.getLeader()) ? "(LEADER) " : "";
+					}
+
+					private String oldest(Member member) {
+						return oldest.equals(member) ? "(OLDEST) " : "";
+					}
+
+					private String unreachable(Member member) {
+						return unreachable.contains(member) ? "(UNREACHABLE) " : "";
+					}
+				});
+
+		currentClusterState.getUnreachable()
+				.forEach(new Consumer<Member>() {
+					int m = 0;
+
+					@Override
+					public void accept(Member member) {
+						log.info("{} - {} {} (unreachable)", getClass().getSimpleName(), ++m, member);
+					}
+				});
+	}
 }
 

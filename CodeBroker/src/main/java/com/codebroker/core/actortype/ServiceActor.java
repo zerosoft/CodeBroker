@@ -31,10 +31,11 @@ public class ServiceActor extends AbstractBehavior<IService> {
         return Behaviors.setup(
                 context -> {
                     int serverId = AppContext.getServerId();
+                    String id = noServerId ? name : name + "." + serverId;
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IService.class, noServerId?name:name+"."+serverId), context.getSelf()));
+                            .tell(Receptionist.register(ServiceKey.create(IService.class, id), context.getSelf()));
                     return new ServiceActor(context,name,service);
                 });
     }
