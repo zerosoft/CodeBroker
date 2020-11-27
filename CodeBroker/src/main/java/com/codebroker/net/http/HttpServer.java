@@ -32,6 +32,7 @@ import com.codebroker.core.actortype.GameWorldWithActor;
 import com.codebroker.core.actortype.message.IService;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
+import com.codebroker.protocol.serialization.KryoSerialization;
 import com.codebroker.setting.SystemEnvironment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -163,7 +164,10 @@ public class HttpServer {
 														)
 												)
 										),
-										post(() -> entity(dataUnmarshaller, date ->
+										post(() -> entity(Unmarshaller.entityToByteArray().thenApply(
+												ms->
+														KryoSerialization.readObjectFromByteArray(ms, HTTPRequest.class)),
+												date ->
 														onSuccess(processClusterHTTPRequest(shardId,date), performed ->
 																complete(StatusCodes.ACCEPTED, performed)
 														)

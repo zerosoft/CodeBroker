@@ -59,9 +59,11 @@ public class CArray implements IArray {
                 objDump = ((IArray) wrappedObject.getObject()).getDump(false);
             } else if (wrappedObject.getTypeId() == DataType.BYTE_ARRAY) {
                 objDump = DefaultObjectDumpFormatter.prettyPrintByteArray((byte[]) wrappedObject.getObject());
-            } else if (wrappedObject.getTypeId() == DataType.CLASS) {
-                objDump = wrappedObject.getObject().getClass().getName();
-            } else {
+            }
+//            else if (wrappedObject.getTypeId() == DataType.CLASS) {
+//                objDump = wrappedObject.getObject().getClass().getName();
+//            }
+            else {
                 objDump = wrappedObject.getObject();
             }
             sb.append(" (").append(wrappedObject.getTypeId().name().toLowerCase()).append(") ").append(objDump)
@@ -301,10 +303,6 @@ public class CArray implements IArray {
 
     public void addUtfStringArray(Collection<String> stringCollection) {
         addObject(stringCollection, DataType.UTF_STRING_ARRAY);
-    }
-
-    public void addClass(Object o) {
-        addObject(o, DataType.CLASS);
     }
 
     public void add(DataWrapper dataWrapper) {

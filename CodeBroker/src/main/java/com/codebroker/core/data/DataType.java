@@ -20,9 +20,9 @@ public enum DataType {
     UTF_STRING_ARRAY(16),
     ARRAY(17),
     OBJECT(18),
-    CLASS(19),
-    ACTOR_REF(20);
-
+//    CLASS(19),
+    ACTOR_REF(20),
+    ACTOR_REF_ARRAY(21);
 
     public final int typeID;
 

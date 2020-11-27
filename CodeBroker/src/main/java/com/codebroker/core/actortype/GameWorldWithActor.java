@@ -24,6 +24,7 @@ import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.net.http.HTTPRequest;
+import com.codebroker.protocol.serialization.KryoSerialization;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.MathUtil;
 import com.google.gson.Gson;
@@ -191,11 +192,9 @@ public class GameWorldWithActor implements IGameWorld {
 		String json = message.toJson();
 		HTTPRequest httpRequest=new HTTPRequest(serviceName,json);
 		//节点数量
-//		Collection<Member> values = ActorPathService.clusterService.values();
-//		Optional<Member> first = values.stream().findFirst();
 		String stationUrl;
-		Gson gson=new Gson();
-		String toJson = gson.toJson(httpRequest, HTTPRequest.class);
+
+		byte[] bytes = KryoSerialization.writeObjectToByteArray(httpRequest);
 
 		if (cacheService.isPresent()){
 			Collection<String> strings = cacheService.get();
@@ -205,7 +204,7 @@ public class GameWorldWithActor implements IGameWorld {
 				CompletionStage<String> futureResponseBody =
 						http.singleRequest(
 								HttpRequest.POST(stationUrl)
-										.withEntity(ContentTypes.APPLICATION_JSON, toJson))
+										.withEntity(ContentTypes.APPLICATION_OCTET_STREAM, bytes))
 								.thenCompose(response ->
 										Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
 												.thenApply(body -> {

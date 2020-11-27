@@ -1,6 +1,7 @@
 package com.codebroker.core.data;
 
 
+import com.codebroker.api.IGameUser;
 import com.codebroker.protocol.SerializableType;
 
 import java.util.Collection;
@@ -70,11 +71,11 @@ public interface IObject extends SerializableType {
 
      Collection<String> getUtfStringArray(String key);
 
+     Collection<IGameUser> getIGameUserArray(String key);
+
      IArray getIArray(String key);
 
      IObject getIObject(String key);
-
-     Object getClass(String key);
 
      void putNull(String key);
 
@@ -108,13 +109,17 @@ public interface IObject extends SerializableType {
 
      void putDoubleArray(String key, Collection<Double> collection);
 
-     void putUtfStringArray(String s, Collection<String> collection);
+     void putUtfStringArray(String key, Collection<String> collection);
+
+     void putIGameUserArray(String key, Collection<IGameUser> collection);
 
      void putIArray(String key, IArray iArray);
 
      void putIObject(String key, IObject iObject);
 
-     void putClass(String key, Object obj);
-
      void put(String key, DataWrapper wrapper);
+
+     void putIGameUser(String key, IGameUser gameUser);
+
+     IGameUser getIGameUser(String key);
 }

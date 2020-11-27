@@ -4,6 +4,7 @@ import akka.actor.typed.ActorRef;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.core.data.IObject;
+import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
@@ -12,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IUser {
+public interface IUser extends SerializableType {
 
 	final class ReceiveMessageFromSession implements IUser {
 		public IPacket message;
@@ -105,11 +106,11 @@ public interface IUser {
 
 	final class GetSendMessageToGameUser implements IUser {
 		public final IObject message;
-		public final ActorRef<IUser> reply;
+//		public final ActorRef<IUser> reply;
 
-		public GetSendMessageToGameUser(IObject message, ActorRef<IUser> reply) {
+		public GetSendMessageToGameUser(IObject message) {
 			this.message = message;
-			this.reply = reply;
+//			this.reply = reply;
 		}
 	}
 }

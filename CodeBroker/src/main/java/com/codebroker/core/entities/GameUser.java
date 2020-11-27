@@ -2,27 +2,22 @@ package com.codebroker.core.entities;
 
 
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
-import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
+import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.internal.IEventHandler;
-import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IUser;
-import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;
 import com.google.common.collect.Maps;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -30,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * @author LongJu
  */
-public class GameUser implements IGameUser , IEventHandler, SerializableType {
+public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, SerializableType {
 
     private ActorRef<IUser> actorRef;
 
@@ -39,7 +34,8 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     }
 
     private String uid;
-    private Map<String, Set<IGameUserEventListener>> eventListenerMap = Maps.newTreeMap();
+
+    private transient Map<String, Set<IGameUserEventListener>> eventListenerMap = Maps.newTreeMap();
 
     public void clean() {
         uid = null;
@@ -87,6 +83,11 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     }
 
     @Override
+    public void sendMessageToGameUser(IObject message) {
+        actorRef.tell(new IUser.GetSendMessageToGameUser(message));
+    }
+
+    @Override
     public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
         return AppContext.getGameWorld().sendMessageToLocalIService(serviceName, message);
     }
@@ -104,6 +105,11 @@ public class GameUser implements IGameUser , IEventHandler, SerializableType {
     @Override
     public void sendMessageToIService(Class iService, IObject message) {
         AppContext.getGameWorld().sendMessageToIService(iService, message);
+    }
+
+    @Override
+    public void sendMessageToIService(long serverId, Class iService, IObject message) {
+
     }
 
     @Override

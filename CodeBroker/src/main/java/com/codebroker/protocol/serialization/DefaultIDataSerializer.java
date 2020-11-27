@@ -5,17 +5,14 @@ import akka.actor.typed.ActorRefResolver;
 import akka.actor.typed.ActorSystem;
 import com.codebroker.api.IGameUser;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IUser;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.*;
 import com.codebroker.core.entities.GameUser;
-import com.codebroker.core.entities.GameUserProxy;
 import com.codebroker.exception.CRuntimeException;
 import com.codebroker.exception.CodecException;
 import com.codebroker.protocol.IDataSerializer;
 import com.codebroker.protocol.SerializableType;
 import com.esotericsoftware.reflectasm.FieldAccess;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -285,9 +282,15 @@ public class DefaultIDataSerializer implements IDataSerializer {
         else if (dataType.equals(DataType.ARRAY)){
             return new DataWrapper(DataType.ARRAY,decodeIArray(object.getAsJsonArray()));
         }
-        else if (dataType.equals(DataType.CLASS)){
-            return new DataWrapper(DataType.CLASS,object.getAsString());
-        }else if (dataType.equals(DataType.ACTOR_REF)){
+//        else if (dataType.equals(DataType.CLASS)){
+//            return new DataWrapper(DataType.CLASS,object.getAsString());
+//        }
+        else if (dataType.equals(DataType.ACTOR_REF)){
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+            ActorRef objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(object.getAsString());
+            DataWrapper decodedObject = new DataWrapper(DataType.ACTOR_REF, objectActorRef);
+            return decodedObject;
+        }else if (dataType.equals(DataType.ACTOR_REF_ARRAY)){
             ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
             ActorRef objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(object.getAsString());
             DataWrapper decodedObject = new DataWrapper(DataType.ACTOR_REF, objectActorRef);
@@ -458,14 +461,14 @@ public class DefaultIDataSerializer implements IDataSerializer {
             buffer.position(buffer.position() - 1);
             IObject iObject = this.decodeIObject(buffer);
             DataType type = DataType.OBJECT;
-            if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)
-                    || iObject.containsKey(CLASS_ACTOR_KEY) && iObject.containsKey(ACTOR_VALUE_KEY)
-            ) {
-                type = DataType.CLASS;
-                decodedObject = new DataWrapper(type, this.cbo2pojo(iObject));
-            } else {
+//            if (iObject.containsKey(CLASS_MARKER_KEY) && iObject.containsKey(CLASS_FIELDS_KEY)
+//                    || iObject.containsKey(CLASS_ACTOR_KEY) && iObject.containsKey(ACTOR_VALUE_KEY)
+//            ) {
+//                type = DataType.CLASS;
+//                decodedObject = new DataWrapper(type, this.cbo2pojo(iObject));
+//            } else {
                 decodedObject = new DataWrapper(type, iObject);
-            }
+//            }
         }
         return decodedObject;
     }
@@ -526,15 +529,18 @@ public class DefaultIDataSerializer implements IDataSerializer {
             case ACTOR_REF:
                 buffer = this.binEncode_UTF_Actor_Ref(buffer, (ActorRef) object);
                 break;
+            case ACTOR_REF_ARRAY:
+                buffer = this.binEncode_UTF_Actor_Ref(buffer, (ActorRef) object);
+                break;
             case ARRAY:
                 buffer = this.addData(buffer, this.array2binary((CArray) object));
                 break;
             case OBJECT:
                 buffer = this.addData(buffer, this.object2binary((CObject) object));
                 break;
-            case CLASS:
-                buffer = this.addData(buffer, this.object2binary(this.pojo2cbo(object)));
-                break;
+//            case CLASS:
+//                buffer = this.addData(buffer, this.object2binary(this.pojo2cbo(object)));
+//                break;
             default:
                 throw new IllegalArgumentException("Unrecognized type in AVAObject serialization: " + typeId);
         }
@@ -1089,10 +1095,11 @@ public class DefaultIDataSerializer implements IDataSerializer {
         } else {
             try {
                 if (iObject.containsKey(CLASS_ACTOR_KEY)) {
-                    ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
-                    ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
-                    GameUserProxy gameUserProxy = new GameUserProxy(iObject.getUtfString(CLASS_ACTOR_KEY), objectActorRef);
-                    return gameUserProxy;
+//                    ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+//                    ActorRef<IUser> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(iObject.getUtfString(ACTOR_VALUE_KEY));
+//                    GameUserProxy gameUserProxy = new GameUserProxy(iObject.getUtfString(CLASS_ACTOR_KEY), objectActorRef);
+//                    return gameUserProxy;
+                    return null;
                 } else {
                     String string = iObject.getUtfString(CLASS_MARKER_KEY);
                     Class theClass = Class.forName(string);
@@ -1252,9 +1259,10 @@ public class DefaultIDataSerializer implements IDataSerializer {
             obj = this.rebuildArray((IArray) wrapper.getObject());
         } else if (type == DataType.OBJECT) {
             obj = this.rebuildMap((IObject) wrapper.getObject());
-        } else if (type == DataType.CLASS) {
-            obj = wrapper.getObject();
         }
+//        else if (type == DataType.CLASS) {
+//            obj = wrapper.getObject();
+//        }
         return obj;
     }
 

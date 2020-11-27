@@ -10,7 +10,7 @@ import java.util.Optional;
  *
  * @author LongJu
  */
-public interface IGameUser extends IEventDispatcher {
+public interface IGameUser  {
     /**
      * 获得用户id，系统分配
      *
@@ -34,6 +34,11 @@ public interface IGameUser extends IEventDispatcher {
     void sendMessageToGameUser(String userId,IObject message);
 
     /**
+     * 给自己发消息
+     * @param message
+     */
+    void sendMessageToGameUser(IObject message);
+    /**
      * 发消息给本地服务
      * @param serviceName
      * @param message
@@ -56,11 +61,17 @@ public interface IGameUser extends IEventDispatcher {
     void sendMessageToIService(String serviceName, IObject message);
 
     /**
-     * 发送消息到服务 会去查找其他服务器的serverice
+     * 发送消息到服务默认是本地服务器
      * @param iService 事件的服务类
      * @param message
      */
     void sendMessageToIService(Class iService, IObject message);
+    /**
+     * 发送消息到服务 会去查找其他服务器的serverice
+     * @param iService 事件的服务类
+     * @param message
+     */
+    void sendMessageToIService(long serverId,Class iService, IObject message);
     /**
      * 主动断开链接
      */

@@ -69,7 +69,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
     private Behavior<IUserManager> sendMessageToGameUser(IUserManager.SendMessageToGameUser message) {
         if (userMap.containsKey(message.userId)){
             ActorRef<IUser> iUserActorRef = userMap.get(message.userId);
-            iUserActorRef.tell(new IUser.GetSendMessageToGameUser(message.message,message.reply));
+            iUserActorRef.tell(new IUser.GetSendMessageToGameUser(message.message));
         }
         return Behaviors.same();
     }

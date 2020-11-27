@@ -1,5 +1,6 @@
 package com.codebroker.core.data;
 
+import com.codebroker.api.IGameUser;
 import com.codebroker.protocol.serialization.DefaultObjectDumpFormatter;
 import com.codebroker.protocol.serialization.DefaultIDataSerializer;
 import com.codebroker.protocol.IDataSerializer;
@@ -90,8 +91,8 @@ public class CObject implements IObject {
                 buffer.append(((CArray) wrapper.getObject()).getDump(false));
             else if (wrapper.getTypeId() == DataType.BYTE_ARRAY)
                 buffer.append(DefaultObjectDumpFormatter.prettyPrintByteArray((byte[]) wrapper.getObject()));
-            else if (wrapper.getTypeId() == DataType.CLASS)
-                buffer.append(wrapper.getObject().getClass().getName());
+//            else if (wrapper.getTypeId() == DataType.CLASS)
+//                buffer.append(wrapper.getObject().getClass().getName());
             else
                 buffer.append(wrapper.getObject());
         }
@@ -310,6 +311,16 @@ public class CObject implements IObject {
         }
     }
 
+    @Override
+    public Collection<IGameUser> getIGameUserArray(String key) {
+        DataWrapper o = dataHolder.get(key);
+        if (o == null) {
+            return null;
+        } else {
+            return (Collection<IGameUser>) o.getObject();
+        }
+    }
+
     public Object getClass(String key) {
         DataWrapper o = dataHolder.get(key);
         if (o == null) {
@@ -395,13 +406,32 @@ public class CObject implements IObject {
         putObj(key, value, DataType.UTF_STRING_ARRAY);
     }
 
+    @Override
+    public void putIGameUserArray(String key, Collection<IGameUser> collection) {
+        putObj(key, collection, DataType.ACTOR_REF_ARRAY);
+    }
+
     public void put(String key, DataWrapper wrapper) {
         putObj(key, wrapper, null);
     }
 
-    public void putClass(String key, Object o) {
-        putObj(key, o, DataType.CLASS);
+    @Override
+    public void putIGameUser(String key, IGameUser gameUser) {
+        putObj(key, gameUser, DataType.ACTOR_REF);
     }
+
+    @Override
+    public IGameUser getIGameUser(String key) {
+        DataWrapper o = dataHolder.get(key);
+        if (o == null)
+            return null;
+        else
+            return (IGameUser) o.getObject();
+    }
+
+//    public void putClass(String key, Object o) {
+//        putObj(key, o, DataType.CLASS);
+//    }
 
     public String toString() {
         return "[Object, size: " + size() + "]";

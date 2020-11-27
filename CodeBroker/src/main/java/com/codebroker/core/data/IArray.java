@@ -65,8 +65,6 @@ public interface IArray extends SerializableType {
 
      void addIObject(IObject iObject);
 
-     void addClass(Object paramObject);
-
      void add(DataWrapper dataWrapper);
 
      boolean isNull(int index);
@@ -107,9 +105,9 @@ public interface IArray extends SerializableType {
 
      Collection<String> getUtfStringArray(int index);
 
-     Object getClass(int index);
-
      IArray getArray(int index);
 
      IObject getObject(int index);
+
+
 }

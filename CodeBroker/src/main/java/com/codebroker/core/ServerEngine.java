@@ -1,5 +1,7 @@
 package com.codebroker.core;
 
+import akka.serialization.Serialization;
+import akka.serialization.SerializationExtension;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.classloader.JarLoader;
@@ -13,6 +15,7 @@ import com.codebroker.util.FileUtil;
 import com.codebroker.util.HotSwapClassUtil;
 import com.codebroker.util.PropertiesWrapper;
 import com.esotericsoftware.reflectasm.MethodAccess;
+import io.altoo.akka.serialization.kryo.KryoSerializer;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
@@ -242,7 +245,7 @@ public class ServerEngine implements InstanceMXBean {
 
         try {
             JarLoader jarLoader = new JarLoader();
-            iClassLoader = jarLoader.loadClasses(path, ClassLoader.getSystemClassLoader());
+            iClassLoader = jarLoader.loadClasses(path,Thread.currentThread().getContextClassLoader());
         } catch (Exception e) {
             logger.error("ClassLoader error", e);
             System.exit(1);
@@ -275,7 +278,7 @@ public class ServerEngine implements InstanceMXBean {
 
                     //启动新的
                     JarLoader jarLoader = new JarLoader();
-                    iClassLoader = jarLoader.loadClasses(path, ClassLoader.getSystemClassLoader());
+                    iClassLoader = jarLoader.loadClasses(path,Thread.currentThread().getContextClassLoader());
                     startApplication();
 
                 } catch (Exception e) {
@@ -304,6 +307,7 @@ public class ServerEngine implements InstanceMXBean {
             Object o = aClass.newInstance();
             MethodAccess.get(aClass).invoke(o, "init", propertiesWrapper);
             kernelContext.setAppListener((AppListener) o);
+
         } catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
             logger.error("Start Error", e);
             System.exit(1);

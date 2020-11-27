@@ -6,6 +6,7 @@ import akka.actor.typed.ActorSystem;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.data.*;
+import com.codebroker.net.http.HTTPRequest;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -37,16 +38,16 @@ public class KryoSerialization {
          */
         //支持对象循环引用（否则会栈溢出）
         kryo.setReferences(true); //默认值就是 true，添加此行的目的是为了提醒维护者，不要改变这个配置
-        kryo.register(IObject.class,IObjectSerializer.getInstance());
-        kryo.register(CObject.class,IObjectSerializer.getInstance());
-        kryo.register(CObjectLite.class,IObjectSerializer.getInstance());
+        kryo.register(IObject.class,IObjectSerializer.getInstance(),1);
+        kryo.register(CObject.class,IObjectSerializer.getInstance(),2);
+        kryo.register(CObjectLite.class,IObjectSerializer.getInstance(),3);
 
-        kryo.register(ActorRef.class,ActorRefSerializer.getInstance());
+        kryo.register(ActorRef.class,ActorRefSerializer.getInstance(),4);
 
-        kryo.register(IArray.class,IArraySerializer.getInstance());
-        kryo.register(CArray.class,IArraySerializer.getInstance());
-        kryo.register(CArrayLite.class,IArraySerializer.getInstance());
-
+        kryo.register(IArray.class,IArraySerializer.getInstance(),5);
+        kryo.register(CArray.class,IArraySerializer.getInstance(),6);
+        kryo.register(CArrayLite.class,IArraySerializer.getInstance(),7);
+        kryo.register(HTTPRequest.class,8);
         //不强制要求注册类（注册行为无法保证多个 JVM 内同一个类的注册编号相同；而且业务系统中大量的 Class 也难以一一注册）
         kryo.setRegistrationRequired(false); //默认值就是 false，添加此行的目的是为了提醒维护者，不要改变这个配置
 

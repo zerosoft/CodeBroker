@@ -62,7 +62,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 	}
 
 	private Behavior<IGameWorldMessage> sendAllOnlineUserEvent(IGameWorldMessage.SendAllOnlineUserEvent message) {
-		userMap.values().forEach(gameUser -> gameUser.dispatchEvent(message.event));
+//		userMap.values().forEach(gameUser -> gameUser.dispatchEvent(message.event));
 		return Behaviors.same();
 	}
 
