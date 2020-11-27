@@ -13,6 +13,7 @@ public class CreateRequestHandler extends AbstractClientRequestHandler<CreateReq
 	public void handleClientProtocolBuffersRequest(IGameUser iGameUser, CreateRequest request) {
 		CObject cObject = CObject.newInstance();
 		cObject.putUtfString("hello","world");
+		cObject.putClass("IGameUser",iGameUser);
 		AppContext.getGameWorld().sendMessageToIService(AllianceService.class,cObject);
 
 		AppContext.getGameWorld().sendMessageToLocalIService(AllianceService.class,cObject);
@@ -20,5 +21,7 @@ public class CreateRequestHandler extends AbstractClientRequestHandler<CreateReq
 		AppContext.getGameWorld().sendMessageToIService(AllianceService.class.getName()+".1",cObject);
 
 		AppContext.getGameWorld().sendMessageToIService(AllianceService.class.getName()+".2",cObject);
+
+		AppContext.getGameWorld().sendMessageToIService(AllianceService.class.getName()+".5",cObject);
 	}
 }

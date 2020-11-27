@@ -118,6 +118,9 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 
 	@Override
 	public Optional<Collection<String>> getCacheServer(String dateCenter) {
+		if (members.size()==0){
+			changeServerData("/CodeBroker/Server/"+dateCenter+"/");
+		}
 		List<String> collect = members.stream()
 				.filter(memberInfo -> memberInfo.dataCenter.equals(dateCenter))
 				.map(memberInfo -> memberInfo.ip+":"+memberInfo.port)
@@ -186,7 +189,10 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 			}
 			if (!has){
 				ServerOnline serverOnline = new ServerOnline(value.ip, value.port, value.dataCenter, value.role);
-				ActorPathService.clusterDomainEventActorRef.tell(serverOnline);
+				if (java.util.Objects.nonNull(ActorPathService.clusterDomainEventActorRef)){
+					ActorPathService.clusterDomainEventActorRef.tell(serverOnline);
+				}
+
 			}
 		}
 	}

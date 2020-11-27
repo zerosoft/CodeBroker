@@ -31,7 +31,8 @@ public interface IClusterServiceRegister {
 	 */
 	void registerServer(long sid, String ip, int port, String dateCenter, Set<String> roles);
 	/**
-	 * 获得已缓存服务列表
+	 * 获得已缓存服务列表 ip地址加端口
+	 * 127.0.0.1:1122
 	 * @param dateCenter
 	 * @return
 	 */

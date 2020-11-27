@@ -1,5 +1,6 @@
 package com.codebroker.demo.service.alliance;
 
+import com.codebroker.api.IGameUser;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ public class AllianceService implements IService {
     @Override
     public void handleMessage(IObject obj) {
         System.out.println("O============================ +"+obj);
+        IGameUser iGameUser = (IGameUser) obj.getClass("IGameUser");
+        String userId = iGameUser.getUserId();
+        System.out.println("O============================ +"+userId);
     }
 
     @Override

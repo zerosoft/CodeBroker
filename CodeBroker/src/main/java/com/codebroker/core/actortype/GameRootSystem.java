@@ -91,7 +91,7 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
         ActorPathService.userManager = getContext().spawn(UserManager.create(gameWorldId,Duration.of(60, ChronoUnit.SECONDS)), UserManager.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("UserManager Path {}", ActorPathService.userManager.path());
 
-        ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
+        ActorPathService.clusterDomainEventActorRef = getContext().spawn(ClusterListenerActor.create(gameWorldId), ClusterListenerActor.IDENTIFY+"."+gameWorldId);
         getContext().getSystem().log().info("cluster Domain Event ActorRef Path {}", ActorPathService.clusterDomainEventActorRef.path());
 
         ContextResolver.setGameWorld(gameWorldWithActor);

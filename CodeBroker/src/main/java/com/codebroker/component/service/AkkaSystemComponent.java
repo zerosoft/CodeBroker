@@ -6,6 +6,7 @@ import akka.discovery.Discovery;
 import akka.discovery.Lookup;
 import akka.discovery.ServiceDiscovery;
 import com.codebroker.component.BaseCoreService;
+import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actortype.ActorPathService;
 import com.codebroker.core.actortype.GameRootSystem;
@@ -16,6 +17,7 @@ import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigList;
@@ -26,9 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
-import akka.management.javadsl.AkkaManagement;
 /**
  * Akka的启动类
  *
@@ -79,6 +80,16 @@ public class AkkaSystemComponent extends BaseCoreService {
         //	"akka://CodeBroker@127.0.0.1:2551"
         List<String> clusterNodes= Lists.newArrayList();
         clusterNodes.add("akka://"+akkaName+"@"+arteryHostname+":"+arteryPort);
+
+        Optional<ZookeeperComponent> manager = ContextResolver.getComponent(ZookeeperComponent.class);
+        if (manager.isPresent()){
+            Optional<Collection<String>> cacheServer = manager.get().getIClusterServiceRegister().getCacheServer(clusterCenter);
+            cacheServer.ifPresent(dc->{
+                for (String dcString : dc) {
+                    clusterNodes.add("akka://CodeBroker@"+dcString);
+                }
+            });
+        }
 
         Config config = cg.withValue(akkaName+".akka.remote.artery.canonical.hostname",
                 ConfigImpl.fromAnyRef(arteryHostname, "网络服务地址IP"))

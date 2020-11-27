@@ -39,14 +39,15 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 	public static final String IDENTIFY = "clusterListener";
 	private final Cluster cluster;
 	private final Logger log;
+	private final long gameWorldId;
 
-	public static Behavior<ClusterEvent.ClusterDomainEvent> create() {
-		return Behaviors.setup(ClusterListenerActor::new);
+	public static Behavior<ClusterEvent.ClusterDomainEvent> create(long gameWorldId) {
+		return Behaviors.setup(context->new ClusterListenerActor(context,gameWorldId));
 	}
 
-	private ClusterListenerActor(ActorContext<ClusterEvent.ClusterDomainEvent> context) {
+	private ClusterListenerActor(ActorContext<ClusterEvent.ClusterDomainEvent> context, long gameWorldId) {
 		super(context);
-
+		this.gameWorldId=gameWorldId;
 		this.cluster = Cluster.get(context.getSystem());
 		this.log = context.getLog();
 
@@ -85,18 +86,18 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 			if (message.dataCenter.equals(dataCenter)){
 				if (message.roles.containsAll(roles)){
 					Collection<Member> values = ActorPathService.clusterService.values();
+					List<Address> seedNodes = new ArrayList<>();
 					for (Member value : values) {
 						 address = value.uniqueAddress().address();
 						 host =address.getHost().get();
 						 port =address.getPort().get();
-						 if (message.host.equals(host)&&port==message.port){
-						 	return Behaviors.same();
-						 }
+						 //akka://CodeBroker@127.0.0.1:2551
+						String addr = "akka://CodeBroker@" +host + ":" +port;
+						seedNodes.add(AddressFromURIString.parse(addr));
 					}
 
 					log.info("add new member host {} port {} dc {}",message.host,message.port,message.dataCenter);
-					List<Address> seedNodes = new ArrayList<>();
-					seedNodes.add(AddressFromURIString.parse("akka://CodeBroker@"+message.host+":"+message.port));
+
 					Cluster.get(getContext().getSystem()).manager().tell(new JoinSeedNodes(seedNodes));
 				}
 			}
@@ -132,15 +133,16 @@ public class ClusterListenerActor extends AbstractBehavior<ClusterEvent.ClusterD
 		ActorPathService.clusterService.put(member.uniqueAddress().toString(),member);
 			Optional<ZookeeperComponent> manager = ContextResolver.getComponent(ZookeeperComponent.class);
 			if (manager.isPresent()){
-				manager.get().getIClusterServiceRegister().registerServer(member.uniqueAddress().longUid(),
-						member.address().getHost().get(),
-						member.address().getPort().get(),
-						member.dataCenter(),
-						roles);
-				log.info("add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
+				Member member1 = Cluster.get(getContext().getSystem()).selfMember();
+				if (member1.equals(member)){
+					manager.get().getIClusterServiceRegister().registerServer(gameWorldId,
+							member.address().getHost().get(),
+							member.address().getPort().get(),
+							member.dataCenter(),
+							roles);
+					log.info("Zookeeper Component add new Member - {} host {} port {}", member.uniqueAddress().toString(), member.address().host().get(),member.address().port().get());
+				}
 			}
-
-
 	}
 
 	private void delMember(Member member) {
