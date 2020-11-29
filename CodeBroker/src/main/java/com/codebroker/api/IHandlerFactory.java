@@ -7,14 +7,14 @@ import java.util.Optional;
  *
  * @author LongJu
  */
-public interface IHandlerFactory {
+public interface IHandlerFactory<T> {
     /**
      * 添加请求的handler 类文件
      *
      * @param handlerKey
      * @param class1
      */
-    void addHandler(int handlerKey, Class<?> class1);
+    void addHandler(T handlerKey, Class<?> class1);
 
     /**
      * 添加请求的handler 实例
@@ -22,14 +22,14 @@ public interface IHandlerFactory {
      * @param handlerKey
      * @param obj
      */
-    void addHandler(int handlerKey, Object obj);
+    void addHandler(T handlerKey, Object obj);
 
     /**
      * 移除handler
      *
      * @param handlerKey
      */
-    void removeHandler(int handlerKey);
+    void removeHandler(T handlerKey);
 
     /**
      * 查找handler
@@ -39,7 +39,7 @@ public interface IHandlerFactory {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    Optional<Object> findHandler(int handlerKey) throws InstantiationException, IllegalAccessException;
+    Optional<Object> findHandler(T handlerKey) throws InstantiationException, IllegalAccessException;
 
     /**
      * 清除所有的handler

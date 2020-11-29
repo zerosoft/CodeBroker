@@ -1,7 +1,5 @@
 package com.codebroker.core;
 
-import akka.serialization.Serialization;
-import akka.serialization.SerializationExtension;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.classloader.JarLoader;
@@ -15,7 +13,6 @@ import com.codebroker.util.FileUtil;
 import com.codebroker.util.HotSwapClassUtil;
 import com.codebroker.util.PropertiesWrapper;
 import com.esotericsoftware.reflectasm.MethodAccess;
-import io.altoo.akka.serialization.kryo.KryoSerializer;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import jodd.props.Props;
@@ -149,13 +146,13 @@ public class ServerEngine implements InstanceMXBean {
          */
         if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.REDIS_URL))) {
             logger.info("redis component init");
-            IService redisService = new RedisComponent();
+            IService  redisService = new RedisComponent();
             systemRegistry.addComponent(redisService);
 
         }
         if (propertiesWrapper.getBooleanProperty("mongodb", false)) {
             logger.info("mongodb component init");
-            IService mongoDBComponent = new MongoDBComponent();
+            IService  mongoDBComponent = new MongoDBComponent();
             systemRegistry.addComponent(mongoDBComponent);
         }
 
@@ -165,25 +162,25 @@ public class ServerEngine implements InstanceMXBean {
             systemRegistry.addComponent(dataSourceComponent);
         }
 
-        IService geoIPService = new GeoIPComponent();
+        IService  geoIPService = new GeoIPComponent();
         systemRegistry.addComponent(geoIPService);
 
 
         if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.ZOOKEEPER_HOST))){
             logger.info("zookeeper component init");
             //增加zookeeper
-            IService zookeeper=new ZookeeperComponent();
+            IService  zookeeper=new ZookeeperComponent();
             systemRegistry.addComponent(zookeeper);
         }
 
         if (Objects.nonNull(propertiesWrapper.getProperty(SystemEnvironment.TCP_PORT))){
             logger.info("netty component init");
             // 如果是网关和单幅模式需要启动网络服务
-            IService nettyComponent = new NettyComponent();
+            IService  nettyComponent = new NettyComponent();
             systemRegistry.addComponent(nettyComponent);
         }
 
-        IService akkaSystemComponent = new AkkaSystemComponent();
+        IService  akkaSystemComponent = new AkkaSystemComponent();
         // jmx相关启动
         ManagementService managementService = new ManagementService(this);
         ((AkkaSystemComponent) akkaSystemComponent).setManagementService(managementService);
@@ -197,7 +194,7 @@ public class ServerEngine implements InstanceMXBean {
         for (Object object : kernelContext.serviceComponents) {
             if (object instanceof IService) {
                 try {
-                    ((IService) object).init(propertiesWrapper);
+                    ((IService ) object).init(propertiesWrapper);
                 } catch (Exception e) {
                     logger.error("Server Exception", e);
                 }
@@ -267,8 +264,8 @@ public class ServerEngine implements InstanceMXBean {
                     for (Object object : kernelContext.managerComponents) {
                         if (object instanceof IService) {
                             try {
-                                ((IService) object).destroy(propertiesWrapper);
-                                ((IService) object).init(propertiesWrapper);
+                                ((IService ) object).destroy(propertiesWrapper);
+                                ((IService ) object).init(propertiesWrapper);
                             } catch (Exception e) {
                                 logger.error("Server Components Exception", e);
                                 System.exit(1);
@@ -329,7 +326,7 @@ public class ServerEngine implements InstanceMXBean {
                 logger.info("Server Application not shut down");
                 return;
             }
-            for (IService iService : systemRegistry) {
+            for (IService  iService : systemRegistry) {
                 iService.destroy(null);
             }
         }).start();

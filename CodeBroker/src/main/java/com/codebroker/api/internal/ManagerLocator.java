@@ -21,10 +21,10 @@ public interface ManagerLocator {
      *
      * @param type the new manager
      */
-    boolean setManager(IService type);
+    boolean setManager(IService  type);
 
 
 	<T> Optional<T> getComponent(Class<T> type);
 
-	void setComponent(IService service);
+	void setComponent(IService  service);
 }

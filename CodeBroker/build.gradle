@@ -143,8 +143,8 @@ task copyJars(type:Copy) {
 
 task copyJartoGame(type:Copy){
 	from 'build/libs'
-	into 'D:\\Users\\Documents\\github\\CodeBrokerGit\\GameServer\\lib'
-	into 'D:\\Users\\Documents\\github\\CodeBrokerGit\\AccountServer\\lib'
+	into 'E:\\github\\CodeBroker\\GameServer\\lib'
+//	into 'E:\\github\\CodeBroker\\AccountServer\\lib'
 }
 
 

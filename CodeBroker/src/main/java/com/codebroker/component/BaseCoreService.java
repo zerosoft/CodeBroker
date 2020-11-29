@@ -31,7 +31,12 @@ public abstract class BaseCoreService implements ICoreService {
     }
 
     @Override
-    public void handleMessage(IObject obj) {
+    public void handleMessage(Object obj) {
+        throw new UnsupportedOperationException("This method should be overridden by the child class!");
+    }
+
+    @Override
+    public Object handleBackMessage(Object obj) {
         throw new UnsupportedOperationException("This method should be overridden by the child class!");
     }
 

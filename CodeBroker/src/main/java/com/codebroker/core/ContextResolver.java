@@ -45,7 +45,7 @@ public final class ContextResolver {
         context = ctx;
     }
 
-    public static void setManager(IService service) {
+    public static void setManager(IService  service) {
         context.setManager(service);
     }
 
@@ -62,7 +62,7 @@ public final class ContextResolver {
         ContextResolver.gameWorld = gameWorld;
     }
 
-    public static void setComponent(IService service) {
+    public static void setComponent(IService  service) {
         context.setComponent(service);
     }
 }

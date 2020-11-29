@@ -6,9 +6,10 @@ import com.codebroker.api.event.Event;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
+import com.codebroker.demo.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-public class AllianceService implements IService {
+public class AllianceService extends AbstractIService {
 
     private Logger logger= LoggerFactory.getLogger(AllianceService.class);
 
@@ -22,22 +23,6 @@ public class AllianceService implements IService {
         logger.info("destroy Alliance "+obj);
     }
 
-    @Override
-    public void handleMessage(IObject obj) {
-        System.out.println("O============================ +"+obj);
-        IGameUser iGameUser = (IGameUser) obj.getClass("IGameUser");
-        String userId = iGameUser.getUserId();
-        System.out.println("O============================ +"+userId);
-
-        CObject cObject = CObject.newInstance();
-        cObject.putUtfString("A","BBBBBBB");
-//        Event event=new Event();
-//        event.setTopic("login");
-//        event.setMessage(cObject);
-//        iGameUser.dispatchEvent(event);
-
-        iGameUser.sendMessageToGameUser(iGameUser.getUserId(),cObject);
-    }
 
     @Override
     public String getName() {

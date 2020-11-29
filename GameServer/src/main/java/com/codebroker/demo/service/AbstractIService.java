@@ -1,16 +1,20 @@
 package com.codebroker.demo.service;
 
 import com.codebroker.api.IClientRequestHandler;
+import com.codebroker.api.internal.IRequestKeyMessage;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.api.internal.IService;
+import com.codebroker.api.internal.ResultStatusMessage;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.extensions.request.ClientHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-public abstract class AbstractIService implements IService {
+public abstract class AbstractIService<Integer> implements IService <IRequestKeyMessage<Integer>, IResultStatusMessage>{
 	private ClientHandlerFactory clientHandlerFactory=new ClientHandlerFactory();
 	private Logger logger = LoggerFactory.getLogger(AbstractIService.class);
 
@@ -38,26 +42,25 @@ public abstract class AbstractIService implements IService {
 
 
 	@Override
-	public void handleMessage(IObject iObject) {
-		logger.info("handleMessage {}", iObject);
-		Optional<Object> handlerKey = clientHandlerFactory.findHandler(iObject.getInt("handlerKey"));
+	public void handleMessage(IRequestKeyMessage requestKeyMessage) {
+		logger.info("handleMessage {}", requestKeyMessage);
+		Optional<Object> handlerKey = clientHandlerFactory.findHandler((Integer) requestKeyMessage.getKey());
 		if (handlerKey.isPresent()) {
-			((IServiceClientRequestHandler) handlerKey.get()).handleBackMessage(this, iObject);
+			((IServiceClientRequestHandler) handlerKey.get()).handleBackMessage(this, requestKeyMessage.message());
 		}else {
-			logger.error(iObject.getDump(),"No handler");
+			logger.error("key is "+requestKeyMessage.getKey(),"No handler");
 		}
 	}
 
 	@Override
-	public IObject handleBackMessage(IObject iObject) {
-		logger.info("handleBackMessage {}", iObject);
-		Optional<Object> handlerKey = clientHandlerFactory.findHandler(iObject.getInt("handlerKey"));
+	public IResultStatusMessage handleBackMessage(IRequestKeyMessage requestKeyMessage) {
+		logger.info("handleBackMessage {}", requestKeyMessage);
+		Optional<Object> handlerKey = clientHandlerFactory.findHandler(requestKeyMessage.getKey());
 		if (handlerKey.isPresent()) {
-			return ((IServiceClientRequestHandler) handlerKey.get()).handleBackMessage(this, iObject);
+			Object handleBackMessage = ((IServiceClientRequestHandler) handlerKey.get()).handleBackMessage(this, requestKeyMessage.message());
+			return ResultStatusMessage.OK((Serializable) handleBackMessage);
 		} else {
-			CObject object = CObject.newInstance();
-			object.putUtfString("M#ERROR", "No handler");
-			return object;
+			return ResultStatusMessage.ERROR("No handler");
 
 		}
 	}

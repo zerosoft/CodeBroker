@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.IoSession;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
-import com.codebroker.core.actortype.message.ISession;
+import com.codebroker.core.actortype.message.ISessionActor;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.setting.SystemEnvironment;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,7 +29,7 @@ public class NettyIoSession implements IoSession {
     private Logger logger= LoggerFactory.getLogger(NettyIoSession.class);
 
     final ChannelHandlerContext ctx;
-    public ActorRef<ISession> sessionActorRef = null;
+    public ActorRef<ISessionActor> sessionActorRef = null;
 
     public NettyIoSession(ChannelHandlerContext ctx) {
         super();
@@ -87,7 +87,7 @@ public class NettyIoSession implements IoSession {
             }
         } else {
             if (sessionActorRef!=null){
-                sessionActorRef.tell(new ISession.SessionClose(false));
+                sessionActorRef.tell(new ISessionActor.SessionActorClose(false));
             }
         }
     }
@@ -105,7 +105,7 @@ public class NettyIoSession implements IoSession {
             buffer.put(binary);
             buffer.flip();
 
-            sessionActorRef.tell(new ISession.SessionAcceptRequest((BaseByteArrayPacket) msg));
+            sessionActorRef.tell(new ISessionActor.SessionActorAcceptRequest((BaseByteArrayPacket) msg));
 
         }
     }

@@ -1,48 +1,73 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.ActorRef;
-import com.codebroker.core.actortype.message.IService;
-import com.codebroker.core.data.IObject;
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.javadsl.AskPattern;
+import com.codebroker.api.internal.*;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
+import com.codebroker.core.actortype.message.IServiceActor;
+import com.codebroker.setting.SystemEnvironment;
+
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Seveice 通过 Akka的actor 执行任务
  */
-public class ServiceWithActor implements com.codebroker.api.internal.IService {
+public class ServiceWithActor implements IService<IRequestKeyMessage,IResultStatusMessage>
+{
 
-    private ActorRef<IService> actorActorRef;
+    private ActorRef<IServiceActor> actorActorRef;
     private String name;
 
-    public ServiceWithActor(String name, ActorRef<IService> actorActorRef ) {
+    public ServiceWithActor(String name, ActorRef<IServiceActor> actorActorRef ) {
         this.actorActorRef = actorActorRef;
         this.name = name;
     }
 
     @Override
     public void init(Object obj) {
-        actorActorRef.tell(new IService.Init(obj));
+        actorActorRef.tell(new IServiceActor.Init(obj));
     }
 
     @Override
     public void destroy(Object obj) {
-        actorActorRef.tell(new IService.Destroy(obj));
+        actorActorRef.tell(new IServiceActor.Destroy(obj));
     }
 
     @Override
-    public void handleMessage(IObject obj) {
-        actorActorRef.tell(new IService.HandleMessage(obj));
+    public void handleMessage(IRequestKeyMessage obj) {
+        actorActorRef.tell(new IServiceActor.HandleMessage(obj));
     }
 
     @Override
-    public IObject handleBackMessage(IObject obj) {
-        return null;
+    public IResultStatusMessage handleBackMessage(IRequestKeyMessage object) {
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+        CompletionStage<IServiceActor.Reply> ask = AskPattern.askWithStatus(
+                actorActorRef,
+                replyActorRef -> new IServiceActor.HandleUserMessage(object, replyActorRef),
+                Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
+                actorSystem.scheduler());
+
+        ask.exceptionally(throwable -> {
+            throwable.printStackTrace();
+            return null;
+        });
+        IServiceActor.Reply join = ask.toCompletableFuture().join();
+        if (join instanceof IServiceActor.HandleUserMessageBack){
+            IServiceActor.HandleUserMessageBack result= (IServiceActor.HandleUserMessageBack) join;
+            return new ResultStatusMessage((Serializable) result.object);
+        }else {
+            return new ResultStatusMessage();
+        }
     }
 
     @Override
     public String getName() {
-        return name;
+        return actorActorRef.path().toString();
     }
 
-//    public ActorRef<IService> getActorActorRef() {
-//        return actorActorRef;
-//    }
+
 }

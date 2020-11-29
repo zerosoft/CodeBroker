@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ClientHandlerFactory implements IHandlerFactory {
+public class ClientHandlerFactory<T> implements IHandlerFactory<T> {
 
-    private final Map<Integer, Class<?>> handlers = new ConcurrentHashMap<Integer, Class<?>>();
+    private final Map<T, Class<?>> handlers = new ConcurrentHashMap();
 
-    private final Map<Integer, Object> cachedHandlers = new ConcurrentHashMap<Integer, Object>();
+    private final Map<T, Object> cachedHandlers = new ConcurrentHashMap();
 
-    public void addHandler(int handlerKey, Class<?> handlerClass) {
+    public void addHandler(T handlerKey, Class<?> handlerClass) {
         handlers.put(handlerKey, handlerClass);
     }
 
-    public void addHandler(int handlerKey, Object requestHandler) {
+    public void addHandler(T handlerKey, Object requestHandler) {
         cachedHandlers.put(handlerKey, requestHandler);
     }
 
@@ -25,14 +25,14 @@ public class ClientHandlerFactory implements IHandlerFactory {
         cachedHandlers.clear();
     }
 
-    public synchronized void removeHandler(int handlerKey) {
+    public synchronized void removeHandler(T handlerKey) {
         handlers.remove(handlerKey);
         if (cachedHandlers.containsKey(handlerKey)) {
             cachedHandlers.remove(handlerKey);
         }
     }
 
-    public  Optional<Object> findHandler(int handlerKey)  {
+    public  Optional<Object> findHandler(T handlerKey)  {
         Object handler = cachedHandlers.get(handlerKey);
         if (handler != null) {
             return Optional.of(handler);

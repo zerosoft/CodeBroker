@@ -11,14 +11,12 @@ import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
 import com.codebroker.api.AppListener;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.ISession;
-import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.ISessionActor;
+import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.core.actortype.message.IUserManager;
-import com.codebroker.exception.NoAuthException;
 
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +29,7 @@ import java.util.Map;
 public class UserManager extends AbstractBehavior<IUserManager> {
 
     public static final String IDENTIFY = UserManager.class.getSimpleName();
-    private Map<String, ActorRef<IUser>> userMap=new HashMap<>();
+    private Map<String, ActorRef<IUserActor>> userMap=new HashMap<>();
     private Map<String,Long> lostSessionUser=new HashMap<>();
 
 
@@ -68,8 +66,8 @@ public class UserManager extends AbstractBehavior<IUserManager> {
 
     private Behavior<IUserManager> sendMessageToGameUser(IUserManager.SendMessageToGameUser message) {
         if (userMap.containsKey(message.userId)){
-            ActorRef<IUser> iUserActorRef = userMap.get(message.userId);
-            iUserActorRef.tell(new IUser.GetSendMessageToGameUser(message.message));
+            ActorRef<IUserActor> iUserActorRef = userMap.get(message.userId);
+            iUserActorRef.tell(new IUserActor.GetSendMessageToGameUserActor(message.message));
         }
         return Behaviors.same();
     }
@@ -88,9 +86,9 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         getContext().getLog().info("time check lost session");
         if (lostSessionUser.size()>0){
             for (String uid : lostSessionUser.keySet()) {
-                ActorRef<IUser> userActorRef = userMap.get(uid);
+                ActorRef<IUserActor> userActorRef = userMap.get(uid);
                 if (userActorRef!=null){
-                    userActorRef.tell(new IUser.Disconnect(false));
+                    userActorRef.tell(new IUserActor.Disconnect(false));
                     userMap.remove(uid);
                 }
             }
@@ -117,7 +115,7 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         }catch (Exception e){
             getContext().getLog().error(e.getMessage(),e);
             //登入失败,关闭处理
-            tryBindingUser.ioSession.tell(new ISession.TryBindingUserFail());
+            tryBindingUser.ioSession.tell(new ISessionActor.TryBindingUserFail());
             return Behaviors.same();
         }
 
@@ -125,22 +123,22 @@ public class UserManager extends AbstractBehavior<IUserManager> {
         if (userMap.containsKey(key)){
             lostSessionUser.remove(key);
 
-            ActorRef<IUser> userActorRef= userMap.get(key);
+            ActorRef<IUserActor> userActorRef= userMap.get(key);
             //通知User之前的session被顶掉了
-            userActorRef.tell(new IUser.NewSessionLogin(tryBindingUser.ioSession));
+            userActorRef.tell(new IUserActor.NewSessionLogin(tryBindingUser.ioSession));
             //通知Session绑定User
-            tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(userActorRef));
+            tryBindingUser.ioSession.tell(new ISessionActor.SessionActorBindingUser(userActorRef));
 
         }else {
-            ActorRef<IUser> spawn = getContext().spawn(
+            ActorRef<IUserActor> spawn = getContext().spawn(
                     User.create(
                             uid,
                             tryBindingUser.ioSession,getContext().getSelf()),
                             key,
                             DispatcherSelector.fromConfig("game-logic"));
             //通知Session绑定User
-            tryBindingUser.ioSession.tell(new ISession.SessionBindingUser(spawn));
-            spawn.tell(IUser.NewGameUserInit.INSTANCE);
+            tryBindingUser.ioSession.tell(new ISessionActor.SessionActorBindingUser(spawn));
+            spawn.tell(IUserActor.NewGameUserActorInit.INSTANCE);
 
             //加入监听
             getContext().watchWith(spawn,new IUserManager.UserClose(uid));

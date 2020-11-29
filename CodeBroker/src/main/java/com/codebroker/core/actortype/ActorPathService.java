@@ -3,12 +3,10 @@ package com.codebroker.core.actortype;
 import akka.actor.typed.ActorRef;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
-import akka.cluster.sharding.typed.ShardingEnvelope;
-import com.codebroker.core.actortype.message.IGameWorldMessage;
-import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.IGameWorldActor;
+import com.codebroker.core.actortype.message.IServiceActor;
 import com.codebroker.core.actortype.message.ISessionManager;
 import com.codebroker.core.actortype.message.IUserManager;
-import com.codebroker.core.actortype.timer.UserManagerTimer;
 import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 
@@ -22,7 +20,7 @@ public class ActorPathService{
 	/**
 	 * 本节点存在的IService的地址
 	 */
-	protected static Map<String, ActorRef<IService>> localService= Maps.newConcurrentMap();
+	protected static Map<String, ActorRef<IServiceActor>> localService= Maps.newConcurrentMap();
 	/**
 	 * 本节点存在的集群Actor的地址
 	 */
@@ -33,6 +31,6 @@ public class ActorPathService{
 	protected static ActorRef<ISessionManager> sessionManager;
 	//用户管理
 	protected static ActorRef<IUserManager> userManager;
-	protected static ActorRef<IGameWorldMessage> gameWorldMessageActorRef;
+	protected static ActorRef<IGameWorldActor> gameWorldMessageActorRef;
 	public static ActorRef<ClusterEvent.ClusterDomainEvent> clusterDomainEventActorRef;
 }

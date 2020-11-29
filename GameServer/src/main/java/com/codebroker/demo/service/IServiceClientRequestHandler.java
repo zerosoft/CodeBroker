@@ -7,6 +7,8 @@ import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
  * Service的事件请求处理
  */
@@ -18,7 +20,7 @@ public interface IServiceClientRequestHandler {
 
 	void handleClientRequest(IService service, IObject message);
 
-	default IObject handleBackMessage(IService service, IObject message){
+	default Object handleBackMessage(IService service, Serializable message){
 		CObject cObject = CObjectLite.newInstance();
 		cObject.putUtfString("msg","your need overwrite this");
 		return cObject;

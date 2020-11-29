@@ -4,7 +4,6 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.protocol.SerializableType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
@@ -13,42 +12,42 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author LongJu
  * @Date 2020/3/26
  */
-public interface ISession {
+public interface ISessionActor {
 
-   final class SessionAcceptRequest implements ISession{
+   final class SessionActorAcceptRequest implements ISessionActor {
         public BaseByteArrayPacket request;
-        public SessionAcceptRequest(BaseByteArrayPacket request) {
+        public SessionActorAcceptRequest(BaseByteArrayPacket request) {
             this.request = request;
         }
     }
 
-    final class SessionWriteResponse implements ISession{
+    final class SessionActorWriteResponse implements ISessionActor {
         public IPacket response;
         @JsonCreator
-        public SessionWriteResponse(IPacket response) {
+        public SessionActorWriteResponse(IPacket response) {
             this.response = response;
         }
     }
 
-    final class SessionBindingUser implements ISession{
-        public  ActorRef<IUser> userActorRef;
+    final class SessionActorBindingUser implements ISessionActor {
+        public  ActorRef<IUserActor> userActorRef;
         @JsonCreator
-        public SessionBindingUser(ActorRef<IUser> userActorRef) {
+        public SessionActorBindingUser(ActorRef<IUserActor> userActorRef) {
             this.userActorRef = userActorRef;
         }
     }
 
-	final class  SessionClose implements ISession{
+	final class SessionActorClose implements ISessionActor {
 		public 	boolean enforce;
         @JsonCreator
-		public SessionClose(boolean enforce) {
+		public SessionActorClose(boolean enforce) {
 			this.enforce = enforce;
 		}
     }
 
 
     //尝试绑定用户失败
-    final class TryBindingUserFail implements ISession{
+    final class TryBindingUserFail implements ISessionActor {
 
     }
 

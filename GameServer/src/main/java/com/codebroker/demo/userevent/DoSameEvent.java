@@ -9,8 +9,7 @@ import com.codebroker.core.data.IObject;
 public class DoSameEvent implements IGameUserEventListener {
 
 	@Override
-	public IObject handleEvent(IGameUser gameUser, IEvent event) {
+	public void handleEvent(IGameUser gameUser, IEvent event) {
 		getGameUserEventListenerLogger().info("get Event game user id  {}",gameUser.getUserId());
-		return null;
 	}
 }

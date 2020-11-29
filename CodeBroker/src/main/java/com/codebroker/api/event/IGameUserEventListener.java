@@ -19,8 +19,6 @@ public interface IGameUserEventListener {
      * @param gameUser 游戏用户
      * @param event  事件
      */
-    default IObject handleEvent(IGameUser gameUser,IEvent event){
-        return null;
-    }
+    default void handleEvent(IGameUser gameUser,IEvent event){}
 
 }

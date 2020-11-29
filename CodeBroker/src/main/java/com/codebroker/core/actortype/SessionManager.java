@@ -8,11 +8,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import com.codebroker.api.IoSession;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
-import com.codebroker.core.actortype.message.ISession;
+import com.codebroker.core.actortype.message.ISessionActor;
 import com.codebroker.core.actortype.message.ISessionManager;
-import com.codebroker.core.actortype.message.IUserManager;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -29,7 +27,7 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
     /**
      * 创建的Session管理
      */
-    Map<Long, ActorRef<ISession>> sessions= Maps.newHashMap();
+    Map<Long, ActorRef<ISessionActor>> sessions= Maps.newHashMap();
     /**
      * Id 生成使用
      */
@@ -65,7 +63,7 @@ public class SessionManager extends AbstractBehavior<ISessionManager> {
         getContext().getLog().debug("SessionManager createSession session");
         //创建一个新的id自增
         long sessionId = idGenerator++;
-        ActorRef<ISession> session = getContext().spawn(Session.create(sessionId, message.ioSession,gameWorldId), Session.IDENTIFY+"."+ sessionId);
+        ActorRef<ISessionActor> session = getContext().spawn(Session.create(sessionId, message.ioSession,gameWorldId), Session.IDENTIFY+"."+ sessionId);
         getContext().getLog().debug("session path {}",session.path());
 
         //加入监听

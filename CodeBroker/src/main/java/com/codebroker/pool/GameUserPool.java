@@ -1,7 +1,7 @@
 package com.codebroker.pool;
 
 import akka.actor.typed.ActorRef;
-import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.core.entities.GameUser;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -12,7 +12,7 @@ public class GameUserPool {
 
 	static GenericObjectPool<GameUser> userGenericObjectPool=new GenericObjectPool(new GameUserBasePooledObjectFactory());
 
-	public static GameUser getGameUser(String uid, ActorRef<IUser> self) {
+	public static GameUser getGameUser(String uid, ActorRef<IUserActor> self) {
 		try {
 			GameUser gameUser = userGenericObjectPool.borrowObject(500);
 			gameUser.setUid(uid);

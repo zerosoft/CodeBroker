@@ -2,17 +2,13 @@ package com.codebroker.demo.actor;
 
 import akka.actor.testkit.typed.javadsl.ActorTestKit;
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.Behaviors;
 import com.codebroker.api.IoSession;
 import com.codebroker.core.actortype.Session;
 import com.codebroker.core.actortype.User;
 import com.codebroker.core.actortype.UserManager;
-import com.codebroker.core.actortype.message.ISession;
-import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.ISessionActor;
 import com.codebroker.core.actortype.message.IUserManager;
 import com.codebroker.core.data.CObject;
-import com.codebroker.core.entities.GameUser;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -33,9 +29,9 @@ public class BaseTest {
 
 		ActorRef<IUserManager> userManagerActorRef = testKit.spawn(UserManager.create(1, Duration.ofSeconds(10)));
 
-		ActorRef<ISession> iSessionActorRef = testKit.spawn(Session.create(1L, session,1));
+		ActorRef<ISessionActor> iSessionActorRef = testKit.spawn(Session.create(1L, session,1));
 
-		iSessionActorRef.tell(new ISession.SessionAcceptRequest(baseByteArrayPacket));
+		iSessionActorRef.tell(new ISessionActor.SessionActorAcceptRequest(baseByteArrayPacket));
 
 
 		testKit.spawn(User.create("1",iSessionActorRef,userManagerActorRef));

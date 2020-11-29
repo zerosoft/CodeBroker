@@ -22,14 +22,14 @@ public interface IGameWorld {
 	 * @param service
 	 * @return
 	 */
-	boolean createService(String serviceName, IService service);
+	boolean createService(String serviceName, IService  service);
 	/**
 	 * 创建一个全局服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
 	 * 使用 IService.getName() 作为 serviceName
 	 * @param service
 	 * @return
 	 */
-	boolean createService(IService service);
+	boolean createService(IService  service);
 
 	/**
 	 * 创建一个集群服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
@@ -37,14 +37,14 @@ public interface IGameWorld {
 	 * @param service
 	 * @return
 	 */
-	boolean createClusterService(String serviceName, IService service);
+	boolean createClusterService(String serviceName, IService  service);
 	/**
 	 * 创建一个集群服务，如果开启集群则成为集群服务 需要给服务类增加注解 IServerType
 	 * 使用 IService.getName() 作为 serviceName
 	 * @param service
 	 * @return
 	 */
-	boolean createClusterService(IService service);
+	boolean createClusterService(IService  service);
 
 
 	Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);

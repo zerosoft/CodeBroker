@@ -84,7 +84,7 @@ class KernelContext {
         return propertieswrapper;
     }
 
-    public void setManager(IService type) {
+    public void setManager(IService  type) {
         ((ComponentRegistryImpl) managerComponents).addComponent(type);
     }
 
@@ -96,7 +96,7 @@ class KernelContext {
         throw new RuntimeException();
     }
 
-    public void setComponent(IService service) {
+    public void setComponent(IService  service) {
         ((ComponentRegistryImpl) serviceComponents).addComponent(service);
     }
 }

@@ -41,7 +41,7 @@ public final class AppContext {
      * @param service
      * @return
      */
-    public static void setComponent(IService service) {
+    public static void setComponent(IService  service) {
         InternalContext.getManagerLocator().setComponent(service);
     }
 
@@ -59,7 +59,7 @@ public final class AppContext {
      * @param service
      * @return
      */
-    public static boolean setManager(IService service) {
+    public static boolean setManager(IService  service) {
         return InternalContext.getManagerLocator().setManager(service);
     }
 

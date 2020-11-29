@@ -8,7 +8,6 @@ import com.codebroker.core.actortype.message.*;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -52,7 +51,7 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
     }
 
     private Behavior<IGameRootSystemMessage> createService(IGameRootSystemMessage.CreateService message) {
-            ActorRef<IService> spawn = getContext()
+            ActorRef<IServiceActor> spawn = getContext()
                     .spawn(ServiceActor.create(message.name, message.service),
                     message.name+"."+gameWorldId,
                     DispatcherSelector.fromConfig("game-service"));
@@ -60,15 +59,15 @@ public class GameRootSystem extends AbstractBehavior<IGameRootSystemMessage> {
     }
 
     private Behavior<IGameRootSystemMessage> createGlobalService(IGameRootSystemMessage.createGlobalService message) {
-        ActorRef<IService> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true),
+        ActorRef<IServiceActor> spawn = getContext().spawn(ServiceActor.create(message.name, message.service,true),
                     message.name+"."+gameWorldId,
                 DispatcherSelector.fromConfig("game-service"));
         return getWorldMessageBehavior(spawn, message.name, message.service, message.replyTo);
     }
 
-    private Behavior<IGameRootSystemMessage> getWorldMessageBehavior(ActorRef<IService> spawn, String name, com.codebroker.api.internal.IService service, ActorRef<IGameRootSystemMessage.Reply> replyTo) {
+    private Behavior<IGameRootSystemMessage> getWorldMessageBehavior(ActorRef<IServiceActor> spawn, String name, com.codebroker.api.internal.IService  service, ActorRef<IGameRootSystemMessage.Reply> replyTo) {
         ServiceWithActor serviceActor=new ServiceWithActor(name,spawn);
-        com.codebroker.api.internal.IService iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
+        com.codebroker.api.internal.IService  iService = new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
         ContextResolver.setManager(iService);
         replyTo.tell(new IGameRootSystemMessage.ReplyCreateService(spawn));
         return Behaviors.same();

@@ -29,7 +29,7 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import com.codebroker.core.actortype.GameWorldWithActor;
-import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.IServiceActor;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.serialization.KryoSerialization;
@@ -95,21 +95,21 @@ public class HttpServer {
 
 	private CompletionStage<String> processClusterGet(long shardId,String serviceName,String message) {
 		ClusterSharding sharding = ClusterSharding.get(actorSystem);
-		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = GameWorldWithActor.getTypeKey(serviceName);
-		EntityRef<IService> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
+		EntityTypeKey<IServiceActor> typeKey = GameWorldWithActor.getTypeKey(serviceName);
+		EntityRef<IServiceActor> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
 
 		IObject iObject = CObject.newFromJsonData(message);
 
-		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+		CompletionStage<IServiceActor.Reply> result = AskPattern.askWithStatus(
 				entityRef,
-				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
+				replyActorRef ->  new IServiceActor.HandleUserMessage(iObject, replyActorRef),
 				Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 				actorSystem.scheduler());
 
 		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
-			if (f instanceof IService.HandleUserMessageBack) {
-				IService.HandleUserMessageBack back = (IService.HandleUserMessageBack) f;
-				return back.object.toJson();
+			if (f instanceof IServiceActor.HandleUserMessageBack) {
+				IServiceActor.HandleUserMessageBack back = (IServiceActor.HandleUserMessageBack) f;
+				return back.object.toString();
 			} else {
 				return "Optional.empty()";
 			}
@@ -120,21 +120,21 @@ public class HttpServer {
 
 	private CompletionStage<String> processClusterHTTPRequest(long shardId,HTTPRequest date) {
 		ClusterSharding sharding = ClusterSharding.get(actorSystem);
-		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = GameWorldWithActor.getTypeKey(date.serviceName);
-		EntityRef<IService> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
+		EntityTypeKey<IServiceActor> typeKey = GameWorldWithActor.getTypeKey(date.serviceName);
+		EntityRef<IServiceActor> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
 
 		IObject iObject = CObject.newFromJsonData(date.message);
 
-		CompletionStage<com.codebroker.core.actortype.message.IService.Reply> result = AskPattern.askWithStatus(
+		CompletionStage<IServiceActor.Reply> result = AskPattern.askWithStatus(
 				entityRef,
-				replyActorRef ->  new com.codebroker.core.actortype.message.IService.HandleUserMessage(iObject, replyActorRef),
+				replyActorRef ->  new IServiceActor.HandleUserMessage(iObject, replyActorRef),
 				Duration.ofSeconds(5),
 				actorSystem.scheduler());
 
 		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
-			if (f instanceof IService.HandleUserMessageBack) {
-				IService.HandleUserMessageBack back = (IService.HandleUserMessageBack) f;
-				return back.object.toJson();
+			if (f instanceof IServiceActor.HandleUserMessageBack) {
+				IServiceActor.HandleUserMessageBack back = (IServiceActor.HandleUserMessageBack) f;
+				return back.object.toString();
 			} else {
 				return "Optional.empty()";
 			}

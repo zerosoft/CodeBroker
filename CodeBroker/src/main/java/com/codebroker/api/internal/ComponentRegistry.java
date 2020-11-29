@@ -7,7 +7,7 @@ import java.util.Optional;
  *
  *  @author LongJu
  */
-public interface ComponentRegistry extends Iterable<IService> {
+public interface ComponentRegistry extends Iterable<IService > {
 
     /**
      * 根据CLASS类型获得已经注册的组件.

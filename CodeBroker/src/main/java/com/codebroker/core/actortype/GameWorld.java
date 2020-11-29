@@ -2,23 +2,20 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.*;
-import akka.actor.typed.pubsub.Topic;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
-import akka.cluster.pubsub.DistributedPubSubMediator;
 import com.codebroker.api.AppListener;
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.event.Event;
 import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IGameWorldMessage;
-import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.IGameWorldActor;
+import com.codebroker.core.actortype.message.IServiceActor;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
+public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 
 	public static final String IDENTIFY = GameWorld.class.getSimpleName();
 
@@ -26,52 +23,52 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 
 	Map<String, IGameUser> userMap= Maps.newTreeMap();
 
-	public static Behavior<IGameWorldMessage> create(long id) {
+	public static Behavior<IGameWorldActor> create(long id) {
 		return Behaviors.setup(
 				context -> {
 					context
 							.getSystem()
 							.receptionist()
-							.tell(Receptionist.register(ServiceKey.create(IGameWorldMessage.class, GameWorld.IDENTIFY+"."+id), context.getSelf()));
+							.tell(Receptionist.register(ServiceKey.create(IGameWorldActor.class, GameWorld.IDENTIFY+"."+id), context.getSelf()));
 					return new GameWorld(context,id);
 				});
 	}
 
 
-	public GameWorld(ActorContext<IGameWorldMessage> context, long id) {
+	public GameWorld(ActorContext<IGameWorldActor> context, long id) {
 		super(context);
 		this.gameWorldId=id;
 	}
 
 	@Override
-	public Receive<IGameWorldMessage> createReceive() {
+	public Receive<IGameWorldActor> createReceive() {
 		return newReceiveBuilder()
-				.onMessage(IGameWorldMessage.findIGameUserByIdMessage.class,this::findGameUserById)
-				.onMessage(IGameWorldMessage.UserLoginWorld.class,this::userLoginWorld)
-				.onMessage(IGameWorldMessage.UserLogOutWorld.class,this::logoutWorld)
-				.onMessage(IGameWorldMessage.SendAllOnlineUserMessage.class,this::sendAllOnlineUserMessage)
-				.onMessage(IGameWorldMessage.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
-				.onMessage(IGameWorldMessage.SendMessageToService.class,this::sendMessageToService)
+				.onMessage(IGameWorldActor.findIGameUserByIdActor.class,this::findGameUserById)
+				.onMessage(IGameWorldActor.UserLoginWorld.class,this::userLoginWorld)
+				.onMessage(IGameWorldActor.UserLogOutWorld.class,this::logoutWorld)
+				.onMessage(IGameWorldActor.SendAllOnlineUserActor.class,this::sendAllOnlineUserMessage)
+				.onMessage(IGameWorldActor.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
+				.onMessage(IGameWorldActor.SendActorToService.class,this::sendMessageToService)
 				.build();
 	}
 
-	private  Behavior<IGameWorldMessage> sendMessageToService(IGameWorldMessage.SendMessageToService message) {
-		IService.HandleMessage handleMessage = new IService.HandleMessage(message.object);
+	private  Behavior<IGameWorldActor> sendMessageToService(IGameWorldActor.SendActorToService message) {
+		IServiceActor.HandleMessage handleMessage = new IServiceActor.HandleMessage(message.object);
 		getContext().spawnAnonymous(ServiceGuardian.create(message.serviceName,handleMessage));
 		return Behaviors.same();
 	}
 
-	private Behavior<IGameWorldMessage> sendAllOnlineUserEvent(IGameWorldMessage.SendAllOnlineUserEvent message) {
+	private Behavior<IGameWorldActor> sendAllOnlineUserEvent(IGameWorldActor.SendAllOnlineUserEvent message) {
 //		userMap.values().forEach(gameUser -> gameUser.dispatchEvent(message.event));
 		return Behaviors.same();
 	}
 
-	private Behavior<IGameWorldMessage> sendAllOnlineUserMessage(IGameWorldMessage.SendAllOnlineUserMessage message) {
+	private Behavior<IGameWorldActor> sendAllOnlineUserMessage(IGameWorldActor.SendAllOnlineUserActor message) {
 		userMap.values().forEach(gameUser -> gameUser.sendMessageToIoSession(message.requestId,message.message));
 		return Behaviors.same();
 	}
 
-	private  Behavior<IGameWorldMessage> logoutWorld(IGameWorldMessage.UserLogOutWorld message) {
+	private  Behavior<IGameWorldActor> logoutWorld(IGameWorldActor.UserLogOutWorld message) {
 
 		userMap.remove(message.gameUser.getUserId());
 
@@ -82,7 +79,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 		return Behaviors.same();
 	}
 
-	private Behavior<IGameWorldMessage> userLoginWorld(IGameWorldMessage.UserLoginWorld message) {
+	private Behavior<IGameWorldActor> userLoginWorld(IGameWorldActor.UserLoginWorld message) {
 		IGameUser gameUser = message.gameUser;
 		userMap.put(gameUser.getUserId(), gameUser);
 
@@ -92,11 +89,11 @@ public class GameWorld extends AbstractBehavior<IGameWorldMessage> {
 		return Behaviors.same();
 	}
 
-	private Behavior<IGameWorldMessage> findGameUserById(IGameWorldMessage.findIGameUserByIdMessage message) {
+	private Behavior<IGameWorldActor> findGameUserById(IGameWorldActor.findIGameUserByIdActor message) {
 		if (userMap.containsKey(message.id)){
-			message.reply.tell(new IGameWorldMessage.FindGameUser(userMap.get(message.id)));
+			message.reply.tell(new IGameWorldActor.FindGameUser(userMap.get(message.id)));
 		}else {
-			message.reply.tell(IGameWorldMessage.NoFindGameUser.INSTANCE);
+			message.reply.tell(IGameWorldActor.NoFindGameUser.INSTANCE);
 		}
 		return Behaviors.same();
 	}

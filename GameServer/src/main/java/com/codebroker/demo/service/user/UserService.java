@@ -2,8 +2,9 @@ package com.codebroker.demo.service.user;
 
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.data.IObject;
+import com.codebroker.demo.service.AbstractIService;
 
-public class UserService implements IService {
+public class UserService  extends AbstractIService {
 
 	@Override
 	public void init(Object o) {
@@ -15,13 +16,4 @@ public class UserService implements IService {
 
 	}
 
-	@Override
-	public void handleMessage(IObject iObject) {
-
-	}
-
-	@Override
-	public IObject handleBackMessage(IObject obj) {
-		return null;
-	}
 }

@@ -9,7 +9,7 @@ import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.internal.IEventHandler;
-import com.codebroker.core.actortype.message.IUser;
+import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.codebroker.protocol.SerializableType;
@@ -25,11 +25,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * @author LongJu
  */
-public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, SerializableType {
+public class GameUser implements IGameUser, IEventDispatcher, IEventHandler {
 
-    private ActorRef<IUser> actorRef;
+    private ActorRef<IUserActor> actorRef;
 
-    public ActorRef<IUser> getActorRef() {
+    public ActorRef<IUserActor> getActorRef() {
         return actorRef;
     }
 
@@ -43,13 +43,13 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, Ser
         eventListenerMap.clear();
     }
 
-    public GameUser(String uid, ActorRef<IUser> spawn) {
+    public GameUser(String uid, ActorRef<IUserActor> spawn) {
         this.uid = uid;
         this.actorRef = spawn;
     }
 
 
-    public void setActorRef(ActorRef<IUser> actorRef) {
+    public void setActorRef(ActorRef<IUserActor> actorRef) {
         this.actorRef = actorRef;
     }
 
@@ -70,21 +70,21 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, Ser
     public void sendMessageToIoSession(int requestId, Object message) {
         if (message instanceof byte[]) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
-            actorRef.tell(new IUser.SendMessageToSession(byteArrayPacket));
+            actorRef.tell(new IUserActor.SendMessageToSession(byteArrayPacket));
         } else if (message instanceof String) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, ((String) message).getBytes());
-            actorRef.tell(new IUser.SendMessageToSession(byteArrayPacket));
+            actorRef.tell(new IUserActor.SendMessageToSession(byteArrayPacket));
         }
     }
 
     @Override
     public void sendMessageToGameUser(String userId, IObject message) {
-        actorRef.tell(new IUser.SendMessageToGameUser(userId, message));
+        actorRef.tell(new IUserActor.SendMessageToGameUserActor(userId, message));
     }
 
     @Override
     public void sendMessageToGameUser(IObject message) {
-        actorRef.tell(new IUser.GetSendMessageToGameUser(message));
+        actorRef.tell(new IUserActor.GetSendMessageToGameUserActor(message));
     }
 
     @Override
@@ -114,7 +114,7 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, Ser
 
     @Override
     public void disconnect() {
-        actorRef.tell(new IUser.Disconnect(true));
+        actorRef.tell(new IUserActor.Disconnect(true));
     }
 
     @Override
@@ -122,6 +122,10 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, Ser
         return actorRef != null;
     }
 
+    @Override
+    public void addEventListener(UserEvent userEvent, IGameUserEventListener iGameUserEventListener) {
+        addEventListener(userEvent.name(),iGameUserEventListener);
+    }
 
     public void rebindIoSession(ActorRef actorRef) {
 
@@ -154,7 +158,7 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler, Ser
     }
 
     public void dispatchEvent(IEvent event) {
-        actorRef.tell(new IUser.LogicEvent(event));
+        actorRef.tell(new IUserActor.LogicEvent(event));
     }
 
     @Override

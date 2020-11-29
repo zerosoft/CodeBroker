@@ -95,8 +95,8 @@ public class GameServerExtension extends AppListenerExtension {
 				}
 			}
 		}
-		user.addEventListener("login", new DoSameEvent());
-		user.addEventListener("USER_REMOVE", new UserRemoveEvent());
+		user.addEventListener(IGameUser.UserEvent.LOGIN, new DoSameEvent());
+		user.addEventListener(IGameUser.UserEvent.LOGOUT, new UserRemoveEvent());
 		onlineUsers.put(user.getUserId(),user);
 	}
 

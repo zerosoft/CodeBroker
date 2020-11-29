@@ -2,7 +2,6 @@ package com.codebroker.core.actortype;
 
 import akka.actor.typed.*;
 import akka.actor.typed.javadsl.*;
-import akka.cluster.Member;
 import akka.cluster.sharding.typed.ShardingEnvelope;
 import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.Entity;
@@ -19,19 +18,18 @@ import com.codebroker.api.internal.IService;
 import com.codebroker.component.service.ZookeeperComponent;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.ServerEngine;
-import com.codebroker.core.actortype.message.IGameWorldMessage;
+import com.codebroker.core.actortype.message.IGameWorldActor;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
+import com.codebroker.core.actortype.message.IServiceActor;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
 import com.codebroker.net.http.HTTPRequest;
 import com.codebroker.protocol.serialization.KryoSerialization;
 import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.MathUtil;
-import com.google.gson.Gson;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
@@ -40,16 +38,16 @@ import java.util.concurrent.CompletionStage;
  */
 public class GameWorldWithActor implements IGameWorld {
 
-	private ActorRef<IGameWorldMessage> gameWorldActorRef;
+	private ActorRef<IGameWorldActor> gameWorldActorRef;
 
-	public static EntityTypeKey<com.codebroker.core.actortype.message.IService> getTypeKey(String name){
-		return EntityTypeKey.create(com.codebroker.core.actortype.message.IService.class,name);
+	public static EntityTypeKey<IServiceActor> getTypeKey(String name){
+		return EntityTypeKey.create(IServiceActor.class,name);
 	}
 
 	private String gameWorldId;
 	private int shardId= 100;
 
-	public GameWorldWithActor(String gameWorldId, ActorRef<IGameWorldMessage> gameWorldActorRef ) {
+	public GameWorldWithActor(String gameWorldId, ActorRef<IGameWorldActor> gameWorldActorRef ) {
 		this.gameWorldActorRef = gameWorldActorRef;
 		this.gameWorldId = gameWorldId;
 		if (ActorPathService.akkaConfig.hasPath("akka.cluster.sharding.number-of-shards")){
@@ -60,15 +58,15 @@ public class GameWorldWithActor implements IGameWorld {
 	@Override
 	public Optional<IGameUser> findIGameUserById(String id)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {
 		Scheduler scheduler = ContextResolver.getActorSystem().scheduler();
-		CompletionStage<IGameWorldMessage.Reply> result =
+		CompletionStage<IGameWorldActor.Reply> result =
 				AskPattern.ask(
 						gameWorldActorRef,
-						replyTo -> new IGameWorldMessage.findIGameUserByIdMessage(id, replyTo),
+						replyTo -> new IGameWorldActor.findIGameUserByIdActor(id, replyTo),
 						Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 						scheduler);
 		CompletionStage<IGameUser> handle = result.handle((reply, throwable) -> {
-			if (reply instanceof IGameWorldMessage.FindGameUser){
-				return ((IGameWorldMessage.FindGameUser) reply).gameUser;
+			if (reply instanceof IGameWorldActor.FindGameUser){
+				return ((IGameWorldActor.FindGameUser) reply).gameUser;
 			}else{
 				return null;
 			}
@@ -77,7 +75,7 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public boolean createService(String serviceName, IService service) {
+	public boolean createService(String serviceName, IService  service) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
 		CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern.ask(actorSystem,
@@ -97,12 +95,12 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public boolean createService(IService service) {
+	public boolean createService(IService  service) {
 		return createService(service.getName(),service);
 	}
 
 	@Override
-	public boolean createClusterService(String serviceName, IService service) {
+	public boolean createClusterService(String serviceName, IService  service) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		//创建独立的节点
 		ClusterSharding clusterSharding = ClusterSharding.get(actorSystem);
@@ -111,22 +109,22 @@ public class GameWorldWithActor implements IGameWorld {
 			dataCenter = ActorPathService.akkaConfig.getString("akka.cluster.multi-data-center.self-data-center");
 		}
 
-		EntityTypeKey<com.codebroker.core.actortype.message.IService> typeKey = getTypeKey(service.getClass().getName());
-		ActorRef<ShardingEnvelope<com.codebroker.core.actortype.message.IService>> shardRegion =
+		EntityTypeKey<IServiceActor> typeKey = getTypeKey(service.getClass().getName());
+		ActorRef<ShardingEnvelope<IServiceActor>> shardRegion =
 				clusterSharding.init(Entity.of(
 						typeKey,
 						ctx -> {
 							String ctxEntityId = ctx.getEntityId();
-							Behavior<com.codebroker.core.actortype.message.IService> commandBehavior =
+							Behavior<IServiceActor> commandBehavior =
 									ClusterServiceActor.create(ctxEntityId, service);
 							return commandBehavior;
 						}).withDataCenter(dataCenter)
 						//停止的时候发的协议
-						.withStopMessage(new com.codebroker.core.actortype.message.IService.Destroy(null))
+						.withStopMessage(new IServiceActor.Destroy(null))
 				);
 
-		ShardingEnvelope<com.codebroker.core.actortype.message.IService> shardingEnvelope =
-				new ShardingEnvelope<>(typeKey.name(), new com.codebroker.core.actortype.message.IService.Init(CObject.newInstance()));
+		ShardingEnvelope<IServiceActor> shardingEnvelope =
+				new ShardingEnvelope<>(typeKey.name(), new IServiceActor.Init(CObject.newInstance()));
 		shardRegion.tell(shardingEnvelope);
 		ClusterServiceWithActor serviceActor = new ClusterServiceWithActor(typeKey.name(), clusterSharding);
 		new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
@@ -142,7 +140,7 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public boolean createClusterService(IService service) {
+	public boolean createClusterService(IService  service) {
 		return createClusterService(service.getName(),service);
 	}
 
@@ -151,9 +149,9 @@ public class GameWorldWithActor implements IGameWorld {
 		if (ActorPathService.localService.containsKey(serviceName)) {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
-			CompletionStage<com.codebroker.core.actortype.message.IService.Reply> ask = AskPattern.askWithStatus(
+			CompletionStage<IServiceActor.Reply> ask = AskPattern.askWithStatus(
 					ActorPathService.localService.get(serviceName),
-					replyActorRef -> new com.codebroker.core.actortype.message.IService.HandleUserMessage(object, replyActorRef),
+					replyActorRef -> new IServiceActor.HandleUserMessage(object, replyActorRef),
 					Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 					actorSystem.scheduler());
 
@@ -161,10 +159,10 @@ public class GameWorldWithActor implements IGameWorld {
 				throwable.printStackTrace();
 				return null;
 			});
-			com.codebroker.core.actortype.message.IService.Reply join = ask.toCompletableFuture().join();
-			if (join instanceof com.codebroker.core.actortype.message.IService.HandleUserMessageBack){
-				com.codebroker.core.actortype.message.IService.HandleUserMessageBack result= (com.codebroker.core.actortype.message.IService.HandleUserMessageBack) join;
-				return Optional.of(result.object);
+			IServiceActor.Reply join = ask.toCompletableFuture().join();
+			if (join instanceof IServiceActor.HandleUserMessageBack){
+				IServiceActor.HandleUserMessageBack result= (IServiceActor.HandleUserMessageBack) join;
+				return Optional.of((IObject) result.object);
 			}else {
 				return Optional.empty();
 			}
@@ -231,11 +229,11 @@ public class GameWorldWithActor implements IGameWorld {
 		 * 如果是当前系统创建则使用当前系统的
 		 */
 		if (ActorPathService.localService.containsKey(serviceName)){
-			ActorRef<com.codebroker.core.actortype.message.IService> iServiceActorRef = ActorPathService.localService.get(serviceName);
-			iServiceActorRef.tell(new com.codebroker.core.actortype.message.IService.HandleMessage(object));
+			ActorRef<IServiceActor> iServiceActorRef = ActorPathService.localService.get(serviceName);
+			iServiceActorRef.tell(new IServiceActor.HandleMessage(object));
 		}
 		else {
-			gameWorldActorRef.tell(new IGameWorldMessage.SendMessageToService(serviceName,object));
+			gameWorldActorRef.tell(new IGameWorldActor.SendActorToService(serviceName,object));
 		}
 	}
 
@@ -246,17 +244,17 @@ public class GameWorldWithActor implements IGameWorld {
 
 	@Override
 	public void sendAllOnlineUserMessage(int requestId, Object message) {
-		gameWorldActorRef.tell(new IGameWorldMessage.SendAllOnlineUserMessage(requestId,message));
+		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserActor(requestId,message));
 	}
 
 	@Override
 	public void sendAllOnlineUserEvent(IEvent event) {
-		gameWorldActorRef.tell(new IGameWorldMessage.SendAllOnlineUserEvent(event));
+		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserEvent(event));
 	}
 
 	@Override
 	public void restart() {
-		com.codebroker.core.actortype.message.IService.Destroy destroy = new com.codebroker.core.actortype.message.IService.Destroy("");
+		IServiceActor.Destroy destroy = new IServiceActor.Destroy("");
 		ActorPathService.localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));
 	}
 }

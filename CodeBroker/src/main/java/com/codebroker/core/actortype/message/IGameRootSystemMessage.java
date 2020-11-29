@@ -57,10 +57,10 @@ public interface IGameRootSystemMessage {
     class CreateService implements IGameRootSystemMessage {
 
         public String name;
-        public com.codebroker.api.internal.IService service;
+        public com.codebroker.api.internal.IService  service;
         public ActorRef<Reply> replyTo;
 
-        public CreateService(String name, com.codebroker.api.internal.IService service, ActorRef<Reply> replyTo) {
+        public CreateService(String name, com.codebroker.api.internal.IService  service, ActorRef<Reply> replyTo) {
             this.service = service;
             this.name = name;
             this.replyTo = replyTo;
@@ -73,10 +73,10 @@ public interface IGameRootSystemMessage {
     class createGlobalService implements IGameRootSystemMessage {
 
         public String name;
-        public com.codebroker.api.internal.IService service;
+        public com.codebroker.api.internal.IService  service;
         public ActorRef<Reply> replyTo;
 
-        public createGlobalService(String name, com.codebroker.api.internal.IService service, ActorRef<Reply> replyTo) {
+        public createGlobalService(String name, com.codebroker.api.internal.IService  service, ActorRef<Reply> replyTo) {
             this.service = service;
             this.name = name;
             this.replyTo = replyTo;
@@ -85,10 +85,10 @@ public interface IGameRootSystemMessage {
     class createClusterService implements IGameRootSystemMessage {
 
         public String name;
-        public com.codebroker.api.internal.IService service;
+        public com.codebroker.api.internal.IService  service;
         public ActorRef<Reply> replyTo;
 
-        public createClusterService(String name, com.codebroker.api.internal.IService service, ActorRef<Reply> replyTo) {
+        public createClusterService(String name, com.codebroker.api.internal.IService  service, ActorRef<Reply> replyTo) {
             this.service = service;
             this.name = name;
             this.replyTo = replyTo;
@@ -100,9 +100,9 @@ public interface IGameRootSystemMessage {
     }
 
     final class ReplyCreateService implements Reply {
-        public final ActorRef<IService> serviceActorRef;
+        public final ActorRef<IServiceActor> serviceActorRef;
 
-        public ReplyCreateService(ActorRef<IService> serviceActorRef) {
+        public ReplyCreateService(ActorRef<IServiceActor> serviceActorRef) {
             this.serviceActorRef = serviceActorRef;
         }
     }
@@ -113,9 +113,9 @@ public interface IGameRootSystemMessage {
     }
     final class  SessionOpenReply implements Reply {
 
-        public final ActorRef<ISession> sessionActorRef;
+        public final ActorRef<ISessionActor> sessionActorRef;
 
-        public SessionOpenReply(ActorRef<ISession> sessionActorRef) {
+        public SessionOpenReply(ActorRef<ISessionActor> sessionActorRef) {
             this.sessionActorRef = sessionActorRef;
         }
     }

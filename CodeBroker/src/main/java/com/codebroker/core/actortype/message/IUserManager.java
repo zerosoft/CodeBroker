@@ -4,7 +4,6 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.protocol.SerializableType;
 
 /**
  * description
@@ -27,10 +26,10 @@ public interface IUserManager  {
 
     //尝试绑定用户
     final class TryBindingUser implements IUserManager{
-        public ActorRef<ISession> ioSession;
+        public ActorRef<ISessionActor> ioSession;
         public BaseByteArrayPacket message;
 
-        public TryBindingUser(ActorRef<ISession> ioSession, BaseByteArrayPacket message) {
+        public TryBindingUser(ActorRef<ISessionActor> ioSession, BaseByteArrayPacket message) {
             this.ioSession = ioSession;
             this.message = message;
         }
@@ -39,8 +38,8 @@ public interface IUserManager  {
 
 
     final class UserLostSession implements IUserManager {
-        public ActorRef<IUser> self;
-        public UserLostSession(ActorRef<IUser> self) {
+        public ActorRef<IUserActor> self;
+        public UserLostSession(ActorRef<IUserActor> self) {
             this.self=self;
         }
     }
@@ -50,9 +49,9 @@ public interface IUserManager  {
 
             public final String userId;
             public final IObject message;
-            public final ActorRef<IUser> reply;
+            public final ActorRef<IUserActor> reply;
 
-            public SendMessageToGameUser(String userId, IObject message, ActorRef<IUser> reply) {
+            public SendMessageToGameUser(String userId, IObject message, ActorRef<IUserActor> reply) {
                 this.userId = userId;
                 this.message = message;
                 this.reply=reply;

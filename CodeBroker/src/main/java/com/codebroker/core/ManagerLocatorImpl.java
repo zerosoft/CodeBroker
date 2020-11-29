@@ -25,7 +25,7 @@ class ManagerLocatorImpl implements ManagerLocator {
     }
 
     @Override
-    public boolean setManager(IService type) {
+    public boolean setManager(IService  type) {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
         CompletionStage<IGameRootSystemMessage.Reply> ask = AskPattern
                 .ask(actorSystem,
@@ -51,7 +51,7 @@ class ManagerLocatorImpl implements ManagerLocator {
     }
 
     @Override
-    public void setComponent(IService service) {
+    public void setComponent(IService  service) {
         ContextResolver.setComponent(service);
     }
 

@@ -1,6 +1,7 @@
 package com.codebroker.api;
 
 import com.codebroker.api.event.IEventDispatcher;
+import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.core.data.IObject;
 
 import java.util.Optional;
@@ -84,4 +85,12 @@ public interface IGameUser  {
      */
     boolean isConnected();
 
+
+    enum UserEvent{
+        LOGIN,LOGOUT,LOSET_CONNECTION,
+    }
+
+    void addEventListener(UserEvent userEvent, IGameUserEventListener iGameUserEventListener);
+
+    void addEventListener(String key,IGameUserEventListener iGameUserEventListener);
 }

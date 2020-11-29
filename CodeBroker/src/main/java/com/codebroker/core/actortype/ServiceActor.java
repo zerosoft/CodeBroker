@@ -9,25 +9,19 @@ import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
 import akka.pattern.StatusReply;
 import com.codebroker.api.AppContext;
-import com.codebroker.core.ContextResolver;
-import com.codebroker.core.actortype.message.IService;
-import com.codebroker.core.actortype.message.ISessionManager;
-import com.codebroker.core.actortype.message.IUser;
-import com.codebroker.core.data.IObject;
-import com.codebroker.setting.SystemEnvironment;
-import com.codebroker.util.PropertiesWrapper;
+import com.codebroker.core.actortype.message.IServiceActor;
 
-public class ServiceActor extends AbstractBehavior<IService> {
+public class ServiceActor extends AbstractBehavior<IServiceActor> {
 
     private String name;
 
-    private com.codebroker.api.internal.IService service;
+    private com.codebroker.api.internal.IService  service;
 
-    public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service) {
+    public static Behavior<IServiceActor> create(String name, com.codebroker.api.internal.IService  service) {
         return create(name,service,false);
     }
 
-    public static Behavior<IService> create(String name, com.codebroker.api.internal.IService service,boolean noServerId) {
+    public static Behavior<IServiceActor> create(String name, com.codebroker.api.internal.IService  service, boolean noServerId) {
         return Behaviors.setup(
                 context -> {
                     int serverId = AppContext.getServerId();
@@ -35,38 +29,38 @@ public class ServiceActor extends AbstractBehavior<IService> {
                     context
                             .getSystem()
                             .receptionist()
-                            .tell(Receptionist.register(ServiceKey.create(IService.class, id), context.getSelf()));
+                            .tell(Receptionist.register(ServiceKey.create(IServiceActor.class, id), context.getSelf()));
                     return new ServiceActor(context,name,service);
                 });
     }
 
-    public ServiceActor(ActorContext<IService> context, String name, com.codebroker.api.internal.IService service) {
+    public ServiceActor(ActorContext<IServiceActor> context, String name, com.codebroker.api.internal.IService  service) {
         super(context);
         this.name=name;
         this.service=service;
     }
 
     @Override
-    public Receive<IService> createReceive() {
+    public Receive<IServiceActor> createReceive() {
         return newReceiveBuilder()
-                .onMessage(IService.Init.class,this::init)
-                .onMessage(IService.Destroy.class,this::destroy)
-                .onMessage(IService.HandleMessage.class,this::handleMessage)
-                .onMessage(IService.HandleUserMessage.class,this::handleUserMessage)
+                .onMessage(IServiceActor.Init.class,this::init)
+                .onMessage(IServiceActor.Destroy.class,this::destroy)
+                .onMessage(IServiceActor.HandleMessage.class,this::handleMessage)
+                .onMessage(IServiceActor.HandleUserMessage.class,this::handleUserMessage)
                 .build();
     }
 
-    private  Behavior<IService> handleUserMessage(IService.HandleUserMessage message) {
+    private  Behavior<IServiceActor> handleUserMessage(IServiceActor.HandleUserMessage message) {
         try {
-            IObject iObject = service.handleBackMessage(message.object);
-            message.Reply.tell(StatusReply.success(new IService.HandleUserMessageBack(iObject)));
+            Object iObject = service.handleBackMessage(message.object);
+            message.Reply.tell(StatusReply.success(new IServiceActor.HandleUserMessageBack(iObject)));
         }catch (Exception e){
             message.Reply.tell(StatusReply.error(e));
         }
         return Behaviors.same();
     }
 
-    private  Behavior<IService> handleMessage(IService.HandleMessage message) {
+    private  Behavior<IServiceActor> handleMessage(IServiceActor.HandleMessage message) {
         try {
             service.handleMessage(message.object);
         }catch (Exception e){
@@ -75,12 +69,12 @@ public class ServiceActor extends AbstractBehavior<IService> {
         return Behaviors.same();
     }
 
-    private  Behavior<IService> destroy(IService.Destroy destroy) {
+    private  Behavior<IServiceActor> destroy(IServiceActor.Destroy destroy) {
         service.destroy(destroy.object);
         return Behaviors.stopped();
     }
 
-    private Behavior<IService> init(IService.Init message) {
+    private Behavior<IServiceActor> init(IServiceActor.Init message) {
         service.init(message.object);
         return Behaviors.same();
     }

@@ -20,7 +20,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     /**
      * 存放组件.
      */
-    private LinkedHashSet<IService> componentSet;
+    private LinkedHashSet<IService > componentSet;
 
     public ComponentRegistryImpl() {
         logger.debug("init = ComponentRegistryImpl");
@@ -28,7 +28,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     @Override
-    public Iterator<IService> iterator() {
+    public Iterator<IService > iterator() {
         return Collections.unmodifiableSet(componentSet).iterator();
     }
 
@@ -37,7 +37,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         // 目标组件
         Object matchComponent = null;
 
-        for (IService component : componentSet) {
+        for (IService  component : componentSet) {
             if (type.isAssignableFrom(component.getClass())) {
                 if (matchComponent != null) {
                     logger.info("More than one matching component", type.getName());
@@ -63,7 +63,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     @Override
     public void removeComponent(Class type) {
-        for (IService component : componentSet) {
+        for (IService  component : componentSet) {
             if (type.isAssignableFrom(component.getClass())) {
                 componentSet.remove(component);
             }else if (type.getName()==component.getName()){
@@ -72,7 +72,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
-    public void addComponent(IService component) {
+    public void addComponent(IService  component) {
         componentSet.add(component);
         logger.debug("Component add component " + component.toString());
     }

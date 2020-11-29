@@ -13,9 +13,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IUser extends SerializableType {
+public interface IUserActor extends SerializableType {
 
-	final class ReceiveMessageFromSession implements IUser {
+	final class ReceiveMessageFromSession implements IUserActor {
 		public IPacket message;
 
 		@JsonCreator
@@ -24,7 +24,7 @@ public interface IUser extends SerializableType {
 		}
 	}
 
-	final class SendMessageToSession implements IUser {
+	final class SendMessageToSession implements IUserActor {
 		public IPacket message;
 
 		public SendMessageToSession(IPacket message) {
@@ -32,13 +32,13 @@ public interface IUser extends SerializableType {
 		}
 	}
 
-	final class SendMessageToIService implements IUser {
+	final class SendMessageToIServiceActor implements IUserActor {
 
 		public final String serviceName;
 		public final IObject message;
-		public final ActorRef<IUser.Reply> replyTo;
+		public final ActorRef<IUserActor.Reply> replyTo;
 
-		public SendMessageToIService(String serviceName, IObject message, ActorRef<IUser.Reply> replyTo) {
+		public SendMessageToIServiceActor(String serviceName, IObject message, ActorRef<IUserActor.Reply> replyTo) {
 			this.serviceName = serviceName;
 			this.message = message;
 			this.replyTo = replyTo;
@@ -46,11 +46,11 @@ public interface IUser extends SerializableType {
 	}
 
 
-	enum SessionClose implements IUser {
+	enum SessionClose implements IUserActor {
 		INSTANCE;
 	}
 
-	final class Disconnect implements IUser {
+	final class Disconnect implements IUserActor {
 		public boolean enforce;
 
 		public Disconnect(boolean enforce) {
@@ -58,22 +58,22 @@ public interface IUser extends SerializableType {
 		}
 	}
 
-	enum NewGameUserInit implements IUser {
+	enum NewGameUserActorInit implements IUserActor {
 		INSTANCE;
 	}
 
 	/**
 	 * 新的连接要连接到userActor
 	 */
-	final class NewSessionLogin implements IUser {
-		public ActorRef<ISession> iSessionActorRef;
+	final class NewSessionLogin implements IUserActor {
+		public ActorRef<ISessionActor> iSessionActorRef;
 
-		public NewSessionLogin(ActorRef<ISession> ioSession) {
+		public NewSessionLogin(ActorRef<ISessionActor> ioSession) {
 			this.iSessionActorRef = ioSession;
 		}
 	}
 
-	final class LogicEvent implements IUser {
+	final class LogicEvent implements IUserActor {
 		public IEvent event;
 
 		public LogicEvent(IEvent event) {
@@ -93,22 +93,22 @@ public interface IUser extends SerializableType {
 	}
 
 
-	final class SendMessageToGameUser implements IUser {
+	final class SendMessageToGameUserActor implements IUserActor {
 
 		public final String userId;
 		public final IObject message;
 
-		public SendMessageToGameUser(String userId, IObject message) {
+		public SendMessageToGameUserActor(String userId, IObject message) {
 			this.userId = userId;
 			this.message = message;
 		}
 	}
 
-	final class GetSendMessageToGameUser implements IUser {
+	final class GetSendMessageToGameUserActor implements IUserActor {
 		public final IObject message;
 //		public final ActorRef<IUser> reply;
 
-		public GetSendMessageToGameUser(IObject message) {
+		public GetSendMessageToGameUserActor(IObject message) {
 			this.message = message;
 //			this.reply = reply;
 		}

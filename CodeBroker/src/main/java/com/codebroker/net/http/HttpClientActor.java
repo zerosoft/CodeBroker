@@ -5,13 +5,13 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import com.codebroker.core.actortype.message.IService;
+import com.codebroker.core.actortype.message.IServiceActor;
 
-public class HttpClientActor extends AbstractBehavior<IService> {
+public class HttpClientActor extends AbstractBehavior<IServiceActor> {
 
 
 
-	public static Behavior<IService> create(String shardId, int httpPort) {
+	public static Behavior<IServiceActor> create(String shardId, int httpPort) {
 		return Behaviors.setup(context ->
 				Behaviors.withTimers(timers ->
 						new HttpClientActor(context)
@@ -19,12 +19,12 @@ public class HttpClientActor extends AbstractBehavior<IService> {
 		);
 	}
 
-	public HttpClientActor(ActorContext<IService> context) {
+	public HttpClientActor(ActorContext<IServiceActor> context) {
 		super(context);
 	}
 
 	@Override
-	public Receive<IService> createReceive() {
+	public Receive<IServiceActor> createReceive() {
 		return null;
 	}
 }
