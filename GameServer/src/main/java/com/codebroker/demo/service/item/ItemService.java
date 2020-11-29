@@ -1,12 +1,10 @@
 package com.codebroker.demo.service.item;
 
-import com.codebroker.api.internal.IService;
-import com.codebroker.core.data.IObject;
-import com.codebroker.demo.service.AbstractIService;
+import com.codebroker.extensions.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ItemService  extends AbstractIService {
+public class ItemService  extends AbstractIService<Integer> {
 
     private Logger logger= LoggerFactory.getLogger(ItemService.class);
 

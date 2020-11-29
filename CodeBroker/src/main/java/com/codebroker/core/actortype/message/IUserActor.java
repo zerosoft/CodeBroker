@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public interface IUserActor extends SerializableType {
 
 	final class ReceiveMessageFromSession implements IUserActor {
-		public IPacket message;
+		public IPacket<Integer> message;
 
 		@JsonCreator
 		public ReceiveMessageFromSession(IPacket message) {

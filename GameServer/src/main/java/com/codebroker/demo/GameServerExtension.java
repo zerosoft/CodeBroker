@@ -47,6 +47,7 @@ public class GameServerExtension extends AppListenerExtension {
 		String parameter=jsonElement.get("parm").getAsString();
 		logger.info("handle login name {} parameter {}", name, parameter);
 		CObject cObject = CObject.newInstance();
+
 		cObject.putInt("handlerKey",1);
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);

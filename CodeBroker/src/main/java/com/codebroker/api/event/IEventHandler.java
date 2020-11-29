@@ -1,4 +1,4 @@
-package com.codebroker.api.internal;
+package com.codebroker.api.event;
 
 import com.codebroker.api.event.IEvent;
 

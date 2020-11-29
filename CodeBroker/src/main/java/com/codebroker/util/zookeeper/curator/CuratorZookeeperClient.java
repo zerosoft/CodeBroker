@@ -129,6 +129,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 		try {
 			return client.getChildren().forPath(path);
 		} catch (NoNodeException e) {
+			logger.error("NoNodeException",e);
 			return null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);

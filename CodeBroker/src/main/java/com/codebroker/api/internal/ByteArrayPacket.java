@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  *
  *  @author LongJu
  */
-public interface ByteArrayPacket extends IPacket{
+public interface ByteArrayPacket<T> extends IPacket<T>{
 
 
     /**

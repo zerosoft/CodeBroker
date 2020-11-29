@@ -1,13 +1,11 @@
 package com.codebroker.demo.service.account.request;
 
-import com.codebroker.api.AppContext;
-import com.codebroker.api.internal.IService;
 import com.codebroker.component.service.RedisComponent;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
-import com.codebroker.demo.service.IServiceClientRequestHandler;
 import com.codebroker.demo.service.account.model.Account;
+import com.codebroker.extensions.service.IServiceClientRequestHandler;
 import com.codebroker.redis.collections.MapStructure;
 import com.codebroker.redis.collections.builder.buider.RedisStrutureBuilder;
 
@@ -16,16 +14,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LoginAccountHandler implements IServiceClientRequestHandler {
+public class LoginAccountHandler implements IServiceClientRequestHandler<IObject> {
 
 
 	@Override
-	public void handleClientRequest(IService service, IObject message) {
-
-	}
-
-	@Override
-	public IObject handleBackMessage(IService service, IObject message) {
+	public Object handleBackMessage(IObject message1) {
+		IObject message=(IObject)message1;
 		Optional<RedisComponent> component = ContextResolver.getComponent(RedisComponent.class);
 		if (component.isPresent()){
 			String name = message.getUtfString("name");

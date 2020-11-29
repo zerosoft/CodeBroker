@@ -8,7 +8,7 @@
 //import com.codebroker.api.event.IEvent;
 //import com.codebroker.api.event.IGameUserEventListener;
 //import com.codebroker.api.internal.ByteArrayPacket;
-//import com.codebroker.api.internal.IEventHandler;
+//import com.codebroker.api.event.IEventHandler;
 //import com.codebroker.core.ContextResolver;
 //import com.codebroker.core.actortype.message.IUser;
 //import com.codebroker.core.data.IObject;

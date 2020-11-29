@@ -1,15 +1,9 @@
 package com.codebroker.demo.service.alliance;
 
-import com.codebroker.api.AppContext;
-import com.codebroker.api.IGameUser;
-import com.codebroker.api.event.Event;
-import com.codebroker.api.internal.IService;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.IObject;
-import com.codebroker.demo.service.AbstractIService;
+import com.codebroker.extensions.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-public class AllianceService extends AbstractIService {
+public class AllianceService extends AbstractIService<Integer> {
 
     private Logger logger= LoggerFactory.getLogger(AllianceService.class);
 

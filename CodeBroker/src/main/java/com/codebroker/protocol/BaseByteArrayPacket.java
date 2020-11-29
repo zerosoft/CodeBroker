@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.nio.ByteBuffer;
 
-public class BaseByteArrayPacket implements ByteArrayPacket {
+public class BaseByteArrayPacket implements ByteArrayPacket<Integer> {
 
     protected int opcode;
 
@@ -22,7 +22,7 @@ public class BaseByteArrayPacket implements ByteArrayPacket {
     }
 
     @Override
-    public int getOpCode() {
+    public Integer getOpCode() {
         return opcode;
     }
 

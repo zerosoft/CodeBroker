@@ -13,9 +13,10 @@ public class AccountExtension extends AppListenerExtension {
 
 	private Logger logger = LoggerFactory.getLogger(AccountExtension.class);
 
+
+
 	@Override
-	public String sessionLoginVerification(String name, String parameter) throws NoAuthException {
-		logger.info("handle login name {} parameter {}", name, parameter);
+	public String sessionLoginVerification(byte[] bytes) throws NoAuthException {
 		throw new NoAuthException();
 	}
 

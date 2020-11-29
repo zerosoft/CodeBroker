@@ -1,13 +1,13 @@
-package com.codebroker.api.internal;
+package com.codebroker.extensions.service;
 
-import java.io.Serializable;
+import com.codebroker.api.internal.IResultStatusMessage;
 
-public class ResultStatusMessage implements IResultStatusMessage{
+public class ResultStatusMessage implements IResultStatusMessage {
 
     private final Status status;
-    private final Serializable message;
+    private final Object message;
 
-    public ResultStatusMessage(Status status, Serializable message) {
+    public ResultStatusMessage(Status status, Object message) {
         this.status = status;
         this.message = message;
     }
@@ -17,12 +17,12 @@ public class ResultStatusMessage implements IResultStatusMessage{
         this.message = null;
     }
 
-    public ResultStatusMessage(Serializable object) {
+    public ResultStatusMessage(Object object) {
         this.status = Status.OK;
         this.message = object;
     }
 
-    public static ResultStatusMessage OK(Serializable object){
+    public static ResultStatusMessage OK(Object object){
         return new ResultStatusMessage(object);
     }
 
@@ -30,7 +30,7 @@ public class ResultStatusMessage implements IResultStatusMessage{
         return new ResultStatusMessage();
     }
 
-    public static ResultStatusMessage ERROR(Serializable object){
+    public static ResultStatusMessage ERROR(Object object){
         return new ResultStatusMessage(Status.ERROR,object);
     }
 
@@ -40,7 +40,7 @@ public class ResultStatusMessage implements IResultStatusMessage{
     }
 
     @Override
-    public Serializable getMessage() {
+    public Object getMessage() {
         return message;
     }
 }

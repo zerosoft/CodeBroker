@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * 带有主键的消息
  */
-public interface IResultStatusMessage {
+public interface IResultStatusMessage<T> {
 
     enum Status{
         OK,FAIL,ERROR;
@@ -13,5 +13,5 @@ public interface IResultStatusMessage {
 
     Status getStatus();
 
-    Serializable getMessage();
+    T getMessage();
 }

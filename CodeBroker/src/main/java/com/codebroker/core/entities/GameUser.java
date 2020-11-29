@@ -8,11 +8,10 @@ import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
-import com.codebroker.api.internal.IEventHandler;
+import com.codebroker.api.event.IEventHandler;
 import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
-import com.codebroker.protocol.SerializableType;
 import com.google.common.collect.Maps;
 
 import java.util.Map;

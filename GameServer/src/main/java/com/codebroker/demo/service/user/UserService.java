@@ -1,14 +1,11 @@
 package com.codebroker.demo.service.user;
 
-import com.codebroker.api.internal.IService;
-import com.codebroker.core.data.IObject;
-import com.codebroker.demo.service.AbstractIService;
+import com.codebroker.extensions.service.AbstractIService;
 
-public class UserService  extends AbstractIService {
+public class UserService  extends AbstractIService<Integer> {
 
 	@Override
 	public void init(Object o) {
-
 	}
 
 	@Override

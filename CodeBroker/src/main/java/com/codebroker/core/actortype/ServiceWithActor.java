@@ -7,6 +7,7 @@ import com.codebroker.api.internal.*;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.IServiceActor;
+import com.codebroker.extensions.service.ResultStatusMessage;
 import com.codebroker.setting.SystemEnvironment;
 
 import java.io.Serializable;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * Seveice 通过 Akka的actor 执行任务
  */
-public class ServiceWithActor implements IService<IRequestKeyMessage,IResultStatusMessage>
+public class ServiceWithActor implements IService<IPacket,IResultStatusMessage>
 {
 
     private ActorRef<IServiceActor> actorActorRef;
@@ -38,12 +39,12 @@ public class ServiceWithActor implements IService<IRequestKeyMessage,IResultStat
     }
 
     @Override
-    public void handleMessage(IRequestKeyMessage obj) {
+    public void handleMessage(IPacket obj) {
         actorActorRef.tell(new IServiceActor.HandleMessage(obj));
     }
 
     @Override
-    public IResultStatusMessage handleBackMessage(IRequestKeyMessage object) {
+    public IResultStatusMessage handleBackMessage(IPacket object) {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
         CompletionStage<IServiceActor.Reply> ask = AskPattern.askWithStatus(
                 actorActorRef,
