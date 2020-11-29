@@ -2,6 +2,7 @@ package com.codebroker.demo;
 
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.component.service.DataSourceComponent;
 import com.codebroker.component.service.MybatisComponent;
 import com.codebroker.core.ContextResolver;
@@ -14,6 +15,7 @@ import com.codebroker.demo.userevent.DoSameEvent;
 import com.codebroker.demo.userevent.UserRemoveEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
+import com.codebroker.extensions.service.RequestKeyMessage;
 import com.codebroker.mybatis.gameserver1.mapper.GameUserMapper;
 import com.codebroker.mybatis.gameserver1.model.GameUser;
 import com.codebroker.mybatis.gameserver1.model.GameUserExample;
@@ -52,11 +54,13 @@ public class GameServerExtension extends AppListenerExtension {
 		cObject.putUtfString("name",name);
 		cObject.putUtfString("password",parameter);
 
-		Optional<IObject> iObject = AppContext.getGameWorld()
-				.sendMessageToClusterIService("com.codebroker.demo.service.account.AccountService", cObject);
+		RequestKeyMessage requestKeyMessage=new RequestKeyMessage<Integer,IObject>(1,cObject);
+
+		IResultStatusMessage iObject = AppContext.getGameWorld()
+				.sendMessageToClusterIService("com.codebroker.demo.service.account.AccountService", requestKeyMessage);
 		String uid;
-		if (iObject.isPresent()) {
-			IObject iObject1 = iObject.get();
+		if (iObject.getStatus().equals(IResultStatusMessage.Status.OK)) {
+			IObject iObject1 = (IObject) iObject.getMessage();
 			uid = iObject1.getUtfString("uid");
 			logger.info("user login {}",uid);
 			return uid;

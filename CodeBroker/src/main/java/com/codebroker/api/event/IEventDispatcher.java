@@ -3,13 +3,13 @@ package com.codebroker.api.event;
 /**
  * 事件调度
  */
-public interface IEventDispatcher {
+public interface IEventDispatcher<T> {
 
-	void addEventListener(String topic, IGameUserEventListener iGameUserEventListener);
+	void addEventListener(T topic, IGameUserEventListener iGameUserEventListener);
 
-	boolean hasEventListener(String topic);
+	boolean hasEventListener(T topic);
 
-	void removeEventListener(String topic, IGameUserEventListener iGameUserEventListener);
+	void removeEventListener(T topic, IGameUserEventListener iGameUserEventListener);
 
 	void dispatchEvent(IEvent event);
 

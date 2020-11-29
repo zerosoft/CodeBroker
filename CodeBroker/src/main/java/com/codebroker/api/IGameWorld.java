@@ -2,8 +2,9 @@ package com.codebroker.api;
 
 
 import com.codebroker.api.event.IEvent;
+import com.codebroker.api.internal.IPacket;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.api.internal.IService;
-import com.codebroker.core.data.IObject;
 
 import java.util.Optional;
 
@@ -47,38 +48,38 @@ public interface IGameWorld {
 	boolean createClusterService(IService  service);
 
 
-	Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
+	IResultStatusMessage sendMessageToLocalIService(String serviceName, IPacket message);
 	/**
 	 * 发消息给集群服务
 	 * @param iService
 	 * @param message
 	 * @return
 	 */
-	Optional<IObject> sendMessageToClusterIService(Class iService, IObject message);
+	IResultStatusMessage sendMessageToClusterIService(Class iService, IPacket message);
 
-	Optional<IObject> sendMessageToClusterIService(String serviceName, IObject message);
+	IResultStatusMessage sendMessageToClusterIService(String serviceName, IPacket message);
 	/**
 	 * 发消息给本地服务
 	 * @param iService
 	 * @param message
 	 * @return
 	 */
-	Optional<IObject> sendMessageToLocalIService(Class iService, IObject message);
+	IResultStatusMessage sendMessageToLocalIService(Class iService, IPacket message);
 
 	/**
 	 * 发送消息到服务
 	 * @param serviceName
 	 * @param message
 	 */
-	void sendMessageToIService(String serviceName, IObject message);
+	void sendMessageToIService(String serviceName, IPacket message);
 
-	void sendMessageToIService(Class iService, IObject message);
+	void sendMessageToIService(Class iService, IPacket message);
 	/**
 	 * 对所有在线玩家发送消息
 	 * @param requestId
 	 * @param message
 	 */
-	void sendAllOnlineUserMessage(int requestId, Object message);
+	void sendAllOnlineUserMessage(int requestId, IPacket message);
 
 	/**
 	 * 对所有在线玩家发送玩家事件

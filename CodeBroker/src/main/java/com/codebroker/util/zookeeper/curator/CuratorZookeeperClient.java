@@ -4,6 +4,7 @@ package com.codebroker.util.zookeeper.curator;
 
 import com.codebroker.util.zookeeper.*;
 import com.codebroker.util.zookeeper.support.AbstractZookeeperClient;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -130,7 +131,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 			return client.getChildren().forPath(path);
 		} catch (NoNodeException e) {
 			logger.error("NoNodeException",e);
-			return null;
+			return Lists.newArrayList();
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
@@ -180,7 +181,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 		try {
 			return client.getChildren().usingWatcher(listener).forPath(path);
 		} catch (NoNodeException e) {
-			return null;
+			logger.error("NoNodeException",e);
+			return Lists.newArrayList();
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}

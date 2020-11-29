@@ -1,5 +1,6 @@
 package com.codebroker.api.event;
 
+import com.codebroker.api.internal.IPacket;
 import com.codebroker.core.data.IObject;
 
 /**
@@ -9,13 +10,13 @@ import com.codebroker.core.data.IObject;
 public class Event implements IEvent {
 
     private String topic;
-    private IObject message;
+    private Object message;
 
     public Event() {
         super();
     }
 
-    public Event(String topic, IObject message) {
+    public Event(String topic, Object message) {
         super();
         this.topic = topic;
         this.message = message;
@@ -29,11 +30,11 @@ public class Event implements IEvent {
         this.topic = topic;
     }
 
-    public IObject getMessage() {
+    public Object getMessage() {
         return message;
     }
 
-    public void setMessage(IObject message) {
+    public void setMessage(Object message) {
         this.message = message;
     }
 

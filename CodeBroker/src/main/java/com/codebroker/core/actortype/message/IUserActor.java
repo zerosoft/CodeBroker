@@ -85,9 +85,9 @@ public interface IUserActor extends SerializableType {
 	}
 
 	final class IObjectReply implements Reply {
-		public final IObject message;
+		public final Object message;
 
-		public IObjectReply(IObject message) {
+		public IObjectReply(Object message) {
 			this.message = message;
 		}
 	}
@@ -96,21 +96,19 @@ public interface IUserActor extends SerializableType {
 	final class SendMessageToGameUserActor implements IUserActor {
 
 		public final String userId;
-		public final IObject message;
+		public final Object message;
 
-		public SendMessageToGameUserActor(String userId, IObject message) {
+		public SendMessageToGameUserActor(String userId, Object message) {
 			this.userId = userId;
 			this.message = message;
 		}
 	}
 
 	final class GetSendMessageToGameUserActor implements IUserActor {
-		public final IObject message;
-//		public final ActorRef<IUser> reply;
+		public final Object message;
 
-		public GetSendMessageToGameUserActor(IObject message) {
+		public GetSendMessageToGameUserActor(Object message) {
 			this.message = message;
-//			this.reply = reply;
 		}
 	}
 }

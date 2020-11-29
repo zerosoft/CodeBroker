@@ -9,6 +9,8 @@ import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.event.IEventHandler;
+import com.codebroker.api.internal.IPacket;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
@@ -24,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * @author LongJu
  */
-public class GameUser implements IGameUser, IEventDispatcher, IEventHandler {
+public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHandler {
 
     private ActorRef<IUserActor> actorRef;
 
@@ -77,37 +79,37 @@ public class GameUser implements IGameUser, IEventDispatcher, IEventHandler {
     }
 
     @Override
-    public void sendMessageToGameUser(String userId, IObject message) {
+    public void sendMessageToGameUser(String userId, IPacket message) {
         actorRef.tell(new IUserActor.SendMessageToGameUserActor(userId, message));
     }
 
     @Override
-    public void sendMessageToGameUser(IObject message) {
+    public void sendMessageToGameUser(IPacket message) {
         actorRef.tell(new IUserActor.GetSendMessageToGameUserActor(message));
     }
 
     @Override
-    public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message) {
+    public IResultStatusMessage sendMessageToLocalIService(String serviceName, IPacket message) {
         return AppContext.getGameWorld().sendMessageToLocalIService(serviceName, message);
     }
 
     @Override
-    public Optional<IObject> sendMessageToLocalIService(Class iService, IObject message) {
+    public IResultStatusMessage sendMessageToLocalIService(Class iService, IPacket message) {
         return AppContext.getGameWorld().sendMessageToLocalIService(iService, message);
     }
 
     @Override
-    public void sendMessageToIService(String serviceName, IObject message) {
+    public void sendMessageToIService(String serviceName, IPacket message) {
         AppContext.getGameWorld().sendMessageToIService(serviceName, message);
     }
 
     @Override
-    public void sendMessageToIService(Class iService, IObject message) {
+    public void sendMessageToIService(Class iService, IPacket message) {
         AppContext.getGameWorld().sendMessageToIService(iService, message);
     }
 
     @Override
-    public void sendMessageToIService(long serverId, Class iService, IObject message) {
+    public void sendMessageToIService(long serverId, Class iService, IPacket message) {
 
     }
 

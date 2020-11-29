@@ -101,7 +101,7 @@ public class User extends AbstractBehavior<IUserActor> {
 
             ask.whenComplete((reply, throwable) -> {
                 if (reply instanceof IServiceActor.HandleUserMessageBack) {
-                    message.replyTo.tell(new IUserActor.IObjectReply((IObject) ((IServiceActor.HandleUserMessageBack) reply).object));
+                    message.replyTo.tell(new IUserActor.IObjectReply(((IServiceActor.HandleUserMessageBack) reply).object));
                 }
             }).exceptionally(throwable -> {
                 throwable.printStackTrace();

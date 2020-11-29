@@ -48,10 +48,10 @@ public interface IUserManager  {
         final class SendMessageToGameUser implements IUserManager {
 
             public final String userId;
-            public final IObject message;
+            public final Object message;
             public final ActorRef<IUserActor> reply;
 
-            public SendMessageToGameUser(String userId, IObject message, ActorRef<IUserActor> reply) {
+            public SendMessageToGameUser(String userId, Object message, ActorRef<IUserActor> reply) {
                 this.userId = userId;
                 this.message = message;
                 this.reply=reply;

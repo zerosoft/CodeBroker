@@ -5,6 +5,7 @@ import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
+import com.codebroker.api.internal.IPacket;
 import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -102,10 +103,9 @@ public interface IGameWorldActor {
 	class SendActorToService implements IGameWorldActor {
 		public final String serviceName;
 
-		public final IObject object;
+		public final IPacket object;
 
-		@JsonCreator
-		public SendActorToService(String serviceName, IObject object) {
+		public SendActorToService(String serviceName, IPacket object) {
 			this.serviceName=serviceName;
 			this.object=object;
 		}

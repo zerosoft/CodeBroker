@@ -14,6 +14,8 @@ import akka.stream.SystemMaterializer;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
 import com.codebroker.api.event.IEvent;
+import com.codebroker.api.internal.IPacket;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.api.internal.IService;
 import com.codebroker.component.service.ZookeeperComponent;
 import com.codebroker.core.ContextResolver;
@@ -23,6 +25,7 @@ import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.IServiceActor;
 import com.codebroker.core.data.CObject;
 import com.codebroker.core.data.IObject;
+import com.codebroker.extensions.service.ResultStatusMessage;
 import com.codebroker.net.http.HTTPRequest;
 import com.codebroker.protocol.serialization.KryoSerialization;
 import com.codebroker.setting.SystemEnvironment;
@@ -145,7 +148,7 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public Optional<IObject> sendMessageToLocalIService(String serviceName, IObject object){
+	public IResultStatusMessage sendMessageToLocalIService(String serviceName, IPacket object){
 		if (ActorPathService.localService.containsKey(serviceName)) {
 			ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 
@@ -162,23 +165,23 @@ public class GameWorldWithActor implements IGameWorld {
 			IServiceActor.Reply join = ask.toCompletableFuture().join();
 			if (join instanceof IServiceActor.HandleUserMessageBack){
 				IServiceActor.HandleUserMessageBack result= (IServiceActor.HandleUserMessageBack) join;
-				return Optional.of((IObject) result.object);
+				return ResultStatusMessage.OK(result);
 			}else {
-				return Optional.empty();
+				return ResultStatusMessage.FAIL();
 			}
 		}
 		else{
-			return Optional.empty();
+			return ResultStatusMessage.ERROR("No Service "+serviceName);
 		}
 	}
 
 	@Override
-	public Optional<IObject> sendMessageToClusterIService(Class iService, IObject message) {
-		return Optional.empty();
+	public IResultStatusMessage sendMessageToClusterIService(Class iService, IPacket message) {
+		return sendMessageToClusterIService(iService.getName(),message);
 	}
 
 	@Override
-	public Optional<IObject> sendMessageToClusterIService(String serviceName, IObject message) {
+	public IResultStatusMessage sendMessageToClusterIService(String serviceName, IPacket message) {
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		Optional<ZookeeperComponent> component = ContextResolver.getComponent(ZookeeperComponent.class);
 		Optional<Collection<String>> cacheService=Optional.empty();
@@ -187,7 +190,9 @@ public class GameWorldWithActor implements IGameWorld {
 		}
 
 		Http http = Http.get(actorSystem);
-		String json = message.toJson();
+//		String json = message.toJson();
+		String json = KryoSerialization.writeObjectToString(message);
+
 		HTTPRequest httpRequest=new HTTPRequest(serviceName,json);
 		//节点数量
 		String stationUrl;
@@ -211,20 +216,20 @@ public class GameWorldWithActor implements IGameWorld {
 													else throw new RuntimeException("Failed to register data: " + body);
 												})
 								);
-				String join = futureResponseBody.toCompletableFuture().join();
-				return Optional.of(CObject.newFromJsonData(join));
+				String result = futureResponseBody.toCompletableFuture().join();
+				return  ResultStatusMessage.OK(result);
 			}
 		}
-		return Optional.empty();
+		return ResultStatusMessage.FAIL();
 	}
 
 	@Override
-	public Optional<IObject> sendMessageToLocalIService(Class clazz, IObject object){
+	public IResultStatusMessage sendMessageToLocalIService(Class clazz, IPacket object){
 		return sendMessageToLocalIService(clazz.getName(),object);
 	}
 
 	@Override
-	public void sendMessageToIService(String serviceName, IObject object){
+	public void sendMessageToIService(String serviceName, IPacket object){
 		/**
 		 * 如果是当前系统创建则使用当前系统的
 		 */
@@ -238,12 +243,12 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public void sendMessageToIService(Class iService, IObject message) {
+	public void sendMessageToIService(Class iService, IPacket message) {
 		sendMessageToIService(iService.getName(),message);
 	}
 
 	@Override
-	public void sendAllOnlineUserMessage(int requestId, Object message) {
+	public void sendAllOnlineUserMessage(int requestId, IPacket message) {
 		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserActor(requestId,message));
 	}
 

@@ -2,6 +2,8 @@ package com.codebroker.api;
 
 import com.codebroker.api.event.IEventDispatcher;
 import com.codebroker.api.event.IGameUserEventListener;
+import com.codebroker.api.internal.IPacket;
+import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.core.data.IObject;
 
 import java.util.Optional;
@@ -32,47 +34,47 @@ public interface IGameUser  {
      * @param userId
      * @param message
      */
-    void sendMessageToGameUser(String userId,IObject message);
+    void sendMessageToGameUser(String userId, IPacket message);
 
     /**
      * 给自己发消息
      * @param message
      */
-    void sendMessageToGameUser(IObject message);
+    void sendMessageToGameUser(IPacket message);
     /**
      * 发消息给本地服务
      * @param serviceName
      * @param message
      * @return
      */
-    Optional<IObject> sendMessageToLocalIService(String serviceName, IObject message);
+    IResultStatusMessage sendMessageToLocalIService(String serviceName, IPacket message);
     /**
      * 发消息给本地服务
      * @param iService
      * @param message
      * @return
      */
-    Optional<IObject> sendMessageToLocalIService(Class iService, IObject message);
+    IResultStatusMessage sendMessageToLocalIService(Class iService, IPacket message);
 
     /**
      * 发送消息到服务 会去查找其他服务器的serverice
      * @param serviceName
      * @param message
      */
-    void sendMessageToIService(String serviceName, IObject message);
+    void sendMessageToIService(String serviceName, IPacket message);
 
     /**
      * 发送消息到服务默认是本地服务器
      * @param iService 事件的服务类
      * @param message
      */
-    void sendMessageToIService(Class iService, IObject message);
+    void sendMessageToIService(Class iService, IPacket message);
     /**
      * 发送消息到服务 会去查找其他服务器的serverice
      * @param iService 事件的服务类
      * @param message
      */
-    void sendMessageToIService(long serverId,Class iService, IObject message);
+    void sendMessageToIService(long serverId,Class iService, IPacket message);
     /**
      * 主动断开链接
      */
