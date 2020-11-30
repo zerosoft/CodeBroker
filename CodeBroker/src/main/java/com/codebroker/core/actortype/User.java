@@ -160,6 +160,11 @@ public class User extends AbstractBehavior<IUserActor> {
         getContext().getLog().debug("User lost session");
         this.ioSession = null;
         parent.tell(new IUserManager.UserLostSession(getContext().getSelf()));
+
+        if (gameUser!=null){
+            gameUser.handlerEvent(new Event(IGameUser.UserEvent.LOST_CONNECTION.name()));
+        }
+
         return Behaviors.same();
     }
 

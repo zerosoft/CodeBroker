@@ -1,5 +1,8 @@
 package com.codebroker.demo.service.item;
 
+import com.codebroker.demo.service.item.handler.UserInit;
+import com.codebroker.demo.service.item.handler.UserLogin;
+import com.codebroker.demo.service.item.handler.UserLogout;
 import com.codebroker.extensions.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,9 @@ public class ItemService  extends AbstractIService<Integer> {
     @Override
     public void init(Object obj) {
         logger.info("init Item Service "+obj);
+        addRequestHandler(1,new UserInit());
+        addRequestHandler(2,new UserLogin());
+        addRequestHandler(3,new UserLogout());
     }
 
     @Override

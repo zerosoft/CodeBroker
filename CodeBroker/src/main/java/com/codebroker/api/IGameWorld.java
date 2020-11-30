@@ -88,6 +88,11 @@ public interface IGameWorld {
 	void sendAllOnlineUserIPacket(IPacket message);
 
 	/**
+	 * 对所有在线玩家发送事件
+	 * @param message
+	 */
+	void sendAllOnlineUserIEvent(IEvent message);
+	/**
 	 * 服务重启启动
 	 */
 	void restart();

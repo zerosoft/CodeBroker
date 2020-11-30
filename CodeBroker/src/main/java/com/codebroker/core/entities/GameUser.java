@@ -170,7 +170,7 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
         Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
         if (listeners != null && listeners.size() > 0) {
             for (IGameUserEventListener listenerObj : listeners) {
-                listenerObj.handleEvent(this, event);
+                listenerObj.handleEvent(this, event.getMessage());
             }
         }
     }

@@ -20,6 +20,11 @@ public class Event implements IEvent {
         this.message = message;
     }
 
+    public Event(String topic) {
+        super();
+        this.topic = topic;
+    }
+
     public String getTopic() {
         return topic;
     }

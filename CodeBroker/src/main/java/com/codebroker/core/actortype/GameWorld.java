@@ -48,6 +48,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 				.onMessage(IGameWorldActor.UserLogOutWorld.class,this::logoutWorld)
 				.onMessage(IGameWorldActor.SendAllOnlineUserActor.class,this::sendAllOnlineUserMessage)
 				.onMessage(IGameWorldActor.SendAllOnlineUserPacket.class,this::sendAllOnlineUserPacket)
+				.onMessage(IGameWorldActor.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
 				.onMessage(IGameWorldActor.SendActorToService.class,this::sendMessageToService)
 				.build();
 	}
@@ -63,6 +64,12 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 		return Behaviors.same();
 	}
 
+	private Behavior<IGameWorldActor> sendAllOnlineUserEvent(IGameWorldActor.SendAllOnlineUserEvent message) {
+		userMap.values().forEach(gameUser -> gameUser.sendEventToSelf(message.iPacket));
+		return Behaviors.same();
+	}
+
+
 	private Behavior<IGameWorldActor> sendAllOnlineUserMessage(IGameWorldActor.SendAllOnlineUserActor message) {
 		userMap.values().forEach(gameUser -> gameUser.sendMessageToIoSession(message.requestId,message.message));
 		return Behaviors.same();
@@ -71,10 +78,13 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 	private  Behavior<IGameWorldActor> logoutWorld(IGameWorldActor.UserLogOutWorld message) {
 
 		userMap.remove(message.gameUser.getUserId());
-
-		AppListener appListener = ContextResolver.getAppListener();
-		if (appListener.handleLogout(message.gameUser)){
-			GameUserPool.returnGameUser((GameUser) message.gameUser);
+		try {
+			AppListener appListener = ContextResolver.getAppListener();
+			if (appListener.handleLogout(message.gameUser)){
+				GameUserPool.returnGameUser((GameUser) message.gameUser);
+			}
+		}catch (Exception e){
+			getContext().getLog().error("logoutWorld error disconnect");
 		}
 		return Behaviors.same();
 	}
@@ -84,9 +94,13 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 		IGameUser gameUser = message.gameUser;
 		userMap.put(gameUser.getUserId(), gameUser);
 
-		AppListener appListener = ContextResolver.getAppListener();
-		appListener.userLogin(gameUser);
-
+		try {
+			AppListener appListener = ContextResolver.getAppListener();
+			appListener.userLogin(gameUser);
+		}catch (Exception e){
+			getContext().getLog().error("Login error disconnect");
+			gameUser.disconnect();
+		}
 
 		return Behaviors.same();
 	}

@@ -1,5 +1,8 @@
 package com.codebroker.demo.service.alliance;
 
+import com.codebroker.demo.service.alliance.handler.UserInit;
+import com.codebroker.demo.service.alliance.handler.UserLogin;
+import com.codebroker.demo.service.alliance.handler.UserLogout;
 import com.codebroker.extensions.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,9 @@ public class AllianceService extends AbstractIService<Integer> {
     @Override
     public void init(Object obj) {
         logger.info("init Alliance "+obj);
+        addRequestHandler(1,new UserInit());
+        addRequestHandler(2,new UserLogin());
+        addRequestHandler(3,new UserLogout());
     }
 
     @Override

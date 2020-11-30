@@ -7,6 +7,7 @@ import com.codebroker.component.service.MybatisComponent;
 import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.demo.service.item.ItemService;
+import com.codebroker.demo.service.user.UserService;
 import com.codebroker.demo.userevent.UserLoginEvent;
 import com.codebroker.demo.userevent.UserLogoutEvent;
 import com.codebroker.demo.userevent.UserLostSessionEvent;
@@ -49,7 +50,7 @@ public class GameServerExtension extends AppListenerExtension {
 		jsonObject.addProperty("password",parameter);
 
 
-		RequestKeyMessage requestKeyMessage=new RequestKeyMessage<Integer,JsonObject>(1,jsonObject);
+		RequestKeyMessage<Integer,JsonObject> requestKeyMessage=new RequestKeyMessage(1,jsonObject);
 
 		IResultStatusMessage resultStatusMessage = AppContext.getGameWorld()
 				.sendMessageToClusterIService("com.codebroker.demo.service.account.AccountService", requestKeyMessage);
@@ -99,6 +100,11 @@ public class GameServerExtension extends AppListenerExtension {
 		user.addEventListener(IGameUser.UserEvent.LOGOUT, new UserLogoutEvent());
 		user.addEventListener(IGameUser.UserEvent.LOST_CONNECTION, new UserLostSessionEvent());
 		onlineUsers.put(user.getUserId(),user);
+		RequestKeyMessage requestKeyMessage=new RequestKeyMessage(2,user.getUserId());
+
+		AppContext.getManager(AllianceService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+		AppContext.getManager(ItemService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+		AppContext.getManager(UserService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
 	}
 
 
@@ -106,7 +112,13 @@ public class GameServerExtension extends AppListenerExtension {
 	public boolean handleLogout(IGameUser user) {
 		logger.info("User LogOut parameter {}", user.getUserId());
 		onlineUsers.remove(user.getUserId());
-		return false;
+
+		RequestKeyMessage requestKeyMessage=new RequestKeyMessage(3,user.getUserId());
+
+		AppContext.getManager(AllianceService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+		AppContext.getManager(ItemService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+		AppContext.getManager(UserService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+		return true;
 	}
 
 	@Override
@@ -132,6 +144,7 @@ public class GameServerExtension extends AppListenerExtension {
 		//初始化服务
 		AppContext.getManager(AllianceService.class).ifPresent(c->c.init(null));
 		AppContext.getManager(ItemService.class).ifPresent(c->c.init(null));
+		AppContext.getManager(UserService.class).ifPresent(c->c.init(null));
 	}
 
 }
