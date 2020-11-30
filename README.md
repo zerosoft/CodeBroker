@@ -24,7 +24,7 @@
 
  **ClusterListener** 集群监听
 
- **http** 拓展Http服务提供集群直接访问
+ **http** 基于Http服务提供服务对集群服务的访问
 
 Idea启动方式
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0518/101654_fc8d2acb_19059.png "微信截图_20200518101606.png")
