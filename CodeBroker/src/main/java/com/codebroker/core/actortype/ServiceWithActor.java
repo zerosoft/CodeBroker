@@ -59,7 +59,7 @@ public class ServiceWithActor implements IService<IPacket,IResultStatusMessage>
         IServiceActor.Reply join = ask.toCompletableFuture().join();
         if (join instanceof IServiceActor.HandleUserMessageBack){
             IServiceActor.HandleUserMessageBack result= (IServiceActor.HandleUserMessageBack) join;
-            return new ResultStatusMessage((Serializable) result.object);
+            return new ResultStatusMessage(result.object);
         }else {
             return new ResultStatusMessage();
         }

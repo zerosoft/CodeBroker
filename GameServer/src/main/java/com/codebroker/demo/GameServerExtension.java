@@ -26,6 +26,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class GameServerExtension extends AppListenerExtension {
 
@@ -105,6 +107,16 @@ public class GameServerExtension extends AppListenerExtension {
 		AppContext.getManager(AllianceService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
 		AppContext.getManager(ItemService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
 		AppContext.getManager(UserService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
+
+		final  RequestKeyMessage requestKeyMessag1e=new RequestKeyMessage(1,user.getUserId());
+		AllianceService allianceService = AppContext.getManager(AllianceService.class).get();
+		CompletableFuture.completedFuture(allianceService.handleBackMessage(requestKeyMessag1e))
+						.thenApply(result->{
+							UserService userService = AppContext.getManager(UserService.class).get();
+							IResultStatusMessage iResultStatusMessage = userService.handleBackMessage(requestKeyMessag1e);
+								return iResultStatusMessage;
+						}).whenCompleteAsync((R,F)->System.out.println(R));
+
 	}
 
 
@@ -141,6 +153,7 @@ public class GameServerExtension extends AppListenerExtension {
 		//创建服务
 		AppContext.setManager(new AllianceService());
 		AppContext.setManager(new ItemService());
+		AppContext.setManager(new UserService());
 		//初始化服务
 		AppContext.getManager(AllianceService.class).ifPresent(c->c.init(null));
 		AppContext.getManager(ItemService.class).ifPresent(c->c.init(null));

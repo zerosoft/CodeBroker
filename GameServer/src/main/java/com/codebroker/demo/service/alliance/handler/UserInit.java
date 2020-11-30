@@ -6,6 +6,6 @@ public class UserInit implements IServiceClientRequestHandler<String> {
 	@Override
 	public Object handleBackMessage(String o) {
 		getClientRequestLogger().info("User init {}",o);
-		return null;
+		return "alliance SomeThing";
 	}
 }

@@ -98,7 +98,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 			AppListener appListener = ContextResolver.getAppListener();
 			appListener.userLogin(gameUser);
 		}catch (Exception e){
-			getContext().getLog().error("Login error disconnect");
+			getContext().getLog().error("Login error disconnect",e);
 			gameUser.disconnect();
 		}
 
