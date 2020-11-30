@@ -82,10 +82,10 @@ public interface IGameWorld {
 	void sendAllOnlineUserMessage(int requestId, IPacket message);
 
 	/**
-	 * 对所有在线玩家发送玩家事件
-	 * @param event
+	 * 对所有在线玩家发送玩家消息
+	 * @param message
 	 */
-	void sendAllOnlineUserEvent(IEvent event);
+	void sendAllOnlineUserIPacket(IPacket message);
 
 	/**
 	 * 服务重启启动

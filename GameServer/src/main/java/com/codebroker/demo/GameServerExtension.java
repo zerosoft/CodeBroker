@@ -3,16 +3,13 @@ package com.codebroker.demo;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.internal.IResultStatusMessage;
-import com.codebroker.component.service.DataSourceComponent;
 import com.codebroker.component.service.MybatisComponent;
-import com.codebroker.core.ContextResolver;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.IObject;
 import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.demo.service.item.ItemService;
-import com.codebroker.demo.userevent.DoSameEvent;
-import com.codebroker.demo.userevent.UserRemoveEvent;
+import com.codebroker.demo.userevent.UserLoginEvent;
+import com.codebroker.demo.userevent.UserLogoutEvent;
+import com.codebroker.demo.userevent.UserLostSessionEvent;
 import com.codebroker.exception.NoAuthException;
 import com.codebroker.extensions.AppListenerExtension;
 import com.codebroker.extensions.service.RequestKeyMessage;
@@ -20,9 +17,6 @@ import com.codebroker.mybatis.gameserver1.mapper.GameUserMapper;
 import com.codebroker.mybatis.gameserver1.model.GameUser;
 import com.codebroker.mybatis.gameserver1.model.GameUserExample;
 import com.google.common.collect.Maps;
-import jodd.io.FileUtil;
-import jodd.io.findfile.ClassScanner;
-import jodd.util.ClassLoaderUtil;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -30,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.net.URL;
 import java.util.*;
 
 public class GameServerExtension extends AppListenerExtension {
@@ -102,8 +95,9 @@ public class GameServerExtension extends AppListenerExtension {
 				}
 			}
 		}
-		user.addEventListener(IGameUser.UserEvent.LOGIN, new DoSameEvent());
-		user.addEventListener(IGameUser.UserEvent.LOGOUT, new UserRemoveEvent());
+		user.addEventListener(IGameUser.UserEvent.LOGIN, new UserLoginEvent());
+		user.addEventListener(IGameUser.UserEvent.LOGOUT, new UserLogoutEvent());
+		user.addEventListener(IGameUser.UserEvent.LOST_CONNECTION, new UserLostSessionEvent());
 		onlineUsers.put(user.getUserId(),user);
 	}
 

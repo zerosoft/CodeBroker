@@ -1,5 +1,6 @@
 package com.codebroker.api;
 
+import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IGameUserEventListener;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.api.internal.IResultStatusMessage;
@@ -32,13 +33,13 @@ public interface IGameUser  {
      * @param userId
      * @param message
      */
-    void sendMessageToGameUser(String userId, IPacket message);
+    void sendMessageToSelf(String userId, IPacket message);
 
     /**
      * 给自己发消息
      * @param message
      */
-    void sendMessageToGameUser(IPacket message);
+    void sendMessageToSelf(IPacket message);
     /**
      * 发消息给本地服务
      * @param serviceName
@@ -87,10 +88,12 @@ public interface IGameUser  {
 
 
     enum UserEvent{
-        LOGIN,LOGOUT,LOSET_CONNECTION,
+        LOGIN,LOGOUT, LOST_CONNECTION,
     }
 
     void addEventListener(UserEvent userEvent, IGameUserEventListener iGameUserEventListener);
 
     void addEventListener(String key,IGameUserEventListener iGameUserEventListener);
+
+    void sendEventToSelf(IEvent event);
 }

@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
  *
  *  @author LongJu
  */
-public interface IGameUserEventListener {
+public interface IGameUserEventListener<T> {
 
     default Logger getGameUserEventListenerLogger(){
         return LoggerFactory.getLogger(IGameUserEventListener.class);
     }
     /**
      * @param gameUser 游戏用户
-     * @param event  事件
+     * @param eventMessage  事件
      */
-    default void handleEvent(IGameUser gameUser,IEvent event){}
+    default void handleEvent(IGameUser gameUser,T eventMessage){}
 
 }

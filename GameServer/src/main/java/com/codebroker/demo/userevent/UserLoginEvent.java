@@ -1,15 +1,12 @@
 package com.codebroker.demo.userevent;
 
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.event.Event;
-import com.codebroker.api.event.IEvent;
 import com.codebroker.api.event.IGameUserEventListener;
-import com.codebroker.core.data.IObject;
 
-public class DoSameEvent implements IGameUserEventListener {
+public class UserLoginEvent implements IGameUserEventListener<Object> {
 
 	@Override
-	public void handleEvent(IGameUser gameUser, IEvent event) {
+	public void handleEvent(IGameUser gameUser, Object event) {
 		getGameUserEventListenerLogger().info("get Event game user id  {}",gameUser.getUserId());
 	}
 }

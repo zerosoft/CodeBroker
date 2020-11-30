@@ -77,12 +77,12 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
     }
 
     @Override
-    public void sendMessageToGameUser(String userId, IPacket message) {
+    public void sendMessageToSelf(String userId, IPacket message) {
         actorRef.tell(new IUserActor.SendMessageToGameUserActor(userId, message));
     }
 
     @Override
-    public void sendMessageToGameUser(IPacket message) {
+    public void sendMessageToSelf(IPacket message) {
         actorRef.tell(new IUserActor.GetSendMessageToGameUserActor(message));
     }
 
@@ -108,7 +108,7 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
 
     @Override
     public void sendMessageToIService(long serverId, Class iService, IPacket message) {
-
+        AppContext.getGameWorld().sendMessageToIService(iService.getName()+"."+serverId, message);
     }
 
     @Override
@@ -138,6 +138,11 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
             this.eventListenerMap.put(eventType, listeners);
         }
         listeners.add(listener);
+    }
+
+    @Override
+    public void sendEventToSelf(IEvent event) {
+        actorRef.tell(new IUserActor.LogicEvent(event));
     }
 
     public boolean hasEventListener(String eventType) {

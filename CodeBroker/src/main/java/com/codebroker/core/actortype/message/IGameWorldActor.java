@@ -4,7 +4,6 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import com.codebroker.api.IGameUser;
-import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.core.entities.GameUser;
 
@@ -88,10 +87,10 @@ public interface IGameWorldActor {
 	/**
 	 * 给所有在线的玩家发事件
 	 */
-	class SendAllOnlineUserEvent implements IGameWorldActor {
-		public final IEvent event;
-		public SendAllOnlineUserEvent(IEvent event) {
-			this.event=event;
+	class SendAllOnlineUserPacket implements IGameWorldActor {
+		public final IPacket iPacket;
+		public SendAllOnlineUserPacket(IPacket iPacket) {
+			this.iPacket = iPacket;
 		}
 	}
 

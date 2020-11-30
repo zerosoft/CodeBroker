@@ -13,7 +13,6 @@ import akka.http.javadsl.unmarshalling.Unmarshaller;
 import akka.stream.SystemMaterializer;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.IGameWorld;
-import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.api.internal.IService;
@@ -263,8 +262,8 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
-	public void sendAllOnlineUserEvent(IEvent event) {
-		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserEvent(event));
+	public void sendAllOnlineUserIPacket(IPacket message) {
+		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserPacket(message));
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 				.onMessage(IGameWorldActor.UserLoginWorld.class,this::userLoginWorld)
 				.onMessage(IGameWorldActor.UserLogOutWorld.class,this::logoutWorld)
 				.onMessage(IGameWorldActor.SendAllOnlineUserActor.class,this::sendAllOnlineUserMessage)
-				.onMessage(IGameWorldActor.SendAllOnlineUserEvent.class,this::sendAllOnlineUserEvent)
+				.onMessage(IGameWorldActor.SendAllOnlineUserPacket.class,this::sendAllOnlineUserPacket)
 				.onMessage(IGameWorldActor.SendActorToService.class,this::sendMessageToService)
 				.build();
 	}
@@ -58,8 +58,8 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 		return Behaviors.same();
 	}
 
-	private Behavior<IGameWorldActor> sendAllOnlineUserEvent(IGameWorldActor.SendAllOnlineUserEvent message) {
-//		userMap.values().forEach(gameUser -> gameUser.dispatchEvent(message.event));
+	private Behavior<IGameWorldActor> sendAllOnlineUserPacket(IGameWorldActor.SendAllOnlineUserPacket message) {
+		userMap.values().forEach(gameUser -> gameUser.sendMessageToSelf(message.iPacket));
 		return Behaviors.same();
 	}
 
@@ -80,11 +80,13 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 	}
 
 	private Behavior<IGameWorldActor> userLoginWorld(IGameWorldActor.UserLoginWorld message) {
+
 		IGameUser gameUser = message.gameUser;
 		userMap.put(gameUser.getUserId(), gameUser);
 
 		AppListener appListener = ContextResolver.getAppListener();
 		appListener.userLogin(gameUser);
+
 
 		return Behaviors.same();
 	}
