@@ -48,20 +48,22 @@ public class GameServerExtension extends AppListenerExtension {
 		String name=jsonElement.get("name").getAsString();
 		String parameter=jsonElement.get("parm").getAsString();
 		logger.info("handle login name {} parameter {}", name, parameter);
-		CObject cObject = CObject.newInstance();
 
-		cObject.putInt("handlerKey",1);
-		cObject.putUtfString("name",name);
-		cObject.putUtfString("password",parameter);
+		JsonObject jsonObject=new JsonObject();
+		//账号
+		jsonObject.addProperty("name",name);
+		//密码
+		jsonObject.addProperty("password",parameter);
 
-		RequestKeyMessage requestKeyMessage=new RequestKeyMessage<Integer,IObject>(1,cObject);
 
-		IResultStatusMessage iObject = AppContext.getGameWorld()
+		RequestKeyMessage requestKeyMessage=new RequestKeyMessage<Integer,JsonObject>(1,jsonObject);
+
+		IResultStatusMessage resultStatusMessage = AppContext.getGameWorld()
 				.sendMessageToClusterIService("com.codebroker.demo.service.account.AccountService", requestKeyMessage);
 		String uid;
-		if (iObject.getStatus().equals(IResultStatusMessage.Status.OK)) {
-			IObject iObject1 = (IObject) iObject.getMessage();
-			uid = iObject1.getUtfString("uid");
+		if (resultStatusMessage.getStatus().equals(IResultStatusMessage.Status.OK)) {
+			JsonObject object = (JsonObject) resultStatusMessage.getMessage();
+			uid = object.get("uid").getAsString();
 			logger.info("user login {}",uid);
 			return uid;
 		} else {

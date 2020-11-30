@@ -30,8 +30,8 @@ import akka.stream.javadsl.Source;
 import akka.util.ByteString;
 import com.codebroker.core.actortype.GameWorldWithActor;
 import com.codebroker.core.actortype.message.IServiceActor;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.IObject;
+import com.codebroker.extensions.service.RequestKeyMessage;
+import com.codebroker.extensions.service.ResultStatusMessage;
 import com.codebroker.protocol.serialization.KryoSerialization;
 import com.codebroker.setting.SystemEnvironment;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -98,11 +98,11 @@ public class HttpServer {
 		EntityTypeKey<IServiceActor> typeKey = GameWorldWithActor.getTypeKey(serviceName);
 		EntityRef<IServiceActor> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
 
-		IObject iObject = CObject.newFromJsonData(message);
+		RequestKeyMessage requestKeyMessage = KryoSerialization.readObjectFromString(message, RequestKeyMessage.class);
 
 		CompletionStage<IServiceActor.Reply> result = AskPattern.askWithStatus(
 				entityRef,
-				replyActorRef ->  new IServiceActor.HandleUserMessage(iObject, replyActorRef),
+				replyActorRef ->  new IServiceActor.HandleUserMessage(requestKeyMessage, replyActorRef),
 				Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
 				actorSystem.scheduler());
 
@@ -123,20 +123,20 @@ public class HttpServer {
 		EntityTypeKey<IServiceActor> typeKey = GameWorldWithActor.getTypeKey(date.serviceName);
 		EntityRef<IServiceActor> entityRef = sharding.entityRefFor(typeKey, Long.toString(shardId));
 
-		IObject iObject = CObject.newFromJsonData(date.message);
+		RequestKeyMessage requestKeyMessage = KryoSerialization.readObjectFromString(date.message, RequestKeyMessage.class);
 
 		CompletionStage<IServiceActor.Reply> result = AskPattern.askWithStatus(
 				entityRef,
-				replyActorRef ->  new IServiceActor.HandleUserMessage(iObject, replyActorRef),
+				replyActorRef ->  new IServiceActor.HandleUserMessage(requestKeyMessage, replyActorRef),
 				Duration.ofSeconds(5),
 				actorSystem.scheduler());
 
-		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(f -> {
-			if (f instanceof IServiceActor.HandleUserMessageBack) {
-				IServiceActor.HandleUserMessageBack back = (IServiceActor.HandleUserMessageBack) f;
-				return back.object.toString();
+		CompletionStage<String> objectCompletionStage = result.thenApplyAsync(message -> {
+			if (message instanceof IServiceActor.HandleUserMessageBack) {
+				IServiceActor.HandleUserMessageBack back = (IServiceActor.HandleUserMessageBack) message;
+				return KryoSerialization.writeObjectToString(back.object);
 			} else {
-				return "Optional.empty()";
+				return KryoSerialization.writeObjectToString(ResultStatusMessage.FAIL());
 			}
 		});
 		return objectCompletionStage;
@@ -164,14 +164,17 @@ public class HttpServer {
 														)
 												)
 										),
-										post(() -> entity(Unmarshaller.entityToByteArray().thenApply(
-												ms->
-														KryoSerialization.readObjectFromByteArray(ms, HTTPRequest.class)),
-												date ->
-														onSuccess(processClusterHTTPRequest(shardId,date), performed ->
-																complete(StatusCodes.ACCEPTED, performed)
-														)
-												)
+										post(() ->
+												entity(Unmarshaller
+																.entityToByteArray()
+																.thenApply(
+																	ms->KryoSerialization.readObjectFromByteArray(ms, HTTPRequest.class)),
+																	date ->
+																			onSuccess(
+																					processClusterHTTPRequest(shardId,date),
+																					performed ->complete(StatusCodes.ACCEPTED, performed)
+																			)
+																)
 										)
 
 				))

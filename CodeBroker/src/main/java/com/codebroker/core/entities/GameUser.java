@@ -12,12 +12,10 @@ import com.codebroker.api.event.IEventHandler;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.core.actortype.message.IUserActor;
-import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 

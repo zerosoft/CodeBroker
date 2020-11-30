@@ -8,38 +8,38 @@ import com.codebroker.demo.service.account.model.Account;
 import com.codebroker.extensions.service.IServiceClientRequestHandler;
 import com.codebroker.redis.collections.MapStructure;
 import com.codebroker.redis.collections.builder.buider.RedisStrutureBuilder;
+import com.google.gson.JsonObject;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LoginAccountHandler implements IServiceClientRequestHandler<IObject> {
+public class LoginAccountHandler implements IServiceClientRequestHandler<JsonObject> {
 
 
 	@Override
-	public Object handleBackMessage(IObject message1) {
-		IObject message=(IObject)message1;
+	public Object handleBackMessage(JsonObject jsonObject) {
 		Optional<RedisComponent> component = ContextResolver.getComponent(RedisComponent.class);
+		JsonObject result=new JsonObject();
 		if (component.isPresent()){
-			String name = message.getUtfString("name");
-			String password = message.getUtfString("password");
+			String name = jsonObject.get("name").getAsString();
+			String password = jsonObject.get("password").getAsString();
 
 			RedisComponent redisComponent = component.get();
 			redis.clients.jedis.Jedis jedis = redisComponent.getJedis();
+
 			try {
 				MapStructure<Account> account = RedisStrutureBuilder.ofMap(jedis, Account.class).withNameSpace("Account").build();
 				Map<String, Account> acccount = account.get("Acccount");
 				if (acccount.containsKey(name)){
 					Account account1 = acccount.get(name);
 					if (account1.getPassoword().equals(password)){
-						CObject cObject = CObject.newInstance();
-						cObject.putUtfString("uid",account1.getUid());
-						return cObject;
+						result.addProperty("uid",account1.getUid());
+						return result;
 					}else{
-						CObject cObject = CObject.newInstance();
-						cObject.putUtfString("status","pass word error");
-						return cObject;
+						result.addProperty("status","pass word error");
+						return result;
 					}
 				}else{
 					UUID uuid = UUID.randomUUID();
@@ -49,15 +49,13 @@ public class LoginAccountHandler implements IServiceClientRequestHandler<IObject
 					account1.setPassoword(password);
 					acccount.put(name,account1);
 
-					CObject cObject = CObject.newInstance();
-					cObject.putUtfString("uid",account1.getUid());
-					return cObject;
+					result.addProperty("uid",account1.getUid());
+					return result;
 				}
 
 			}catch (Exception e){
-				CObject cObject = CObject.newInstance();
-				cObject.putUtfString("status",e.getMessage());
-				return cObject;
+				result.addProperty("status",e.getMessage());
+				return result;
 			}finally {
 				if (Objects.nonNull(jedis)){
 					jedis.close();
@@ -65,9 +63,8 @@ public class LoginAccountHandler implements IServiceClientRequestHandler<IObject
 			}
 
 		}else {
-			CObject cObject = CObject.newInstance();
-			cObject.putUtfString("status","no db");
-			return cObject;
+			result.addProperty("status","no db");
+			return result;
 		}
 	}
 }

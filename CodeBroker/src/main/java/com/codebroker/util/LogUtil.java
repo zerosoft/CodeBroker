@@ -1,8 +1,8 @@
 package com.codebroker.util;
 
 import akka.actor.ActorRef;
-import com.codebroker.core.data.CObject;
 import com.codebroker.exception.CodeBrokerException;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +25,10 @@ public class LogUtil {
     public static void snedELKLogMessage(String clazzName, String message) {
         try {
             if (elkLog != null) {
-                CObject cObject = CObject.newInstance();
-                cObject.putUtfString("c", clazzName);
-                cObject.putUtfString("m", message);
-                elkLog.tell(cObject, ActorRef.noSender());
+                JsonObject jsonObject=new JsonObject();
+                jsonObject.addProperty("c", clazzName);
+                jsonObject.addProperty("m", message);
+                elkLog.tell(jsonObject, ActorRef.noSender());
             }
         } catch (Exception e) {
             e.printStackTrace();

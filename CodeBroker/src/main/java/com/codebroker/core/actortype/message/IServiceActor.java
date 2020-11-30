@@ -3,12 +3,11 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.pattern.StatusReply;
-import com.codebroker.protocol.SerializableType;
 
 /**
  * 服务规则消息
  */
-public interface IServiceActor extends SerializableType {
+public interface IServiceActor{
 
     final class Init implements IServiceActor {
         public Object object;
@@ -35,7 +34,7 @@ public interface IServiceActor extends SerializableType {
     }
 
 
-    interface Reply extends SerializableType{
+    interface Reply{
     }
 
     final class HandleUserMessageBack implements IServiceActor.Reply{

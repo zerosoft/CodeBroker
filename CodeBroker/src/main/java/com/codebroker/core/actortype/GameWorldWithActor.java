@@ -23,8 +23,6 @@ import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actortype.message.IGameWorldActor;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.IServiceActor;
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.data.IObject;
 import com.codebroker.extensions.service.ResultStatusMessage;
 import com.codebroker.net.http.HTTPRequest;
 import com.codebroker.protocol.serialization.KryoSerialization;
@@ -127,7 +125,7 @@ public class GameWorldWithActor implements IGameWorld {
 				);
 
 		ShardingEnvelope<IServiceActor> shardingEnvelope =
-				new ShardingEnvelope<>(typeKey.name(), new IServiceActor.Init(CObject.newInstance()));
+				new ShardingEnvelope<>(typeKey.name(), new IServiceActor.Init(""));
 		shardRegion.tell(shardingEnvelope);
 		ClusterServiceWithActor serviceActor = new ClusterServiceWithActor(typeKey.name(), clusterSharding);
 		new ObjectActorDecorate<>(serviceActor, service).newProxyInstance(service.getClass());
@@ -204,20 +202,32 @@ public class GameWorldWithActor implements IGameWorld {
 			int randomShardId = MathUtil.random(shardId) + 1;
 			for (String string : strings) {
 				stationUrl = "http://" + string + "/service/" + randomShardId;
-				CompletionStage<String> futureResponseBody =
+				CompletionStage<IResultStatusMessage> futureResponseBody =
 						http.singleRequest(
 								HttpRequest.POST(stationUrl)
 										.withEntity(ContentTypes.APPLICATION_OCTET_STREAM, bytes))
-								.thenCompose(response ->
-										Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
-												.thenApply(body -> {
-													if (response.status().isSuccess())
-														return body;
-													else throw new RuntimeException("Failed to register data: " + body);
-												})
+								.thenCompose(
+										response ->
+										Unmarshaller.entityToString().unmarshal(response.entity(),SystemMaterializer.get(actorSystem).materializer())
+										.thenApply(body -> {
+														if (response.status().isSuccess()){
+															return KryoSerialization.readObjectFromString(body,ResultStatusMessage.class);
+														}else {
+															return ResultStatusMessage.ERROR("Http");
+														}
+													}
+												)
 								);
-				String result = futureResponseBody.toCompletableFuture().join();
-				return  ResultStatusMessage.OK(result);
+//								.thenCompose(response ->
+//										Unmarshaller.entityToString().unmarshal(response.entity(), SystemMaterializer.get(actorSystem).materializer())
+//												.thenApply(body -> {
+//													if (response.status().isSuccess())
+//														return body;
+//													else throw new RuntimeException("Failed to register data: " + body);
+//												})
+//								);
+				IResultStatusMessage result = futureResponseBody.toCompletableFuture().join();
+				return  result;
 			}
 		}
 		return ResultStatusMessage.FAIL();

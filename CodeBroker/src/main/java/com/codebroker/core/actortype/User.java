@@ -9,8 +9,6 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.Event;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
-import com.codebroker.core.data.CObjectLite;
-import com.codebroker.core.data.IObject;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
 import com.codebroker.api.event.EventName;
@@ -110,9 +108,9 @@ public class User extends AbstractBehavior<IUserActor> {
             ask.whenComplete(
                     (reply, failure) -> {
                         if (reply instanceof IServiceActor.HandleUserMessageBack) {
-                            message.replyTo.tell(new IUserActor.IObjectReply((IObject)((IServiceActor.HandleUserMessageBack) reply).object));
+                            message.replyTo.tell(new IUserActor.IObjectReply(((IServiceActor.HandleUserMessageBack) reply).object));
                         } else if (failure instanceof StatusReply.ErrorMessage) {
-                            message.replyTo.tell(new IUserActor.IObjectReply(CObjectLite.newInstance()));
+                            message.replyTo.tell(new IUserActor.IObjectReply(""));
                         }
                     });
         }

@@ -1,7 +1,6 @@
 package com.codebroker.api.event;
 
 import com.codebroker.api.IGameUser;
-import com.codebroker.core.data.IObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

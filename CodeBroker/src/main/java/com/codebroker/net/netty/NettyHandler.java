@@ -1,7 +1,5 @@
 package com.codebroker.net.netty;
 
-import com.codebroker.core.data.CObject;
-import com.codebroker.core.monitor.MonitorEventType;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -24,8 +22,8 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         super.channelRegistered(ctx);
         this.nettyIoSession = new NettyIoSession(ctx);
 
-        CObject newInstance = CObject.newInstance();
-        newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_ONLINE);
+//        CObject newInstance = CObject.newInstance();
+//        newInstance.putInt(MonitorEventType.KEY, MonitorEventType.SESSEION_ONLINE);
         logger.info("ChannelHandlerContext Registered");
     }
 

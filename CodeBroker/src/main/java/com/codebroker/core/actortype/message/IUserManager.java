@@ -2,7 +2,6 @@ package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.receptionist.Receptionist;
-import com.codebroker.core.data.IObject;
 import com.codebroker.protocol.BaseByteArrayPacket;
 
 /**

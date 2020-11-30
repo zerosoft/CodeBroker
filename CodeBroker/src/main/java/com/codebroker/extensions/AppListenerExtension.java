@@ -4,7 +4,6 @@ import com.codebroker.api.AppListener;
 import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IHandlerFactory;
 import com.codebroker.api.IGameUser;
-import com.codebroker.core.data.IObject;
 import com.codebroker.exception.CodeBrokerException;
 import com.codebroker.extensions.request.ClientExtensionFilterChain;
 import com.codebroker.extensions.request.ClientHandlerFactory;

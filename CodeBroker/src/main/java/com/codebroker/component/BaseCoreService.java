@@ -1,7 +1,6 @@
 package com.codebroker.component;
 
 import com.codebroker.api.internal.ICoreService;
-import com.codebroker.core.data.IObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

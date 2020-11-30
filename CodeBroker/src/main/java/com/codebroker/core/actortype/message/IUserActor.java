@@ -3,9 +3,6 @@ package com.codebroker.core.actortype.message;
 import akka.actor.typed.ActorRef;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
-import com.codebroker.core.data.IObject;
-import com.codebroker.protocol.SerializableType;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * description
@@ -13,12 +10,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author LongJu
  * @Date 2020/3/25
  */
-public interface IUserActor extends SerializableType {
+public interface IUserActor{
 
 	final class ReceiveMessageFromSession implements IUserActor {
 		public IPacket<Integer> message;
 
-		@JsonCreator
 		public ReceiveMessageFromSession(IPacket message) {
 			this.message = message;
 		}
@@ -35,10 +31,10 @@ public interface IUserActor extends SerializableType {
 	final class SendMessageToIServiceActor implements IUserActor {
 
 		public final String serviceName;
-		public final IObject message;
+		public final Object message;
 		public final ActorRef<IUserActor.Reply> replyTo;
 
-		public SendMessageToIServiceActor(String serviceName, IObject message, ActorRef<IUserActor.Reply> replyTo) {
+		public SendMessageToIServiceActor(String serviceName, Object message, ActorRef<IUserActor.Reply> replyTo) {
 			this.serviceName = serviceName;
 			this.message = message;
 			this.replyTo = replyTo;
