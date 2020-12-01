@@ -26,7 +26,7 @@ public class GsonSerializer extends Serializer<JsonObject> {
 	@Override
 	public void write(Kryo kryo, Output output, JsonObject object) {
 		String string = object.toString();
-		byte[] bytes = string.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = string.getBytes(Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 		output.writeInt(bytes.length);
 		output.write(bytes);
 	}
@@ -35,7 +35,7 @@ public class GsonSerializer extends Serializer<JsonObject> {
 	public JsonObject read(Kryo kryo, Input input, Class type) {
 		int length = input.readInt();
 		byte[] bytes = input.readBytes(length);
-		String json=new String(bytes,Charset.forName("UTF-8"));
+		String json=new String(bytes,Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 		JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
 		return jsonObject;
 	}

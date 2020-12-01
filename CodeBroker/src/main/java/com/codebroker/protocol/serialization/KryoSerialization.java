@@ -1,6 +1,5 @@
 package com.codebroker.protocol.serialization;
 
-import akka.actor.typed.ActorRef;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.internal.IService;
 import com.codebroker.core.actortype.ServiceWithActor;
@@ -24,7 +23,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class KryoSerialization {
 
-    private static final String DEFAULT_ENCODING = "UTF-8";
+    public static final String DEFAULT_ENCODING = "UTF-8";
 
     //每个线程的 Kryo 实例
     private static final ThreadLocal<Kryo> kryoLocal = ThreadLocal.withInitial(() -> {

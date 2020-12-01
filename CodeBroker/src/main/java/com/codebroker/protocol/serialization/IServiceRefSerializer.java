@@ -37,20 +37,20 @@ public class IServiceRefSerializer extends Serializer<IService> {
 		String actorRefString = serviceWithActor.getActorRefStringPath();
 
 		output.writeInt(serviceWithActorName.getBytes().length);
-		output.write(serviceWithActorName.getBytes(Charset.forName("UTF-8")));
+		output.write(serviceWithActorName.getBytes(Charset.forName(KryoSerialization.DEFAULT_ENCODING)));
 
 		output.writeInt(actorRefString.getBytes().length);
-		output.write(actorRefString.getBytes(Charset.forName("UTF-8")));
+		output.write(actorRefString.getBytes(Charset.forName(KryoSerialization.DEFAULT_ENCODING)));
 	}
 
 	@Override
 	public IService read(Kryo kryo, Input input, Class type) {
 
 		byte[] bytes = input.readBytes(input.readInt());
-		String serviceWithActorName = new String(bytes,Charset.forName("UTF-8"));
+		String serviceWithActorName = new String(bytes,Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 
 		bytes = input.readBytes(input.readInt());
-		String actorRefString = new String(bytes,Charset.forName("UTF-8"));
+		String actorRefString = new String(bytes,Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		ActorRef<IServiceActor> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(actorRefString);

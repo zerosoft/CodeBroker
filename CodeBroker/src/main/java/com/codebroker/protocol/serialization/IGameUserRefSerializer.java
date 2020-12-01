@@ -33,19 +33,19 @@ public class IGameUserRefSerializer extends Serializer<IGameUser> {
 		String gameUserUid = gameUser.getUid();
 		String actorRefString = gameUser.getActorRefString();
 		output.writeInt(gameUserUid.getBytes().length);
-		output.write(gameUserUid.getBytes(Charset.forName("UTF-8")));
+		output.write(gameUserUid.getBytes(Charset.forName(KryoSerialization.DEFAULT_ENCODING)));
 		output.writeInt(actorRefString.getBytes().length);
-		output.write(actorRefString.getBytes(Charset.forName("UTF-8")));
+		output.write(actorRefString.getBytes(Charset.forName(KryoSerialization.DEFAULT_ENCODING)));
 	}
 
 	@Override
 	public IGameUser read(Kryo kryo, Input input, Class type) {
 		int length = input.readInt();
 		byte[] bytes = input.readBytes(length);
-		String gameUserUid = new String(bytes,Charset.forName("UTF-8"));
+		String gameUserUid = new String(bytes,Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 		length = input.readInt();
 		bytes = input.readBytes(length);
-		String actorRefString = new String(bytes,Charset.forName("UTF-8"));
+		String actorRefString = new String(bytes,Charset.forName(KryoSerialization.DEFAULT_ENCODING));
 		ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
 		ActorRef<IUserActor> objectActorRef = ActorRefResolver.get(actorSystem).resolveActorRef(actorRefString);
 		return new GameUser(gameUserUid,objectActorRef);
