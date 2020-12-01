@@ -1,12 +1,14 @@
 package com.codebroker.core.actortype;
 
 import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorRefResolver;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.javadsl.AskPattern;
 import com.codebroker.api.internal.*;
 import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.IServiceActor;
+import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.extensions.service.ResultStatusMessage;
 import com.codebroker.setting.SystemEnvironment;
 
@@ -20,34 +22,52 @@ import java.util.concurrent.CompletionStage;
 public class ServiceWithActor implements IService<IPacket,IResultStatusMessage>
 {
 
-    private ActorRef<IServiceActor> actorActorRef;
+    private transient ActorRef<IServiceActor> actorActorRef;
+
     private String name;
+    //Actor 序列化地址
+    private String actorRefStringPath;
 
     public ServiceWithActor(String name, ActorRef<IServiceActor> actorActorRef ) {
         this.actorActorRef = actorActorRef;
         this.name = name;
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+        this.actorRefStringPath = ActorRefResolver.get(actorSystem).toSerializationFormat(actorActorRef);
     }
 
+    public String getActorRefStringPath() {
+        return actorRefStringPath;
+    }
+
+
+    public ActorRef<IServiceActor> getActorRef() {
+        if (actorActorRef==null){
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+            ActorRef<IServiceActor> result= ActorRefResolver.get(actorSystem).resolveActorRef(actorRefStringPath);
+            actorActorRef=result;
+        }
+        return actorActorRef;
+    }
     @Override
     public void init(Object obj) {
-        actorActorRef.tell(new IServiceActor.Init(obj));
+        getActorRef().tell(new IServiceActor.Init(obj));
     }
 
     @Override
     public void destroy(Object obj) {
-        actorActorRef.tell(new IServiceActor.Destroy(obj));
+        getActorRef().tell(new IServiceActor.Destroy(obj));
     }
 
     @Override
     public void handleMessage(IPacket obj) {
-        actorActorRef.tell(new IServiceActor.HandleMessage(obj));
+        getActorRef().tell(new IServiceActor.HandleMessage(obj));
     }
 
     @Override
     public IResultStatusMessage handleBackMessage(IPacket object) {
         ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
         CompletionStage<IServiceActor.Reply> ask = AskPattern.askWithStatus(
-                actorActorRef,
+                getActorRef(),
                 replyActorRef -> new IServiceActor.HandleUserMessage(object, replyActorRef),
                 Duration.ofMillis(SystemEnvironment.TIME_OUT_MILLIS),
                 actorSystem.scheduler());
@@ -67,7 +87,7 @@ public class ServiceWithActor implements IService<IPacket,IResultStatusMessage>
 
     @Override
     public String getName() {
-        return actorActorRef.path().toString();
+        return getActorRef().path().toString();
     }
 
 

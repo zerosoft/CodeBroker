@@ -6,6 +6,7 @@ import com.codebroker.demo.AbstractClientRequestHandler;
 import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.extensions.service.RequestKeyMessage;
 import com.codebroker.protobuff.user.CreateRequest;
+import com.codebroker.protocol.serialization.KryoSerialization;
 import com.google.gson.JsonObject;
 
 
@@ -15,6 +16,7 @@ public class CreateRequestHandler extends AbstractClientRequestHandler<CreateReq
 		JsonObject jsonObject=new JsonObject();
 
 		jsonObject.addProperty("hello","world");
+		jsonObject.addProperty("IGameUser", KryoSerialization.writeObjectToString(iGameUser));
 
 		RequestKeyMessage requestKeyMessage=new RequestKeyMessage<Integer, JsonObject>(1,jsonObject);
 //		cObject.putClass("IGameUser",iGameUser);

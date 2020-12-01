@@ -1,7 +1,9 @@
 package com.codebroker.demo;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
+import com.codebroker.api.event.Event;
 import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.component.service.MybatisComponent;
 import com.codebroker.demo.request.CreateRequestHandler;
@@ -27,7 +29,6 @@ import com.google.gson.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public class GameServerExtension extends AppListenerExtension {
 
@@ -102,20 +103,8 @@ public class GameServerExtension extends AppListenerExtension {
 		user.addEventListener(IGameUser.UserEvent.LOGOUT, new UserLogoutEvent());
 		user.addEventListener(IGameUser.UserEvent.LOST_CONNECTION, new UserLostSessionEvent());
 		onlineUsers.put(user.getUserId(),user);
-		RequestKeyMessage requestKeyMessage=new RequestKeyMessage(2,user.getUserId());
 
-		AppContext.getManager(AllianceService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
-		AppContext.getManager(ItemService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
-		AppContext.getManager(UserService.class).ifPresent(c->c.handleMessage(requestKeyMessage));
-
-		final  RequestKeyMessage requestKeyMessag1e=new RequestKeyMessage(1,user.getUserId());
-		AllianceService allianceService = AppContext.getManager(AllianceService.class).get();
-		CompletableFuture.completedFuture(allianceService.handleBackMessage(requestKeyMessag1e))
-						.thenApply(result->{
-							UserService userService = AppContext.getManager(UserService.class).get();
-							IResultStatusMessage iResultStatusMessage = userService.handleBackMessage(requestKeyMessag1e);
-								return iResultStatusMessage;
-						}).whenCompleteAsync((R,F)->System.out.println(R));
+//		user.sendEventToSelf(new Event(IGameUser.UserEvent.LOGIN.name(),""));
 
 	}
 
@@ -140,6 +129,22 @@ public class GameServerExtension extends AppListenerExtension {
 
 	@Override
 	public void init(Object obj) {
+//		try {
+//			LogBackConfigLoader.load("D:\\Users\\Documents\\github\\CodeBrokerGit\\GameServer\\src\\main\\resource\\logback.xml");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (JoranException e) {
+//			e.printStackTrace();
+//		}
+
+//		// 获取classpath路径
+//		String s = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+//		System.out.println("classpath => " + s );
+//
+//// 获取classpath路径
+//		String path = GameServerExtension.class.getResource("/").toString();
+//		System.out.println("classpath => " + path);
+
 		logger.info("Init");
 		//注册消息命令
 		addRequestHandler(11, CreateRequestHandler.class);

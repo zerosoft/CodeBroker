@@ -18,6 +18,6 @@ public interface IGameUserEventListener<T> {
      * @param gameUser 游戏用户
      * @param eventMessage  事件
      */
-    default void handleEvent(IGameUser gameUser,T eventMessage){}
+    void handleEvent(IGameUser gameUser,T eventMessage);
 
 }

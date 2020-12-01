@@ -2,6 +2,8 @@ package com.codebroker.core.entities;
 
 
 import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorRefResolver;
+import akka.actor.typed.ActorSystem;
 import com.codebroker.api.AppContext;
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.IEvent;
@@ -11,11 +13,16 @@ import com.codebroker.api.internal.ByteArrayPacket;
 import com.codebroker.api.event.IEventHandler;
 import com.codebroker.api.internal.IPacket;
 import com.codebroker.api.internal.IResultStatusMessage;
+import com.codebroker.core.ContextResolver;
+import com.codebroker.core.actortype.message.IGameRootSystemMessage;
 import com.codebroker.core.actortype.message.IUserActor;
 import com.codebroker.protocol.BaseByteArrayPacket;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -26,30 +33,48 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHandler {
 
-    private ActorRef<IUserActor> actorRef;
+    private transient Logger logger = LoggerFactory.getLogger(GameUser.class);
+    private transient Map<String, Set<IGameUserEventListener>> eventListenerMap = Maps.newTreeMap();
+    private transient ActorRef<IUserActor> actorRef;
+
+    private String uid;
+    //Actor 序列化地址
+    private String actorRefStringPath;
+
+    public String getActorRefString(){
+        return actorRefStringPath;
+    }
 
     public ActorRef<IUserActor> getActorRef() {
+        if (actorRef==null){
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+            ActorRef<IUserActor> result= ActorRefResolver.get(actorSystem).resolveActorRef(actorRefStringPath);
+            actorRef=result;
+        }
         return actorRef;
     }
 
-    private String uid;
-
-    private transient Map<String, Set<IGameUserEventListener>> eventListenerMap = Maps.newTreeMap();
-
     public void clean() {
         uid = null;
-        actorRef = null;
+        actorRefStringPath = null;
         eventListenerMap.clear();
     }
 
     public GameUser(String uid, ActorRef<IUserActor> spawn) {
+
         this.uid = uid;
-        this.actorRef = spawn;
+        if (Objects.nonNull(spawn)){
+            this.actorRef=spawn;
+            ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+            this.actorRefStringPath = ActorRefResolver.get(actorSystem).toSerializationFormat(spawn);
+        }
     }
 
 
     public void setActorRef(ActorRef<IUserActor> actorRef) {
-        this.actorRef = actorRef;
+        ActorSystem<IGameRootSystemMessage> actorSystem = ContextResolver.getActorSystem();
+        this.actorRefStringPath = ActorRefResolver.get(actorSystem).toSerializationFormat(actorRef);
+        this.actorRef=actorRef;
     }
 
     public String getUid() {
@@ -69,21 +94,21 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
     public void sendMessageToIoSession(int requestId, Object message) {
         if (message instanceof byte[]) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, (byte[]) message);
-            actorRef.tell(new IUserActor.SendMessageToSession(byteArrayPacket));
+            getActorRef().tell(new IUserActor.SendMessageToSession(byteArrayPacket));
         } else if (message instanceof String) {
             ByteArrayPacket byteArrayPacket = new BaseByteArrayPacket(requestId, ((String) message).getBytes());
-            actorRef.tell(new IUserActor.SendMessageToSession(byteArrayPacket));
+            getActorRef().tell(new IUserActor.SendMessageToSession(byteArrayPacket));
         }
     }
 
     @Override
     public void sendMessageToSelf(String userId, IPacket message) {
-        actorRef.tell(new IUserActor.SendMessageToGameUserActor(userId, message));
+        getActorRef().tell(new IUserActor.SendMessageToGameUserActor(userId, message));
     }
 
     @Override
     public void sendMessageToSelf(IPacket message) {
-        actorRef.tell(new IUserActor.GetSendMessageToGameUserActor(message));
+        getActorRef().tell(new IUserActor.GetSendMessageToGameUserActor(message));
     }
 
     @Override
@@ -113,12 +138,12 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
 
     @Override
     public void disconnect() {
-        actorRef.tell(new IUserActor.Disconnect(true));
+        getActorRef().tell(new IUserActor.Disconnect(true));
     }
 
     @Override
     public boolean isConnected() {
-        return actorRef != null;
+        return actorRefStringPath != null;
     }
 
     @Override
@@ -142,7 +167,7 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
 
     @Override
     public void sendEventToSelf(IEvent event) {
-        actorRef.tell(new IUserActor.LogicEvent(event));
+        getActorRef().tell(new IUserActor.LogicEvent(event));
     }
 
     public boolean hasEventListener(String eventType) {
@@ -162,7 +187,7 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
     }
 
     public void dispatchEvent(IEvent event) {
-        actorRef.tell(new IUserActor.LogicEvent(event));
+        getActorRef().tell(new IUserActor.LogicEvent(event));
     }
 
     @Override
@@ -170,7 +195,11 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
         Set<IGameUserEventListener> listeners = this.eventListenerMap.get(event.getTopic());
         if (listeners != null && listeners.size() > 0) {
             for (IGameUserEventListener listenerObj : listeners) {
-                listenerObj.handleEvent(this, event.getMessage());
+                try {
+                    listenerObj.handleEvent(this, event.getMessage());
+                }catch (Exception e){
+                    logger.error("event error",e);
+                }
             }
         }
     }

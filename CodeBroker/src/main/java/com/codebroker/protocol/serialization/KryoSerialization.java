@@ -1,6 +1,10 @@
 package com.codebroker.protocol.serialization;
 
 import akka.actor.typed.ActorRef;
+import com.codebroker.api.IGameUser;
+import com.codebroker.api.internal.IService;
+import com.codebroker.core.actortype.ServiceWithActor;
+import com.codebroker.core.entities.GameUser;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -33,7 +37,10 @@ public class KryoSerialization {
         //支持对象循环引用（否则会栈溢出）
         kryo.setReferences(true); //默认值就是 true，添加此行的目的是为了提醒维护者，不要改变这个配置
         kryo.register(JsonObject.class, GsonSerializer.getInstance(),1);
-        kryo.register(ActorRef.class, ActorRefSerializer.getInstance(),2);
+        kryo.register(IGameUser.class, IGameUserRefSerializer.getInstance(),2);
+        kryo.register(GameUser.class, IGameUserRefSerializer.getInstance(),3);
+        kryo.register(IService.class, IServiceRefSerializer.getInstance(),4);
+        kryo.register(ServiceWithActor.class, IServiceRefSerializer.getInstance(),5);
         //不强制要求注册类（注册行为无法保证多个 JVM 内同一个类的注册编号相同；而且业务系统中大量的 Class 也难以一一注册）
         kryo.setRegistrationRequired(false); //默认值就是 false，添加此行的目的是为了提醒维护者，不要改变这个配置
 
