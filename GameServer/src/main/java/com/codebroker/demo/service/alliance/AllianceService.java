@@ -1,5 +1,6 @@
 package com.codebroker.demo.service.alliance;
 
+import com.codebroker.demo.service.alliance.handler.GetMessage;
 import com.codebroker.demo.service.alliance.handler.UserInit;
 import com.codebroker.demo.service.alliance.handler.UserLogin;
 import com.codebroker.demo.service.alliance.handler.UserLogout;
@@ -16,6 +17,7 @@ public class AllianceService extends AbstractIService<Integer> {
         addRequestHandler(1,new UserInit());
         addRequestHandler(2,new UserLogin());
         addRequestHandler(3,new UserLogout());
+        addRequestHandler(4,new GetMessage());
     }
 
     @Override

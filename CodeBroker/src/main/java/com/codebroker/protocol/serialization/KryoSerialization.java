@@ -2,6 +2,7 @@ package com.codebroker.protocol.serialization;
 
 import com.codebroker.api.IGameUser;
 import com.codebroker.api.internal.IService;
+import com.codebroker.core.ServerEngine;
 import com.codebroker.core.actortype.ServiceWithActor;
 import com.codebroker.core.entities.GameUser;
 import com.esotericsoftware.kryo.Kryo;
@@ -45,6 +46,9 @@ public class KryoSerialization {
 
         //Fix the NPE bug when de serializing Collections.
         ((Kryo.DefaultInstantiatorStrategy) kryo.getInstantiatorStrategy()).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy());
+
+        ClassLoader classLoader = ServerEngine.getInstance().getiClassLoader();
+        kryo.setClassLoader(classLoader);
 
         return kryo;
     });
