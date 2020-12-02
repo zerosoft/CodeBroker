@@ -14,6 +14,7 @@ import com.codebroker.setting.SystemEnvironment;
 import com.codebroker.util.FileUtil;
 import com.codebroker.util.PropertiesWrapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.impl.ConfigImpl;
@@ -44,21 +45,20 @@ public class AkkaSystemComponent extends BaseCoreService {
     @Override
     public void init(Object obj) {
         logger.debug("Code Broker Mediator init");
-        File root = new File("");
-        String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
-        logger.debug("conf path:" + searchPath);
+//        File root = new File("");
+//        String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
+//        logger.debug("conf path:" + searchPath);
         PropertiesWrapper propertiesWrapper = (PropertiesWrapper) obj;
 
-        String property = propertiesWrapper.getProperty(SystemEnvironment.AKKA_FILE_NAME, DEF_AKKA_CONFIG_NAME);
+//        String property = propertiesWrapper.getProperty(SystemEnvironment.AKKA_FILE_NAME, DEF_AKKA_CONFIG_NAME);
 
-        String filePath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
+//        String filePath = propertiesWrapper.getProperty(SystemEnvironment.AKKA_CONFIG_PATH, searchPath);
 
-        logger.debug("akka conf path:" + filePath);
-        File configFile = FileUtil.scanFileByPath(filePath, property);
+//        logger.debug("akka conf path:" + filePath);
+//        File configFile = FileUtil.scanFileByPath(filePath, property);
 
         String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME,SystemEnvironment.ENGINE_NAME);
         logger.debug("AKKA_NAME:" + akkaName);
-
 
         String arteryHostname = propertiesWrapper.getProperty(SystemEnvironment.ARTERY_HOSTNAME, "127.0.0.1");
         int arteryPort = propertiesWrapper.getIntProperty(SystemEnvironment.ARTERY_PORT, 2551);
@@ -68,7 +68,7 @@ public class AkkaSystemComponent extends BaseCoreService {
 
         int clusterShards = propertiesWrapper.getIntProperty(SystemEnvironment.CLUSTER_SHARDS, 1000);
 
-        Config cg = ConfigFactory.parseFile(configFile);
+        Config cg = ConfigFactory.defaultApplication();
         List<String> roles= Lists.newArrayList();
         roles.add(clusterType);
         //	"akka://CodeBroker@127.0.0.1:2551"
@@ -80,15 +80,18 @@ public class AkkaSystemComponent extends BaseCoreService {
             Optional<Collection<String>> cacheServer = manager.get().getIClusterServiceRegister().getCacheServer(clusterCenter);
             cacheServer.ifPresent(dc->{
                 for (String dcString : dc) {
-                    clusterNodes.add("akka://CodeBroker@"+dcString);
+                    clusterNodes.add("akka://"+akkaName+"@"+dcString);
                 }
             });
         }
 
+        List<String> loggers= Lists.newArrayList();
+        loggers.add( "akka.event.slf4j.Slf4jLogger");
+
         Config config = cg.withValue(akkaName+".akka.remote.artery.canonical.hostname",
                 ConfigImpl.fromAnyRef(arteryHostname, "网络服务地址IP"))
                          .withValue(akkaName+".akka.remote.artery.canonical.port",
-                ConfigImpl.fromAnyRef(arteryPort, "网络服务地址端口"))
+                 ConfigImpl.fromAnyRef(arteryPort, "网络服务地址端口"))
                           .withValue(akkaName+".akka.cluster.roles",
                         ConfigImpl.fromAnyRef(roles, "网络集群的角色"))
                          .withValue(akkaName+".akka.cluster.sharding.number-of-shards",
@@ -96,7 +99,70 @@ public class AkkaSystemComponent extends BaseCoreService {
                         .withValue(akkaName+".akka.cluster.multi-data-center.self-data-center",
                         ConfigImpl.fromAnyRef(clusterCenter, "网络集群所属数据中心"))
                         .withValue(akkaName+".akka.cluster.seed-nodes",
-                        ConfigImpl.fromAnyRef(clusterNodes, "网络集群节点"));
+                        ConfigImpl.fromAnyRef(clusterNodes, "网络集群节点"))
+                .withValue(akkaName+".akka-kryo-serialization.kryo-initializer",
+                ConfigImpl.fromAnyRef("com.codebroker.protocol.InitKryoInitializer", "默认序列化"))
+                .withValue(akkaName+".akka.loggers",
+                        ConfigImpl.fromAnyRef(loggers, "日志实现类"))
+                .withValue(akkaName+".akka.actor.provider",
+                        ConfigImpl.fromAnyRef("cluster", "Actor类型"))
+                .withValue(akkaName+".akka.actor.serializers.kryo",
+                        ConfigImpl.fromAnyRef("io.altoo.akka.serialization.kryo.KryoSerializer", "序列化器"))
+//                    .withValue(akkaName+".akka.actor.serializers.serialization-bindings",
+//                            ConfigImpl.fromAnyRef("kryo", "序列化器"))
+//                .withValue(akkaName+".akka.actor.serializers.serialization-bindings",
+//                        ConfigImpl.fromAnyRef(serializationBindings, "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.core.actortype.message.ISessionActor\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.core.actortype.message.IServiceActor$Reply\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.core.actortype.message.IServiceActor$HandleMessage\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.core.actortype.message.IUserActor\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.core.actortype.message.IUserActor$LogicEvent\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.api.internal.IPacket\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"com.codebroker.api.event.Event\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+                .withValue(akkaName+".akka.actor.serialization-bindings.\"akka.actor.typed.ActorRef\"",
+                        ConfigImpl.fromAnyRef("kryo", "序列化器"))
+
+                .withValue(akkaName+".akka.actor.cluster.downing-provider-class",
+                        ConfigImpl.fromAnyRef("akka.cluster.sbr.SplitBrainResolverProvider", "集群脑裂管理器"))
+
+                .withValue(akkaName+".game-logic.type",
+                        ConfigImpl.fromAnyRef("Dispatcher", "执行器类型"))
+                .withValue(akkaName+".game-logic.executor",
+                        ConfigImpl.fromAnyRef("thread-pool-executor", "执行器类型"))
+                .withValue(akkaName+".game-logic.executor.thread-pool-executor.core-pool-size-min",
+                        ConfigImpl.fromAnyRef(2, "最小线程数"))
+                .withValue(akkaName+".game-logic.executor.thread-pool-executor.core-pool-size-factor",
+                        ConfigImpl.fromAnyRef(2.0, "线程因子"))
+                .withValue(akkaName+".game-logic.executor.thread-pool-executor.core-pool-size-max",
+                        ConfigImpl.fromAnyRef(10, "最大线程数"))
+                .withValue(akkaName+".game-logic.throughput",
+                        ConfigImpl.fromAnyRef(1, "集群脑裂管理器"))
+
+                .withValue(akkaName+".game-service.type",
+                        ConfigImpl.fromAnyRef("Dispatcher", "执行器类型"))
+                .withValue(akkaName+".game-service.executor",
+                        ConfigImpl.fromAnyRef("thread-pool-executor", "执行器类型"))
+                .withValue(akkaName+".game-service.thread-pool-executor.fixed-pool-size",
+                        ConfigImpl.fromAnyRef(2, "执行器类型"))
+                .withValue(akkaName+".game-service.throughput",
+                        ConfigImpl.fromAnyRef(1, "执行器类型"))
+
+                .withValue(akkaName+".akka.actor.default-blocking-io-dispatcher.type",
+                        ConfigImpl.fromAnyRef("Dispatcher", "执行器类型"))
+                .withValue(akkaName+".akka.actor.default-blocking-io-dispatcher.executor",
+                        ConfigImpl.fromAnyRef("thread-pool-executor", "执行器类型"))
+                .withValue(akkaName+".akka.actor.default-blocking-io-dispatcher.thread-pool-executor.fixed-pool-size",
+                        ConfigImpl.fromAnyRef(2, "执行器类型"))
+                .withValue(akkaName+".akka.actor.default-blocking-io-dispatcher.throughput",
+                        ConfigImpl.fromAnyRef(1, "执行器类型"));
+
         cg.withFallback(ConfigFactory.defaultReference(Thread.currentThread().getContextClassLoader()));
         Config akkaConfig = ConfigFactory
                 .load(config)
@@ -106,7 +172,7 @@ public class AkkaSystemComponent extends BaseCoreService {
         this.system = ActorSystem.create(GameRootSystem.create(propertiesWrapper.getIntProperty(SystemEnvironment.APP_ID,1)), akkaName,akkaConfig);
         ServerEngine.akkaHttpHost = propertiesWrapper.getProperty(SystemEnvironment.AKKA_HTTP_HOSTNAME, "127.0.0.1");
         ServerEngine.akkaHttpPort = propertiesWrapper.getIntProperty(SystemEnvironment.AKKA_HTTP_PORT, 0);
-//        AkkaManagement.get(system.classicSystem()).start();
+
         HttpServer.start(system,ServerEngine.akkaHttpHost,ServerEngine.akkaHttpPort);
 
         ActorPathService.akkaConfig=akkaConfig;
@@ -142,5 +208,6 @@ public class AkkaSystemComponent extends BaseCoreService {
     public void setManagementService(ManagementService managementService) {
         this.managementService = managementService;
     }
+
 
 }
