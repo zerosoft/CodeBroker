@@ -10,7 +10,7 @@
 集群之间不同的节点通讯通过，Http方式访问。
 
 更多说明
-- https://zerosoft.github.io/codebroker
+- https://zerosoft.github.io/CodeBroker/
 
  **当前的akka模型** 
 
