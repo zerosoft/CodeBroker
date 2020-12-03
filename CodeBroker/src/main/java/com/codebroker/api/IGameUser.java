@@ -29,17 +29,16 @@ public interface IGameUser  {
     void sendMessageToIoSession(int requestId, Object message);
 
     /**
-     * 发生消息给其他GameUser
-     * @param userId
+     * 发生消息给其他IO会话
      * @param message
      */
-    void sendMessageToSelf(String userId, IPacket message);
+    void sendMessageToIoSession(IPacket message);
 
     /**
-     * 给自己发消息
-     * @param message
+     * 向自己发送事件
+     * @param event
      */
-    void sendMessageToSelf(IPacket message);
+    void sendMessageToSelf(IEvent event);
     /**
      * 发消息给本地服务
      * @param serviceName
@@ -88,8 +87,10 @@ public interface IGameUser  {
 
 
     enum UserEvent{
-        LOGIN,LOGOUT, LOST_CONNECTION,
-    }
+        LOGIN,//登入
+        LOGOUT,//登出
+        LOST_CONNECTION,//失去连接
+	}
 
     void addEventListener(UserEvent userEvent, IGameUserEventListener iGameUserEventListener);
 

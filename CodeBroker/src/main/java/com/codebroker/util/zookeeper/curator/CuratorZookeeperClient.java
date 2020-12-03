@@ -10,6 +10,8 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.framework.recipes.locks.Locker;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
@@ -26,6 +28,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.CuratorWatcherImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
@@ -35,7 +40,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 	static final Charset CHARSET = Charset.forName("UTF-8");
 	private final CuratorFramework client;
 	private Map<String, CuratorCache> treeCacheMap = new ConcurrentHashMap<>();
-
 
 	public CuratorZookeeperClient(ZookeeperURL zookeeperUrl) {
 		super(zookeeperUrl);
@@ -288,7 +292,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 		}
 	}
 
-	CuratorFramework getClient() {
+	public CuratorFramework getClient() {
 		return client;
 	}
 }

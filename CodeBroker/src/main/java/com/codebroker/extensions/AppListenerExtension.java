@@ -17,7 +17,8 @@ import java.util.Optional;
 
 /**
  * 请求拓展接口.
- *
+ * 所有API请求都在当前线程执行，尽量不要消耗太长时间。
+ * 否则其他函数会排队
  * @author LongJu
  */
 public abstract class AppListenerExtension implements AppListener {
@@ -57,7 +58,8 @@ public abstract class AppListenerExtension implements AppListener {
     }
 
     public void handleClientRequest(IGameUser user, int requestId, Object params) {
-        if (filterChain.size() > 0 && filterChain.runRequestInChain(requestId, this, params) == FilterAction.HALT) {
+        if (filterChain.size() > 0
+                && filterChain.runRequestInChain(requestId, this, params) == FilterAction.HALT) {
             return;
         }
         try {
@@ -92,11 +94,11 @@ public abstract class AppListenerExtension implements AppListener {
 
     @Override
     public void handleMessage(Object obj) {
-
+        throw new CodeBrokerException(name+" handleMessage do what ?");
     }
 
     @Override
     public Object handleBackMessage(Object obj) {
-        return null;
+        throw new CodeBrokerException(name+" handleBackMessage do what ?");
     }
 }

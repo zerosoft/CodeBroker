@@ -11,6 +11,7 @@ import com.codebroker.util.zookeeper.listener.ServiceDataListener;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,6 +127,11 @@ public class ZookeeperClusterServiceRegister implements IClusterServiceRegister 
 				.map(memberInfo -> memberInfo.ip+":"+memberInfo.port)
 				.collect(Collectors.toList());
 		return Optional.ofNullable(collect);
+	}
+
+	@Override
+	public CuratorFramework getCuratorFramework() {
+		return curatorZookeeperClient.getClient();
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.codebroker.util.zookeeper;
 
 import akka.cluster.Member;
+import org.apache.curator.framework.CuratorFramework;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -37,6 +38,18 @@ public interface IClusterServiceRegister {
 	 * @return
 	 */
 	Optional<Collection<String>> getCacheServer(String dateCenter);
+
+	/**
+	 * 获得链接客户端，以备日后使用分布式锁
+	 * InterProcessMutex mutex = new InterProcessMutex(client,"/path");
+	 * // or any InterProcessLock
+	 * try ( Locker locker = new Locker(mutex, 5, TimeUnit.MINUTES) )
+	 *     {
+	 * 			// do work
+	 *     }
+	 * @return
+	 */
+	CuratorFramework getCuratorFramework();
 	/**
 	 * 增加一个服务节点
 	 * @param member

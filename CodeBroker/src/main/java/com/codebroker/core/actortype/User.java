@@ -11,10 +11,10 @@ import com.codebroker.core.ContextResolver;
 import com.codebroker.core.actortype.message.*;
 import com.codebroker.core.entities.GameUser;
 import com.codebroker.pool.GameUserPool;
-import com.codebroker.api.event.EventName;
 import com.codebroker.setting.SystemEnvironment;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
@@ -56,8 +56,8 @@ public class User extends AbstractBehavior<IUserActor> {
                 .onMessage(IUserActor.Disconnect.class, this::disconnect)
                 .onMessage(IUserActor.NewGameUserActorInit.class, this::newGameUserInit)
                 .onMessage(IUserActor.SendMessageToSession.class, this::sendMessageToSession)
-				.onMessage(IUserActor.SendMessageToGameUserActor.class,this::sendMessageToGameUser)
-				.onMessage(IUserActor.GetSendMessageToGameUserActor.class,this::getSendMessageToGameUser)
+				.onMessage(IUserActor.SendIPackToGameUserActor.class,this::sendIPackToGameUser)
+				.onMessage(IUserActor.SendEventToGameUserActor.class,this::sendIEventToGameUser)
                 .onMessage(IUserActor.SendMessageToIServiceActor.class, this::sendMessageToIService)
                 .onMessage(IUserActor.LogicEvent.class, this::handlerLogicEvent)
                 .onSignal(PostStop.class, this::postStop)
@@ -65,24 +65,29 @@ public class User extends AbstractBehavior<IUserActor> {
     }
 
     private Behavior<IUserActor> postStop(PostStop message) {
-        if (gameUser!=null){
+        if (Objects.nonNull(gameUser)){
             gameUser.handlerEvent(new Event(IGameUser.UserEvent.LOGOUT.name(),null));
         }
         return Behaviors.same();
     }
 
-    private  Behavior<IUserActor> getSendMessageToGameUser(IUserActor.GetSendMessageToGameUserActor message) {
-		gameUser.dispatchEvent(new Event(EventName.GAME_EVENT,message.message));
+    private  Behavior<IUserActor> sendIEventToGameUser(IUserActor.SendEventToGameUserActor message) {
+        if (Objects.nonNull(gameUser)){
+	    	gameUser.dispatchEvent(message.message);
+        }
 		return Behaviors.same();
 	}
 
-	private  Behavior<IUserActor> sendMessageToGameUser(IUserActor.SendMessageToGameUserActor message) {
-		getContext().spawnAnonymous(
-				UserManagerGuardian.create(
-				        new IUserManager.SendMessageToGameUser(message.userId,message.message,getContext().getSelf())
-                        , AppContext.getServerId()
-                )
-        );
+	private  Behavior<IUserActor> sendIPackToGameUser(IUserActor.SendIPackToGameUserActor message) {
+        if (Objects.nonNull(gameUser)){
+            gameUser.sendMessageToIoSession(message.message);
+        }
+//		getContext().spawnAnonymous(
+//				UserManagerGuardian.create(
+//				        new IUserManager.SendIPackToGameUser(message.userId,message.message,getContext().getSelf())
+//                        , AppContext.getServerId()
+//                )
+//        );
 		return Behaviors.same();
 	}
 
@@ -102,7 +107,7 @@ public class User extends AbstractBehavior<IUserActor> {
                     message.replyTo.tell(new IUserActor.IObjectReply(((IServiceActor.HandleUserMessageBack) reply).object));
                 }
             }).exceptionally(throwable -> {
-                throwable.printStackTrace();
+                getContext().getLog().error("sendMessageToIService error",throwable);
                 return null;
             });
             ask.whenComplete(

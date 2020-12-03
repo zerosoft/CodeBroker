@@ -38,7 +38,9 @@ public class UserManagerGuardian {
 	private Behavior<IUserManager> handle() {
 		return Behaviors.receive(IUserManager.class)
 				.onMessage(IUserManager.AddProcessorReference.class, listing -> {
-					serviceInstances = listing.listing.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + serverId));
+					serviceInstances = listing
+							.listing
+							.getServiceInstances(ServiceKey.create(IUserManager.class, UserManager.IDENTIFY + "." + serverId));
 					for (ActorRef<IUserManager> serviceInstance : serviceInstances) {
 						serviceInstance.tell(message);
 					}

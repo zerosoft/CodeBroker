@@ -4,6 +4,8 @@ import com.codebroker.api.IClientRequestHandler;
 import com.codebroker.api.IGameUser;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +17,8 @@ import java.lang.reflect.ParameterizedType;
  */
 public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3> implements IClientRequestHandler {
 
+	Logger logger= LoggerFactory.getLogger(AbstractClientRequestHandler.class);
+
 	@Override
 	public void handleClientRequest(IGameUser gameUser, Object message) {
 		try {
@@ -25,7 +29,7 @@ public abstract class  AbstractClientRequestHandler<T extends GeneratedMessageV3
 			if (pass) {
 				handleClientProtocolBuffersRequest(gameUser, decode);
 			} else {
-
+				logger.error("not pass  verifyParams");
 			}
 		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 			getClientRequestLogger().error(e.getMessage());

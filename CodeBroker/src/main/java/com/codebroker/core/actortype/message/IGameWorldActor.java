@@ -89,8 +89,16 @@ public interface IGameWorldActor {
 	 * 给所有在线的玩家发事件
 	 */
 	class SendAllOnlineUserPacket implements IGameWorldActor {
+		public final String gameUserId;
 		public final IPacket iPacket;
+
 		public SendAllOnlineUserPacket(IPacket iPacket) {
+			this.gameUserId=null;
+			this.iPacket = iPacket;
+		}
+
+		public SendAllOnlineUserPacket(String gameUserId,IPacket iPacket) {
+			this.gameUserId=gameUserId;
 			this.iPacket = iPacket;
 		}
 	}
@@ -99,9 +107,17 @@ public interface IGameWorldActor {
 	 * 给所有在线的玩家发事件
 	 */
 	class SendAllOnlineUserEvent implements IGameWorldActor {
-		public final IEvent iPacket;
-		public SendAllOnlineUserEvent(IEvent iPacket) {
-			this.iPacket = iPacket;
+		public final String gameUserId;
+		public final IEvent iEvent;
+
+		public SendAllOnlineUserEvent(IEvent iEvent) {
+			this.iEvent = iEvent;
+			this.gameUserId=null;
+		}
+
+		public SendAllOnlineUserEvent(String gameUserId,IEvent iEvent) {
+			this.iEvent = iEvent;
+			this.gameUserId=gameUserId;
 		}
 	}
 

@@ -14,6 +14,7 @@ import com.codebroker.pool.GameUserPool;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 
@@ -60,12 +61,24 @@ public class GameWorld extends AbstractBehavior<IGameWorldActor> {
 	}
 
 	private Behavior<IGameWorldActor> sendAllOnlineUserPacket(IGameWorldActor.SendAllOnlineUserPacket message) {
-		userMap.values().forEach(gameUser -> gameUser.sendMessageToSelf(message.iPacket));
+		if (Objects.nonNull(message.gameUserId)){
+			if (userMap.containsKey(message.gameUserId)){
+				userMap.get(message.gameUserId).sendMessageToIoSession(message.iPacket);
+			}
+		}else {
+			userMap.values().forEach(gameUser -> gameUser.sendMessageToIoSession(message.iPacket));
+		}
 		return Behaviors.same();
 	}
 
 	private Behavior<IGameWorldActor> sendAllOnlineUserEvent(IGameWorldActor.SendAllOnlineUserEvent message) {
-		userMap.values().forEach(gameUser -> gameUser.sendEventToSelf(message.iPacket));
+		if (Objects.nonNull(message.gameUserId)){
+			if (userMap.containsKey(message.gameUserId)){
+				userMap.get(message.gameUserId).sendEventToSelf(message.iEvent);
+			}
+		}else {
+			userMap.values().forEach(gameUser -> gameUser.sendEventToSelf(message.iEvent));
+		}
 		return Behaviors.same();
 	}
 

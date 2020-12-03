@@ -1,9 +1,6 @@
 package com.codebroker.demo.service.alliance;
 
-import com.codebroker.demo.service.alliance.handler.GetMessage;
-import com.codebroker.demo.service.alliance.handler.UserInit;
-import com.codebroker.demo.service.alliance.handler.UserLogin;
-import com.codebroker.demo.service.alliance.handler.UserLogout;
+import com.codebroker.demo.service.alliance.handler.*;
 import com.codebroker.extensions.service.AbstractIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +15,7 @@ public class AllianceService extends AbstractIService<Integer> {
         addRequestHandler(2,new UserLogin());
         addRequestHandler(3,new UserLogout());
         addRequestHandler(4,new GetMessage());
+        addRequestHandler(5,new DoSomeLogicMessage());
     }
 
     @Override

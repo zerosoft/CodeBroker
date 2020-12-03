@@ -102,13 +102,13 @@ public class GameUser implements IGameUser, IEventDispatcher<String>, IEventHand
     }
 
     @Override
-    public void sendMessageToSelf(String userId, IPacket message) {
-        getActorRef().tell(new IUserActor.SendMessageToGameUserActor(userId, message));
+    public void sendMessageToIoSession(IPacket message) {
+        getActorRef().tell(new IUserActor.SendMessageToSession(message));
     }
 
     @Override
-    public void sendMessageToSelf(IPacket message) {
-        getActorRef().tell(new IUserActor.GetSendMessageToGameUserActor(message));
+    public void sendMessageToSelf(IEvent event) {
+        getActorRef().tell(new IUserActor.SendEventToGameUserActor(event));
     }
 
     @Override

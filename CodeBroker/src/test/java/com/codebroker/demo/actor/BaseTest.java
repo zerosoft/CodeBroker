@@ -37,7 +37,7 @@ public class BaseTest {
 		testKit.spawn(User.create("1",iSessionActorRef,userManagerActorRef));
 
 
-		userManagerActorRef.tell(new IUserManager.SendMessageToGameUser("test", CObject.newInstance(),null));
+		userManagerActorRef.tell(new IUserManager.SendEventToGameUser("test", CObject.newInstance(),null));
 	}
 
 

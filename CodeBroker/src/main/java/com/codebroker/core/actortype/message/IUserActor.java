@@ -1,6 +1,7 @@
 package com.codebroker.core.actortype.message;
 
 import akka.actor.typed.ActorRef;
+import com.codebroker.api.event.Event;
 import com.codebroker.api.event.IEvent;
 import com.codebroker.api.internal.IPacket;
 
@@ -89,21 +90,21 @@ public interface IUserActor{
 	}
 
 
-	final class SendMessageToGameUserActor implements IUserActor {
+	final class SendIPackToGameUserActor implements IUserActor {
 
 		public final String userId;
-		public final Object message;
+		public final IPacket message;
 
-		public SendMessageToGameUserActor(String userId, Object message) {
+		public SendIPackToGameUserActor(String userId, IPacket message) {
 			this.userId = userId;
 			this.message = message;
 		}
 	}
 
-	final class GetSendMessageToGameUserActor implements IUserActor {
-		public final Object message;
+	final class SendEventToGameUserActor implements IUserActor {
+		public final IEvent message;
 
-		public GetSendMessageToGameUserActor(Object message) {
+		public SendEventToGameUserActor(IEvent message) {
 			this.message = message;
 		}
 	}

@@ -273,6 +273,16 @@ public class GameWorldWithActor implements IGameWorld {
 	}
 
 	@Override
+	public void sendAllOnlineUserIPacket(String iGameUserId, IPacket message) {
+		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserPacket(iGameUserId,message));
+	}
+
+	@Override
+	public void sendAllOnlineUserIEvent(String iGameUserId, IEvent message) {
+		gameWorldActorRef.tell(new IGameWorldActor.SendAllOnlineUserEvent(iGameUserId,message));
+	}
+
+	@Override
 	public void restart() {
 		IServiceActor.Destroy destroy = new IServiceActor.Destroy("");
 		ActorPathService.localService.values().forEach(iServiceActorRef -> iServiceActorRef.tell(destroy));

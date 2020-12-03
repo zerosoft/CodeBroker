@@ -92,6 +92,18 @@ public interface IGameWorld {
 	 * @param message
 	 */
 	void sendAllOnlineUserIEvent(IEvent message);
+
+	/**
+	 * 对所有在线玩家发送玩家消息
+	 * @param message
+	 */
+	void sendAllOnlineUserIPacket(String iGameUserId,IPacket message);
+
+	/**
+	 * 对所有在线玩家发送事件
+	 * @param message
+	 */
+	void sendAllOnlineUserIEvent(String iGameUserId,IEvent message);
 	/**
 	 * 服务重启启动
 	 */

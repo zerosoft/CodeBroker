@@ -6,6 +6,9 @@ import com.codebroker.api.IGameUser;
 import com.codebroker.api.event.Event;
 import com.codebroker.api.internal.IResultStatusMessage;
 import com.codebroker.component.service.MybatisComponent;
+import com.codebroker.demo.request.BuyItemRequestHandler;
+import com.codebroker.demo.request.BuyItemResponseHandler;
+import com.codebroker.demo.request.CreateAllianceRequestHandler;
 import com.codebroker.demo.request.CreateRequestHandler;
 import com.codebroker.demo.service.alliance.AllianceService;
 import com.codebroker.demo.service.item.ItemService;
@@ -28,7 +31,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 public class GameServerExtension extends AppListenerExtension {
 
@@ -129,25 +131,14 @@ public class GameServerExtension extends AppListenerExtension {
 
 	@Override
 	public void init(Object obj) {
-//		try {
-//			LogBackConfigLoader.load("D:\\Users\\Documents\\github\\CodeBrokerGit\\GameServer\\src\\main\\resource\\logback.xml");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		} catch (JoranException e) {
-//			e.printStackTrace();
-//		}
-
-//		// 获取classpath路径
-//		String s = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-//		System.out.println("classpath => " + s );
-//
-//// 获取classpath路径
-//		String path = GameServerExtension.class.getResource("/").toString();
-//		System.out.println("classpath => " + path);
 
 		logger.info("Init");
 		//注册消息命令
 		addRequestHandler(11, CreateRequestHandler.class);
+		//模拟业务消耗，用户独立业务
+		addRequestHandler(12, BuyItemRequestHandler.class);
+		addRequestHandler(13, CreateAllianceRequestHandler.class);
+
 
 		/**
 		 * 初始化MyBatis组件
