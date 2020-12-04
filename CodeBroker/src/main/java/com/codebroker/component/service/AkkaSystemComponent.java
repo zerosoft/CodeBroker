@@ -70,9 +70,6 @@ public class AkkaSystemComponent extends BaseCoreService {
     @Override
     public void init(Object obj) {
         logger.debug("Code Broker Mediator init");
-        File root = new File("");
-        String searchPath = root.getAbsolutePath() + File.separator + CONF_NAME;
-        logger.debug("conf path:" + searchPath);
         PropertiesWrapper propertiesWrapper = (PropertiesWrapper) obj;
 
         String akkaName = propertiesWrapper.getProperty(SystemEnvironment.AKKA_NAME,SystemEnvironment.ENGINE_NAME);
