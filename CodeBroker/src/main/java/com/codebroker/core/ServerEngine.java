@@ -90,11 +90,11 @@ public class ServerEngine implements InstanceMXBean {
 
         logger.debug("ServerEngine start getInstance application");
 
-        createAndStartApplication();
     }
 
 
     public static void main(String[] args) throws Exception {
+
         File root = new File("");
         logger.info("File path=" + root.getAbsolutePath());
 
@@ -115,7 +115,12 @@ public class ServerEngine implements InstanceMXBean {
 
         name = props.getValue(SystemEnvironment.APP_NAME);
         // 启动核心
-        new ServerEngine(props);
+        ServerEngine serverEngine = new ServerEngine(props);
+        serverEngine.start();
+    }
+
+    private void start() {
+        createAndStartApplication();
     }
 
 
